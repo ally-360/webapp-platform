@@ -51,8 +51,6 @@ export default function ThemeProvider({ children }) {
       merge(
         // Base
         baseOption,
-        // Direction: remove if not in use
-        directionOption,
         // Dark mode: remove if not in use
         darkModeOption,
         // Presets: remove if not in use
@@ -60,7 +58,7 @@ export default function ThemeProvider({ children }) {
         // Contrast: remove if not in use
         contrastOption.theme
       ),
-    [baseOption, directionOption, darkModeOption, presetsOption, contrastOption.theme]
+    [baseOption,  darkModeOption, presetsOption, contrastOption.theme]
   );
 
   const theme = createTheme(memoizedValue);
