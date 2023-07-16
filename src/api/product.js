@@ -16,7 +16,7 @@ export function useGetProducts() {
       productsLoading: isLoading,
       productsError: error,
       productsValidating: isValidating,
-      productsEmpty: !isLoading && !data?.products.length,
+      productsEmpty: !isLoading && !data?.products.length
     }),
     [data?.products, error, isLoading, isValidating]
   );
@@ -36,7 +36,7 @@ export function useGetProduct(productId) {
       product: data?.product,
       productLoading: isLoading,
       productError: error,
-      productValidating: isValidating,
+      productValidating: isValidating
     }),
     [data?.product, error, isLoading, isValidating]
   );
@@ -50,7 +50,7 @@ export function useSearchProducts(query) {
   const URL = query ? [endpoints.product.search, { params: { query } }] : null;
 
   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher, {
-    keepPreviousData: true,
+    keepPreviousData: true
   });
 
   const memoizedValue = useMemo(
@@ -59,7 +59,7 @@ export function useSearchProducts(query) {
       searchLoading: isLoading,
       searchError: error,
       searchValidating: isValidating,
-      searchEmpty: !isLoading && !data?.results.length,
+      searchEmpty: !isLoading && !data?.results.length
     }),
     [data?.results, error, isLoading, isValidating]
   );

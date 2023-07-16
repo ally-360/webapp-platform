@@ -18,7 +18,7 @@ const visuallyHidden = {
   overflow: 'hidden',
   position: 'absolute',
   whiteSpace: 'nowrap',
-  clip: 'rect(0 0 0 0)',
+  clip: 'rect(0 0 0 0)'
 };
 
 // ----------------------------------------------------------------------
@@ -31,7 +31,7 @@ export default function TableHeadCustom({
   numSelected = 0,
   onSort,
   onSelectAllRows,
-  sx,
+  sx
 }) {
   return (
     <TableHead sx={sx}>
@@ -63,9 +63,7 @@ export default function TableHeadCustom({
                 {headCell.label}
 
                 {orderBy === headCell.id ? (
-                  <Box sx={{ ...visuallyHidden }}>
-                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                  </Box>
+                  <Box sx={{ ...visuallyHidden }}>{order === 'desc' ? 'sorted descending' : 'sorted ascending'}</Box>
                 ) : null}
               </TableSortLabel>
             ) : (
@@ -86,5 +84,5 @@ TableHeadCustom.propTypes = {
   rowCount: PropTypes.number,
   numSelected: PropTypes.number,
   onSelectAllRows: PropTypes.func,
-  order: PropTypes.oneOf(['asc', 'desc']),
+  order: PropTypes.oneOf(['asc', 'desc'])
 };

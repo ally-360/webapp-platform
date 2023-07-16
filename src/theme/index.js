@@ -41,7 +41,7 @@ export default function ThemeProvider({ children }) {
       shadows: shadows('light'),
       customShadows: customShadows('light'),
       typography,
-      shape: { borderRadius: 8 },
+      shape: { borderRadius: 8 }
     }),
     []
   );
@@ -51,6 +51,7 @@ export default function ThemeProvider({ children }) {
       merge(
         // Base
         baseOption,
+        // Direction: remove if not in use
         // Dark mode: remove if not in use
         darkModeOption,
         // Presets: remove if not in use
@@ -58,17 +59,14 @@ export default function ThemeProvider({ children }) {
         // Contrast: remove if not in use
         contrastOption.theme
       ),
-    [baseOption,  darkModeOption, presetsOption, contrastOption.theme]
+    [baseOption, darkModeOption, presetsOption, contrastOption.theme]
   );
 
   const theme = createTheme(memoizedValue);
 
   theme.components = merge(componentsOverrides(theme), contrastOption.components);
 
-  const themeWithLocale = useMemo(
-    () => createTheme(theme, currentLang.systemValue),
-    [currentLang.systemValue, theme]
-  );
+  const themeWithLocale = useMemo(() => createTheme(theme, currentLang.systemValue), [currentLang.systemValue, theme]);
 
   return (
     <MuiThemeProvider theme={themeWithLocale}>
@@ -81,5 +79,5 @@ export default function ThemeProvider({ children }) {
 }
 
 ThemeProvider.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

@@ -85,6 +85,17 @@ export const dashboardRoutes = [
       { path: 'booking', element: <OverviewBookingPage /> },
       { path: 'file', element: <OverviewFilePage /> },
       {
+        path: 'inventory',
+        children: [
+          { element: <ProductListPage />, index: true },
+          { path: 'list', element: <ProductListPage /> },
+          { path: 'new-product', element: <ProductCreatePage /> },
+          { path: 'categories', element: <ProductListPage /> },
+          { path: 'pdvs', element: <ProductListPage/> },
+          { path: 'brands', element: <ProductListPage /> },
+        ],
+      },
+      {
         path: 'user',
         children: [
           { element: <UserProfilePage />, index: true },

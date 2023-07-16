@@ -99,6 +99,19 @@ export const paths = {
     calendar: `${ROOTS.DASHBOARD}/calendar`,
     fileManager: `${ROOTS.DASHBOARD}/file-manager`,
     permission: `${ROOTS.DASHBOARD}/permission`,
+    inventory: {
+      list: `${ROOTS.DASHBOARD}/inventory`,
+      newProduct: `${ROOTS.DASHBOARD}/inventory/new-product`,
+      categories: `${ROOTS.DASHBOARD}/inventory/categories`,
+      pdvs: `${ROOTS.DASHBOARD}/inventory/pdvs`,
+      brands: `${ROOTS.DASHBOARD}/inventory/brands`,
+    },
+    sales:{
+      list: `${ROOTS.DASHBOARD}/sales`,
+      newSale: `${ROOTS.DASHBOARD}/sales/new-sale`,
+    },
+    pos: `${ROOTS.DASHBOARD}/pos`,
+
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,
@@ -177,4 +190,7 @@ export const paths = {
       },
     },
   },
+
+
+
 };

@@ -42,6 +42,9 @@ import { SettingsProvider, SettingsDrawer } from 'src/components/settings';
 import { CheckoutProvider } from 'src/sections/checkout/context';
 // auth
 import { AuthProvider, AuthConsumer } from 'src/auth/context/jwt';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Provider } from 'react-redux';
+import { store } from 'src/redux/store';
 // import { AuthProvider, AuthConsumer } from 'src/auth/context/auth0';
 // import { AuthProvider, AuthConsumer } from 'src/auth/context/amplify';
 // import { AuthProvider, AuthConsumer } from 'src/auth/context/firebase';
@@ -49,48 +52,37 @@ import { AuthProvider, AuthConsumer } from 'src/auth/context/jwt';
 // ----------------------------------------------------------------------
 
 export default function App() {
-  const charAt = `
-
-  ░░░    ░░░ 
-  ▒▒▒▒  ▒▒▒▒ 
-  ▒▒ ▒▒▒▒ ▒▒ 
-  ▓▓  ▓▓  ▓▓ 
-  ██      ██ 
-  
-  `;
-
-  console.info(`%c${charAt}`, 'color: #5BE49B');
-
   useScrollToTop();
-
   return (
     <AuthProvider>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <SettingsProvider
-          defaultSettings={{
-            themeMode: 'light', // 'light' | 'dark'
-            themeDirection: 'ltr', //  'rtl' | 'ltr'
-            themeContrast: 'bold', // 'default' | 'bold'
-            themeLayout: 'vertical', // 'vertical' | 'horizontal' | 'mini'
-            themeColorPresets: 'blue', // 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red'
-            themeStretch: false,
-          }}
-        >
-          <ThemeProvider>
-            <MotionLazy>
-              <SnackbarProvider>
-                <CheckoutProvider>
-                  <SettingsDrawer />
-                  <ProgressBar />
-                  <AuthConsumer>
-                    <Router />
-                  </AuthConsumer>
-                </CheckoutProvider>
-              </SnackbarProvider>
-            </MotionLazy>
-          </ThemeProvider>
-        </SettingsProvider>
-      </LocalizationProvider>
+      <Provider store={store}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <SettingsProvider
+            defaultSettings={{
+              themeMode: 'light', // 'light' | 'dark'
+              themeDirection: 'ltr', //  'rtl' | 'ltr'
+              themeContrast: 'bold', // 'default' | 'bold'
+              themeLayout: 'vertical', // 'vertical' | 'horizontal' | 'mini'
+              themeColorPresets: 'blue', // 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red'
+              themeStretch: false
+            }}
+          >
+            <ThemeProvider>
+              <MotionLazy>
+                <SnackbarProvider>
+                  <CheckoutProvider>
+                    <SettingsDrawer />
+                    <ProgressBar />
+                    <AuthConsumer>
+                      <Router />
+                    </AuthConsumer>
+                  </CheckoutProvider>
+                </SnackbarProvider>
+              </MotionLazy>
+            </ThemeProvider>
+          </SettingsProvider>
+        </LocalizationProvider>
+      </Provider>
     </AuthProvider>
   );
 }

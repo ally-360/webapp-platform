@@ -3,7 +3,7 @@
 export const PRODUCT_GENDER_OPTIONS = [
   { label: 'Men', value: 'Men' },
   { label: 'Women', value: 'Women' },
-  { label: 'Kids', value: 'Kids' },
+  { label: 'Kids', value: 'Kids' }
 ];
 
 export const PRODUCT_CATEGORY_OPTIONS = ['Shose', 'Apparel', 'Accessories'];
@@ -18,7 +18,7 @@ export const PRODUCT_COLOR_OPTIONS = [
   '#FF4842',
   '#1890FF',
   '#94D82D',
-  '#FFC107',
+  '#FFC107'
 ];
 
 export const PRODUCT_COLOR_NAME_OPTIONS = [
@@ -29,7 +29,7 @@ export const PRODUCT_COLOR_NAME_OPTIONS = [
   { value: 'yellow', label: 'Yellow' },
   { value: 'violet', label: 'Violet' },
   { value: 'black', label: 'Black' },
-  { value: 'white', label: 'White' },
+  { value: 'white', label: 'White' }
 ];
 
 export const PRODUCT_SIZE_OPTIONS = [
@@ -43,37 +43,37 @@ export const PRODUCT_SIZE_OPTIONS = [
   { value: '11', label: '11' },
   { value: '11.5', label: '11.5' },
   { value: '12', label: '12' },
-  { value: '13', label: '13' },
+  { value: '13', label: '13' }
 ];
 
 export const PRODUCT_STOCK_OPTIONS = [
-  { value: 'in stock', label: 'In stock' },
-  { value: 'low stock', label: 'Low stock' },
-  { value: 'out of stock', label: 'Out of stock' },
+  { value: 'Con existencais', label: 'Con existencias' },
+  { value: 'Pocas existencias', label: 'Pocas existencias' },
+  { value: 'Sin existencias', label: 'Sin existencias' }
 ];
 
 export const PRODUCT_PUBLISH_OPTIONS = [
   {
     value: 'published',
-    label: 'Published',
+    label: 'Published'
   },
   {
     value: 'draft',
-    label: 'Draft',
-  },
+    label: 'Draft'
+  }
 ];
 
 export const PRODUCT_SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
   { value: 'newest', label: 'Newest' },
   { value: 'priceDesc', label: 'Price: High - Low' },
-  { value: 'priceAsc', label: 'Price: Low - High' },
+  { value: 'priceAsc', label: 'Price: Low - High' }
 ];
 
 export const PRODUCT_CATEGORY_GROUP_OPTIONS = [
   { group: 'Clothing', classify: ['Shirts', 'T-shirts', 'Jeans', 'Leather', 'Accessories'] },
   { group: 'Tailored', classify: ['Suits', 'Blazers', 'Trousers', 'Waistcoats', 'Apparel'] },
-  { group: 'Accessories', classify: ['Shoes', 'Backpacks and bags', 'Bracelets', 'Face masks'] },
+  { group: 'Accessories', classify: ['Shoes', 'Backpacks and bags', 'Bracelets', 'Face masks'] }
 ];
 
 export const PRODUCT_CHECKOUT_STEPS = ['Cart', 'Billing & address', 'Payment'];

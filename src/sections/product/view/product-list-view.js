@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import isEqual from 'lodash/isEqual';
 import { useState, useEffect, useCallback } from 'react';
 // @mui
@@ -30,13 +31,17 @@ import {
   TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
-  TablePaginationCustom,
+  TablePaginationCustom
 } from 'src/components/table';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
+import { LoadingButton } from '@mui/lab';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllProducts } from 'src/redux/inventory/productsSlice';
 import ProductTableRow from '../product-table-row';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
@@ -44,23 +49,25 @@ import ProductTableFiltersResult from '../product-table-filters-result';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Product' },
-  { id: 'createdAt', label: 'Create at', width: 160 },
-  { id: 'inventoryType', label: 'Stock', width: 160 },
-  { id: 'price', label: 'Price', width: 140 },
-  { id: 'publish', label: 'Publish', width: 110 },
-  { id: '', width: 88 },
+  { id: 'name', label: 'Producto' },
+  // { id: 'createdAt', label: 'Create at', width: 160 },
+  { id: 'sku', label: 'SKU', width: 160 },
+  { id: 'globalStock', label: 'Cantidad', width: 160 },
+  { id: 'priceSale', label: 'Price', width: 140 },
+  { id: 'state', label: 'Estado', width: 110 },
+  { id: '', width: 88 }
 ];
 
 const PUBLISH_OPTIONS = [
-  { value: 'published', label: 'Published' },
-  { value: 'draft', label: 'Draft' },
+  { value: true, label: 'Activo' },
+  { value: false, label: 'Desactivado' }
 ];
 
 const defaultFilters = {
   name: '',
+  sku: '',
   publish: [],
-  stock: [],
+  stock: []
 };
 
 // ----------------------------------------------------------------------
@@ -76,7 +83,9 @@ export default function ProductListView() {
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  const { products, productsLoading, productsEmpty } = useGetProducts();
+  const { productsLoading, productsEmpty } = useGetProducts();
+
+  const { products } = useSelector((state) => state.products);
 
   const confirm = useBoolean();
 
@@ -89,7 +98,7 @@ export default function ProductListView() {
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
-    filters,
+    filters
   });
 
   const dataInPage = dataFiltered.slice(
@@ -108,7 +117,7 @@ export default function ProductListView() {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
-        [name]: value,
+        [name]: value
       }));
     },
     [table]
@@ -131,7 +140,7 @@ export default function ProductListView() {
     table.onUpdatePageDeleteRows({
       totalRows: tableData.length,
       totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
+      totalRowsFiltered: dataFiltered.length
     });
   }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
@@ -153,27 +162,39 @@ export default function ProductListView() {
     setFilters(defaultFilters);
   }, []);
 
+  // nueva logica
+
+  const dispatch = useDispatch();
+
+  // useEffect(() => {
+  //   dispatch(getAllProducts());
+  // }, [dispatch]);
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <LoadingButton loadingPosition="center" variant="contained" color="primary">
+          Obtener productos
+        </LoadingButton>
         <CustomBreadcrumbs
-          heading="List"
+          heading="Productos"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
             {
-              name: 'Product',
-              href: paths.dashboard.product.root,
+              name: 'Inventario',
+              href: paths.dashboard.inventory.list
             },
-            { name: 'List' },
+            { name: 'Productos' }
           ]}
           action={
             <Button
               component={RouterLink}
               href={paths.dashboard.product.new}
               variant="contained"
+              color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              New Product
+              Crear producto
             </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
@@ -245,10 +266,7 @@ export default function ProductListView() {
                   ) : (
                     <>
                       {dataFiltered
-                        .slice(
-                          table.page * table.rowsPerPage,
-                          table.page * table.rowsPerPage + table.rowsPerPage
-                        )
+                        .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
                         .map((row) => (
                           <ProductTableRow
                             key={row.id}
@@ -315,8 +333,10 @@ export default function ProductListView() {
 
 // ----------------------------------------------------------------------
 
+// Filtros
 function applyFilter({ inputData, comparator, filters }) {
   const { name, stock, publish } = filters;
+  console.log(stock);
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -330,12 +350,22 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (name) {
     inputData = inputData.filter(
-      (product) => product.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+      (product) =>
+        product.name.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
+        product.sku.toLowerCase().indexOf(name.toLowerCase()) !== -1
     );
   }
 
   if (stock.length) {
-    inputData = inputData.filter((product) => stock.includes(product.inventoryType));
+    const inputDataWithInventoryType = inputData.map((product) => {
+      // eslint-disable-next-line no-nested-ternary
+      const inventoryType = product.globalStock > product.pdvs.minQuantity ? 'Existencias' : product.globalStock === 0 ? 'Sin existencias' : 'Pocas existencias';
+      return {
+        ...product,
+        inventoryType
+      };
+    })
+    inputData = inputDataWithInventoryType.filter((product) => stock.includes(product.inventoryType));
   }
 
   if (publish.length) {

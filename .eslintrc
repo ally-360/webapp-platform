@@ -107,6 +107,16 @@
         "args": "after-used",
         "argsIgnorePattern": "^_"
       }
+    ],
+    "prettier/prettier": [
+      2,
+      {
+        "printWidth": 120,
+        "singleQuote": true,
+        "trailingComma": "none",
+        "tabWidth": 2,
+        "endOfLine": "auto"
+      }
     ]
   }
 }

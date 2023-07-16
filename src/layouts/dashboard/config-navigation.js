@@ -7,6 +7,8 @@ import { useLocales } from 'src/locales';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
+import { IconButton, Tooltip, Zoom } from '@mui/material';
+import { Icon } from '@iconify/react';
 
 // ----------------------------------------------------------------------
 
@@ -43,6 +45,7 @@ const ICONS = {
   ecommerce: icon('ic_ecommerce'),
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
+  inventory: icon('ic_inventory'),
 };
 
 // ----------------------------------------------------------------------
@@ -66,6 +69,37 @@ export function useNavData() {
         ],
       },
 
+      {
+        subheader: t('General'),
+        items: [
+          {
+            title: t('Inventario'),
+            path: paths.dashboard.inventory.list,
+            icon: ICONS.inventory,
+            children: [
+              {
+                title: t('Productos'),
+                path: paths.dashboard.inventory.list,
+                info: (
+                  <IconButton color="primary" size="small">
+                    <Tooltip
+                      TransitionComponent={Zoom}
+                      title={t('Agregar producto')}
+                      placement="right"
+                      arrow
+                    >
+                      <Icon icon="gala:add" width={20} height={20} />
+                    </Tooltip>
+                  </IconButton>
+                ),
+              },
+              { title: t('Categorias'), path: paths.dashboard.inventory.categories },
+              { title: t('Marcas'), path: paths.dashboard.inventory.brands },
+              { title: t('Puntos de venta'), path: paths.dashboard.inventory.pdvs },
+            ],
+          },
+        ],
+      },
       // MANAGEMENT
       // ----------------------------------------------------------------------
       {

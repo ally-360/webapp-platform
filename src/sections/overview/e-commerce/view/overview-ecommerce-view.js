@@ -10,13 +10,14 @@ import {
   _ecommerceNewProducts,
   _ecommerceSalesOverview,
   _ecommerceBestSalesman,
-  _ecommerceLatestProducts,
+  _ecommerceLatestProducts
 } from 'src/_mock';
 // components
 import { useSettingsContext } from 'src/components/settings';
 // assets
 import { MotivationIllustration } from 'src/assets/illustrations';
 //
+import { useTranslation } from 'react-i18next';
 import EcommerceWelcome from '../ecommerce-welcome';
 import EcommerceNewProducts from '../ecommerce-new-products';
 import EcommerceYearlySales from '../ecommerce-yearly-sales';
@@ -31,6 +32,8 @@ import EcommerceCurrentBalance from '../ecommerce-current-balance';
 
 export default function OverviewEcommerceView() {
   const { user } = useMockedUser();
+
+  const { t } = useTranslation();
 
   const theme = useTheme();
 
@@ -58,11 +61,11 @@ export default function OverviewEcommerceView() {
 
         <Grid xs={12} md={4}>
           <EcommerceWidgetSummary
-            title="Product Sold"
+            title={t('Product Sold')}
             percent={2.6}
             total={765}
             chart={{
-              series: [22, 8, 35, 50, 82, 84, 77, 12, 87, 43],
+              series: [22, 8, 35, 50, 82, 84, 77, 12, 87, 43]
             }}
           />
         </Grid>
@@ -74,7 +77,7 @@ export default function OverviewEcommerceView() {
             total={18765}
             chart={{
               colors: [theme.palette.info.light, theme.palette.info.main],
-              series: [56, 47, 40, 62, 73, 30, 23, 54, 67, 68],
+              series: [56, 47, 40, 62, 73, 30, 23, 54, 67, 68]
             }}
           />
         </Grid>
@@ -86,7 +89,7 @@ export default function OverviewEcommerceView() {
             total={4876}
             chart={{
               colors: [theme.palette.warning.light, theme.palette.warning.main],
-              series: [40, 70, 75, 70, 50, 28, 7, 64, 38, 27],
+              series: [40, 70, 75, 70, 50, 28, 7, 64, 38, 27]
             }}
           />
         </Grid>
@@ -98,8 +101,8 @@ export default function OverviewEcommerceView() {
             chart={{
               series: [
                 { label: 'Mens', value: 44 },
-                { label: 'Womens', value: 75 },
-              ],
+                { label: 'Womens', value: 75 }
+              ]
             }}
           />
         </Grid>
@@ -109,48 +112,35 @@ export default function OverviewEcommerceView() {
             title="Yearly Sales"
             subheader="(+43%) than last year"
             chart={{
-              categories: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec',
-              ],
+              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
               series: [
                 {
                   year: '2019',
                   data: [
                     {
                       name: 'Total Income',
-                      data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49],
+                      data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49]
                     },
                     {
                       name: 'Total Expenses',
-                      data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77],
-                    },
-                  ],
+                      data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77]
+                    }
+                  ]
                 },
                 {
                   year: '2020',
                   data: [
                     {
                       name: 'Total Income',
-                      data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49],
+                      data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49]
                     },
                     {
                       name: 'Total Expenses',
-                      data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77],
-                    },
-                  ],
-                },
-              ],
+                      data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77]
+                    }
+                  ]
+                }
+              ]
             }}
           />
         </Grid>
@@ -160,11 +150,7 @@ export default function OverviewEcommerceView() {
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
-          <EcommerceCurrentBalance
-            title="Current Balance"
-            currentBalance={187650}
-            sentAmount={25500}
-          />
+          <EcommerceCurrentBalance title="Current Balance" currentBalance={187650} sentAmount={25500} />
         </Grid>
 
         <Grid xs={12} md={6} lg={8}>
@@ -176,7 +162,7 @@ export default function OverviewEcommerceView() {
               { id: 'category', label: 'Product' },
               { id: 'country', label: 'Country', align: 'center' },
               { id: 'totalAmount', label: 'Total', align: 'right' },
-              { id: 'rank', label: 'Rank', align: 'right' },
+              { id: 'rank', label: 'Rank', align: 'right' }
             ]}
           />
         </Grid>

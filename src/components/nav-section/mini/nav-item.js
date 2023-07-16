@@ -36,7 +36,7 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
         <StyledIcon
           size={config.iconSize}
           sx={{
-            ...(subItem && { mr: 1.5 }),
+            ...(subItem && { mr: 1.5 })
           }}
         >
           {icon}
@@ -50,8 +50,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
             flex: 'unset',
             ...(!subItem && {
               px: 0.5,
-              mt: 0.5,
-            }),
+              mt: 0.5
+            })
           }}
           primary={title}
           primaryTypographyProps={{
@@ -65,8 +65,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
               textAlign: 'unset',
               fontSize: theme.typography.body2.fontSize,
               lineHeight: theme.typography.body2.lineHeight,
-              fontWeight: active ? 'fontWeightSemiBold' : 'fontWeightMedium',
-            }),
+              fontWeight: active ? 'fontWeightSemiBold' : 'fontWeightMedium'
+            })
           }}
         />
       )}
@@ -81,8 +81,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
               ...(!subItem && {
                 top: 11,
                 left: 6,
-                position: 'absolute',
-              }),
+                position: 'absolute'
+              })
             }}
           />
         </Tooltip>
@@ -95,7 +95,7 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
           sx={{
             top: 11,
             right: 6,
-            position: 'absolute',
+            position: 'absolute'
           }}
         />
       )}
@@ -118,8 +118,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
         sx={{
           width: 1,
           ...(disabled && {
-            cursor: 'default',
-          }),
+            cursor: 'default'
+          })
         }}
       >
         {renderContent}
@@ -135,8 +135,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
       sx={{
         width: 1,
         ...(disabled && {
-          cursor: 'default',
-        }),
+          cursor: 'default'
+        })
       }}
     >
       {renderContent}
@@ -150,7 +150,7 @@ NavItem.propTypes = {
   depth: PropTypes.number,
   externalLink: PropTypes.bool,
   item: PropTypes.object,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };
 
 export default NavItem;

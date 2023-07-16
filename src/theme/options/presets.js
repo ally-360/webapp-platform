@@ -10,11 +10,11 @@ export function presets(presetsColor) {
 
   const theme = {
     palette: {
-      primary,
+      primary
     },
     customShadows: {
-      primary: `0 8px 16px 0 ${alpha(`${primary?.main}`, 0.24)}`,
-    },
+      primary: `0 8px 16px 0 ${alpha(`${primary?.main}`, 0.24)}`
+    }
   };
 
   return theme;
@@ -28,7 +28,7 @@ export const primaryPresets = [
   // DEFAULT
   {
     name: 'default',
-    ...palette.primary,
+    ...palette.primary
   },
   // CYAN
   {
@@ -38,7 +38,7 @@ export const primaryPresets = [
     main: '#078DEE',
     dark: '#0351AB',
     darker: '#012972',
-    contrastText: '#FFFFFF',
+    contrastText: '#FFFFFF'
   },
   // PURPLE
   {
@@ -48,7 +48,7 @@ export const primaryPresets = [
     main: '#7635dc',
     dark: '#431A9E',
     darker: '#200A69',
-    contrastText: '#FFFFFF',
+    contrastText: '#FFFFFF'
   },
   // BLUE
   {
@@ -58,7 +58,7 @@ export const primaryPresets = [
     main: '#2065D1',
     dark: '#103996',
     darker: '#061B64',
-    contrastText: '#FFFFFF',
+    contrastText: '#FFFFFF'
   },
   // ORANGE
   {
@@ -68,7 +68,7 @@ export const primaryPresets = [
     main: '#fda92d',
     dark: '#B66816',
     darker: '#793908',
-    contrastText: palette.grey[800],
+    contrastText: palette.grey[800]
   },
   // RED
   {
@@ -78,6 +78,6 @@ export const primaryPresets = [
     main: '#FF3030',
     dark: '#B71833',
     darker: '#7A0930',
-    contrastText: '#FFFFFF',
-  },
+    contrastText: '#FFFFFF'
+  }
 ];

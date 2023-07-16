@@ -34,7 +34,7 @@ export default function ProductTableFiltersResult({
       <Box sx={{ typography: 'body2' }}>
         <strong>{results}</strong>
         <Box component="span" sx={{ color: 'text.secondary', ml: 0.25 }}>
-          results found
+          Resultados
         </Box>
       </Box>
 
@@ -50,22 +50,13 @@ export default function ProductTableFiltersResult({
         {!!filters.publish.length && (
           <Block label="Publish:">
             {filters.publish.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemovePublish(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemovePublish(item)} />
             ))}
           </Block>
         )}
 
-        <Button
-          color="error"
-          onClick={onResetFilters}
-          startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-        >
-          Clear
+        <Button color="error" onClick={onResetFilters} startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
+          Limpiar
         </Button>
       </Stack>
     </Stack>
@@ -76,7 +67,7 @@ ProductTableFiltersResult.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
-  results: PropTypes.number,
+  results: PropTypes.number
 };
 
 // ----------------------------------------------------------------------
@@ -93,7 +84,7 @@ function Block({ label, children, sx, ...other }) {
         borderRadius: 1,
         overflow: 'hidden',
         borderStyle: 'dashed',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -111,5 +102,5 @@ function Block({ label, children, sx, ...other }) {
 Block.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

@@ -21,7 +21,7 @@ export default function TablePaginationCustom({
         component="div"
         {...other}
         sx={{
-          borderTopColor: 'transparent',
+          borderTopColor: 'transparent'
         }}
       />
 
@@ -34,8 +34,8 @@ export default function TablePaginationCustom({
             py: 1.5,
             top: 0,
             position: {
-              sm: 'absolute',
-            },
+              sm: 'absolute'
+            }
           }}
         />
       )}
@@ -47,5 +47,5 @@ TablePaginationCustom.propTypes = {
   dense: PropTypes.bool,
   onChangeDense: PropTypes.func,
   rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
