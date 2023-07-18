@@ -16,9 +16,11 @@
 
 import { configureStore } from '@reduxjs/toolkit';
 import productsReducer from './inventory/productsSlice';
+import pdvsReducer from './inventory/pdvsSlice';
 
 export const store = configureStore({
   reducer: {
-    products: productsReducer
+    products: productsReducer,
+    pdvs: pdvsReducer
   }
 });

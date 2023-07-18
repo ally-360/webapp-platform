@@ -47,7 +47,7 @@ export const PRODUCT_SIZE_OPTIONS = [
 ];
 
 export const PRODUCT_STOCK_OPTIONS = [
-  { value: 'Con existencais', label: 'Con existencias' },
+  { value: 'Con existencias', label: 'Con existencias' },
   { value: 'Pocas existencias', label: 'Pocas existencias' },
   { value: 'Sin existencias', label: 'Sin existencias' }
 ];

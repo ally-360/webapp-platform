@@ -21,6 +21,10 @@ const ProductDetailsPage = lazy(() => import('src/pages/dashboard/product/detail
 const ProductListPage = lazy(() => import('src/pages/dashboard/product/list'));
 const ProductCreatePage = lazy(() => import('src/pages/dashboard/product/new'));
 const ProductEditPage = lazy(() => import('src/pages/dashboard/product/edit'));
+
+// PDVS
+const PDVSListPage = lazy(() => import('src/pages/dashboard/pdvs/list'));
+
 // ORDER
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
@@ -91,9 +95,9 @@ export const dashboardRoutes = [
           { path: 'list', element: <ProductListPage /> },
           { path: 'new-product', element: <ProductCreatePage /> },
           { path: 'categories', element: <ProductListPage /> },
-          { path: 'pdvs', element: <ProductListPage/> },
-          { path: 'brands', element: <ProductListPage /> },
-        ],
+          { path: 'pdvs', element: <PDVSListPage /> },
+          { path: 'brands', element: <ProductListPage /> }
+        ]
       },
       {
         path: 'user',
@@ -104,8 +108,8 @@ export const dashboardRoutes = [
           { path: 'list', element: <UserListPage /> },
           { path: 'new', element: <UserCreatePage /> },
           { path: ':id/edit', element: <UserEditPage /> },
-          { path: 'account', element: <UserAccountPage /> },
-        ],
+          { path: 'account', element: <UserAccountPage /> }
+        ]
       },
       {
         path: 'product',
@@ -114,16 +118,16 @@ export const dashboardRoutes = [
           { path: 'list', element: <ProductListPage /> },
           { path: ':id', element: <ProductDetailsPage /> },
           { path: 'new', element: <ProductCreatePage /> },
-          { path: ':id/edit', element: <ProductEditPage /> },
-        ],
+          { path: ':id/edit', element: <ProductEditPage /> }
+        ]
       },
       {
         path: 'order',
         children: [
           { element: <OrderListPage />, index: true },
           { path: 'list', element: <OrderListPage /> },
-          { path: ':id', element: <OrderDetailsPage /> },
-        ],
+          { path: ':id', element: <OrderDetailsPage /> }
+        ]
       },
       {
         path: 'invoice',
@@ -132,8 +136,8 @@ export const dashboardRoutes = [
           { path: 'list', element: <InvoiceListPage /> },
           { path: ':id', element: <InvoiceDetailsPage /> },
           { path: ':id/edit', element: <InvoiceEditPage /> },
-          { path: 'new', element: <InvoiceCreatePage /> },
-        ],
+          { path: 'new', element: <InvoiceCreatePage /> }
+        ]
       },
       {
         path: 'post',
@@ -142,8 +146,8 @@ export const dashboardRoutes = [
           { path: 'list', element: <BlogPostsPage /> },
           { path: ':title', element: <BlogPostPage /> },
           { path: ':title/edit', element: <BlogEditPostPage /> },
-          { path: 'new', element: <BlogNewPostPage /> },
-        ],
+          { path: 'new', element: <BlogNewPostPage /> }
+        ]
       },
       {
         path: 'job',
@@ -152,8 +156,8 @@ export const dashboardRoutes = [
           { path: 'list', element: <JobListPage /> },
           { path: ':id', element: <JobDetailsPage /> },
           { path: 'new', element: <JobCreatePage /> },
-          { path: ':id/edit', element: <JobEditPage /> },
-        ],
+          { path: ':id/edit', element: <JobEditPage /> }
+        ]
       },
       {
         path: 'tour',
@@ -162,8 +166,8 @@ export const dashboardRoutes = [
           { path: 'list', element: <TourListPage /> },
           { path: ':id', element: <TourDetailsPage /> },
           { path: 'new', element: <TourCreatePage /> },
-          { path: ':id/edit', element: <TourEditPage /> },
-        ],
+          { path: ':id/edit', element: <TourEditPage /> }
+        ]
       },
       { path: 'file-manager', element: <FileManagerPage /> },
       { path: 'mail', element: <MailPage /> },
@@ -171,7 +175,7 @@ export const dashboardRoutes = [
       { path: 'calendar', element: <CalendarPage /> },
       { path: 'kanban', element: <KanbanPage /> },
       { path: 'permission', element: <PermissionDeniedPage /> },
-      { path: 'blank', element: <BlankPage /> },
-    ],
-  },
+      { path: 'blank', element: <BlankPage /> }
+    ]
+  }
 ];

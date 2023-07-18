@@ -42,38 +42,42 @@ import { LoadingButton } from '@mui/lab';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteProduct, getAllProducts } from 'src/redux/inventory/productsSlice';
-import ProductTableRow from '../product-table-row';
-import ProductTableToolbar from '../product-table-toolbar';
-import ProductTableFiltersResult from '../product-table-filters-result';
+import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
+import PDVSTableRow from '../pdvs-table-row';
+import PDVSTableToolbar from '../pdvs-table-toolbar';
+import PDVSTableFiltersResult from '../pdvs-table-filters-result';
 
 // ----------------------------------------------------------------------
 
-const TABLE_HEAD = [
-  { id: 'name', label: 'Producto' },
-  // { id: 'createdAt', label: 'Create at', width: 160 },
-  { id: 'sku', label: 'SKU', width: 160 },
-  { id: 'globalStock', label: 'Cantidad', width: 160 },
-  { id: 'priceSale', label: 'Price', width: 140 },
-  { id: 'state', label: 'Estado', width: 110 },
-  { id: '', width: 88 }
-];
+// export const MUNICIPIO_OPTIONS = [
+//   { value: 'Palmira', label: 'Palmira' },
+//   { value: 'Cali', label: 'Cali' },
+//   { value: 'Cartago', label: 'Cartago' },
+//   { value: 'Buga', label: 'Buga' },
+//   { value: 'Pereira', label: 'Pereira' },
+// ];
 
-const PUBLISH_OPTIONS = [
-  { value: true, label: 'Activo' },
-  { value: false, label: 'Desactivado' }
+const TABLE_HEAD = [
+  { id: 'name', label: 'Nombre', minWidth: 220, align: 'left', width: 150 },
+  { id: 'sku', label: 'Dirección', width: 200, maxWidth: 250 },
+  { id: 'location', label: 'Municipio', width: 160, maxWidth: 160 },
+  { id: 'main', label: 'Principal', width: 20, align: 'left' },
+  { id: '', width: 88 }
 ];
 
 const defaultFilters = {
   name: '',
-  sku: '',
-  publish: [],
-  stock: []
+  address: '',
+  main: false,
+  municipio: []
 };
 
 // ----------------------------------------------------------------------
 
-export default function ProductListView() {
+export default function PdvsListView() {
   const router = useRouter();
+
+  const [MUNICIPIO_OPTIONS, SETMUNICIPIO_OPTIONS] = useState([]);
 
   // Ref component to print
   const componentRef = useRef();
@@ -86,15 +90,36 @@ export default function ProductListView() {
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  const { products, productsLoading, productsEmpty } = useSelector((state) => state.products);
+  // const { products, pdvsLoading, pdvsEmpty } = useSelector((state) => state.products);
+
+  const {pdvs , pdvsLoading, pdvsEmpty} = useSelector((state) => state.pdvs);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllPDVS());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (pdvs.length) {
+      const municipios = pdvs.map((pdv) => ({ value: pdv.location.name, label: pdv.location.name }));
+      // Eliminar duplicados
+      const municipiosSinDuplicados = municipios.filter((municipio, index, self) => self.findIndex((m) => m.value === municipio.value) === index);
+      SETMUNICIPIO_OPTIONS(municipiosSinDuplicados);
+    }
+  }, [pdvs]);
+
+  useEffect(() => {
+    console.log('pdvs', pdvs);
+  }, [pdvs]);
 
   const confirm = useBoolean();
 
   useEffect(() => {
-    if (products.length) {
-      setTableData(products);
+    if (pdvs.length) {
+      setTableData(pdvs);
     }
-  }, [products]);
+  }, [pdvs]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -107,11 +132,13 @@ export default function ProductListView() {
     table.page * table.rowsPerPage + table.rowsPerPage
   );
 
+  console.log('dataFiltered', dataFiltered);
+
   const denseHeight = table.dense ? 60 : 80;
 
   const canReset = !isEqual(defaultFilters, filters);
 
-  const notFound = (!dataFiltered.length && canReset) || productsEmpty;
+  const notFound = (!dataFiltered.length && canReset) || pdvsEmpty;
 
   const handleFilters = useCallback(
     (name, value) => {
@@ -155,7 +182,6 @@ export default function ProductListView() {
 
   // nueva logica
 
-  const dispatch = useDispatch();
 
   const handleDeleteRow = useCallback(
     (id) => {
@@ -163,9 +189,6 @@ export default function ProductListView() {
     },
     [ dispatch ]
   );
-  // useEffect(() => {
-  //   dispatch(getAllProducts());
-  // }, [dispatch]);
 
   return (
     <>
@@ -174,15 +197,15 @@ export default function ProductListView() {
       
       maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="Productos"
-          icon="icon-park-outline:ad-product"
+          heading="Puntos de venta"
+          icon="ic:round-store"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
             {
               name: 'Inventario',
               href: paths.dashboard.inventory.list
             },
-            { name: 'Productos' }
+            { name: 'Puntos de venta' }
           ]}
           action={
             <Button
@@ -192,25 +215,24 @@ export default function ProductListView() {
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              Crear producto
+              Crear Punto De Venta
             </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
 
         <Card>
-          <ProductTableToolbar
+          <PDVSTableToolbar
             filters={filters}
             componentRef={componentRef}
             dataFiltered={dataFiltered}
             onFilters={handleFilters}
             //
-            stockOptions={PRODUCT_STOCK_OPTIONS}
-            publishOptions={PUBLISH_OPTIONS}
+            stockOptions={MUNICIPIO_OPTIONS}
           />
 
           {canReset && (
-            <ProductTableFiltersResult
+            <PDVSTableFiltersResult
               filters={filters}
               onFilters={handleFilters}
               //
@@ -258,7 +280,7 @@ export default function ProductListView() {
                 />
 
                 <TableBody>
-                  {productsLoading ? (
+                  {pdvsLoading ? (
                     [...Array(table.rowsPerPage)].map((i, index) => (
                       <TableSkeleton key={index} sx={{ height: denseHeight }} />
                     ))
@@ -267,7 +289,7 @@ export default function ProductListView() {
                       {dataFiltered
                         .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
                         .map((row) => (
-                          <ProductTableRow
+                          <PDVSTableRow
                             key={row.id}
                             row={row}
                             selected={table.selected.includes(row.id)}
@@ -333,8 +355,7 @@ export default function ProductListView() {
 
 // Filtros
 function applyFilter({ inputData, comparator, filters }) {
-  const { name, stock, publish } = filters;
-  console.log(stock);
+  const { name, municipio, main } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -350,24 +371,16 @@ function applyFilter({ inputData, comparator, filters }) {
     inputData = inputData.filter(
       (product) =>
         product.name.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        product.sku.toLowerCase().indexOf(name.toLowerCase()) !== -1
+        product.address.toLowerCase().indexOf(name.toLowerCase()) !== -1
     );
   }
 
-  if (stock.length) {
-    const inputDataWithInventoryType = inputData.map((product) => {
-      // eslint-disable-next-line no-nested-ternary
-      const inventoryType = product.globalStock > product.pdvs.minQuantity ? 'Existencias' : product.globalStock === 0 ? 'Sin existencias' : 'Pocas existencias';
-      return {
-        ...product,
-        inventoryType
-      };
-    })
-    inputData = inputDataWithInventoryType.filter((product) => stock.includes(product.inventoryType));
+  if (municipio.length) {
+    inputData = inputData.filter((product) => municipio.includes(product.location.name));
   }
 
-  if (publish.length) {
-    inputData = inputData.filter((product) => publish.includes(product.publish));
+  if (main) {
+    inputData = inputData.filter((product) => product.main === main);
   }
 
   return inputData;

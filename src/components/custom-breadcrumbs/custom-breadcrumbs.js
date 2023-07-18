@@ -6,19 +6,12 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 //
+import { Icon } from '@iconify/react';
 import LinkItem from './link-item';
 
 // ----------------------------------------------------------------------
 
-export default function CustomBreadcrumbs({
-  links,
-  action,
-  heading,
-  moreLink,
-  activeLast,
-  sx,
-  ...other
-}) {
+export default function CustomBreadcrumbs({ icon, links, action, heading, moreLink, activeLast, sx, ...other }) {
   const lastLink = links[links.length - 1].name;
 
   return (
@@ -26,22 +19,20 @@ export default function CustomBreadcrumbs({
       <Stack direction="row" alignItems="center">
         <Box sx={{ flexGrow: 1 }}>
           {/* HEADING */}
-          {heading && (
-            <Typography variant="h4" gutterBottom>
-              {heading}
-            </Typography>
+          {heading && icon !== '' && (
+            <Stack direction="row" alignItems="center" gap={1} mb={1}>
+              <Icon icon={icon} width={24} height={24} />
+              <Typography variant="h4">{heading}</Typography>
+            </Stack>
           )}
+
+          {heading && icon === '' && <Typography variant="h4">{heading}</Typography>}
 
           {/* BREADCRUMBS */}
           {!!links.length && (
             <Breadcrumbs separator={<Separator />} {...other}>
               {links.map((link) => (
-                <LinkItem
-                  key={link.name || ''}
-                  link={link}
-                  activeLast={activeLast}
-                  disabled={link.name === lastLink}
-                />
+                <LinkItem key={link.name || ''} link={link} activeLast={activeLast} disabled={link.name === lastLink} />
               ))}
             </Breadcrumbs>
           )}
@@ -54,14 +45,7 @@ export default function CustomBreadcrumbs({
       {!!moreLink && (
         <Box sx={{ mt: 2 }}>
           {moreLink.map((href) => (
-            <Link
-              key={href}
-              href={href}
-              variant="body2"
-              target="_blank"
-              rel="noopener"
-              sx={{ display: 'table' }}
-            >
+            <Link key={href} href={href} variant="body2" target="_blank" rel="noopener" sx={{ display: 'table' }}>
               {href}
             </Link>
           ))}
@@ -78,15 +62,14 @@ CustomBreadcrumbs.propTypes = {
   heading: PropTypes.string,
   moreLink: PropTypes.array,
   activeLast: PropTypes.bool,
+  icon: PropTypes.string
 };
 
+CustomBreadcrumbs.defaultProps = {
+  icon: ''
+};
 // ----------------------------------------------------------------------
 
 function Separator() {
-  return (
-    <Box
-      component="span"
-      sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'text.disabled' }}
-    />
-  );
+  return <Box component="span" sx={{ width: 4, height: 4, borderRadius: '50%', bgcolor: 'text.disabled' }} />;
 }

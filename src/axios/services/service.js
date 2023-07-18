@@ -28,6 +28,8 @@ class RequestService {
 
   createProduct = async (databody) => apiClient(configPostWithToken('/product', databody));
 
+  deleteProduct = async (id) => apiClient(configDeleteWithToken(`/product/${id}`));
+
   // Categories
 
   getCategories = async () => apiClient(configGetWithToken('/category?r=true'));
@@ -36,7 +38,7 @@ class RequestService {
 
   // pdv
 
-  getPDV = async ({ r }) => apiClient(configGetWithToken(`/pdv?r=${r}`));
+  getPDVS = async ({ r }) => apiClient(configGetWithToken(`/pdv?r=${r}`));
 
   createPDV = async ({ databody }) => apiClient(configPostWithToken(`/pdv?`, databody));
 

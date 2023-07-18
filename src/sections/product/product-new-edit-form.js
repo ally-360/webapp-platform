@@ -26,7 +26,7 @@ import {
   PRODUCT_SIZE_OPTIONS,
   PRODUCT_GENDER_OPTIONS,
   PRODUCT_COLOR_NAME_OPTIONS,
-  PRODUCT_CATEGORY_GROUP_OPTIONS,
+  PRODUCT_CATEGORY_GROUP_OPTIONS
 } from 'src/_mock';
 // components
 import { useSnackbar } from 'src/components/snackbar';
@@ -39,7 +39,7 @@ import FormProvider, {
   RHFTextField,
   RHFMultiSelect,
   RHFAutocomplete,
-  RHFMultiCheckbox,
+  RHFMultiCheckbox
 } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -64,12 +64,12 @@ export default function ProductNewEditForm({ currentProduct }) {
     taxes: Yup.number(),
     newLabel: Yup.object().shape({
       enabled: Yup.boolean(),
-      content: Yup.string(),
+      content: Yup.string()
     }),
     saleLabel: Yup.object().shape({
       enabled: Yup.boolean(),
-      content: Yup.string(),
-    }),
+      content: Yup.string()
+    })
   });
 
   const defaultValues = useMemo(
@@ -91,14 +91,14 @@ export default function ProductNewEditForm({ currentProduct }) {
       colors: currentProduct?.colors || [],
       sizes: currentProduct?.sizes || [],
       newLabel: currentProduct?.newLabel || { enabled: false, content: '' },
-      saleLabel: currentProduct?.saleLabel || { enabled: false, content: '' },
+      saleLabel: currentProduct?.saleLabel || { enabled: false, content: '' }
     }),
     [currentProduct]
   );
 
   const methods = useForm({
     resolver: yupResolver(NewProductSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
@@ -106,7 +106,7 @@ export default function ProductNewEditForm({ currentProduct }) {
     watch,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -143,7 +143,7 @@ export default function ProductNewEditForm({ currentProduct }) {
 
       const newFiles = acceptedFiles.map((file) =>
         Object.assign(file, {
-          preview: URL.createObjectURL(file),
+          preview: URL.createObjectURL(file)
         })
       );
 
@@ -238,7 +238,7 @@ export default function ProductNewEditForm({ currentProduct }) {
               display="grid"
               gridTemplateColumns={{
                 xs: 'repeat(1, 1fr)',
-                md: 'repeat(2, 1fr)',
+                md: 'repeat(2, 1fr)'
               }}
             >
               <RHFTextField name="code" label="Product Code" />
@@ -265,12 +265,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                 ))}
               </RHFSelect>
 
-              <RHFMultiSelect
-                checkbox
-                name="colors"
-                label="Colors"
-                options={PRODUCT_COLOR_NAME_OPTIONS}
-              />
+              <RHFMultiSelect checkbox name="colors" label="Colors" options={PRODUCT_COLOR_NAME_OPTIONS} />
 
               <RHFMultiSelect checkbox name="sizes" label="Sizes" options={PRODUCT_SIZE_OPTIONS} />
             </Box>
@@ -321,12 +316,7 @@ export default function ProductNewEditForm({ currentProduct }) {
 
             <Stack direction="row" alignItems="center" spacing={3}>
               <RHFSwitch name="newLabel.enabled" label={null} sx={{ m: 0 }} />
-              <RHFTextField
-                name="newLabel.content"
-                label="New Label"
-                fullWidth
-                disabled={!values.newLabel.enabled}
-              />
+              <RHFTextField name="newLabel.content" label="New Label" fullWidth disabled={!values.newLabel.enabled} />
             </Stack>
           </Stack>
         </Card>
@@ -365,7 +355,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                       $
                     </Box>
                   </InputAdornment>
-                ),
+                )
               }}
             />
 
@@ -382,7 +372,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                       $
                     </Box>
                   </InputAdornment>
-                ),
+                )
               }}
             />
 
@@ -405,7 +395,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                         %
                       </Box>
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
             )}
@@ -419,11 +409,7 @@ export default function ProductNewEditForm({ currentProduct }) {
     <>
       {mdUp && <Grid md={4} />}
       <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
-        <FormControlLabel
-          control={<Switch defaultChecked />}
-          label="Publish"
-          sx={{ flexGrow: 1, pl: 3 }}
-        />
+        <FormControlLabel control={<Switch defaultChecked />} label="Publish" sx={{ flexGrow: 1, pl: 3 }} />
 
         <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting}>
           {!currentProduct ? 'Create Product' : 'Save Changes'}
@@ -448,5 +434,5 @@ export default function ProductNewEditForm({ currentProduct }) {
 }
 
 ProductNewEditForm.propTypes = {
-  currentProduct: PropTypes.object,
+  currentProduct: PropTypes.object
 };

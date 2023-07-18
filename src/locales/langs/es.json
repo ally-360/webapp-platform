@@ -50,6 +50,12 @@
   "upgrade_to_pro": "Actualizar a Pro",
   "Inventario": "Inventario",
   "Product Sold": "Producto vendido",
+  "Productos": "Productos",
+  "Producto" : "Producto",
+  "Ventas": "Ventas",
+  "Activo" : "Activo",
+  "Inactivo" : "Inactivo",
+  "Código" : "Código",
   "demo": {
   "title": "Inglés"
   }

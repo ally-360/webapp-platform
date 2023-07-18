@@ -17,11 +17,13 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import * as XLSX from 'xlsx';
 import { headerTable } from 'src/sections/product/constantsTableExportData';
 import ReactToPrint from 'react-to-print';
+import { useTranslation } from 'react-i18next';
+import { FormControlLabel, Switch } from '@mui/material';
 // ----------------------------------------------------------------------
 
-const EXPORT_NAME = 'productos';
+const EXPORT_NAME = 'puntos de venta';
 
-export default function ProductTableToolbar({
+export default function PDVSTableToolbar({
   filters,
   onFilters,
   dataFiltered,
@@ -38,55 +40,75 @@ export default function ProductTableToolbar({
     [onFilters]
   );
 
+  const { t } = useTranslation();
   const handleFilterStock = useCallback(
     (event) => {
-      onFilters('stock', typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value);
+      onFilters(
+        'municipio',
+        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value
+      );
     },
     [onFilters]
   );
-
-  const handleFilterPublish = useCallback(
+  const handleFilterMain = useCallback(
     (event) => {
-      onFilters('publish', typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value);
+      // switch component
+      // onFilters('main', event.target.checked);
+      onFilters('main', event.target.checked);
     },
     [onFilters]
   );
   const downloadExcel = (data) => {
-    const worksheetData = headerTable;
+    const worksheetData = [
+      // Header row data
+      {
+        name: 'Nombre',
+        description: 'Descripción',
+        address: 'Dirección',
+        phone: 'Teléfono',
+        location: 'Municipio'
+      }
+    ];
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData, { skipHeader: true });
 
+    // Apply the headerStyle to the header row
+    const headerStyle = {
+      fill: {
+        fgColor: { rgb: 'FFFF0000' } // Red color, you can change the RGB code as desired
+      },
+      font: {
+        color: { rgb: 'FFFFFFFF' }, // White text color for better visibility
+        bold: true
+      }
+    };
+
+    Object.keys(worksheet).forEach((cellRef) => {
+      if (cellRef.endsWith('1')) {
+        // Check if the cell is in the first row (header)
+        const cell = worksheet[cellRef];
+        cell.s = headerStyle; // Apply the headerStyle to the cell
+      }
+    });
+
     let rowIndex = 2; // Start from the second row to avoid overwriting the header
 
-    data.forEach((product) => {
-      product.pdvs.forEach((pdv) => {
-        const rowData = {
-          id: product.id,
-          name: product.name,
-          description: product.description,
-          code: product.code,
-          images: product.images.join(', '), // Assuming images is an array
-          typeProduct: product.typeProduct,
-          state: product.state,
-          sellInNegative: product.sellInNegative,
-          taxesOption: product.taxesOption,
-          sku: product.sku,
-          priceSale: product.priceSale,
-          priceBase: product.priceBase,
-          globalStock: product.globalStock,
-          pdvName: pdv.name,
-          minQuantity: pdv.minQuantity,
-          maxQuantity: pdv.maxQuantity,
-          pdvQuantity: pdv.quantity,
-          category: product.category
-        };
-        XLSX.utils.sheet_add_json(worksheet, [rowData], { skipHeader: true, origin: `A${rowIndex}` });
-        rowIndex++;
-      });
+    dataFiltered.forEach((pdv) => {
+      const rowData = {
+        name: pdv.name,
+        description: pdv.description,
+        address: pdv.address,
+        phone: pdv.phone,
+        location: pdv.location.name // Extract the name from the location object
+      };
+      XLSX.utils.sheet_add_json(worksheet, [rowData], { skipHeader: true, origin: `A${rowIndex}` });
+      // eslint-disable-next-line no-plusplus
+      rowIndex++;
     });
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'PDVsSheet');
+
     XLSX.writeFile(workbook, `${EXPORT_NAME}.xlsx`);
   };
 
@@ -109,7 +131,7 @@ export default function ProductTableToolbar({
             fullWidth
             value={filters.name}
             onChange={handleFilterName}
-            placeholder="Buscar (sku o nombre)"
+            placeholder="Buscar (nombre o dirección)"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -125,19 +147,19 @@ export default function ProductTableToolbar({
             width: { xs: 1, md: 200 }
           }}
         >
-          <InputLabel>Cantidad</InputLabel>
+          <InputLabel>{t('Municipio')}</InputLabel>
 
           <Select
             multiple
-            value={filters.stock}
+            value={filters.municipio}
             onChange={handleFilterStock}
-            input={<OutlinedInput label="Existencias" />}
+            input={<OutlinedInput label="Municipio" />}
             renderValue={(selected) => selected.map((value) => value).join(', ')}
             sx={{ textTransform: 'capitalize' }}
           >
             {stockOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
-                <Checkbox disableRipple size="small" checked={filters.stock.includes(option.value)} />
+                <Checkbox disableRipple size="small" checked={filters.municipio.includes(option.value)} />
                 {option.label}
               </MenuItem>
             ))}
@@ -150,23 +172,7 @@ export default function ProductTableToolbar({
             width: { xs: 1, md: 200 }
           }}
         >
-          <InputLabel>Precio</InputLabel>
-
-          <Select
-            multiple
-            value={filters.publish}
-            onChange={handleFilterPublish}
-            input={<OutlinedInput label="Publish" />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {publishOptions.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                <Checkbox disableRipple size="small" checked={filters.publish.includes(option.value)} />
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControlLabel control={<Switch checked={filters.main} onChange={handleFilterMain} />} label="Principal" />
         </FormControl>
 
         <IconButton color="primary" onClick={popover.onOpen}>
@@ -206,7 +212,7 @@ export default function ProductTableToolbar({
   );
 }
 
-ProductTableToolbar.propTypes = {
+PDVSTableToolbar.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   publishOptions: PropTypes.array,

@@ -24,36 +24,19 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { Popover, Tooltip, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Icon } from '@iconify/react';
 
 // ----------------------------------------------------------------------
 
-export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow }) {
-  const { name, priceSale, state, images, sku, globalStock, pdvs, code } = row;
+export default function PDVSTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow }) {
+  const { name, address, location, main, phone } = row;
 
+  console.log(onSelectRow);
   const { t } = useTranslation();
-
-  const inventoryType =
-    // eslint-disable-next-line no-nested-ternary
-    globalStock > pdvs.minQuantity ? 'Existencias' : globalStock === 0 ? 'Sin exitencias' : 'Pocas existencias';
 
   const confirm = useBoolean();
 
-  const minQuantityAllPdvs = pdvs.reduce((acc, pdv) => pdv.minQuantity + acc, 0);
-  const maxQuantityAllPdvs = pdvs.reduce((acc, pdv) => pdv.maxQuantity + acc, 0);
-
   const popover = usePopover();
-
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const handlePopoverOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handlePopoverClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
 
   return (
     <>
@@ -63,7 +46,6 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={name} src={images[0]} variant="rounded" sx={{ width: 64, height: 64, mr: 2 }} />
           <ListItemText
             disableTypography
             primary={
@@ -73,7 +55,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
             }
             secondary={
               <Box component="div" sx={{ typography: 'body2', color: 'text.disabled' }}>
-                {t('Código')} {code}
+                {t('Número: ')} {phone}
               </Box>
             }
           />
@@ -81,7 +63,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
 
         <TableCell>
           <ListItemText
-            primary={sku}
+            primary={address}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
             secondaryTypographyProps={{
               mt: 0.5,
@@ -90,60 +72,31 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
             }}
           />
         </TableCell>
-        <TableCell
-          aria-owns={open ? 'mouse-over-popover' : undefined}
-          aria-haspopup="true"
-          onMouseEnter={handlePopoverOpen}
-          onMouseLeave={handlePopoverClose}
-          sx={{ typography: 'caption', color: 'text.secondary' }}
-        >
-          <LinearProgress
-            value={(globalStock * 100) / (maxQuantityAllPdvs !== 0 ? maxQuantityAllPdvs : minQuantityAllPdvs)}
-            variant="determinate"
-            color={
-              (globalStock === 0 && 'error') ||
-              (globalStock < minQuantityAllPdvs && 'low stock' && 'warning') ||
-              'success'
-            }
-            sx={{ mb: 1, height: 6, maxWidth: 80 }}
-          />
-          {!!globalStock && globalStock} {inventoryType}
-          {pdvs.length > 1 && (
-            <Popover
-              id="mouse-over-popover"
-              sx={{
-                pointerEvents: 'none'
-              }}
-              open={open}
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'center',
-                horizontal: 'left'
-              }}
-              transformOrigin={{
-                vertical: 'center',
-                horizontal: 'right'
-              }}
-              onClose={handlePopoverClose}
-              disableRestoreFocus
-            >
-              {pdvs.map((pdv) => (
-                <Box key={pdv.name} sx={{ p: 0.2 }}>
-                  <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
-                    {pdv.name}: {pdv.quantity} {t('productos')}
-                  </Typography>
-                </Box>
-              ))}
-            </Popover>
-          )}
-        </TableCell>
-
-        <TableCell>{fCurrency(priceSale)}</TableCell>
 
         <TableCell>
-          <Label variant="soft" color={(state === true && 'success') || 'default'}>
-            {state === true ? t('Activo') : t('Inactivo')}
-          </Label>
+          <ListItemText
+            primary={location.name}
+            primaryTypographyProps={{ typography: 'body2', noWrap: true }}
+            secondaryTypographyProps={{
+              mt: 0.5,
+              component: 'span',
+              typography: 'caption'
+            }}
+          />
+        </TableCell>
+
+        <TableCell>
+          {main === true ? (
+            <Tooltip arrow title={t('Punto de venta principal')}>
+              <Label
+                sx={{ padding: '15px 10px', margin: 'auto' }}
+                variant="soft"
+                color={(main === true && 'success') || 'default'}
+              >
+                <Icon width={18} height={18} icon="iconamoon:star-fill" />
+              </Label>
+            </Tooltip>
+          ) : null}
         </TableCell>
 
         <TableCell align="right">
@@ -189,8 +142,8 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
-        title={t('Eliminar producto')}
-        content={t(`¿Estás seguro de eliminar el producto ${name}?`)}
+        title={t('Eliminar Punto De Venta')}
+        content={t(`¿Estás seguro de eliminar el PDV ${name}?`)}
         action={
           <Button variant="contained" color="error" onClick={onDeleteRow}>
             {t('Eliminar')}
@@ -201,7 +154,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
   );
 }
 
-ProductTableRow.propTypes = {
+PDVSTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
   onEditRow: PropTypes.func,
   onSelectRow: PropTypes.func,
