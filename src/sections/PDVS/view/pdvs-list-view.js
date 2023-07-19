@@ -46,7 +46,7 @@ import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 import PDVSTableRow from '../pdvs-table-row';
 import PDVSTableToolbar from '../pdvs-table-toolbar';
 import PDVSTableFiltersResult from '../pdvs-table-filters-result';
-
+import FormPDVS from '../pdv-new-edit-form';
 // ----------------------------------------------------------------------
 
 // export const MUNICIPIO_OPTIONS = [
@@ -190,6 +190,18 @@ export default function PdvsListView() {
     [ dispatch ]
   );
 
+  // Popup create punto de venta
+
+  const [openCreatePDV, setOpenCreatePDV] = useState(false);
+
+  const handleClickOpenCreatePDV = () => {
+    setOpenCreatePDV(true);
+  };
+
+  const handleCloseCreatePDV = () => {
+    setOpenCreatePDV(false);
+  };
+
   return (
     <>
       <Container 
@@ -209,8 +221,7 @@ export default function PdvsListView() {
           ]}
           action={
             <Button
-              component={RouterLink}
-              href={paths.dashboard.product.new}
+              onClick={handleClickOpenCreatePDV}
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
@@ -346,6 +357,10 @@ export default function PdvsListView() {
             Delete
           </Button>
         }
+      />
+      <FormPDVS
+      open={openCreatePDV}
+      handleClose={handleCloseCreatePDV}      
       />
     </>
   );

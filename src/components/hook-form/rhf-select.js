@@ -14,15 +14,7 @@ import TextField from '@mui/material/TextField';
 
 // ----------------------------------------------------------------------
 
-export function RHFSelect({
-  name,
-  native,
-  maxHeight = 220,
-  helperText,
-  children,
-  PaperPropsSx,
-  ...other
-}) {
+export function RHFSelect({ name, native, maxHeight = 220, helperText, children, PaperPropsSx, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -40,13 +32,13 @@ export function RHFSelect({
               PaperProps: {
                 sx: {
                   ...(!native && {
-                    maxHeight: typeof maxHeight === 'number' ? maxHeight : 'unset',
+                    maxHeight: typeof maxHeight === 'number' ? maxHeight : 'unset'
                   }),
-                  ...PaperPropsSx,
-                },
-              },
+                  ...PaperPropsSx
+                }
+              }
             },
-            sx: { textTransform: 'capitalize' },
+            sx: { textTransform: 'capitalize' }
           }}
           error={!!error}
           helperText={error ? error?.message : helperText}
@@ -65,22 +57,12 @@ RHFSelect.propTypes = {
   helperText: PropTypes.object,
   maxHeight: PropTypes.number,
   name: PropTypes.string,
-  native: PropTypes.bool,
+  native: PropTypes.bool
 };
 
 // ----------------------------------------------------------------------
 
-export function RHFMultiSelect({
-  name,
-  chip,
-  label,
-  options,
-  checkbox,
-  placeholder,
-  helperText,
-  sx,
-  ...other
-}) {
+export function RHFMultiSelect({ name, chip, label, options, checkbox, placeholder, helperText, sx, ...other }) {
   const { control } = useFormContext();
 
   const renderValues = (selectedIds) => {
@@ -160,5 +142,5 @@ RHFMultiSelect.propTypes = {
   name: PropTypes.string,
   options: PropTypes.array,
   placeholder: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
