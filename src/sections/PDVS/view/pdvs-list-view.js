@@ -12,14 +12,8 @@ import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 // routes
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hook';
-import { RouterLink } from 'src/routes/components';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
-// _mock
-import { PRODUCT_STOCK_OPTIONS } from 'src/_mock';
-// api
-import { useGetProducts } from 'src/api/product';
 // components
 import { useSettingsContext } from 'src/components/settings';
 import {
@@ -38,11 +32,9 @@ import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
-import { LoadingButton } from '@mui/lab';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteProduct, getAllProducts } from 'src/redux/inventory/productsSlice';
-import { deletePDV, getAllPDVS, switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { deletePDV, getAllPDVS, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
 import PDVSTableRow from '../pdvs-table-row';
 import PDVSTableToolbar from '../pdvs-table-toolbar';
 import PDVSTableFiltersResult from '../pdvs-table-filters-result';
@@ -75,7 +67,6 @@ const defaultFilters = {
 // ----------------------------------------------------------------------
 
 export default function PdvsListView() {
-  const router = useRouter();
 
   const [MUNICIPIO_OPTIONS, SETMUNICIPIO_OPTIONS] = useState([]);
 
@@ -148,16 +139,6 @@ export default function PdvsListView() {
     [table]
   );
 
-  // const handleDeleteRows = useCallback(() => {
-  //   const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-  //   setTableData(deleteRows);
-
-  //   table.onUpdatePageDeleteRows({
-  //     totalRows: tableData.length,
-  //     totalRowsInPage: dataInPage.length,
-  //     totalRowsFiltered: dataFiltered.length
-  //   });
-  // }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
   const handleDeleteRows = useCallback(() => {
     table.selected.forEach((id) => {
@@ -170,7 +151,7 @@ export default function PdvsListView() {
       totalRowsFiltered: dataFiltered.length
     });
     
-  }, [dispatch, table]);
+  }, [dataFiltered.length, dataInPage.length, dispatch, table, tableData.length]);
 
   
   const handleEditRow = useCallback(
@@ -182,9 +163,9 @@ export default function PdvsListView() {
 
   const handleViewRow = useCallback(
     (id) => {
-      router.push(paths.dashboard.product.details(id));
+      dispatch(setSeePDV({ seePDV: true, id }));
     },
-    [router]
+    [dispatch]
   );
 
   const handleResetFilters = useCallback(() => {

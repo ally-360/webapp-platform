@@ -11,14 +11,8 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import parse from 'autosuggest-highlight/parse';
 
-// routes
-import { paths } from 'src/routes/paths';
-// hooks
-import { useResponsive } from 'src/hooks/use-responsive';
-
 // components
 import { useSnackbar } from 'src/components/snackbar';
-import { useRouter } from 'src/routes/hook';
 import FormProvider, { RHFTextField, RHFAutocomplete } from 'src/components/hook-form';
 import {
   Button,
@@ -27,6 +21,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
   Slide,
   useMediaQuery,
   useTheme
@@ -37,9 +32,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import match from 'autosuggest-highlight/match';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import MuiPhoneNumber from 'material-ui-phone-number-2';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { createPDV, getAllPDVS, getPDVById } from 'src/redux/inventory/pdvsSlice';
+import { getAllPDVS, getPDVById, setSeePDV } from 'src/redux/inventory/pdvsSlice';
 
 import RequestService from '../../axios/services/service';
 
@@ -48,14 +42,15 @@ import RequestService from '../../axios/services/service';
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 export default function FormPDVS({ open, handleClose }) {
-  const router = useRouter();
   const dispatch = useDispatch();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const { editId } = useSelector((state) => state.pdvs);
+  const { editId, seePDV } = useSelector((state) => state.pdvs);
   const { locations } = useSelector((state) => state.locations);
+
+  const [editDisabled, setEditDisabled] = useState(false);
 
   const [pdvEdit, setPdvEdit] = useState(null);
 
@@ -121,8 +116,6 @@ export default function FormPDVS({ open, handleClose }) {
     formState: { isSubmitting }
   } = methods;
 
-  const values = watch();
-
   useEffect(() => {
     if (pdvEdit) {
       reset(defaultValues);
@@ -134,6 +127,14 @@ export default function FormPDVS({ open, handleClose }) {
       reset(defaultValues);
     }
   }, [pdvEdit, defaultValues, reset]);
+
+  useEffect(() => {
+    if (seePDV) {
+      setEditDisabled(true);
+    } else {
+      setEditDisabled(false);
+    }
+  }, [seePDV]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -170,7 +171,7 @@ export default function FormPDVS({ open, handleClose }) {
   const [searchQueryMunicipio, setSearchQueryMunicipio] = React.useState('');
 
   const [searchQueryDepartamento, setSearchQueryDepartamento] = React.useState('');
-  const [scroll, setScroll] = React.useState('paper');
+  const [scroll] = React.useState('paper');
 
   const descriptionElementRef = React.useRef(null);
   React.useEffect(() => {
@@ -233,6 +234,18 @@ export default function FormPDVS({ open, handleClose }) {
             <Icon icon="ic:round-store" width={24} height={24} />
             {t('Crear Punto De Venta')}
           </Box>
+          <IconButton
+            aria-label="close"
+            onClick={() => dispatch(handleClose())}
+            sx={{
+              position: 'absolute',
+              right: 10,
+              top: 16,
+              color: theme.palette.primary.main
+            }}
+          >
+            <Icon icon="ic:round-close" width={24} height={24} />
+          </IconButton>
         </DialogTitle>
         <DialogContent
           sx={{
@@ -254,12 +267,18 @@ export default function FormPDVS({ open, handleClose }) {
           <DialogContentText id="alert-dialog-slide-description" ref={descriptionElementRef} tabIndex={-1}>
             <Grid container spacing={3}>
               <Stack spacing={2} mt={1} sx={{ p: 3, width: '100%' }}>
-                <RHFTextField name="name" placeholder="Ej: Almacen Norte" label="Nombre Punto De Venta" />
-                <RHFTextField name="description" label="Descripción" rows={4} />
+                <RHFTextField
+                  disabled={editDisabled}
+                  name="name"
+                  placeholder="Ej: Almacen Norte"
+                  label="Nombre Punto De Venta"
+                />
+                <RHFTextField disabled={editDisabled} name="description" label="Descripción" rows={4} />
                 <RHFAutocomplete
                   name="departamento"
                   placeholder="Ej: Valle del Cauca"
                   fullWidth
+                  disabled={editDisabled}
                   label="Departamento"
                   onInputChange={handleInputDepartamentoChange}
                   isOptionEqualToValue={isOptionEqualToValue}
@@ -297,6 +316,7 @@ export default function FormPDVS({ open, handleClose }) {
                 />
                 <RHFAutocomplete
                   name="municipio"
+                  disabled={editDisabled}
                   fullWidth
                   placeholder="Ej: Cali"
                   label="Municipio"
@@ -336,9 +356,15 @@ export default function FormPDVS({ open, handleClose }) {
                     </Typography>
                   }
                 />
-                <RHFTextField name="address" label="Dirección" placeholder="Ej: Calle 63 # 28 - 35" />
+                <RHFTextField
+                  disabled={editDisabled}
+                  name="address"
+                  label="Dirección"
+                  placeholder="Ej: Calle 63 # 28 - 35"
+                />
                 <RHFPhoneNumber
                   fullWidth
+                  disabled={editDisabled}
                   type="string"
                   variant="outlined"
                   placeholder="Ej: 300 123 4567"
@@ -368,12 +394,30 @@ export default function FormPDVS({ open, handleClose }) {
             }
           }}
         >
-          <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
-            Crear Punto De Venta
-          </LoadingButton>
-          <Button color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
-            Cancelar
-          </Button>
+          {editDisabled ? (
+            <>
+              <LoadingButton
+                startIcon={<Icon icon="ic:round-edit" width={20} height={20} />}
+                color="primary"
+                variant="contained"
+                onClick={() => dispatch(setSeePDV({ seePDV: false, id: pdvEdit.id }))}
+              >
+                Editar
+              </LoadingButton>
+              <Button color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
+                Cerrar
+              </Button>
+            </>
+          ) : (
+            <>
+              <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
+                {pdvEdit ? 'Confirmar edición' : 'Crear Punto De Venta'}
+              </LoadingButton>
+              <Button startIcon color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
+                Cancelar
+              </Button>
+            </>
+          )}
         </DialogActions>
       </FormProvider>
     </Dialog>

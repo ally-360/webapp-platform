@@ -8,7 +8,8 @@ const initialState = {
   success: null,
   pdvsEmpty: false,
   openPopup: false,
-  editId: false
+  editId: false,
+  seePDV: false
 };
 
 const pdvsSlice = createSlice({
@@ -53,11 +54,20 @@ const pdvsSlice = createSlice({
     },
     switchPopup(state, action) {
       state.openPopup = !state.openPopup;
+      state.seePDV = false;
       if (action.payload) {
         state.editId = action.payload;
       } else {
         state.editId = false;
       }
+    },
+    setSeePDV(state, action) {
+      state.seePDV = action.payload.seePDV;
+      state.openPopup = true;
+      state.editId = action.payload.id;
+    },
+    setEditId(state, action) {
+      state.editId = action.payload;
     }
   }
 });
@@ -69,7 +79,9 @@ export const {
   getAllPDVSError,
   deletePDVSuccess,
   deletePDVError,
-  switchPopup
+  switchPopup,
+  setSeePDV,
+  setEditId
 } = pdvsSlice.actions;
 
 export default pdvsSlice.reducer;
