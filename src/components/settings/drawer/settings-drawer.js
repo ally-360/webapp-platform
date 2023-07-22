@@ -30,16 +30,11 @@ export default function SettingsDrawer() {
   const labelStyles = {
     mb: 1.5,
     color: 'text.disabled',
-    fontWeight: 'fontWeightSemiBold',
+    fontWeight: 'fontWeightSemiBold'
   };
 
   const renderHead = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      sx={{ py: 2, pr: 1, pl: 2.5 }}
-    >
+    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 2, pr: 1, pl: 2.5 }}>
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
         Configuración
       </Typography>
@@ -110,7 +105,7 @@ export default function SettingsDrawer() {
         sx={{
           ...labelStyles,
           display: 'inline-flex',
-          alignItems: 'center',
+          alignItems: 'center'
         }}
       >
         Stretch
@@ -145,13 +140,13 @@ export default function SettingsDrawer() {
       open={settings.open}
       onClose={settings.onClose}
       slotProps={{
-        backdrop: { invisible: true },
+        backdrop: { invisible: true }
       }}
       sx={{
         [`& .${drawerClasses.paper}`]: {
           ...paper({ theme, bgcolor: theme.palette.background.default }),
-          width: 280,
-        },
+          width: 280
+        }
       }}
     >
       {renderHead}

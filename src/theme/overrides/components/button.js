@@ -34,37 +34,37 @@ export default function Button(theme) {
           color: isLight ? theme.palette.common.white : theme.palette.grey[800],
           backgroundColor: isLight ? theme.palette.grey[800] : theme.palette.common.white,
           '&:hover': {
-            backgroundColor: isLight ? theme.palette.grey[700] : theme.palette.grey[400],
-          },
+            backgroundColor: isLight ? theme.palette.grey[700] : theme.palette.grey[400]
+          }
         }),
         // OUTLINED
         ...(outlinedVariant && {
           borderColor: alpha(theme.palette.grey[500], 0.32),
           '&:hover': {
-            backgroundColor: theme.palette.action.hover,
-          },
+            backgroundColor: theme.palette.action.hover
+          }
         }),
         // TEXT
         ...(textVariant && {
           '&:hover': {
-            backgroundColor: theme.palette.action.hover,
-          },
+            backgroundColor: theme.palette.action.hover
+          }
         }),
         // SOFT
         ...(softVariant && {
           color: theme.palette.text.primary,
           backgroundColor: alpha(theme.palette.grey[500], 0.08),
           '&:hover': {
-            backgroundColor: alpha(theme.palette.grey[500], 0.24),
-          },
-        }),
+            backgroundColor: alpha(theme.palette.grey[500], 0.24)
+          }
+        })
       }),
       ...(outlinedVariant && {
         '&:hover': {
           borderColor: 'currentColor',
-          boxShadow: '0 0 0 0.5px currentColor',
-        },
-      }),
+          boxShadow: '0 0 0 0.5px currentColor'
+        }
+      })
     };
 
     const colorStyle = COLORS.map((color) => ({
@@ -72,27 +72,27 @@ export default function Button(theme) {
         // CONTAINED
         ...(containedVariant && {
           '&:hover': {
-            boxShadow: theme.customShadows[color],
-          },
+            boxShadow: theme.customShadows[color]
+          }
         }),
         // SOFT
         ...(softVariant && {
           color: theme.palette[color][isLight ? 'dark' : 'light'],
           backgroundColor: alpha(theme.palette[color].main, 0.16),
           '&:hover': {
-            backgroundColor: alpha(theme.palette[color].main, 0.32),
-          },
-        }),
-      }),
+            backgroundColor: alpha(theme.palette[color].main, 0.32)
+          }
+        })
+      })
     }));
 
     const disabledState = {
       [`&.${buttonClasses.disabled}`]: {
         // SOFT
         ...(softVariant && {
-          backgroundColor: theme.palette.action.disabledBackground,
-        }),
-      },
+          backgroundColor: theme.palette.action.disabledBackground
+        })
+      }
     };
 
     const size = {
@@ -103,16 +103,16 @@ export default function Button(theme) {
         paddingRight: 8,
         ...(textVariant && {
           paddingLeft: 4,
-          paddingRight: 4,
-        }),
+          paddingRight: 4
+        })
       }),
       ...(mediumSize && {
         paddingLeft: 12,
         paddingRight: 12,
         ...(textVariant && {
           paddingLeft: 8,
-          paddingRight: 8,
-        }),
+          paddingRight: 8
+        })
       }),
       ...(largeSize && {
         height: 48,
@@ -121,9 +121,9 @@ export default function Button(theme) {
         paddingRight: 16,
         ...(textVariant && {
           paddingLeft: 10,
-          paddingRight: 10,
-        }),
-      }),
+          paddingRight: 10
+        })
+      })
     };
 
     return [defaultStyle, ...colorStyle, disabledState, size];
@@ -133,12 +133,12 @@ export default function Button(theme) {
     MuiButton: {
       defaultProps: {
         color: 'inherit',
-        disableElevation: true,
+        disableElevation: true
       },
 
       styleOverrides: {
-        root: ({ ownerState }) => rootStyles(ownerState),
-      },
-    },
+        root: ({ ownerState }) => rootStyles(ownerState)
+      }
+    }
   };
 }

@@ -1,46 +1,25 @@
-import PropTypes from 'prop-types';
+import PropTypes, { number } from 'prop-types';
 import * as Yup from 'yup';
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
-import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import parse from 'autosuggest-highlight/parse';
+
 // routes
 import { paths } from 'src/routes/paths';
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
-// _mock
-import {
-  _tags,
-  PRODUCT_SIZE_OPTIONS,
-  PRODUCT_GENDER_OPTIONS,
-  PRODUCT_COLOR_NAME_OPTIONS,
-  PRODUCT_CATEGORY_GROUP_OPTIONS
-} from 'src/_mock';
+
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import { useRouter } from 'src/routes/hook';
-import FormProvider, {
-  RHFSelect,
-  RHFEditor,
-  RHFUpload,
-  RHFSwitch,
-  RHFTextField,
-  RHFMultiSelect,
-  RHFAutocomplete,
-  RHFMultiCheckbox
-} from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFAutocomplete } from 'src/components/hook-form';
 import {
   Button,
   Dialog,
@@ -48,72 +27,89 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  IconButton,
-  Slide
+  Slide,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
+import match from 'autosuggest-highlight/match';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import MuiPhoneNumber from 'material-ui-phone-number-2';
+import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
+import { createPDV, getAllPDVS, getPDVById } from 'src/redux/inventory/pdvsSlice';
+
+import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-export default function FormPDVS({ currentProduct, open, handleClose }) {
+export default function FormPDVS({ open, handleClose }) {
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  const mdUp = useResponsive('up', 'md');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const { editId } = useSelector((state) => state.pdvs);
+  const { locations } = useSelector((state) => state.locations);
+
+  const [pdvEdit, setPdvEdit] = useState(null);
+
+  const getPdvInfo = React.useCallback(async () => {
+    const resp = await dispatch(getPDVById(editId));
+    const municipio = resp.location;
+    const departamento = locations.find((dep) => dep.towns.find((m) => m.id === municipio.id));
+    const pdv = {
+      ...resp,
+      municipio,
+      departamento
+    };
+    setPdvEdit(pdv);
+  }, [editId, dispatch, setPdvEdit, locations]);
+
+  useEffect(() => {
+    if (editId) {
+      getPdvInfo();
+    } else {
+      setPdvEdit(false);
+    }
+  }, [editId, dispatch, setPdvEdit, getPdvInfo]);
 
   const { t } = useTranslation();
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [includeTaxes, setIncludeTaxes] = useState(false);
-
-  const NewProductSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    images: Yup.array().min(1, 'Images is required'),
-    tags: Yup.array().min(2, 'Must have at least 2 tags'),
-    category: Yup.string().required('Category is required'),
-    price: Yup.number().moreThan(0, 'Price should not be $0.00'),
-    description: Yup.string().required('Description is required'),
-    // not required
-    taxes: Yup.number(),
-    newLabel: Yup.object().shape({
-      enabled: Yup.boolean(),
-      content: Yup.string()
-    }),
-    saleLabel: Yup.object().shape({
-      enabled: Yup.boolean(),
-      content: Yup.string()
-    })
+  const NewPDVSchema = Yup.object().shape({
+    name: Yup.string().required('Nombre es requerido'),
+    description: Yup.string().required('Descripción es requerida'),
+    departamento: Yup.object().required('Departamento es requerido'),
+    municipio: Yup.object().required('Municipio es requerido'),
+    address: Yup.string().required('Dirección es requerida'),
+    phone: Yup.string().required('Teléfono es requerido'),
+    main: Yup.boolean().optional()
   });
 
   const defaultValues = useMemo(
     () => ({
-      name: currentProduct?.name || '',
-      description: currentProduct?.description || '',
-      subDescription: currentProduct?.subDescription || '',
-      images: currentProduct?.images || [],
-      //
-      code: currentProduct?.code || '',
-      sku: currentProduct?.sku || '',
-      price: currentProduct?.price || 0,
-      quantity: currentProduct?.quantity || 0,
-      priceSale: currentProduct?.priceSale || 0,
-      tags: currentProduct?.tags || [],
-      taxes: currentProduct?.taxes || 0,
-      gender: currentProduct?.gender || '',
-      category: currentProduct?.category || '',
-      colors: currentProduct?.colors || [],
-      sizes: currentProduct?.sizes || [],
-      newLabel: currentProduct?.newLabel || { enabled: false, content: '' },
-      saleLabel: currentProduct?.saleLabel || { enabled: false, content: '' }
+      name: pdvEdit?.name || '',
+      description: pdvEdit?.description || '',
+      departamento: pdvEdit?.departamento || '',
+      municipio: pdvEdit?.municipio || '',
+      address: pdvEdit?.address || '',
+      phone: pdvEdit?.phone || '',
+      // TODO: extraer el company id del usuario logueado
+      company: { id: '1b02d2b6-c354-4a74-9e48-5162af036b36' },
+      main: pdvEdit?.main || false
     }),
-    [currentProduct]
+    [pdvEdit]
   );
 
   const methods = useForm({
-    resolver: yupResolver(NewProductSchema),
+    resolver: yupResolver(NewPDVSchema),
     defaultValues
   });
 
@@ -128,64 +124,52 @@ export default function FormPDVS({ currentProduct, open, handleClose }) {
   const values = watch();
 
   useEffect(() => {
-    if (currentProduct) {
+    if (pdvEdit) {
       reset(defaultValues);
     }
-  }, [currentProduct, defaultValues, reset]);
+  }, [pdvEdit, defaultValues, reset]);
 
   useEffect(() => {
-    if (includeTaxes) {
-      setValue('taxes', 0);
-    } else {
-      setValue('taxes', currentProduct?.taxes || 0);
+    if (!pdvEdit) {
+      reset(defaultValues);
     }
-  }, [currentProduct?.taxes, includeTaxes, setValue]);
+  }, [pdvEdit, defaultValues, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      data.location = { id: data.municipio.id };
+      delete data.municipio;
+      delete data.departamento;
+      if (pdvEdit) {
+        await RequestService.editPDV({ id: pdvEdit.id, databody: data });
+      } else {
+        await RequestService.createPDV(data);
+      }
+      dispatch(getAllPDVS());
       reset();
-      enqueueSnackbar(currentProduct ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.product.root);
-      console.info('DATA', data);
+      enqueueSnackbar(
+        pdvEdit ? t(`Punto De Venta ${data.name} editado correctamente`) : t(`Punto De Venta ${data.name} Creado`),
+        {
+          variant: 'success'
+        }
+      );
+      dispatch(handleClose());
     } catch (error) {
-      console.error(error);
+      enqueueSnackbar(t('No se ha podido crear el punto de venta, verifica los datos nuevamente'), {
+        variant: 'error'
+      });
+      console.log(error);
     }
   });
 
-  const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const files = values.images || [];
-
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file)
-        })
-      );
-
-      setValue('images', [...files, ...newFiles], { shouldValidate: true });
-    },
-    [setValue, values.images]
-  );
-
-  const handleRemoveFile = useCallback(
-    (inputFile) => {
-      const filtered = values.images && values.images?.filter((file) => file !== inputFile);
-      setValue('images', filtered);
-    },
-    [setValue, values.images]
-  );
-
-  const handleRemoveAllFiles = useCallback(() => {
-    setValue('images', []);
-  }, [setValue]);
-
-  const handleChangeIncludeTaxes = useCallback((event) => {
-    setIncludeTaxes(event.target.checked);
-  }, []);
-
   // ----------------------------------------------------------------------
 
+  useEffect(() => {
+    dispatch(getAllMunicipios());
+  }, [dispatch]);
+  const [searchQueryMunicipio, setSearchQueryMunicipio] = React.useState('');
+
+  const [searchQueryDepartamento, setSearchQueryDepartamento] = React.useState('');
   const [scroll, setScroll] = React.useState('paper');
 
   const descriptionElementRef = React.useRef(null);
@@ -198,246 +182,202 @@ export default function FormPDVS({ currentProduct, open, handleClose }) {
     }
   }, [open]);
 
-  const renderDetails = (
-    <Grid xs={12} md={8}>
-      <Stack spacing={3} sx={{ p: 3 }}>
-        <RHFTextField name="name" label="Nombre Punto De Venta" />
+  const [municipios, setMunicipios] = useState([]);
+  const departmentValue = watch('departamento');
 
-        <RHFTextField name="subDescription" label="Sub Description" multiline rows={4} />
+  const isOptionEqualToValue = (option, value = '') => {
+    if (option && value) {
+      return option.id === value.id && option.name === value.name;
+    }
+    return false;
+  };
 
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Content</Typography>
-          <RHFEditor simple name="description" />
-        </Stack>
+  useEffect(() => {
+    if (departmentValue) {
+      setMunicipios(departmentValue.towns);
+      const selectedMunicipio = watch('municipio');
+      if (selectedMunicipio) {
+        const municipioExist = departmentValue.towns.filter((municipio) => municipio.name === selectedMunicipio.name);
+        if (municipioExist.length === 0) {
+          setValue('municipio', '');
+          setSearchQueryMunicipio('');
+        }
+      }
+    } else {
+      setMunicipios([]);
+      setValue('municipio', null);
+      setSearchQueryMunicipio('');
+    }
+  }, [departmentValue, locations, setValue, watch]);
 
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2">Images</Typography>
-          <RHFUpload
-            multiple
-            thumbnail
-            name="images"
-            maxSize={3145728}
-            onDrop={handleDrop}
-            onRemove={handleRemoveFile}
-            onRemoveAll={handleRemoveAllFiles}
-            onUpload={() => console.info('ON UPLOAD')}
-          />
-        </Stack>
-      </Stack>
-    </Grid>
-  );
+  const handleInputMunicipioChange = (event, value) => {
+    setSearchQueryMunicipio(value);
+  };
 
-  const renderProperties = (
-    <Grid xs={12} md={8}>
-      <Card>
-        {!mdUp && <CardHeader title="Properties" />}
-
-        <Stack spacing={3} sx={{ p: 3 }}>
-          <Box
-            columnGap={2}
-            rowGap={3}
-            display="grid"
-            gridTemplateColumns={{
-              xs: 'repeat(1, 1fr)',
-              md: 'repeat(2, 1fr)'
-            }}
-          >
-            <RHFTextField name="code" label="Product Code" />
-
-            <RHFTextField name="sku" label="Product SKU" />
-
-            <RHFTextField
-              name="quantity"
-              label="Quantity"
-              placeholder="0"
-              type="number"
-              InputLabelProps={{ shrink: true }}
-            />
-
-            <RHFSelect native name="category" label="Category" InputLabelProps={{ shrink: true }}>
-              {PRODUCT_CATEGORY_GROUP_OPTIONS.map((category) => (
-                <optgroup key={category.group} label={category.group}>
-                  {category.classify.map((classify) => (
-                    <option key={classify} value={classify}>
-                      {classify}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </RHFSelect>
-
-            <RHFMultiSelect checkbox name="colors" label="Colors" options={PRODUCT_COLOR_NAME_OPTIONS} />
-
-            <RHFMultiSelect checkbox name="sizes" label="Sizes" options={PRODUCT_SIZE_OPTIONS} />
-          </Box>
-
-          <RHFAutocomplete
-            name="tags"
-            label="Tags"
-            placeholder="+ Tags"
-            multiple
-            freeSolo
-            options={_tags.map((option) => option)}
-            getOptionLabel={(option) => option}
-            renderOption={(props, option) => (
-              <li {...props} key={option}>
-                {option}
-              </li>
-            )}
-            renderTags={(selected, getTagProps) =>
-              selected.map((option, index) => (
-                <Chip
-                  {...getTagProps({ index })}
-                  key={option}
-                  label={option}
-                  size="small"
-                  color="info"
-                  variant="soft"
-                />
-              ))
-            }
-          />
-
-          <Stack spacing={1}>
-            <Typography variant="subtitle2">Gender</Typography>
-            <RHFMultiCheckbox row name="gender" spacing={2} options={PRODUCT_GENDER_OPTIONS} />
-          </Stack>
-
-          <Divider sx={{ borderStyle: 'dashed' }} />
-
-          <Stack direction="row" alignItems="center" spacing={3}>
-            <RHFSwitch name="saleLabel.enabled" label={null} sx={{ m: 0 }} />
-            <RHFTextField name="saleLabel.content" label="Sale Label" fullWidth disabled={!values.saleLabel.enabled} />
-          </Stack>
-
-          <Stack direction="row" alignItems="center" spacing={3}>
-            <RHFSwitch name="newLabel.enabled" label={null} sx={{ m: 0 }} />
-            <RHFTextField name="newLabel.content" label="New Label" fullWidth disabled={!values.newLabel.enabled} />
-          </Stack>
-        </Stack>
-      </Card>
-    </Grid>
-  );
-
-  const renderPricing = (
-    <Grid xs={12} md={8}>
-      <Card>
-        {!mdUp && <CardHeader title="Pricing" />}
-
-        <Stack spacing={3} sx={{ p: 3 }}>
-          <RHFTextField
-            name="price"
-            label="Regular Price"
-            placeholder="0.00"
-            type="number"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Box component="span" sx={{ color: 'text.disabled' }}>
-                    $
-                  </Box>
-                </InputAdornment>
-              )
-            }}
-          />
-
-          <RHFTextField
-            name="priceSale"
-            label="Sale Price"
-            placeholder="0.00"
-            type="number"
-            InputLabelProps={{ shrink: true }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Box component="span" sx={{ color: 'text.disabled' }}>
-                    $
-                  </Box>
-                </InputAdornment>
-              )
-            }}
-          />
-
-          <FormControlLabel
-            control={<Switch checked={includeTaxes} onChange={handleChangeIncludeTaxes} />}
-            label="Price includes taxes"
-          />
-
-          {!includeTaxes && (
-            <RHFTextField
-              name="taxes"
-              label="Tax (%)"
-              placeholder="0.00"
-              type="number"
-              InputLabelProps={{ shrink: true }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Box component="span" sx={{ color: 'text.disabled' }}>
-                      %
-                    </Box>
-                  </InputAdornment>
-                )
-              }}
-            />
-          )}
-        </Stack>
-      </Card>
-    </Grid>
-  );
-
-  const renderActions = (
-    <>
-      {mdUp && <Grid md={4} />}
-      <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
-        <FormControlLabel control={<Switch defaultChecked />} label="Publish" sx={{ flexGrow: 1, pl: 3 }} />
-
-        <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting}>
-          {!currentProduct ? 'Create Product' : 'Save Changes'}
-        </LoadingButton>
-      </Grid>
-    </>
-  );
+  const handleInputDepartamentoChange = (event, value) => {
+    setSearchQueryDepartamento(value);
+  };
 
   return (
     <Dialog
       open={open}
       TransitionComponent={Transition}
       keepMounted
-      onClose={handleClose}
-      aria-describedby="alert-dialog-slide-description"
+      maxWidth="sm"
+      fullWidth
+      onClose={() => dispatch(handleClose())}
     >
-      <DialogTitle id="scroll-dialog-title">
-        <Box gap={1} sx={{ display: 'flex', alignItems: 'center' }}>
-          <Icon icon="ic:round-store" width={24} height={24} />
-          {t('Crear Punto De Venta')}
-        </Box>
-      </DialogTitle>
-
-      <DialogContent dividers={scroll === 'paper'}>
-        <DialogContentText id="alert-dialog-slide-description" ref={descriptionElementRef} tabIndex={-1}>
-          <FormProvider methods={methods} onSubmit={onSubmit}>
+      <FormProvider methods={methods} onSubmit={onSubmit}>
+        <DialogTitle id="scroll-dialog-title" boxShadow={2} sx={{ padding: '23px  40px 18px 40px!important' }}>
+          <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Icon icon="ic:round-store" width={24} height={24} />
+            {t('Crear Punto De Venta')}
+          </Box>
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            // Estilos para el scrollbar
+            '&::-webkit-scrollbar': {
+              width: '8px',
+              background: 'transparent'
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: '#888',
+              borderRadius: '0px'
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: '#555'
+            }
+          }}
+          dividers={scroll === 'paper'}
+        >
+          <DialogContentText id="alert-dialog-slide-description" ref={descriptionElementRef} tabIndex={-1}>
             <Grid container spacing={3}>
-              {renderDetails}
+              <Stack spacing={2} mt={1} sx={{ p: 3, width: '100%' }}>
+                <RHFTextField name="name" placeholder="Ej: Almacen Norte" label="Nombre Punto De Venta" />
+                <RHFTextField name="description" label="Descripción" rows={4} />
+                <RHFAutocomplete
+                  name="departamento"
+                  placeholder="Ej: Valle del Cauca"
+                  fullWidth
+                  label="Departamento"
+                  onInputChange={handleInputDepartamentoChange}
+                  isOptionEqualToValue={isOptionEqualToValue}
+                  getOptionLabel={(option) => (option.name ? option.name : '')}
+                  options={locations}
+                  renderOption={(props, option) => {
+                    const matches = match(option.name, searchQueryDepartamento);
+                    const parts = parse(option.name, matches);
 
-              {renderProperties}
+                    return (
+                      <li {...props}>
+                        <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.primary">
+                            {parts.map((part, index) => (
+                              <span
+                                key={index}
+                                style={{
+                                  fontWeight: part.highlight ? 700 : 400,
+                                  color: part.highlight ? theme.palette.primary.main : 'inherit'
+                                }}
+                              >
+                                {part.text}
+                              </span>
+                            ))}
+                          </Typography>
+                        </Box>
+                      </li>
+                    );
+                  }}
+                  noOptionsText={
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
+                      No hay resultados para {searchQueryMunicipio}
+                    </Typography>
+                  }
+                />
+                <RHFAutocomplete
+                  name="municipio"
+                  fullWidth
+                  placeholder="Ej: Cali"
+                  label="Municipio"
+                  onInputChange={handleInputMunicipioChange}
+                  isOptionEqualToValue={isOptionEqualToValue}
+                  getOptionLabel={(option) => (option.name ? option.name : '')}
+                  options={municipios}
+                  renderOption={(props, option) => {
+                    const matches = match(option.name, searchQueryMunicipio);
+                    const parts = parse(option.name, matches);
 
-              {renderPricing}
-
-              {renderActions}
+                    return (
+                      <li {...props}>
+                        <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" color="text.primary">
+                            {parts.map((part, index) => (
+                              <span
+                                key={index}
+                                style={{
+                                  fontWeight: part.highlight ? 700 : 400,
+                                  color: part.highlight ? theme.palette.primary.main : 'inherit'
+                                }}
+                              >
+                                {part.text}
+                              </span>
+                            ))}
+                          </Typography>
+                        </Box>
+                      </li>
+                    );
+                  }}
+                  noOptionsText={
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
+                      {municipios.length === 0
+                        ? 'Seleciona un departamento'
+                        : `No hay resultados para ${searchQueryMunicipio}`}
+                    </Typography>
+                  }
+                />
+                <RHFTextField name="address" label="Dirección" placeholder="Ej: Calle 63 # 28 - 35" />
+                <RHFPhoneNumber
+                  fullWidth
+                  type="string"
+                  variant="outlined"
+                  placeholder="Ej: 300 123 4567"
+                  name="phone"
+                  defaultCountry="co"
+                  label="teléfono"
+                  countryCodeEditable={false}
+                  onlyCountries={['co']}
+                />
+              </Stack>
             </Grid>
-          </FormProvider>
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Disagree</Button>
-        <Button onClick={handleClose}>Agree</Button>
-      </DialogActions>
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions
+          boxShadow={2}
+          sx={{
+            padding: '20px 35px 15px 40px!important',
+            display: 'flex',
+            flexWrap: isMobile ? 'wrap' : 'nowrap',
+            flexDirection: isMobile ? 'column' : 'row',
+            '& > button': {
+              flexGrow: isMobile ? 1 : 0,
+              minWidth: isMobile ? '100%' : 'auto',
+              marginBottom: isMobile ? theme.spacing(1) : 0,
+              marginLeft: isMobile ? '0 !important' : theme.spacing(1)
+            }
+          }}
+        >
+          <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
+            Crear Punto De Venta
+          </LoadingButton>
+          <Button color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
+            Cancelar
+          </Button>
+        </DialogActions>
+      </FormProvider>
     </Dialog>
   );
 }
 
-FormPDVS.propTypes = {
-  currentProduct: PropTypes.object
-};
+FormPDVS.propTypes = { open: PropTypes.bool, handleClose: PropTypes.func };

@@ -31,7 +31,6 @@ import { Icon } from '@iconify/react';
 export default function PDVSTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow }) {
   const { name, address, location, main, phone } = row;
 
-  console.log(onSelectRow);
   const { t } = useTranslation();
 
   const confirm = useBoolean();

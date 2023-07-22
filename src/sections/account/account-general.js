@@ -19,12 +19,7 @@ import { countries } from 'src/assets/data';
 // components
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, {
-  RHFSwitch,
-  RHFTextField,
-  RHFUploadAvatar,
-  RHFAutocomplete,
-} from 'src/components/hook-form';
+import FormProvider, { RHFSwitch, RHFTextField, RHFUploadAvatar, RHFAutocomplete } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -45,7 +40,7 @@ export default function AccountGeneral() {
     zipCode: Yup.string().required('Zip code is required'),
     about: Yup.string().required('About is required'),
     // not required
-    isPublic: Yup.boolean(),
+    isPublic: Yup.boolean()
   });
 
   const defaultValues = {
@@ -59,18 +54,18 @@ export default function AccountGeneral() {
     city: user?.city || '',
     zipCode: user?.zipCode || '',
     about: user?.about || '',
-    isPublic: user?.isPublic || false,
+    isPublic: user?.isPublic || false
   };
 
   const methods = useForm({
     resolver: yupResolver(UpdateUserSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -88,7 +83,7 @@ export default function AccountGeneral() {
       const file = acceptedFiles[0];
 
       const newFile = Object.assign(file, {
-        preview: URL.createObjectURL(file),
+        preview: URL.createObjectURL(file)
       });
 
       if (file) {
@@ -115,7 +110,7 @@ export default function AccountGeneral() {
                     mx: 'auto',
                     display: 'block',
                     textAlign: 'center',
-                    color: 'text.disabled',
+                    color: 'text.disabled'
                   }}
                 >
                   Allowed *.jpeg, *.jpg, *.png, *.gif
@@ -124,12 +119,7 @@ export default function AccountGeneral() {
               }
             />
 
-            <RHFSwitch
-              name="isPublic"
-              labelPlacement="start"
-              label="Public Profile"
-              sx={{ mt: 5 }}
-            />
+            <RHFSwitch name="isPublic" labelPlacement="start" label="Public Profile" sx={{ mt: 5 }} />
 
             <Button variant="soft" color="error" sx={{ mt: 3 }}>
               Delete User
@@ -145,7 +135,7 @@ export default function AccountGeneral() {
               display="grid"
               gridTemplateColumns={{
                 xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
+                sm: 'repeat(2, 1fr)'
               }}
             >
               <RHFTextField name="displayName" label="Name" />
@@ -159,9 +149,7 @@ export default function AccountGeneral() {
                 options={countries.map((country) => country.label)}
                 getOptionLabel={(option) => option}
                 renderOption={(props, option) => {
-                  const { code, label, phone } = countries.filter(
-                    (country) => country.label === option
-                  )[0];
+                  const { code, label, phone } = countries.filter((country) => country.label === option)[0];
 
                   if (!label) {
                     return null;
@@ -169,12 +157,7 @@ export default function AccountGeneral() {
 
                   return (
                     <li {...props} key={label}>
-                      <Iconify
-                        key={label}
-                        icon={`circle-flags:${code.toLowerCase()}`}
-                        width={28}
-                        sx={{ mr: 1 }}
-                      />
+                      <Iconify key={label} icon={`circle-flags:${code.toLowerCase()}`} width={28} sx={{ mr: 1 }} />
                       {label} ({code}) +{phone}
                     </li>
                   );

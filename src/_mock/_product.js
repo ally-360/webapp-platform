@@ -70,10 +70,5 @@ export const PRODUCT_SORT_OPTIONS = [
   { value: 'priceAsc', label: 'Price: Low - High' }
 ];
 
-export const PRODUCT_CATEGORY_GROUP_OPTIONS = [
-  { group: 'Clothing', classify: ['Shirts', 'T-shirts', 'Jeans', 'Leather', 'Accessories'] },
-  { group: 'Tailored', classify: ['Suits', 'Blazers', 'Trousers', 'Waistcoats', 'Apparel'] },
-  { group: 'Accessories', classify: ['Shoes', 'Backpacks and bags', 'Bracelets', 'Face masks'] }
-];
-
+export const PRODUCT_CATEGORY_GROUP_OPTIONS = [{ label: 'Shirts' }, 'T-shirts', 'Jeans', 'Leather', 'Accessories'];
 export const PRODUCT_CHECKOUT_STEPS = ['Cart', 'Billing & address', 'Payment'];

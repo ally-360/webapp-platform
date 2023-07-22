@@ -31,7 +31,7 @@ function createShadow(color) {
     secondary: `0 8px 16px 0 ${alpha(palette.secondary.main, 0.24)}`,
     success: `0 8px 16px 0 ${alpha(palette.success.main, 0.24)}`,
     warning: `0 8px 16px 0 ${alpha(palette.warning.main, 0.24)}`,
-    error: `0 8px 16px 0 ${alpha(palette.error.main, 0.24)}`,
+    error: `0 8px 16px 0 ${alpha(palette.error.main, 0.24)}`
   };
 }
 

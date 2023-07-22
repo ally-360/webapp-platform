@@ -28,7 +28,7 @@ export function SettingsProvider({ children, defaultSettings }) {
     (name, value) => {
       setSettings((prevState) => ({
         ...prevState,
-        [name]: value,
+        [name]: value
       }));
     },
     [setSettings]
@@ -70,18 +70,9 @@ export function SettingsProvider({ children, defaultSettings }) {
       // Drawer
       open: openDrawer,
       onToggle: onToggleDrawer,
-      onClose: onCloseDrawer,
+      onClose: onCloseDrawer
     }),
-    [
-      onReset,
-      onUpdate,
-      settings,
-      canReset,
-      openDrawer,
-      onCloseDrawer,
-      onToggleDrawer,
-      onChangeDirectionByLang,
-    ]
+    [onReset, onUpdate, settings, canReset, openDrawer, onCloseDrawer, onToggleDrawer, onChangeDirectionByLang]
   );
 
   return <SettingsContext.Provider value={memoizedValue}>{children}</SettingsContext.Provider>;
@@ -89,5 +80,5 @@ export function SettingsProvider({ children, defaultSettings }) {
 
 SettingsProvider.propTypes = {
   children: PropTypes.node,
-  defaultSettings: PropTypes.object,
+  defaultSettings: PropTypes.object
 };

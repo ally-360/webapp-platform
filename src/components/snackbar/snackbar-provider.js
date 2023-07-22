@@ -24,7 +24,7 @@ export default function SnackbarProvider({ children }) {
       ref={notistackRef}
       maxSnack={5}
       preventDuplicate
-      autoHideDuration={3000}
+      autoHideDuration={5000}
       TransitionComponent={isRTL ? Collapse : undefined}
       variant="success" // Set default variant
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -48,14 +48,14 @@ export default function SnackbarProvider({ children }) {
           <StyledIcon color="error">
             <Iconify icon="solar:danger-bold" width={24} />
           </StyledIcon>
-        ),
+        )
       }}
       Components={{
         default: StyledNotistack,
         info: StyledNotistack,
         success: StyledNotistack,
         warning: StyledNotistack,
-        error: StyledNotistack,
+        error: StyledNotistack
       }}
       // with close as default
       action={(snackbarId) => (
@@ -70,5 +70,5 @@ export default function SnackbarProvider({ children }) {
 }
 
 SnackbarProvider.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

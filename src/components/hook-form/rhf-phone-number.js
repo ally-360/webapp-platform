@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
-import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material';
 import { useState } from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import MuiPhoneNumber from 'material-ui-phone-number-2';
 // ----------------------------------------------------------------------
 
-export default function RHFTextField({ name, helperText, type, ...other }) {
+export default function RHFPhoneNumber({ name, helperText, type, ...other }) {
   const { control } = useFormContext();
   const theme = useTheme(); // Obtiene el tema actual de Material-UI
   const [isFocused, setIsFocused] = useState(false); // Estado para rastrear el focus
@@ -16,19 +17,15 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
-        <TextField
+        <MuiPhoneNumber
           {...field}
           fullWidth
           color="primary"
           variant="outlined"
-          type={type}
-          value={type === 'number' && field.value === 0 ? '' : field.value}
+          countryCodeEditable={false}
+          value={field.value === 0 ? '' : field.value}
           onChange={(event) => {
-            if (type === 'number') {
-              field.onChange(Number(event.target.value));
-            } else {
-              field.onChange(event.target.value);
-            }
+            field.onChange(event);
           }}
           error={!!error}
           helperText={error ? error?.message : helperText}
@@ -54,7 +51,7 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
   );
 }
 
-RHFTextField.propTypes = {
+RHFPhoneNumber.propTypes = {
   helperText: PropTypes.object,
   name: PropTypes.string,
   type: PropTypes.string

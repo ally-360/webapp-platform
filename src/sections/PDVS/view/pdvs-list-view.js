@@ -42,7 +42,7 @@ import { LoadingButton } from '@mui/lab';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteProduct, getAllProducts } from 'src/redux/inventory/productsSlice';
-import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
+import { deletePDV, getAllPDVS, switchPopup } from 'src/redux/inventory/pdvsSlice';
 import PDVSTableRow from '../pdvs-table-row';
 import PDVSTableToolbar from '../pdvs-table-toolbar';
 import PDVSTableFiltersResult from '../pdvs-table-filters-result';
@@ -97,7 +97,9 @@ export default function PdvsListView() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+
     dispatch(getAllPDVS());
+    
   }, [dispatch]);
 
   useEffect(() => {
@@ -109,9 +111,6 @@ export default function PdvsListView() {
     }
   }, [pdvs]);
 
-  useEffect(() => {
-    console.log('pdvs', pdvs);
-  }, [pdvs]);
 
   const confirm = useBoolean();
 
@@ -132,8 +131,6 @@ export default function PdvsListView() {
     table.page * table.rowsPerPage + table.rowsPerPage
   );
 
-  console.log('dataFiltered', dataFiltered);
-
   const denseHeight = table.dense ? 60 : 80;
 
   const canReset = !isEqual(defaultFilters, filters);
@@ -151,22 +148,36 @@ export default function PdvsListView() {
     [table]
   );
 
+  // const handleDeleteRows = useCallback(() => {
+  //   const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+  //   setTableData(deleteRows);
+
+  //   table.onUpdatePageDeleteRows({
+  //     totalRows: tableData.length,
+  //     totalRowsInPage: dataInPage.length,
+  //     totalRowsFiltered: dataFiltered.length
+  //   });
+  // }, [dataFiltered.length, dataInPage.length, table, tableData]);
+
   const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-    setTableData(deleteRows);
+    table.selected.forEach((id) => {
+      dispatch(deletePDV(id));
+    });
 
     table.onUpdatePageDeleteRows({
       totalRows: tableData.length,
       totalRowsInPage: dataInPage.length,
       totalRowsFiltered: dataFiltered.length
     });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+    
+  }, [dispatch, table]);
 
+  
   const handleEditRow = useCallback(
     (id) => {
-      router.push(paths.dashboard.product.edit(id));
+      dispatch(switchPopup(id));
     },
-    [router]
+    [dispatch]
   );
 
   const handleViewRow = useCallback(
@@ -185,22 +196,16 @@ export default function PdvsListView() {
 
   const handleDeleteRow = useCallback(
     (id) => {
-      dispatch(deleteProduct(id));
+      dispatch(deletePDV(id));
     },
     [ dispatch ]
   );
 
   // Popup create punto de venta
 
-  const [openCreatePDV, setOpenCreatePDV] = useState(false);
+  
+  const { openPopup } = useSelector((state) => state.pdvs);
 
-  const handleClickOpenCreatePDV = () => {
-    setOpenCreatePDV(true);
-  };
-
-  const handleCloseCreatePDV = () => {
-    setOpenCreatePDV(false);
-  };
 
   return (
     <>
@@ -221,7 +226,7 @@ export default function PdvsListView() {
           ]}
           action={
             <Button
-              onClick={handleClickOpenCreatePDV}
+              onClick={() => dispatch(switchPopup())}
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
@@ -359,8 +364,8 @@ export default function PdvsListView() {
         }
       />
       <FormPDVS
-      open={openCreatePDV}
-      handleClose={handleCloseCreatePDV}      
+      open={openPopup}
+      handleClose={switchPopup}      
       />
     </>
   );

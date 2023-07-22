@@ -253,7 +253,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                 InputLabelProps={{ shrink: true }}
               />
 
-              <RHFSelect native name="category" label="Category" InputLabelProps={{ shrink: true }}>
+              {/* <RHFSelect native name="category" label="Category" InputLabelProps={{ shrink: true }}>
                 {PRODUCT_CATEGORY_GROUP_OPTIONS.map((category) => (
                   <optgroup key={category.group} label={category.group}>
                     {category.classify.map((classify) => (
@@ -263,7 +263,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                     ))}
                   </optgroup>
                 ))}
-              </RHFSelect>
+              </RHFSelect> */}
 
               <RHFMultiSelect checkbox name="colors" label="Colors" options={PRODUCT_COLOR_NAME_OPTIONS} />
 

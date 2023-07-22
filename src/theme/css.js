@@ -13,8 +13,8 @@ export const paper = ({ theme, bgcolor, dropdown }) => ({
     opacity: 0.9,
     color: theme.palette.background.paper,
     ...(!!bgcolor && {
-      color: bgcolor,
-    }),
+      color: bgcolor
+    })
   }),
   backgroundImage: 'url(/assets/cyan-blur.png), url(/assets/red-blur.png)',
   backgroundRepeat: 'no-repeat, no-repeat',
@@ -23,8 +23,8 @@ export const paper = ({ theme, bgcolor, dropdown }) => ({
   ...(dropdown && {
     padding: theme.spacing(0.5),
     boxShadow: theme.customShadows.dropdown,
-    borderRadius: theme.shape.borderRadius * 1.25,
-  }),
+    borderRadius: theme.shape.borderRadius * 1.25
+  })
 });
 
 // ----------------------------------------------------------------------
@@ -34,29 +34,29 @@ export const menuItem = (theme) => ({
   padding: theme.spacing(0.75, 1),
   borderRadius: theme.shape.borderRadius * 0.75,
   '&:not(:last-of-type)': {
-    marginBottom: 4,
+    marginBottom: 4
   },
   [`&.${menuItemClasses.selected}`]: {
     fontWeight: theme.typography.fontWeightSemiBold,
     backgroundColor: theme.palette.action.selected,
     '&:hover': {
-      backgroundColor: theme.palette.action.hover,
-    },
+      backgroundColor: theme.palette.action.hover
+    }
   },
   [`& .${checkboxClasses.root}`]: {
     padding: theme.spacing(0.5),
     marginLeft: theme.spacing(-0.5),
-    marginRight: theme.spacing(0.5),
+    marginRight: theme.spacing(0.5)
   },
   [`&.${autocompleteClasses.option}[aria-selected="true"]`]: {
     backgroundColor: theme.palette.action.selected,
     '&:hover': {
-      backgroundColor: theme.palette.action.hover,
-    },
+      backgroundColor: theme.palette.action.hover
+    }
   },
   [`&+.${dividerClasses.root}`]: {
-    margin: theme.spacing(0.5, 0),
-  },
+    margin: theme.spacing(0.5, 0)
+  }
 });
 
 // ----------------------------------------------------------------------
@@ -81,15 +81,15 @@ export function bgBlur(props) {
         height: '100%',
         backdropFilter: `blur(${blur}px)`,
         WebkitBackdropFilter: `blur(${blur}px)`,
-        backgroundColor: alpha(color, opacity),
-      },
+        backgroundColor: alpha(color, opacity)
+      }
     };
   }
 
   return {
     backdropFilter: `blur(${blur}px)`,
     WebkitBackdropFilter: `blur(${blur}px)`,
-    backgroundColor: alpha(color, opacity),
+    backgroundColor: alpha(color, opacity)
   };
 }
 
@@ -104,17 +104,15 @@ export function bgGradient(props) {
 
   if (imgUrl) {
     return {
-      background: `linear-gradient(${direction}, ${startColor || color}, ${
-        endColor || color
-      }), url(${imgUrl})`,
+      background: `linear-gradient(${direction}, ${startColor || color}, ${endColor || color}), url(${imgUrl})`,
       backgroundSize: 'cover',
       backgroundRepeat: 'no-repeat',
-      backgroundPosition: 'center center',
+      backgroundPosition: 'center center'
     };
   }
 
   return {
-    background: `linear-gradient(${direction}, ${startColor}, ${endColor})`,
+    background: `linear-gradient(${direction}, ${startColor}, ${endColor})`
   };
 }
 
@@ -124,7 +122,7 @@ export function textGradient(value) {
   return {
     background: `-webkit-linear-gradient(${value})`,
     WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    WebkitTextFillColor: 'transparent'
   };
 }
 
@@ -136,15 +134,15 @@ export const hideScroll = {
     scrollbarWidth: 'none',
     overflowX: 'scroll',
     '&::-webkit-scrollbar': {
-      display: 'none',
-    },
+      display: 'none'
+    }
   },
   y: {
     msOverflowStyle: 'none',
     scrollbarWidth: 'none',
     overflowY: 'scroll',
     '&::-webkit-scrollbar': {
-      display: 'none',
-    },
-  },
+      display: 'none'
+    }
+  }
 };

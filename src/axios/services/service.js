@@ -40,7 +40,13 @@ class RequestService {
 
   getPDVS = async ({ r }) => apiClient(configGetWithToken(`/pdv?r=${r}`));
 
-  createPDV = async ({ databody }) => apiClient(configPostWithToken(`/pdv?`, databody));
+  createPDV = async (databody) => apiClient(configPostWithToken(`/pdv`, databody));
+
+  getPDVById = async (id) => apiClient(configGetWithToken(`/pdv/${id}?r=true`));
+
+  deletePDV = async (id) => apiClient(configDeleteWithToken(`/pdv/${id}`));
+
+  editPDV = async ({ id, databody }) => apiClient(configPatchWithToken(`/pdv/${id}`, databody));
 
   // Brands
 
@@ -67,7 +73,7 @@ class RequestService {
 
   // Location
 
-  getLocations = async (r) => apiClient(configGetWithToken(`/location?r=${r}`));
+  getLocations = async ({ r }) => apiClient(configGetWithToken(`/location?r=${r}`));
 
   // External API (deparments and cities)
 
