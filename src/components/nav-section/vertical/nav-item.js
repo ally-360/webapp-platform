@@ -3,43 +3,56 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Tooltip from '@mui/material/Tooltip';
-import ListItemText from '@mui/material/ListItemText';
+import ListItem from '@mui/material/ListItem';
 // routes
 import { RouterLink } from 'src/routes/components';
 //
+import { IconButton, ListItemText } from '@mui/material';
+import { useTheme } from '@emotion/react';
 import Iconify from '../../iconify';
 //
 import { StyledItem, StyledIcon, StyledDotIcon } from './styles';
 
 // ----------------------------------------------------------------------
 
-export default function NavItem({ item, open, depth, active, config, externalLink, ...other }) {
+export default function NavItem({ item, open, depth, active, config, externalLink, openPopup, ...other }) {
   const { title, path, icon, info, children, disabled, caption, roles } = item;
 
+  const theme = useTheme();
   const subItem = depth !== 1;
 
-  const renderContent = (
-    <StyledItem
-      disableGutters
-      disabled={disabled}
-      active={active}
-      depth={depth}
-      config={config}
-      {...other}
+  const renderContent = !(config.hiddenLabel && !subItem) && (
+    <ListItem
+      sx={{
+        padding: '0 !important'
+      }}
+      secondaryAction={
+        item.openPopup && (
+          <IconButton
+            aria-label="close"
+            onClick={() => {
+              item.openPopup();
+            }}
+            sx={{
+              color: theme.palette.primary.main
+            }}
+          >
+            <Iconify width={16} icon="eva:arrow-ios-forward-fill" />
+          </IconButton>
+        )
+      }
     >
-      <>
-        {icon && <StyledIcon size={config.iconSize}>{icon}</StyledIcon>}
+      <StyledItem disableGutters p={0} disabled={disabled} active={active} depth={depth} config={config} {...other}>
+        <>
+          {icon && <StyledIcon size={config.iconSize}>{icon}</StyledIcon>}
 
-        {subItem && (
-          <StyledIcon size={config.iconSize}>
-            <StyledDotIcon active={active} />
-          </StyledIcon>
-        )}
-      </>
-
-      {!(config.hiddenLabel && !subItem) && (
+          {subItem && (
+            <StyledIcon size={config.iconSize}>
+              <StyledDotIcon active={active} />
+            </StyledIcon>
+          )}
+        </>
         <ListItemText
-          primary={title}
           secondary={
             caption ? (
               <Tooltip title={caption} placement="top-start">
@@ -49,33 +62,34 @@ export default function NavItem({ item, open, depth, active, config, externalLin
           }
           primaryTypographyProps={{
             noWrap: true,
+            paddingLeft: '0 !important',
             typography: 'body2',
             textTransform: 'capitalize',
-            fontWeight: active ? 'fontWeightSemiBold' : 'fontWeightMedium',
+            fontWeight: active ? 'fontWeightSemiBold' : 'fontWeightMedium'
           }}
           secondaryTypographyProps={{
             noWrap: true,
             component: 'span',
             typography: 'caption',
-            color: 'text.disabled',
+            color: 'text.disabled'
           }}
+          primary={title}
         />
-      )}
+        {info && (
+          <Box component="span" sx={{ ml: 1, lineHeight: 0 }}>
+            {info}
+          </Box>
+        )}
 
-      {info && (
-        <Box component="span" sx={{ ml: 1, lineHeight: 0 }}>
-          {info}
-        </Box>
-      )}
-
-      {!!children && (
-        <Iconify
-          width={16}
-          icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
-          sx={{ ml: 1, flexShrink: 0 }}
-        />
-      )}
-    </StyledItem>
+        {!!children && (
+          <Iconify
+            width={16}
+            icon={open ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
+            sx={{ ml: 1, flexShrink: 0 }}
+          />
+        )}
+      </StyledItem>
+    </ListItem>
   );
 
   // Hidden item by role
@@ -94,8 +108,8 @@ export default function NavItem({ item, open, depth, active, config, externalLin
         color="inherit"
         sx={{
           ...(disabled && {
-            cursor: 'default',
-          }),
+            cursor: 'default'
+          })
         }}
       >
         {renderContent}
@@ -116,8 +130,8 @@ export default function NavItem({ item, open, depth, active, config, externalLin
       color="inherit"
       sx={{
         ...(disabled && {
-          cursor: 'default',
-        }),
+          cursor: 'default'
+        })
       }}
     >
       {renderContent}
@@ -131,5 +145,5 @@ NavItem.propTypes = {
   depth: PropTypes.number,
   externalLink: PropTypes.bool,
   item: PropTypes.object,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };

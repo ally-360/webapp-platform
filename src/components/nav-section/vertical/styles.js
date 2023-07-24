@@ -7,7 +7,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 // ----------------------------------------------------------------------
 
 export const StyledItem = styled(ListItemButton, {
-  shouldForwardProp: (prop) => prop !== 'active',
+  shouldForwardProp: (prop) => prop !== 'active'
 })(({ active, depth, config, theme }) => {
   const subItem = depth !== 1;
 
@@ -15,20 +15,19 @@ export const StyledItem = styled(ListItemButton, {
 
   const activeStyles = {
     root: {
-      color:
-        theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.light,
+      color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.light,
       backgroundColor: alpha(theme.palette.primary.main, 0.08),
       '&:hover': {
-        backgroundColor: alpha(theme.palette.primary.main, 0.16),
-      },
+        backgroundColor: alpha(theme.palette.primary.main, 0.16)
+      }
     },
     sub: {
       color: theme.palette.text.primary,
       backgroundColor: 'transparent',
       '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
+        backgroundColor: theme.palette.action.hover
+      }
+    }
   };
 
   return {
@@ -41,7 +40,7 @@ export const StyledItem = styled(ListItemButton, {
 
     // Active root item
     ...(active && {
-      ...activeStyles.root,
+      ...activeStyles.root
     }),
 
     // Sub item
@@ -49,14 +48,14 @@ export const StyledItem = styled(ListItemButton, {
       minHeight: config.itemSubHeight,
       // Active sub item
       ...(active && {
-        ...activeStyles.sub,
-      }),
+        ...activeStyles.sub
+      })
     }),
 
     // Deep sub item
     ...(deepSubItem && {
-      paddingLeft: theme.spacing(depth),
-    }),
+      paddingLeft: theme.spacing(depth)
+    })
   };
 });
 
@@ -66,7 +65,7 @@ export const StyledIcon = styled(ListItemIcon)(({ size }) => ({
   width: size,
   height: size,
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'center'
 }));
 
 export const StyledDotIcon = styled('span')(({ active, theme }) => ({
@@ -75,12 +74,12 @@ export const StyledDotIcon = styled('span')(({ active, theme }) => ({
   borderRadius: '50%',
   backgroundColor: theme.palette.text.disabled,
   transition: theme.transitions.create(['transform'], {
-    duration: theme.transitions.duration.shorter,
+    duration: theme.transitions.duration.shorter
   }),
   ...(active && {
     transform: 'scale(2)',
-    backgroundColor: theme.palette.primary.main,
-  }),
+    backgroundColor: theme.palette.primary.main
+  })
 }));
 
 // ----------------------------------------------------------------------
@@ -96,9 +95,9 @@ export const StyledSubheader = styled(ListSubheader)(({ config, theme }) => ({
   paddingBottom: theme.spacing(1),
   color: theme.palette.text.disabled,
   transition: theme.transitions.create(['color'], {
-    duration: theme.transitions.duration.shortest,
+    duration: theme.transitions.duration.shortest
   }),
   '&:hover': {
-    color: theme.palette.text.primary,
-  },
+    color: theme.palette.text.primary
+  }
 }));

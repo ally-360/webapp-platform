@@ -30,7 +30,7 @@ function NavSectionVertical({ data, config, sx, ...other }) {
 NavSectionVertical.propTypes = {
   config: PropTypes.object,
   data: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 export default memo(NavSectionVertical);
@@ -45,13 +45,7 @@ function Group({ subheader, items, config }) {
   }, []);
 
   const renderContent = items.map((list) => (
-    <NavList
-      key={list.title + list.path}
-      data={list}
-      depth={1}
-      hasChild={!!list.children}
-      config={config}
-    />
+    <NavList key={list.title + list.path} data={list} depth={1} hasChild={!!list.children} config={config} />
   ));
 
   return (
@@ -62,7 +56,7 @@ function Group({ subheader, items, config }) {
             {subheader}
           </StyledSubheader>
 
-          <Collapse in={open}>{renderContent}</Collapse>
+          <Collapse in={open}>{renderContent} </Collapse>
         </>
       ) : (
         renderContent
@@ -74,5 +68,5 @@ function Group({ subheader, items, config }) {
 Group.propTypes = {
   config: PropTypes.object,
   items: PropTypes.array,
-  subheader: PropTypes.string,
+  subheader: PropTypes.string
 };
