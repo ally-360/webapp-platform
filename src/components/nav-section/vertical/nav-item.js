@@ -15,7 +15,7 @@ import { StyledItem, StyledIcon, StyledDotIcon } from './styles';
 
 // ----------------------------------------------------------------------
 
-export default function NavItem({ item, open, depth, active, config, externalLink, openPopup, ...other }) {
+export default function NavItem({ item, open, depth, active, config, externalLink, ...other }) {
   const { title, path, icon, info, children, disabled, caption, roles } = item;
 
   const theme = useTheme();

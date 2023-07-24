@@ -59,7 +59,7 @@ NavList.propTypes = {
   config: PropTypes.object,
   data: PropTypes.object,
   depth: PropTypes.number,
-  hasChild: PropTypes.bool,
+  hasChild: PropTypes.bool
 };
 
 // ----------------------------------------------------------------------
@@ -83,5 +83,5 @@ function NavSubList({ data, depth, config }) {
 NavSubList.propTypes = {
   config: PropTypes.object,
   data: PropTypes.array,
-  depth: PropTypes.number,
+  depth: PropTypes.number
 };
