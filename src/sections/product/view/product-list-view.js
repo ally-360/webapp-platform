@@ -95,14 +95,16 @@ export default function ProductListView({categoryView}) {
     }
   }, [products]);
 
-  useEffect(() => {
-    if (categoryView?.products) {
-      setTableData(categoryView.products? categoryView.products : []);
-    }
-    // console.log(categoryView?.products);
+  // TODO: descomentar cuando funcione correctamente el endpoint de productos de categoria
+
+  // useEffect(() => {
+  //   if (categoryView?.products) {
+  //     setTableData(categoryView.products? categoryView.products : []);
+  //   }
+  //   // console.log(categoryView?.products);
     
 
-  }, [categoryView]);
+  // }, [categoryView]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,

@@ -29,9 +29,7 @@ export default function ComingSoonView() {
         Coming Soon!
       </Typography>
 
-      <Typography sx={{ color: 'text.secondary' }}>
-        We are currently working hard on this page!
-      </Typography>
+      <Typography sx={{ color: 'text.secondary' }}>We are currently working hard on this page!</Typography>
 
       <ComingSoonIllustration sx={{ my: 10, height: 240 }} />
 
@@ -67,13 +65,13 @@ export default function ComingSoonView() {
               boxShadow: (theme) => theme.customShadows.z20,
               transition: (theme) =>
                 theme.transitions.create(['box-shadow'], {
-                  duration: theme.transitions.duration.shorter,
+                  duration: theme.transitions.duration.shorter
                 }),
               [`& .${outlinedInputClasses.notchedOutline}`]: {
-                border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.32)}`,
-              },
-            },
-          },
+                border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.32)}`
+              }
+            }
+          }
         }}
         sx={{ my: 5 }}
       />
@@ -85,8 +83,8 @@ export default function ComingSoonView() {
             sx={{
               color: social.color,
               '&:hover': {
-                bgcolor: alpha(social.color, 0.08),
-              },
+                bgcolor: alpha(social.color, 0.08)
+              }
             }}
           >
             <Iconify icon={social.icon} />
@@ -110,5 +108,5 @@ function TimeBlock({ label, value }) {
 
 TimeBlock.propTypes = {
   label: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.string
 };
