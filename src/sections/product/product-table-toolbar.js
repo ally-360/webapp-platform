@@ -22,6 +22,7 @@ import ReactToPrint from 'react-to-print';
 const EXPORT_NAME = 'productos';
 
 export default function ProductTableToolbar({
+  categoryView,
   filters,
   onFilters,
   dataFiltered,
@@ -96,78 +97,98 @@ export default function ProductTableToolbar({
         spacing={2}
         alignItems={{ xs: 'flex-end', md: 'center' }}
         direction={{
-          xs: 'column',
+          xs: categoryView ? 'row' : 'column',
           md: 'row'
         }}
         sx={{
-          p: 2.5,
+          p: categoryView ? '20px 0px' : 2.5,
           pr: { xs: 2.5, md: 1 }
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
-          <TextField
-            fullWidth
-            value={filters.name}
-            onChange={handleFilterName}
-            placeholder="Buscar (sku o nombre)"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                </InputAdornment>
-              )
-            }}
-          />
-        </Stack>
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 }
-          }}
-        >
-          <InputLabel>Cantidad</InputLabel>
+        {!categoryView ? (
+          <>
+            <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
+              <TextField
+                fullWidth
+                value={filters.name}
+                onChange={handleFilterName}
+                placeholder="Buscar (sku o nombre)"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Stack>
+            <FormControl
+              sx={{
+                flexShrink: 0,
+                width: { xs: 1, md: 200 }
+              }}
+            >
+              <InputLabel>Cantidad</InputLabel>
 
-          <Select
-            multiple
-            value={filters.stock}
-            onChange={handleFilterStock}
-            input={<OutlinedInput label="Existencias" />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {stockOptions.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                <Checkbox disableRipple size="small" checked={filters.stock.includes(option.value)} />
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              <Select
+                multiple
+                value={filters.stock}
+                onChange={handleFilterStock}
+                input={<OutlinedInput label="Existencias" />}
+                renderValue={(selected) => selected.map((value) => value).join(', ')}
+                sx={{ textTransform: 'capitalize' }}
+              >
+                {stockOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    <Checkbox disableRipple size="small" checked={filters.stock.includes(option.value)} />
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 }
-          }}
-        >
-          <InputLabel>Precio</InputLabel>
+            <FormControl
+              sx={{
+                flexShrink: 0,
+                width: { xs: 1, md: 200 }
+              }}
+            >
+              <InputLabel>Precio</InputLabel>
 
-          <Select
-            multiple
-            value={filters.publish}
-            onChange={handleFilterPublish}
-            input={<OutlinedInput label="Publish" />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {publishOptions.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                <Checkbox disableRipple size="small" checked={filters.publish.includes(option.value)} />
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              <Select
+                multiple
+                value={filters.publish}
+                onChange={handleFilterPublish}
+                input={<OutlinedInput label="Publish" />}
+                renderValue={(selected) => selected.map((value) => value).join(', ')}
+                sx={{ textTransform: 'capitalize' }}
+              >
+                {publishOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    <Checkbox disableRipple size="small" checked={filters.publish.includes(option.value)} />
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
+        ) : (
+          <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
+            <TextField
+              fullWidth
+              value={filters.name}
+              onChange={handleFilterName}
+              placeholder="Buscar (sku o nombre)"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Stack>
+        )}
 
         <IconButton color="primary" onClick={popover.onOpen}>
           <Iconify icon="eva:more-vertical-fill" />

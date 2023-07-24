@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import PropTypes, { number } from 'prop-types';
 import * as Yup from 'yup';
 import React, { useMemo, useEffect, useState } from 'react';
@@ -35,6 +36,7 @@ import match from 'autosuggest-highlight/match';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { getAllPDVS, getPDVById, setSeePDV } from 'src/redux/inventory/pdvsSlice';
 
+import Iconify from 'src/components/iconify';
 import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
@@ -232,7 +234,7 @@ export default function FormPDVS({ open, handleClose }) {
         <DialogTitle id="scroll-dialog-title" boxShadow={2} sx={{ padding: '23px  40px 18px 40px!important' }}>
           <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
             <Icon icon="ic:round-store" width={24} height={24} />
-            {t('Crear Punto De Venta')}
+            {editId && seePDV ? pdvEdit.name : editId ? t('Editar Punto De Venta') : t('Crear Punto De Venta')}
           </Box>
           <IconButton
             aria-label="close"
@@ -397,7 +399,7 @@ export default function FormPDVS({ open, handleClose }) {
           {editDisabled ? (
             <>
               <LoadingButton
-                startIcon={<Icon icon="ic:round-edit" width={20} height={20} />}
+                startIcon={<Iconify icon="solar:pen-bold" width={20} height={20} />}
                 color="primary"
                 variant="contained"
                 onClick={() => dispatch(setSeePDV({ seePDV: false, id: pdvEdit.id }))}

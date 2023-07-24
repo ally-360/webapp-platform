@@ -25,6 +25,10 @@ const ProductEditPage = lazy(() => import('src/pages/dashboard/product/edit'));
 // PDVS
 const PDVSListPage = lazy(() => import('src/pages/dashboard/pdvs/list'));
 
+// CATEGORIES
+
+const CategoriesListView = lazy(() => import('src/pages/dashboard/categories/list'));
+
 // ORDER
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
@@ -94,7 +98,7 @@ export const dashboardRoutes = [
           { element: <ProductListPage />, index: true },
           { path: 'list', element: <ProductListPage /> },
           { path: 'new-product', element: <ProductCreatePage /> },
-          { path: 'categories', element: <ProductListPage /> },
+          { path: 'categories', element: <CategoriesListView /> },
           { path: 'pdvs', element: <PDVSListPage /> },
           { path: 'brands', element: <ProductListPage /> }
         ]

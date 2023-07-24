@@ -7,6 +7,9 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
+import { useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -17,6 +20,12 @@ import NavHorizontal from './nav-horizontal';
 
 export default function DashboardLayout({ children }) {
   const settings = useSettingsContext();
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllPDVS());
+  }, [dispatch]);
 
   const lgUp = useResponsive('up', 'lg');
 
@@ -53,7 +62,7 @@ export default function DashboardLayout({ children }) {
           sx={{
             minHeight: 1,
             display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
+            flexDirection: { xs: 'column', md: 'row' }
           }}
         >
           {lgUp ? renderNavMini : renderNavVertical}
@@ -72,7 +81,7 @@ export default function DashboardLayout({ children }) {
         sx={{
           minHeight: 1,
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
+          flexDirection: { xs: 'column', md: 'row' }
         }}
       >
         {renderNavVertical}
@@ -84,5 +93,5 @@ export default function DashboardLayout({ children }) {
 }
 
 DashboardLayout.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

@@ -11,12 +11,12 @@ export const navConfig = [
   {
     title: 'Home',
     icon: <Iconify icon="solar:home-2-bold-duotone" />,
-    path: '/',
+    path: '/'
   },
   {
     title: 'Components',
     icon: <Iconify icon="solar:atom-bold-duotone" />,
-    path: paths.components,
+    path: paths.components
   },
   {
     title: 'Pages',
@@ -32,8 +32,8 @@ export const navConfig = [
           { title: 'Pricing', path: paths.pricing },
           { title: 'Payment', path: paths.payment },
           { title: 'Maintenance', path: paths.maintenance },
-          { title: 'Coming Soon', path: paths.comingSoon },
-        ],
+          { title: 'Coming Soon', path: paths.comingSoon }
+        ]
       },
       {
         subheader: 'Concepts',
@@ -42,8 +42,8 @@ export const navConfig = [
           { title: 'Product', path: paths.product.demo.details },
           { title: 'Checkout', path: paths.product.checkout },
           { title: 'Posts', path: paths.post.root },
-          { title: 'Post', path: paths.post.demo.details },
-        ],
+          { title: 'Post', path: paths.post.demo.details }
+        ]
       },
       {
         subheader: 'Auth Demo',
@@ -57,26 +57,26 @@ export const navConfig = [
           { title: 'Register (modern)', path: paths.authDemo.modern.register },
           { title: 'Forgot password (modern)', path: paths.authDemo.modern.forgotPassword },
           { title: 'New password (modern)', path: paths.authDemo.modern.newPassword },
-          { title: 'Verify (modern)', path: paths.authDemo.modern.verify },
-        ],
+          { title: 'Verify (modern)', path: paths.authDemo.modern.verify }
+        ]
       },
       {
         subheader: 'Error',
         items: [
           { title: 'Page 403', path: paths.page403 },
           { title: 'Page 404', path: paths.page404 },
-          { title: 'Page 500', path: paths.page500 },
-        ],
+          { title: 'Page 500', path: paths.page500 }
+        ]
       },
       {
         subheader: 'Dashboard',
-        items: [{ title: 'Dashboard', path: PATH_AFTER_LOGIN }],
-      },
-    ],
+        items: [{ title: 'Dashboard', path: PATH_AFTER_LOGIN }]
+      }
+    ]
   },
   {
     title: 'Docs',
     icon: <Iconify icon="solar:notebook-bold-duotone" />,
-    path: paths.docs,
-  },
+    path: paths.docs
+  }
 ];

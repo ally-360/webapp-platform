@@ -36,6 +36,12 @@ class RequestService {
 
   createCategory = async (databody) => apiClient(configPostWithToken('/category', databody));
 
+  deleteCategory = async (id) => apiClient(configDeleteWithToken(`/category/${id}`));
+
+  editCategory = async ({ id, databody }) => apiClient(configPatchWithToken(`/category/${id}`, databody));
+
+  getCategoryById = async (id) => apiClient(configGetWithToken(`/category/${id}?r=true`));
+
   // pdv
 
   getPDVS = async ({ r }) => apiClient(configGetWithToken(`/pdv?r=${r}`));

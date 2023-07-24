@@ -74,7 +74,7 @@ export default function PDVSTableRow({ row, selected, onSelectRow, onDeleteRow, 
 
         <TableCell>
           <ListItemText
-            primary={location.name}
+            primary={location}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
             secondaryTypographyProps={{
               mt: 0.5,

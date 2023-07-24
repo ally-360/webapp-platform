@@ -99,6 +99,15 @@ export const getAllPDVS = () => async (dispatch) => {
   }
 };
 
+export const getAllPDVSWhitoutLoading = () => async (dispatch) => {
+  try {
+    const response = await RequestService.getPDVS({ r: true });
+    dispatch(getAllPDVSSuccess(response.data));
+  } catch (error) {
+    dispatch(getAllPDVSError(error));
+  }
+};
+
 export const createPDV = (pdv) => async (dispatch) => {
   try {
     dispatch(pdvsSlice.actions.startLoading());

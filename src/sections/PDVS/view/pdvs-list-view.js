@@ -34,25 +34,17 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useDispatch, useSelector } from 'react-redux';
-import { deletePDV, getAllPDVS, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { deletePDV, getAllPDVS, getAllPDVSWhitoutLoading, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
 import PDVSTableRow from '../pdvs-table-row';
 import PDVSTableToolbar from '../pdvs-table-toolbar';
 import PDVSTableFiltersResult from '../pdvs-table-filters-result';
 import FormPDVS from '../pdv-new-edit-form';
 // ----------------------------------------------------------------------
 
-// export const MUNICIPIO_OPTIONS = [
-//   { value: 'Palmira', label: 'Palmira' },
-//   { value: 'Cali', label: 'Cali' },
-//   { value: 'Cartago', label: 'Cartago' },
-//   { value: 'Buga', label: 'Buga' },
-//   { value: 'Pereira', label: 'Pereira' },
-// ];
-
 const TABLE_HEAD = [
   { id: 'name', label: 'Nombre', minWidth: 220, align: 'left', width: 150 },
-  { id: 'sku', label: 'Dirección', width: 200, maxWidth: 250 },
-  { id: 'location', label: 'Municipio', width: 160, maxWidth: 160 },
+  { id: 'description', label: 'Dirección', width: 200, maxWidth: 250 },
+  { id: 'location', label: 'Municipio', width: 160, maxWidth: 160,  },
   { id: 'main', label: 'Principal', width: 20, align: 'left' },
   { id: '', width: 88 }
 ];
@@ -89,7 +81,7 @@ export default function PdvsListView() {
 
   useEffect(() => {
 
-    dispatch(getAllPDVS());
+    dispatch(getAllPDVSWhitoutLoading());
     
   }, [dispatch]);
 
@@ -107,7 +99,7 @@ export default function PdvsListView() {
 
   useEffect(() => {
     if (pdvs.length) {
-      setTableData(pdvs);
+      setTableData(pdvs.map((pdv) => ({ ...pdv, location: pdv.location.name }) ));
     }
   }, [pdvs]);
 
@@ -190,10 +182,7 @@ export default function PdvsListView() {
 
   return (
     <>
-      <Container 
-        ref={componentRef}
-      
-      maxWidth={settings.themeStretch ? false : 'lg'}>
+      <Container ref={componentRef} maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
           heading="Puntos de venta"
           icon="ic:round-store"
@@ -325,10 +314,10 @@ export default function PdvsListView() {
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
-        title="Delete"
+        title="Eliminar Puntos de venta"
         content={
           <>
-            ¿Esta seguro que desea eliminar <strong> {table.selected.length} </strong> producto(s)?
+            ¿Esta seguro que desea eliminar <strong> {table.selected.length} </strong> Puntos de venta?
           </>
         }
         action={
@@ -340,7 +329,7 @@ export default function PdvsListView() {
               confirm.onFalse();
             }}
           >
-            Delete
+            Eliminar
           </Button>
         }
       />
@@ -361,7 +350,10 @@ function applyFilter({ inputData, comparator, filters }) {
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
+
+    console.log(inputData);
     const order = comparator(a[0], b[0]);
+
     if (order !== 0) return order;
     return a[1] - b[1];
   });
@@ -377,7 +369,7 @@ function applyFilter({ inputData, comparator, filters }) {
   }
 
   if (municipio.length) {
-    inputData = inputData.filter((product) => municipio.includes(product.location.name));
+    inputData = inputData.filter((product) => municipio.includes(product.location));
   }
 
   if (main) {
