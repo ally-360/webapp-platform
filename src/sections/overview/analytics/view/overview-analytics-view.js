@@ -3,12 +3,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // _mock
-import {
-  _analyticTasks,
-  _analyticPosts,
-  _analyticTraffic,
-  _analyticOrderTimeline,
-} from 'src/_mock';
+import { _analyticTasks, _analyticPosts, _analyticTraffic, _analyticOrderTimeline } from 'src/_mock';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
@@ -32,7 +27,7 @@ export default function OverviewAnalyticsView() {
       <Typography
         variant="h4"
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         Hi, Welcome back 👋
@@ -90,28 +85,28 @@ export default function OverviewAnalyticsView() {
                 '08/01/2003',
                 '09/01/2003',
                 '10/01/2003',
-                '11/01/2003',
+                '11/01/2003'
               ],
               series: [
                 {
                   name: 'Team A',
                   type: 'column',
                   fill: 'solid',
-                  data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30],
+                  data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30]
                 },
                 {
                   name: 'Team B',
                   type: 'area',
                   fill: 'gradient',
-                  data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43],
+                  data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43]
                 },
                 {
                   name: 'Team C',
                   type: 'line',
                   fill: 'solid',
-                  data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],
-                },
-              ],
+                  data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39]
+                }
+              ]
             }}
           />
         </Grid>
@@ -124,8 +119,8 @@ export default function OverviewAnalyticsView() {
                 { label: 'America', value: 4344 },
                 { label: 'Asia', value: 5435 },
                 { label: 'Europe', value: 1443 },
-                { label: 'Africa', value: 4443 },
-              ],
+                { label: 'Africa', value: 4443 }
+              ]
             }}
           />
         </Grid>
@@ -145,8 +140,8 @@ export default function OverviewAnalyticsView() {
                 { label: 'South Korea', value: 690 },
                 { label: 'Netherlands', value: 1100 },
                 { label: 'United States', value: 1200 },
-                { label: 'United Kingdom', value: 1380 },
-              ],
+                { label: 'United Kingdom', value: 1380 }
+              ]
             }}
           />
         </Grid>
@@ -159,8 +154,8 @@ export default function OverviewAnalyticsView() {
               series: [
                 { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
                 { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
-              ],
+                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] }
+              ]
             }}
           />
         </Grid>

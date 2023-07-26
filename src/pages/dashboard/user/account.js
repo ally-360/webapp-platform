@@ -8,7 +8,7 @@ export default function AccountPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Account Settings</title>
+        <title> POS: Mi cuenta</title>
       </Helmet>
 
       <AccountView />

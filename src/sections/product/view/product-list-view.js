@@ -173,9 +173,9 @@ export default function ProductListView({categoryView}) {
     },
     [ dispatch ]
   );
-  // useEffect(() => {
-  //   dispatch(getAllProducts());
-  // }, [dispatch]);
+  useEffect(() => {
+    dispatch(getAllProducts());
+  }, [dispatch]);
 
   return (
     <>

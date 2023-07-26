@@ -38,12 +38,12 @@ export default function OverviewAppView() {
       <Grid container spacing={3}>
         <Grid xs={12} md={8}>
           <AppWelcome
-            title={`Welcome back 👋 \n ${user?.displayName}`}
-            description="If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything."
+            title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+            description=""
             img={<SeoIllustration />}
             action={
               <Button variant="contained" color="primary">
-                Go Now
+                Explorar
               </Button>
             }
           />
@@ -59,7 +59,7 @@ export default function OverviewAppView() {
             percent={2.6}
             total={18765}
             chart={{
-              series: [5, 18, 12, 51, 68, 11, 39, 37, 27, 20],
+              series: [5, 18, 12, 51, 68, 11, 39, 37, 27, 20]
             }}
           />
         </Grid>
@@ -71,7 +71,7 @@ export default function OverviewAppView() {
             total={4876}
             chart={{
               colors: [theme.palette.info.light, theme.palette.info.main],
-              series: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26],
+              series: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26]
             }}
           />
         </Grid>
@@ -83,7 +83,7 @@ export default function OverviewAppView() {
             total={678}
             chart={{
               colors: [theme.palette.warning.light, theme.palette.warning.main],
-              series: [8, 9, 31, 8, 16, 37, 8, 33, 46, 31],
+              series: [8, 9, 31, 8, 16, 37, 8, 33, 46, 31]
             }}
           />
         </Grid>
@@ -96,8 +96,8 @@ export default function OverviewAppView() {
                 { label: 'Mac', value: 12244 },
                 { label: 'Window', value: 53345 },
                 { label: 'iOS', value: 44313 },
-                { label: 'Android', value: 78343 },
-              ],
+                { label: 'Android', value: 78343 }
+              ]
             }}
           />
         </Grid>
@@ -107,48 +107,35 @@ export default function OverviewAppView() {
             title="Area Installed"
             subheader="(+43%) than last year"
             chart={{
-              categories: [
-                'Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec',
-              ],
+              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
               series: [
                 {
                   year: '2019',
                   data: [
                     {
                       name: 'Asia',
-                      data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49],
+                      data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49]
                     },
                     {
                       name: 'America',
-                      data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77],
-                    },
-                  ],
+                      data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77]
+                    }
+                  ]
                 },
                 {
                   year: '2020',
                   data: [
                     {
                       name: 'Asia',
-                      data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49],
+                      data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49]
                     },
                     {
                       name: 'America',
-                      data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77],
-                    },
-                  ],
-                },
-              ],
+                      data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77]
+                    }
+                  ]
+                }
+              ]
             }}
           />
         </Grid>
@@ -162,7 +149,7 @@ export default function OverviewAppView() {
               { id: 'category', label: 'Category' },
               { id: 'price', label: 'Price' },
               { id: 'status', label: 'Status' },
-              { id: '' },
+              { id: '' }
             ]}
           />
         </Grid>
@@ -186,7 +173,7 @@ export default function OverviewAppView() {
               total={38566}
               icon="solar:user-rounded-bold"
               chart={{
-                series: 48,
+                series: 48
               }}
             />
 
@@ -196,7 +183,7 @@ export default function OverviewAppView() {
               icon="fluent:mail-24-filled"
               color="info"
               chart={{
-                series: 75,
+                series: 75
               }}
             />
           </Stack>

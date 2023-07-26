@@ -34,7 +34,7 @@ class RequestService {
 
   // Categories
 
-  getCategories = async () => apiClient(configGetWithToken(`/category/c/${this.company_id}?r=true`));
+  getCategories = async () => apiClient(configGetWithToken(`/category/?r=true`));
 
   createCategory = async (databody) => apiClient(configPostWithToken('/category', databody));
 

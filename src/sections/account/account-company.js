@@ -11,7 +11,6 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
 // utils
 import { fData } from 'src/utils/format-number';
 // assets
@@ -28,24 +27,32 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 export default function AccountCompany() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const { user } = useAuthContext();
+  const { company } = useAuthContext();
 
   const UpdateUserSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    lastname: Yup.string().required('Last name is required'),
-    photoURL: Yup.mixed().nullable().required('Avatar is required'),
+    nit: Yup.string().required('Nit is required'),
+    address: Yup.string().required('Address is required'),
     phoneNumber: Yup.string().required('Phone number is required'),
-    dni: Yup.number().required('DNI is required')
+    website: Yup.string().required('Website is required'),
+    quantityEmployees: Yup.string().required('Quantity of employees is required'),
+    economicActivity: Yup.string().required('Economic activity is required')
   });
 
   const defaultValues = {
-    name: user?.profile?.name || '',
-    lastname: user?.profile?.lastname || '',
-    email: user?.profile?.email || '',
-    photoURL: user?.profile?.photo || null,
-    phoneNumber: user?.profile?.personalPhoneNumber || '',
-    dni: user?.profile?.dni || ''
+    name: company?.name || '',
+    nit: company?.nit || '',
+    address: company?.address || '',
+    phoneNumber: company?.phoneNumber || '',
+    website: company?.website || '',
+    quantityEmployees: company?.quantityEmployees || '',
+    economicActivity: company?.economicActivity || ''
+
+    // lastname: company?.profile?.lastname || '',
+    // email: company?.profile?.email || '',
+    // photoURL: company?.profile?.photo || null,
+    // phoneNumber: company?.profile?.personalPhoneNumber || '',
+    // dni: company?.profile?.dni || ''
   };
 
   const methods = useForm({
@@ -123,10 +130,25 @@ export default function AccountCompany() {
               }}
             >
               <RHFTextField name="name" label="Nombre" />
-              <RHFTextField name="lastname" label="Apellido" />
+              <RHFTextField name="nit" label="Nit" />
+              <RHFTextField name="address" label="Dirección" />
+              <RHFPhoneNumber
+                type="string"
+                variant="outlined"
+                placeholder="Ej: 300 123 4567"
+                defaultCountry="co"
+                countryCodeEditable={false}
+                onlyCountries={['co']}
+                name="phoneNumber"
+                label="Télefono"
+              />
+              <RHFTextField name="website" label="Sitio web" />
+              <RHFTextField name="quantityEmployees" label="Cantidad de empleados" />
+
+              {/* <RHFTextField name="lastname" label="Apellido" />
               <RHFTextField name="email" label="Email Address" />
               <RHFPhoneNumber name="phoneNumber" label="Télefono" />
-              <RHFTextField name="dni" label="Cédula de ciudadania" />
+              <RHFTextField name="dni" label="Cédula de ciudadania" /> */}
             </Box>
 
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>

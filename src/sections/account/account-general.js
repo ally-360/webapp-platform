@@ -22,6 +22,7 @@ import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFSwitch, RHFTextField, RHFUploadAvatar, RHFAutocomplete } from 'src/components/hook-form';
 import { useAuthContext } from 'src/auth/hooks';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
+import { CardHeader } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -105,8 +106,8 @@ export default function AccountGeneral() {
                     color: 'text.disabled'
                   }}
                 >
-                  Allowed *.jpeg, *.jpg, *.png, *.gif
-                  <br /> max size of {fData(3145728)}
+                  permitidos *.jpeg, *.jpg, *.png, *.gif
+                  <br /> tamaño maximo {fData(3145728)}
                 </Typography>
               }
             />
@@ -127,7 +128,16 @@ export default function AccountGeneral() {
               <RHFTextField name="name" label="Nombre" />
               <RHFTextField name="lastname" label="Apellido" />
               <RHFTextField name="email" label="Email Address" />
-              <RHFPhoneNumber name="personalPhoneNumber" label="Télefono" />
+              <RHFPhoneNumber
+                type="string"
+                variant="outlined"
+                placeholder="Ej: 300 123 4567"
+                defaultCountry="co"
+                countryCodeEditable={false}
+                onlyCountries={['co']}
+                name="personalPhoneNumber"
+                label="Télefono"
+              />
               <RHFTextField name="dni" label="Cédula de ciudadania" />
             </Box>
 

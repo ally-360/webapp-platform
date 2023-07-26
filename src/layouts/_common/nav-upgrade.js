@@ -25,10 +25,10 @@ export default function NavUpgrade() {
       sx={{
         px: 2,
         py: 5,
-        textAlign: 'center',
+        textAlign: 'center'
       }}
     >
-      <Stack alignItems="center">
+      {/* <Stack alignItems="center">
         <Box sx={{ position: 'relative' }}>
           <Avatar src={user?.photoURL} alt={user?.displayName} sx={{ width: 48, height: 48 }} />
           <Label
@@ -40,27 +40,13 @@ export default function NavUpgrade() {
               left: 40,
               height: 20,
               position: 'absolute',
-              borderBottomLeftRadius: 2,
+              borderBottomLeftRadius: 2
             }}
           >
             Free
           </Label>
         </Box>
-
-        <Stack spacing={0.5} sx={{ mt: 1.5, mb: 2 }}>
-          <Typography variant="subtitle2" noWrap>
-            {user?.displayName}
-          </Typography>
-
-          <Typography variant="body2" noWrap sx={{ color: 'text.disabled' }}>
-            {user?.email}
-          </Typography>
-        </Stack>
-
-        <Button variant="contained" href={paths.minimalUI} target="_blank" rel="noopener">
-          {t('upgrade_to_pro')}
-        </Button>
-      </Stack>
+      </Stack> */}
     </Stack>
   );
 }

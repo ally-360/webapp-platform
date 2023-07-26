@@ -28,23 +28,23 @@ const TABS = [
     icon: <Iconify icon="solar:user-id-bold" width={24} />
   },
   {
+    value: 'company',
+    label: 'Empresa',
+    icon: <Iconify icon="ion:business" width={24} />
+  },
+  {
     value: 'billing',
-    label: 'Billing',
+    label: 'Facturación',
     icon: <Iconify icon="solar:bill-list-bold" width={24} />
   },
   {
     value: 'notifications',
-    label: 'Notifications',
+    label: 'Notificaciones',
     icon: <Iconify icon="solar:bell-bing-bold" width={24} />
   },
   {
-    value: 'social',
-    label: 'Social links',
-    icon: <Iconify icon="solar:share-bold" width={24} />
-  },
-  {
     value: 'security',
-    label: 'Security',
+    label: 'Cambiar contraseña',
     icon: <Iconify icon="ic:round-vpn-key" width={24} />
   }
 ];
@@ -63,11 +63,11 @@ export default function AccountView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Account"
+        heading="Mi cuenta"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'User', href: paths.dashboard.user.root },
-          { name: 'Account' }
+          { name: 'Usuario', href: paths.dashboard.user.root },
+          { name: 'Mi cuenta' }
         ]}
         sx={{
           mb: { xs: 3, md: 5 }
@@ -86,13 +86,9 @@ export default function AccountView() {
         ))}
       </Tabs>
 
-      {currentTab === 'general' && (
-        <>
-          <AccountCompany />
+      {currentTab === 'general' && <AccountGeneral />}
 
-          <AccountGeneral />
-        </>
-      )}
+      {currentTab === 'company' && <AccountCompany />}
 
       {currentTab === 'billing' && (
         <AccountBilling
