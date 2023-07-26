@@ -98,8 +98,8 @@ export default function StepByStep() {
 
   const handleLogout = async () => {
     try {
-      navigate('/');
       await logout();
+      navigate('/');
     } catch (error) {
       console.error(error);
       enqueueSnackbar('Unable to logout', { variant: 'error' });

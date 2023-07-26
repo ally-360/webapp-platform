@@ -40,7 +40,7 @@ export default function RegisterSummary() {
               Nombre
             </Typography>
             <Typography variant="body2" gutterBottom>
-              {company.name}
+              {company?.name}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -48,7 +48,7 @@ export default function RegisterSummary() {
               NIT
             </Typography>
             <Typography variant="body2" gutterBottom>
-              {company.nit}
+              {company?.nit}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -56,7 +56,7 @@ export default function RegisterSummary() {
               Dirección
             </Typography>
             <Typography variant="body2" gutterBottom>
-              {company.address}
+              {company?.address}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -64,7 +64,7 @@ export default function RegisterSummary() {
               Teléfono
             </Typography>
             <Typography variant="body2" gutterBottom>
-              {company.phoneNumber}
+              {company?.phoneNumber}
             </Typography>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -72,7 +72,7 @@ export default function RegisterSummary() {
               Cantidad de empleados
             </Typography>
             <Typography variant="body2" gutterBottom>
-              {company.quantityEmployees}
+              {company?.quantityEmployees}
             </Typography>
           </Grid>
         </Grid>

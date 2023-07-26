@@ -23,8 +23,6 @@ export default function GuestGuard({ children }) {
     }
     if (authenticated && isFirstLogin === true) {
       router.replace(paths.stepByStep.root);
-    } else {
-      router.replace(paths.auth.jwt.login);
     }
   }, [authenticated, returnTo, router, isFirstLogin]);
 

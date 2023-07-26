@@ -75,7 +75,9 @@ const reducer = (state, action) => {
       isAuthenticated: false,
       user: null,
       company: null,
-      pdvCompany: null
+      pdvCompany: null,
+      isFirstLogin: false,
+      loading: false
     };
   }
   return state;
