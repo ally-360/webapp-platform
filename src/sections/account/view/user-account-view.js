@@ -12,6 +12,7 @@ import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
+import AccountCompany from 'src/sections/account/account-company';
 import AccountGeneral from '../account-general';
 import AccountBilling from '../account-billing';
 import AccountSocialLinks from '../account-social-links';
@@ -24,28 +25,28 @@ const TABS = [
   {
     value: 'general',
     label: 'General',
-    icon: <Iconify icon="solar:user-id-bold" width={24} />,
+    icon: <Iconify icon="solar:user-id-bold" width={24} />
   },
   {
     value: 'billing',
     label: 'Billing',
-    icon: <Iconify icon="solar:bill-list-bold" width={24} />,
+    icon: <Iconify icon="solar:bill-list-bold" width={24} />
   },
   {
     value: 'notifications',
     label: 'Notifications',
-    icon: <Iconify icon="solar:bell-bing-bold" width={24} />,
+    icon: <Iconify icon="solar:bell-bing-bold" width={24} />
   },
   {
     value: 'social',
     label: 'Social links',
-    icon: <Iconify icon="solar:share-bold" width={24} />,
+    icon: <Iconify icon="solar:share-bold" width={24} />
   },
   {
     value: 'security',
     label: 'Security',
-    icon: <Iconify icon="ic:round-vpn-key" width={24} />,
-  },
+    icon: <Iconify icon="ic:round-vpn-key" width={24} />
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -66,10 +67,10 @@ export default function AccountView() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'User', href: paths.dashboard.user.root },
-          { name: 'Account' },
+          { name: 'Account' }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -77,7 +78,7 @@ export default function AccountView() {
         value={currentTab}
         onChange={handleChangeTab}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         {TABS.map((tab) => (
@@ -85,7 +86,13 @@ export default function AccountView() {
         ))}
       </Tabs>
 
-      {currentTab === 'general' && <AccountGeneral />}
+      {currentTab === 'general' && (
+        <>
+          <AccountCompany />
+
+          <AccountGeneral />
+        </>
+      )}
 
       {currentTab === 'billing' && (
         <AccountBilling

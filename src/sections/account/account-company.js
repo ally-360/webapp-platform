@@ -25,26 +25,26 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 
 // ----------------------------------------------------------------------
 
-export default function AccountGeneral() {
+export default function AccountCompany() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const { user, updateProfileInfo } = useAuthContext();
+  const { user } = useAuthContext();
 
   const UpdateUserSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
     lastname: Yup.string().required('Last name is required'),
-    photo: Yup.mixed().nullable().required('Avatar is required'),
-    personalPhoneNumber: Yup.string().required('Phone number is required'),
-    dni: Yup.string().required('DNI is required')
+    photoURL: Yup.mixed().nullable().required('Avatar is required'),
+    phoneNumber: Yup.string().required('Phone number is required'),
+    dni: Yup.number().required('DNI is required')
   });
 
   const defaultValues = {
     name: user?.profile?.name || '',
     lastname: user?.profile?.lastname || '',
     email: user?.profile?.email || '',
-    photo: user?.profile?.photo || null,
-    personalPhoneNumber: user?.profile?.personalPhoneNumber || '',
+    photoURL: user?.profile?.photo || null,
+    phoneNumber: user?.profile?.personalPhoneNumber || '',
     dni: user?.profile?.dni || ''
   };
 
@@ -61,12 +61,11 @@ export default function AccountGeneral() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await updateProfileInfo(user?.profile?.id, data);
-      enqueueSnackbar('Se ha actualizado la información', { variant: 'success' });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      enqueueSnackbar('Update success!');
       console.info('DATA', data);
     } catch (error) {
       console.error(error);
-      enqueueSnackbar('No se ha podido actualizar la información', { variant: 'error' });
     }
   });
 
@@ -79,7 +78,7 @@ export default function AccountGeneral() {
       });
 
       if (file) {
-        setValue('photo', newFile, { shouldValidate: true });
+        setValue('photoURL', newFile, { shouldValidate: true });
       }
     },
     [setValue]
@@ -91,7 +90,7 @@ export default function AccountGeneral() {
         <Grid xs={12} md={4}>
           <Card sx={{ pt: 10, pb: 5, px: 3, textAlign: 'center' }}>
             <RHFUploadAvatar
-              name="photo"
+              name="photoURL"
               maxSize={3145728}
               onDrop={handleDrop}
               helperText={
@@ -112,7 +111,6 @@ export default function AccountGeneral() {
             />
           </Card>
         </Grid>
-
         <Grid xs={12} md={8}>
           <Card sx={{ p: 3 }}>
             <Box
@@ -127,7 +125,7 @@ export default function AccountGeneral() {
               <RHFTextField name="name" label="Nombre" />
               <RHFTextField name="lastname" label="Apellido" />
               <RHFTextField name="email" label="Email Address" />
-              <RHFPhoneNumber name="personalPhoneNumber" label="Télefono" />
+              <RHFPhoneNumber name="phoneNumber" label="Télefono" />
               <RHFTextField name="dni" label="Cédula de ciudadania" />
             </Box>
 

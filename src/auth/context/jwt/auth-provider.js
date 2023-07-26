@@ -299,8 +299,21 @@ export function AuthProvider({ children }) {
     [state]
   );
 
+  // Hace el update del usuario y actualiza el estado del usuario. no del perfil
   const updateProfile = useCallback(async (id, databody) => {
     await RequestService.updateUser({ id, databody });
+    const user = (await RequestService.fetchGetUserById({ id })).data;
+    dispatch({
+      type: 'LOGIN',
+      payload: {
+        isFirstLogin: user.firstLogin,
+        user
+      }
+    });
+  }, []);
+
+  const updateProfileInfo = useCallback(async (id, databody) => {
+    await RequestService.updateProfile({ id, databody });
     const user = (await RequestService.fetchGetUserById({ id })).data;
     dispatch({
       type: 'LOGIN',
@@ -355,13 +368,15 @@ export function AuthProvider({ children }) {
       updatePDV,
       createCompany,
       createPDV,
-      updateProfile
+      updateProfile,
+      updateProfileInfo
     }),
     [
       login,
       logout,
       register,
       updateProfile,
+      updateProfileInfo,
       state.user,
       status,
       updateCompany,
