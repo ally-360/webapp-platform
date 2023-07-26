@@ -14,7 +14,7 @@ export default function RegisterSummary() {
   const handleFinish = async () => {
     try {
       await updateProfile(user.id, {
-        isFirstLogin: false
+        firstLogin: false
       });
       enqueueSnackbar('Registro completado', {
         variant: 'success'

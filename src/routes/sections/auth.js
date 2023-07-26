@@ -7,6 +7,9 @@ import CompactLayout from 'src/layouts/compact';
 import AuthClassicLayout from 'src/layouts/auth/classic';
 // components
 import { SplashScreen } from 'src/components/loading-screen';
+import AuthModernLayout from 'src/layouts/auth/modern';
+import AuthModernCompactLayout from 'src/layouts/auth/modern-compact';
+import AuthClassicLayoutRegister from 'src/layouts/auth/classicRegister';
 
 // ----------------------------------------------------------------------
 
@@ -20,6 +23,7 @@ const AmplifyForgotPasswordPage = lazy(() => import('src/pages/auth/amplify/forg
 // JWT
 const JwtLoginPage = lazy(() => import('src/pages/auth/jwt/login'));
 const JwtRegisterPage = lazy(() => import('src/pages/auth/jwt/register'));
+const ForgotPasswordPage = lazy(() => import('src/pages/auth/jwt/forgot-password'));
 
 // FIREBASE
 const FirebaseLoginPage = lazy(() => import('src/pages/auth/firebase/login'));
@@ -57,7 +61,7 @@ const authAmplify = {
     {
       path: 'register',
       element: (
-        <AuthClassicLayout title="Manage the job more effectively with Minimal">
+        <AuthClassicLayout title="Sistema de Contabilidad y POS para impulsar tu negocio">
           <AmplifyRegisterPage />
         </AuthClassicLayout>
       )
@@ -98,9 +102,17 @@ const authJwt = {
     {
       path: 'register',
       element: (
-        <AuthClassicLayout title="Manage the job more effectively with Minimal">
+        <AuthClassicLayoutRegister title="Sistema de Contabilidad y POS para impulsar tu negocio">
           <JwtRegisterPage />
-        </AuthClassicLayout>
+        </AuthClassicLayoutRegister>
+      )
+    },
+    {
+      path: 'forgot-password',
+      element: (
+        <AuthModernCompactLayout>
+          <ForgotPasswordPage />
+        </AuthModernCompactLayout>
       )
     }
   ]

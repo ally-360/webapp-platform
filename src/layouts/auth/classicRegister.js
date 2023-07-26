@@ -32,7 +32,7 @@ const SectionStyle = styled(Card)(({ theme }) => ({
   margin: theme.spacing(2, 0, 2, 2)
 }));
 
-export default function AuthClassicLayout({ children, image, title }) {
+export default function AuthClassicLayoutRegister({ children, image, title }) {
   const theme = useTheme();
 
   const upMd = useResponsive('up', 'md');
@@ -53,7 +53,7 @@ export default function AuthClassicLayout({ children, image, title }) {
         margin: 'auto',
         width: 1,
         mx: 'auto',
-        maxWidth: 650,
+        maxWidth: 890,
         px: { xs: 2, md: 8 }
       }}
     >
@@ -106,7 +106,7 @@ export default function AuthClassicLayout({ children, image, title }) {
   );
 }
 
-AuthClassicLayout.propTypes = {
+AuthClassicLayoutRegister.propTypes = {
   children: PropTypes.node,
   image: PropTypes.string,
   title: PropTypes.string

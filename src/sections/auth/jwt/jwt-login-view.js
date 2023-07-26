@@ -23,6 +23,7 @@ import { useAuthContext } from 'src/auth/hooks';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { Box } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -74,14 +75,10 @@ export default function JwtLoginView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5 }}>
-      <Typography variant="h4">Sign in to Minimal</Typography>
+      <Typography variant="h4">Iniciar Sesión</Typography>
 
       <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2">New user?</Typography>
-
-        <Link component={RouterLink} href={paths.auth.jwt.register} variant="subtitle2">
-          Crear cuenta
-        </Link>
+        <Typography variant="body2">Introduzca sus datos</Typography>
       </Stack>
     </Stack>
   );
@@ -95,6 +92,7 @@ export default function JwtLoginView() {
       <RHFTextField
         name="password"
         label="Password"
+        color="primary"
         type={password.value ? 'text' : 'password'}
         InputProps={{
           endAdornment: (
@@ -107,23 +105,34 @@ export default function JwtLoginView() {
         }}
       />
 
-      <Link variant="body2" color="inherit" underline="always" sx={{ alignSelf: 'flex-end' }}>
-        Forgot password?
+      <Link
+        variant="body2"
+        color="inherit"
+        underline="always"
+        component={RouterLink}
+        to={paths.auth.jwt.forgotPassword}
+        sx={{ alignSelf: 'flex-end' }}
+      >
+        ¿Olvidaste tu contraseña?
       </Link>
 
-      <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
-        Login
+      <LoadingButton fullWidth color="primary" size="large" type="submit" variant="contained" loading={isSubmitting}>
+        Iniciar Sesión
       </LoadingButton>
+      <Box width="smUp">
+        <Typography variant="body2" align="center">
+          ¿No tienes una cuenta?&nbsp;
+          <Link variant="subtitle2" component={RouterLink} to={paths.auth.jwt.register}>
+            Registrate
+          </Link>
+        </Typography>
+      </Box>
     </Stack>
   );
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       {renderHead}
-
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Use email : <strong>demo@minimals.cc</strong> / password :<strong> demo1234</strong>
-      </Alert>
 
       {renderForm}
     </FormProvider>

@@ -299,6 +299,18 @@ export function AuthProvider({ children }) {
     [state]
   );
 
+  const updateProfile = useCallback(async (id, databody) => {
+    await RequestService.updateUser({ id, databody });
+    const user = (await RequestService.fetchGetUserById({ id })).data;
+    dispatch({
+      type: 'LOGIN',
+      payload: {
+        isFirstLogin: user.firstLogin,
+        user
+      }
+    });
+  }, []);
+
   const createPDV = useCallback(async (databody) => {
     const response = await RequestService.createPDV(databody);
     dispatch({
@@ -342,12 +354,14 @@ export function AuthProvider({ children }) {
       updateCompany,
       updatePDV,
       createCompany,
-      createPDV
+      createPDV,
+      updateProfile
     }),
     [
       login,
       logout,
       register,
+      updateProfile,
       state.user,
       status,
       updateCompany,

@@ -98,13 +98,13 @@ export default function JwtRegisterView() {
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
-      <Typography variant="h4">Get started absolutely free</Typography>
+      <Typography variant="h4">Registrarse gratis</Typography>
 
       <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2"> Already have an account? </Typography>
+        <Typography variant="body2"> ¿Ya tienes cuenta? </Typography>
 
         <Link href={paths.auth.jwt.login} component={RouterLink} variant="subtitle2">
-          Sign in
+          Iniciar sesión
         </Link>
       </Stack>
     </Stack>
@@ -112,13 +112,13 @@ export default function JwtRegisterView() {
 
   const renderTerms = (
     <Typography component="div" sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}>
-      {'By signing up, I agree to '}
+      Al registrarte, aceptas nuestros{' '}
       <Link underline="always" color="text.primary">
-        Terms of Service
+        Terminos y condiciones
       </Link>
       {' and '}
       <Link underline="always" color="text.primary">
-        Privacy Policy
+        Política de privacidad
       </Link>
       .
     </Typography>
@@ -130,30 +130,30 @@ export default function JwtRegisterView() {
         {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="firstName" label="First name" />
-          <RHFTextField name="lastName" label="Last name" />
+          <RHFTextField name="firstName" label="Nombre" />
+          <RHFTextField name="lastName" label="Apellido" />
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFPhoneNumber
             name="tel"
-            label="Phonenumber"
+            label="Teléfono"
             fullWidth
             type="string"
             variant="outlined"
-            placeholder="Ej: 300 123 4567"
+            placeholder="Ej:3001234567"
             defaultCountry="co"
             countryCodeEditable={false}
             onlyCountries={['co']}
           />
-          <RHFTextField name="dni" label="DNI" />
+          <RHFTextField name="dni" label="Cédula de ciudadania" />
         </Stack>
 
-        <RHFTextField name="email" label="Email address" />
+        <RHFTextField name="email" label="Correo electrónico" />
 
         <RHFTextField
           name="password"
-          label="Password"
+          label="Contraseña"
           type={password.value ? 'text' : 'password'}
           InputProps={{
             endAdornment: (
@@ -166,8 +166,8 @@ export default function JwtRegisterView() {
           }}
         />
 
-        <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
-          Create account
+        <LoadingButton color="primary" fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
+          Registrarse
         </LoadingButton>
       </Stack>
     </FormProvider>
