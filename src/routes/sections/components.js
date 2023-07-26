@@ -90,8 +90,8 @@ export const componentsRoutes = [
               { path: 'typography', element: <TypographyPage /> },
               { path: 'shadows', element: <ShadowsPage /> },
               { path: 'grid', element: <GridPage /> },
-              { path: 'icons', element: <IconsPage /> },
-            ],
+              { path: 'icons', element: <IconsPage /> }
+            ]
           },
           {
             path: 'mui',
@@ -125,8 +125,8 @@ export const componentsRoutes = [
               { path: 'timeline', element: <TimelinePage /> },
               { path: 'tooltip', element: <TooltipPage /> },
               { path: 'transfer-list', element: <TransferListPage /> },
-              { path: 'tree-view', element: <TreesViewPage /> },
-            ],
+              { path: 'tree-view', element: <TreesViewPage /> }
+            ]
           },
           {
             path: 'extra',
@@ -151,11 +151,11 @@ export const componentsRoutes = [
               { path: 'text-max-line', element: <TextMaxLinePage /> },
               { path: 'upload', element: <UploadPage /> },
               { path: 'markdown', element: <MarkdownPage /> },
-              { path: 'scroll-progress', element: <ScrollProgressPage /> },
-            ],
-          },
-        ],
-      },
-    ],
-  },
+              { path: 'scroll-progress', element: <ScrollProgressPage /> }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 ];

@@ -59,15 +59,13 @@ function PopupCreateCategory({ open, PaperComponent }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
 
-  useEffect(() => {
-    console.log(categoryEditInfo);
-  }, [categoryEditInfo]);
   // create category schema
   const createCategorySchema = Yup.object().shape(
     {
       name: Yup.string().required('Nombre requerido'),
       description: Yup.string().required('Descripción requerida'),
-      categoryMainCategory: Yup.string().optional()
+      categoryMainCategory: Yup.string().optional(),
+      company: Yup.string().optional()
     }[categoryEditInfo]
   );
 
@@ -75,7 +73,9 @@ function PopupCreateCategory({ open, PaperComponent }) {
     () => ({
       name: categoryEditInfo ? categoryEditInfo.name : '',
       description: categoryEditInfo ? categoryEditInfo.description : '',
-      categoryMainCategory: categoryEditInfo ? categoryEditInfo.categoryMainCategory : null
+      categoryMainCategory: categoryEditInfo ? categoryEditInfo.categoryMainCategory : null,
+      // TODO: agregar company id
+      company: 'f403346f-e91d-423d-9bbb-6a0168cd3f64'
     }),
     [categoryEditInfo]
   );

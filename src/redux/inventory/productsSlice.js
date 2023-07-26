@@ -66,7 +66,7 @@ const initialState = {
       sku: 'A156548C',
       priceSale: 39500,
       priceBase: 12300,
-      globalStock: 20,
+      globalStock: 120,
       pdvs: [
         {
           name: 'Cali',

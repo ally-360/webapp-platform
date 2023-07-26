@@ -1,5 +1,6 @@
 export const configGetWithToken = (url) => {
   const localUser = localStorage.getItem('accessToken');
+  console.log(localUser);
   return {
     method: 'get',
     url,

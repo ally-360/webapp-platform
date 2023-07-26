@@ -86,7 +86,7 @@ export default function FormPDVS({ open, handleClose }) {
     departamento: Yup.object().required('Departamento es requerido'),
     municipio: Yup.object().required('Municipio es requerido'),
     address: Yup.string().required('Dirección es requerida'),
-    phone: Yup.string().required('Teléfono es requerido'),
+    phoneNumber: Yup.string().required('Teléfono es requerido'),
     main: Yup.boolean().optional()
   });
 
@@ -97,9 +97,9 @@ export default function FormPDVS({ open, handleClose }) {
       departamento: pdvEdit?.departamento || '',
       municipio: pdvEdit?.municipio || '',
       address: pdvEdit?.address || '',
-      phone: pdvEdit?.phone || '',
+      phoneNumber: pdvEdit?.phoneNumber || '',
       // TODO: extraer el company id del usuario logueado
-      company: { id: '1b02d2b6-c354-4a74-9e48-5162af036b36' },
+      company: { id: 'f403346f-e91d-423d-9bbb-6a0168cd3f64' },
       main: pdvEdit?.main || false
     }),
     [pdvEdit]
@@ -144,6 +144,7 @@ export default function FormPDVS({ open, handleClose }) {
       delete data.municipio;
       delete data.departamento;
       if (pdvEdit) {
+        delete data.company;
         await RequestService.editPDV({ id: pdvEdit.id, databody: data });
       } else {
         await RequestService.createPDV(data);
@@ -370,7 +371,7 @@ export default function FormPDVS({ open, handleClose }) {
                   type="string"
                   variant="outlined"
                   placeholder="Ej: 300 123 4567"
-                  name="phone"
+                  name="phoneNumber"
                   defaultCountry="co"
                   label="teléfono"
                   countryCodeEditable={false}

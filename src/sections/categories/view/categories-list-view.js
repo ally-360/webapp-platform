@@ -130,7 +130,7 @@ export default function InvetoryCategoriesList() {
           }
         />
         <Grid container spacing={2}>
-          <Grid sx={{ height: '100%' }} item xs={12} md={4}>
+          <Grid sx={{ height: '100%', position: 'sticky', bottom: '100px', left: 0, top: '60px' }} item xs={12} md={4}>
             <Card>
               {categories.length === 0 ? (
                 <Skeleton variant="rectangular" height={400} />

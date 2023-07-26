@@ -12,7 +12,7 @@ const loginPaths = {
   jwt: paths.auth.jwt.login,
   auth0: paths.auth.auth0.login,
   amplify: paths.auth.amplify.login,
-  firebase: paths.auth.firebase.login,
+  firebase: paths.auth.firebase.login
 };
 
 // ----------------------------------------------------------------------
@@ -20,7 +20,9 @@ const loginPaths = {
 export default function AuthGuard({ children }) {
   const router = useRouter();
 
-  const { authenticated, method } = useAuthContext();
+  const { authenticated, method, isFirstLogin } = useAuthContext();
+
+  console.log('AuthGuard', { authenticated, method, isFirstLogin });
 
   const [checked, setChecked] = useState(false);
 
@@ -43,6 +45,12 @@ export default function AuthGuard({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (isFirstLogin === true) {
+      router.push(paths.stepByStep.root);
+    }
+  }, [isFirstLogin, router]);
+
   if (!checked) {
     return null;
   }
@@ -51,5 +59,5 @@ export default function AuthGuard({ children }) {
 }
 
 AuthGuard.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

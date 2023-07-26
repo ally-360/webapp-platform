@@ -6,6 +6,7 @@ import { AuthGuard } from 'src/auth/guard';
 import DashboardLayout from 'src/layouts/dashboard';
 // components
 import { LoadingScreen } from 'src/components/loading-screen';
+import StepGuard from 'src/auth/guard/step-guard';
 
 // ----------------------------------------------------------------------
 
@@ -28,6 +29,10 @@ const PDVSListPage = lazy(() => import('src/pages/dashboard/pdvs/list'));
 // CATEGORIES
 
 const CategoriesListView = lazy(() => import('src/pages/dashboard/categories/list'));
+
+// BRANDS
+
+const BrandsListView = lazy(() => import('src/pages/dashboard/brands/list'));
 
 // ORDER
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
@@ -78,11 +83,13 @@ export const dashboardRoutes = [
     path: 'dashboard',
     element: (
       <AuthGuard>
-        <DashboardLayout>
-          <Suspense fallback={<LoadingScreen />}>
-            <Outlet />
-          </Suspense>
-        </DashboardLayout>
+        <StepGuard>
+          <DashboardLayout>
+            <Suspense fallback={<LoadingScreen />}>
+              <Outlet />
+            </Suspense>
+          </DashboardLayout>
+        </StepGuard>
       </AuthGuard>
     ),
     children: [
@@ -98,9 +105,12 @@ export const dashboardRoutes = [
           { element: <ProductListPage />, index: true },
           { path: 'list', element: <ProductListPage /> },
           { path: 'new-product', element: <ProductCreatePage /> },
-          { path: 'categories', element: <CategoriesListView /> },
+          {
+            path: 'categories',
+            element: <CategoriesListView />
+          },
           { path: 'pdvs', element: <PDVSListPage /> },
-          { path: 'brands', element: <ProductListPage /> }
+          { path: 'brands', element: <BrandsListView /> }
         ]
       },
       {

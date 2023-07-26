@@ -7,8 +7,10 @@ import ListItem from '@mui/material/ListItem';
 // routes
 import { RouterLink } from 'src/routes/components';
 //
-import { IconButton, ListItemText } from '@mui/material';
+import { IconButton, ListItemText, Zoom } from '@mui/material';
 import { useTheme } from '@emotion/react';
+import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 import Iconify from '../../iconify';
 //
 import { StyledItem, StyledIcon, StyledDotIcon } from './styles';
@@ -21,10 +23,15 @@ export default function NavItem({ item, open, depth, active, config, externalLin
   const theme = useTheme();
   const subItem = depth !== 1;
 
+  const { t } = useTranslation();
+
   const renderContent = !(config.hiddenLabel && !subItem) && (
     <ListItem
       sx={{
-        padding: '0 !important'
+        padding: '0 !important',
+        '.MuiListItemSecondaryAction-root': {
+          right: '7px !important'
+        }
       }}
       secondaryAction={
         item.openPopup && (
@@ -34,10 +41,15 @@ export default function NavItem({ item, open, depth, active, config, externalLin
               item.openPopup();
             }}
             sx={{
-              color: theme.palette.primary.main
+              color: theme.palette.primary.main,
+              marginRight: 0
             }}
+            color="primary"
+            size="small"
           >
-            <Iconify width={16} icon="eva:arrow-ios-forward-fill" />
+            <Tooltip TransitionComponent={Zoom} title={t('Crear')} placement="right" arrow>
+              <Icon icon="gala:add" width={20} height={20} />
+            </Tooltip>
           </IconButton>
         )
       }

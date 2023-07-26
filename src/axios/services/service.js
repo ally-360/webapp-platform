@@ -10,13 +10,15 @@ import {
 import apiClient from '../axios';
 
 class RequestService {
+  company_id = 'f403346f-e91d-423d-9bbb-6a0168cd3f64';
+
   fetchLoginUser = async ({ databody }) => apiClient(configPostWithToken('/auth/login', databody));
 
   fetchRegisterUser = async ({ databody }) => apiClient(configPostWithToken('/auth/register', databody));
 
   // Users
 
-  fetchGetUserById = async ({ id }) => apiClient(configGet(`/user/${id}`));
+  fetchGetUserById = async ({ id }) => apiClient(configGetWithToken(`/user/${id}`));
 
   updateUser = async ({ id, databody }) => apiClient(configPatchWithToken(`/user/${id}`, databody));
 
@@ -32,7 +34,7 @@ class RequestService {
 
   // Categories
 
-  getCategories = async () => apiClient(configGetWithToken('/category?r=true'));
+  getCategories = async () => apiClient(configGetWithToken(`/category/c/${this.company_id}?r=true`));
 
   createCategory = async (databody) => apiClient(configPostWithToken('/category', databody));
 

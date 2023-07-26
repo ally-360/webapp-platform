@@ -7,13 +7,9 @@ import { AuthContext } from './auth-context';
 // ----------------------------------------------------------------------
 
 export function AuthConsumer({ children }) {
-  return (
-    <AuthContext.Consumer>
-      {(auth) => (auth.loading ? <SplashScreen /> : children)}
-    </AuthContext.Consumer>
-  );
+  return <AuthContext.Consumer>{(auth) => (auth.loading ? <SplashScreen /> : children)}</AuthContext.Consumer>;
 }
 
 AuthConsumer.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

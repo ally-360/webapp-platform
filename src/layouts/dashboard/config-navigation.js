@@ -9,6 +9,11 @@ import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
 import { IconButton, Tooltip, Zoom } from '@mui/material';
 import { Icon } from '@iconify/react';
+import { useDispatch } from 'react-redux';
+import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
+import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
+import { switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { useNavigate } from 'react-router';
 
 // ----------------------------------------------------------------------
 
@@ -53,6 +58,10 @@ const ICONS = {
 export function useNavData() {
   const { t } = useLocales();
 
+  const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
   const data = useMemo(
     () => [
       // OVERVIEW
@@ -80,23 +89,32 @@ export function useNavData() {
               {
                 title: t('Productos'),
                 path: paths.dashboard.inventory.list,
-                info: (
-                  <IconButton color="primary" size="small">
-                    <Tooltip TransitionComponent={Zoom} title={t('Agregar producto')} placement="right" arrow>
-                      <Icon icon="gala:add" width={20} height={20} />
-                    </Tooltip>
-                  </IconButton>
-                )
+                openPopup() {
+                  navigate(paths.dashboard.inventory.newProduct);
+                }
               },
               {
                 title: t('Categorias'),
                 path: paths.dashboard.inventory.categories,
                 openPopup() {
-                  console.log('openPopup');
+                  dispatch(switchPopupState());
                 }
               },
-              { title: t('Marcas'), path: paths.dashboard.inventory.brands },
-              { title: t('Puntos de venta'), path: paths.dashboard.inventory.pdvs }
+              {
+                title: t('Marcas'),
+                path: paths.dashboard.inventory.brands,
+                openPopup() {
+                  dispatch(switchPopupStateBrands());
+                }
+              },
+
+              {
+                title: t('Puntos de venta'),
+                path: paths.dashboard.inventory.pdvs,
+                openPopup() {
+                  dispatch(switchPopup());
+                }
+              }
             ]
           }
         ]
@@ -322,7 +340,7 @@ export function useNavData() {
         ]
       }
     ],
-    [t]
+    [t, dispatch, navigate]
   );
 
   return data;

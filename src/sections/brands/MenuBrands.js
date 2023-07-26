@@ -9,7 +9,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useBoolean } from 'src/hooks/use-boolean';
 // import trash2Outline from '@iconify/icons-eva/trash-2-outline';
 
-export default function MenuCategories({ handleEdit, handleDelete, handleView, view, element, edit }) {
+export default function MenuBrands({ handleEdit, handleDelete, handleView, view, element, edit }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
   const { t } = useTranslation();
@@ -122,7 +122,7 @@ export default function MenuCategories({ handleEdit, handleDelete, handleView, v
   );
 }
 
-MenuCategories.propTypes = {
+MenuBrands.propTypes = {
   handleEdit: PropTypes.func,
   handleDelete: PropTypes.func,
   handleView: PropTypes.func,
@@ -131,6 +131,6 @@ MenuCategories.propTypes = {
   edit: PropTypes.bool
 };
 
-MenuCategories.defaultProps = {
+MenuBrands.defaultProps = {
   view: true
 };

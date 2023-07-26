@@ -31,6 +31,9 @@ const FirebaseForgotPasswordPage = lazy(() => import('src/pages/auth/firebase/fo
 const Auth0LoginPage = lazy(() => import('src/pages/auth/auth0/login'));
 const Auth0Callback = lazy(() => import('src/pages/auth/auth0/callback'));
 
+// STEP BY STEP
+const SetpBySetp = lazy(() => import('src/pages/authentication/StepByStep'));
+
 // ----------------------------------------------------------------------
 
 const authAmplify = {
@@ -49,7 +52,7 @@ const authAmplify = {
         <AuthClassicLayout>
           <AmplifyLoginPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       path: 'register',
@@ -57,7 +60,7 @@ const authAmplify = {
         <AuthClassicLayout title="Manage the job more effectively with Minimal">
           <AmplifyRegisterPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       element: (
@@ -68,10 +71,10 @@ const authAmplify = {
       children: [
         { path: 'verify', element: <AmplifyVerifyPage /> },
         { path: 'new-password', element: <AmplifyNewPasswordPage /> },
-        { path: 'forgot-password', element: <AmplifyForgotPasswordPage /> },
-      ],
-    },
-  ],
+        { path: 'forgot-password', element: <AmplifyForgotPasswordPage /> }
+      ]
+    }
+  ]
 };
 
 const authJwt = {
@@ -90,7 +93,7 @@ const authJwt = {
         <AuthClassicLayout>
           <JwtLoginPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       path: 'register',
@@ -98,9 +101,20 @@ const authJwt = {
         <AuthClassicLayout title="Manage the job more effectively with Minimal">
           <JwtRegisterPage />
         </AuthClassicLayout>
-      ),
-    },
-  ],
+      )
+    }
+  ]
+};
+
+const stepByStep = {
+  path: 'step-by-step',
+  element: (
+    <GuestGuard>
+      <Suspense fallback={<SplashScreen />}>
+        <SetpBySetp />
+      </Suspense>
+    </GuestGuard>
+  )
 };
 
 const authFirebase = {
@@ -119,7 +133,7 @@ const authFirebase = {
         <AuthClassicLayout>
           <FirebaseLoginPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       path: 'register',
@@ -127,7 +141,7 @@ const authFirebase = {
         <AuthClassicLayout title="Manage the job more effectively with Minimal">
           <FirebaseRegisterPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       element: (
@@ -137,10 +151,10 @@ const authFirebase = {
       ),
       children: [
         { path: 'verify', element: <FirebaseVerifyPage /> },
-        { path: 'forgot-password', element: <FirebaseForgotPasswordPage /> },
-      ],
-    },
-  ],
+        { path: 'forgot-password', element: <FirebaseForgotPasswordPage /> }
+      ]
+    }
+  ]
 };
 
 const authAuth0 = {
@@ -159,18 +173,18 @@ const authAuth0 = {
         <AuthClassicLayout>
           <Auth0LoginPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       path: 'callback',
-      element: <Auth0Callback />,
-    },
-  ],
+      element: <Auth0Callback />
+    }
+  ]
 };
 
 export const authRoutes = [
   {
     path: 'auth',
-    children: [authAmplify, authJwt, authFirebase, authAuth0],
-  },
+    children: [authAmplify, authJwt, authFirebase, authAuth0, stepByStep]
+  }
 ];

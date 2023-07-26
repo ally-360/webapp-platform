@@ -41,23 +41,23 @@ export default function JwtLoginView() {
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    password: Yup.string().required('Password is required')
   });
 
   const defaultValues = {
-    email: 'demo@minimals.cc',
-    password: 'demo1234',
+    email: 'example@example.com',
+    password: 'myPassword123'
   };
 
   const methods = useForm({
     resolver: yupResolver(LoginSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -80,7 +80,7 @@ export default function JwtLoginView() {
         <Typography variant="body2">New user?</Typography>
 
         <Link component={RouterLink} href={paths.auth.jwt.register} variant="subtitle2">
-          Create an account
+          Crear cuenta
         </Link>
       </Stack>
     </Stack>
@@ -103,7 +103,7 @@ export default function JwtLoginView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
@@ -111,14 +111,7 @@ export default function JwtLoginView() {
         Forgot password?
       </Link>
 
-      <LoadingButton
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
+      <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
         Login
       </LoadingButton>
     </Stack>

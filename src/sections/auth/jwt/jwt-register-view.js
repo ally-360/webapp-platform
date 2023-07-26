@@ -23,6 +23,8 @@ import { useAuthContext } from 'src/auth/hooks';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { enqueueSnackbar } from 'notistack';
+import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 
 // ----------------------------------------------------------------------
 
@@ -40,10 +42,21 @@ export default function JwtRegisterView() {
   const password = useBoolean();
 
   const RegisterSchema = Yup.object().shape({
-    firstName: Yup.string().required('First name required'),
-    lastName: Yup.string().required('Last name required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    firstName: Yup.string()
+      .min(3, 'Ingrese un nombre valido')
+      .max(50, 'Ingrese un nombre valido')
+      .required('Ingrese el nombre'),
+    lastName: Yup.string()
+      .min(3, 'Ingrese un apellido valido')
+      .max(50, 'Ingrese un apellido más corto')
+      .required('Ingrese el apellido'),
+    email: Yup.string().email('Ingrese un correo valido').required('Correo es requerido'),
+    password: Yup.string().required('La contraseña es requerida'),
+    tel: Yup.string(),
+    dni: Yup.string()
+      .min(10, 'Ingrese un número de Cédula de ciudadanía')
+      .max(10, 'Ingrese un número de Cédula de ciudadanía')
+      .required('Ingrese un número de Cédula de ciudadanía')
   });
 
   const defaultValues = {
@@ -51,26 +64,33 @@ export default function JwtRegisterView() {
     lastName: '',
     email: '',
     password: '',
+    tel: '',
+    dni: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(RegisterSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await register?.(data.email, data.password, data.firstName, data.lastName);
-
+      await register?.(data.email, data.password, data.firstName, data.lastName, data.tel, data.dni);
       router.push(returnTo || PATH_AFTER_LOGIN);
+      enqueueSnackbar('Registro del usuario completado', {
+        variant: 'success'
+      });
     } catch (error) {
       console.error(error);
+      enqueueSnackbar(`Error al registrar el usuario ${error.message}`, {
+        variant: 'error'
+      });
       reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
@@ -91,10 +111,7 @@ export default function JwtRegisterView() {
   );
 
   const renderTerms = (
-    <Typography
-      component="div"
-      sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}
-    >
+    <Typography component="div" sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}>
       {'By signing up, I agree to '}
       <Link underline="always" color="text.primary">
         Terms of Service
@@ -117,6 +134,21 @@ export default function JwtRegisterView() {
           <RHFTextField name="lastName" label="Last name" />
         </Stack>
 
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <RHFPhoneNumber
+            name="tel"
+            label="Phonenumber"
+            fullWidth
+            type="string"
+            variant="outlined"
+            placeholder="Ej: 300 123 4567"
+            defaultCountry="co"
+            countryCodeEditable={false}
+            onlyCountries={['co']}
+          />
+          <RHFTextField name="dni" label="DNI" />
+        </Stack>
+
         <RHFTextField name="email" label="Email address" />
 
         <RHFTextField
@@ -130,18 +162,11 @@ export default function JwtRegisterView() {
                   <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
                 </IconButton>
               </InputAdornment>
-            ),
+            )
           }}
         />
 
-        <LoadingButton
-          fullWidth
-          color="inherit"
-          size="large"
-          type="submit"
-          variant="contained"
-          loading={isSubmitting}
-        >
+        <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
           Create account
         </LoadingButton>
       </Stack>

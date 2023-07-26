@@ -4,13 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
-  TextField,
   Slide,
   Box,
   IconButton,
@@ -26,98 +20,80 @@ import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
 import { LoadingButton } from '@mui/lab';
 
-import { getCategories, switchPopupState } from 'src/redux/inventory/categoriesSlice';
+import { getCategories } from 'src/redux/inventory/categoriesSlice';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useTranslation } from 'react-i18next';
 import FormProvider from 'src/components/hook-form/form-provider';
-import { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { RHFTextField } from 'src/components/hook-form';
 import { Icon } from '@iconify/react';
+import { getBrands, switchPopupState } from 'src/redux/inventory/brandsSlice';
 import RequestService from '../../axios/services/service';
 
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-function PopupCreateCategory({ open, PaperComponent }) {
+function PopupCreateBrand({ open, PaperComponent }) {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const theme = useTheme();
-  const categoryEdit = useSelector((state) => state.categories.categoryEdit);
-  const [categoryEditInfo, setCategoryEditInfo] = useState(null);
-
-  useEffect(() => {
-    const category = async () => {
-      if (categoryEdit) {
-        const { data } = await RequestService.getCategoryById(categoryEdit.id);
-        setCategoryEditInfo(data);
-      } else {
-        setCategoryEditInfo(null);
-      }
-    };
-    category();
-  }, [categoryEdit]);
+  const { brandEdit } = useSelector((state) => state.brands);
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.log(categoryEditInfo);
-  }, [categoryEditInfo]);
+    console.log(brandEdit);
+  }, [brandEdit]);
   // create category schema
-  const createCategorySchema = Yup.object().shape(
+  const createBrandSchema = Yup.object().shape(
     {
-      name: Yup.string().required('Nombre requerido'),
-      description: Yup.string().required('Descripción requerida'),
-      categoryMainCategory: Yup.string().optional()
-    }[categoryEditInfo]
+      name: Yup.string().required('Nombre requerido')
+    }[brandEdit]
   );
 
   const defaultValues = useMemo(
     () => ({
-      name: categoryEditInfo ? categoryEditInfo.name : '',
-      description: categoryEditInfo ? categoryEditInfo.description : '',
-      categoryMainCategory: categoryEditInfo ? categoryEditInfo.categoryMainCategory : null
+      name: brandEdit ? brandEdit.name : ''
     }),
-    [categoryEditInfo]
+    [brandEdit]
   );
 
   const methods = useForm({
-    resolver: yupResolver(createCategorySchema),
+    resolver: yupResolver(createBrandSchema),
     defaultValues
   });
 
   const {
     reset,
-    watch,
-    setValue,
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
 
   useEffect(() => {
-    if (categoryEditInfo) {
+    if (brandEdit) {
       reset(defaultValues);
     }
-  }, [categoryEditInfo, defaultValues, reset]);
+  }, [brandEdit, defaultValues, reset]);
 
   useEffect(() => {
-    if (!categoryEditInfo) {
+    if (!brandEdit) {
       reset(defaultValues);
     }
-  }, [categoryEditInfo, defaultValues, reset]);
+  }, [brandEdit, defaultValues, reset]);
 
   const { categories } = useSelector((state) => state.categories);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      if (categoryEditInfo) {
-        await RequestService.editCategory({ id: categoryEditInfo.id, databody: data });
+      if (brandEdit) {
+        await RequestService.editBrand({ id: brandEdit.id, databody: data });
       } else {
-        await RequestService.createCategory(data);
+        await RequestService.createBrand(data);
       }
-      dispatch(getCategories());
+      dispatch(getBrands());
       reset();
       enqueueSnackbar(
-        categoryEdit ? t(`Categoria ${data.name} editado correctamente`) : t(`Categoria ${data.name} Creado`),
+        brandEdit ? t(`Categoria ${data.name} editado correctamente`) : t(`Categoria ${data.name} Creado`),
         {
           variant: 'success'
         }
@@ -141,15 +117,10 @@ function PopupCreateCategory({ open, PaperComponent }) {
       aria-labelledby="draggable-dialog-title"
       TransitionComponent={Transition}
     >
-      <DialogTitle
-        style={{ cursor: 'move' }}
-        id="scroll-dialog-title"
-        boxShadow={2}
-        sx={{ padding: '23px  40px 18px 40px!important' }}
-      >
+      <DialogTitle id="scroll-dialog-title" boxShadow={2} sx={{ padding: '23px  40px 18px 40px!important' }}>
         <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
           <Icon icon="ic:round-store" width={24} height={24} />
-          <Box sx={{ fontSize: 18, fontWeight: 500 }}>Crear categoria</Box>
+          <Box sx={{ fontSize: 18, fontWeight: 500 }}>Crear Marca</Box>
         </Box>
         <IconButton
           aria-label="close"
@@ -168,14 +139,6 @@ function PopupCreateCategory({ open, PaperComponent }) {
         <DialogContent>
           <Stack spacing={2} mt={4} mb={3} direction="column" alignItems="center">
             <RHFTextField label="Nombre" name="name" required />
-            <RHFTextField label="Descripción" name="description" required />
-            <RHFSelect label="Categoria padre" name="categoryMainCategory">
-              {categories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
-                </MenuItem>
-              ))}
-            </RHFSelect>
           </Stack>
         </DialogContent>
         <DialogActions
@@ -194,7 +157,7 @@ function PopupCreateCategory({ open, PaperComponent }) {
           }}
         >
           <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
-            {categoryEdit ? 'Confirmar edición' : 'Crear Categoria'}
+            {brandEdit ? 'Confirmar edición' : 'Crear Marca'}
           </LoadingButton>
           <Button startIcon color="primary" variant="outlined" onClick={() => dispatch(switchPopupState())}>
             Cancelar
@@ -205,9 +168,9 @@ function PopupCreateCategory({ open, PaperComponent }) {
   );
 }
 
-PopupCreateCategory.propTypes = {
+PopupCreateBrand.propTypes = {
   open: PropTypes.bool,
   PaperComponent: PropTypes.func
 };
 
-export default PopupCreateCategory;
+export default PopupCreateBrand;

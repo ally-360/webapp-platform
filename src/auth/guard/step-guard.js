@@ -8,23 +8,18 @@ import { useAuthContext } from '../hooks';
 
 // ----------------------------------------------------------------------
 
-export default function GuestGuard({ children }) {
+export default function StepGuard({ children }) {
   const router = useRouter();
 
   const searchParams = useSearchParams();
 
-  const returnTo = searchParams.get('returnTo') || paths.dashboard.root;
+  const returnTo = searchParams.get('returnTo') || paths.stepByStep.root;
 
   const { authenticated, isFirstLogin } = useAuthContext();
 
   const check = useCallback(() => {
-    if (authenticated && isFirstLogin === false) {
-      router.replace(returnTo);
-    }
     if (authenticated && isFirstLogin === true) {
-      router.replace(paths.stepByStep.root);
-    } else {
-      router.replace(paths.auth.jwt.login);
+      router.replace(returnTo);
     }
   }, [authenticated, returnTo, router, isFirstLogin]);
 
@@ -35,6 +30,6 @@ export default function GuestGuard({ children }) {
   return <>{children}</>;
 }
 
-GuestGuard.propTypes = {
+StepGuard.propTypes = {
   children: PropTypes.node
 };

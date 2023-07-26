@@ -11,7 +11,7 @@ const MOCK_TITLE = _postTitles[2];
 const ROOTS = {
   AUTH: '/auth',
   AUTH_DEMO: '/auth-demo',
-  DASHBOARD: '/dashboard',
+  DASHBOARD: '/dashboard'
 };
 
 // ----------------------------------------------------------------------
@@ -40,15 +40,15 @@ export const paths = {
     checkout: `/product/checkout`,
     details: (id) => `/product/${id}`,
     demo: {
-      details: `/product/${MOCK_ID}`,
-    },
+      details: `/product/${MOCK_ID}`
+    }
   },
   post: {
     root: `/post`,
     details: (title) => `/post/${paramCase(title)}`,
     demo: {
-      details: `/post/${paramCase(MOCK_TITLE)}`,
-    },
+      details: `/post/${paramCase(MOCK_TITLE)}`
+    }
   },
   // AUTH
   auth: {
@@ -57,21 +57,21 @@ export const paths = {
       verify: `${ROOTS.AUTH}/amplify/verify`,
       register: `${ROOTS.AUTH}/amplify/register`,
       newPassword: `${ROOTS.AUTH}/amplify/new-password`,
-      forgotPassword: `${ROOTS.AUTH}/amplify/forgot-password`,
+      forgotPassword: `${ROOTS.AUTH}/amplify/forgot-password`
     },
     jwt: {
       login: `${ROOTS.AUTH}/jwt/login`,
-      register: `${ROOTS.AUTH}/jwt/register`,
+      register: `${ROOTS.AUTH}/jwt/register`
     },
     firebase: {
       login: `${ROOTS.AUTH}/firebase/login`,
       verify: `${ROOTS.AUTH}/firebase/verify`,
       register: `${ROOTS.AUTH}/firebase/register`,
-      forgotPassword: `${ROOTS.AUTH}/firebase/forgot-password`,
+      forgotPassword: `${ROOTS.AUTH}/firebase/forgot-password`
     },
     auth0: {
-      login: `${ROOTS.AUTH}/auth0/login`,
-    },
+      login: `${ROOTS.AUTH}/auth0/login`
+    }
   },
   authDemo: {
     classic: {
@@ -79,15 +79,18 @@ export const paths = {
       register: `${ROOTS.AUTH_DEMO}/classic/register`,
       forgotPassword: `${ROOTS.AUTH_DEMO}/classic/forgot-password`,
       newPassword: `${ROOTS.AUTH_DEMO}/classic/new-password`,
-      verify: `${ROOTS.AUTH_DEMO}/classic/verify`,
+      verify: `${ROOTS.AUTH_DEMO}/classic/verify`
     },
     modern: {
       login: `${ROOTS.AUTH_DEMO}/modern/login`,
       register: `${ROOTS.AUTH_DEMO}/modern/register`,
       forgotPassword: `${ROOTS.AUTH_DEMO}/modern/forgot-password`,
       newPassword: `${ROOTS.AUTH_DEMO}/modern/new-password`,
-      verify: `${ROOTS.AUTH_DEMO}/modern/verify`,
-    },
+      verify: `${ROOTS.AUTH_DEMO}/modern/verify`
+    }
+  },
+  stepByStep: {
+    root: `${ROOTS.AUTH}/step-by-step`
   },
   // DASHBOARD
   dashboard: {
@@ -104,11 +107,11 @@ export const paths = {
       newProduct: `${ROOTS.DASHBOARD}/inventory/new-product`,
       categories: `${ROOTS.DASHBOARD}/inventory/categories`,
       pdvs: `${ROOTS.DASHBOARD}/inventory/pdvs`,
-      brands: `${ROOTS.DASHBOARD}/inventory/brands`,
+      brands: `${ROOTS.DASHBOARD}/inventory/brands`
     },
-    sales:{
+    sales: {
       list: `${ROOTS.DASHBOARD}/sales`,
-      newSale: `${ROOTS.DASHBOARD}/sales/new-sale`,
+      newSale: `${ROOTS.DASHBOARD}/sales/new-sale`
     },
     pos: `${ROOTS.DASHBOARD}/pos`,
 
@@ -118,7 +121,7 @@ export const paths = {
       analytics: `${ROOTS.DASHBOARD}/analytics`,
       banking: `${ROOTS.DASHBOARD}/banking`,
       booking: `${ROOTS.DASHBOARD}/booking`,
-      file: `${ROOTS.DASHBOARD}/file`,
+      file: `${ROOTS.DASHBOARD}/file`
     },
     user: {
       root: `${ROOTS.DASHBOARD}/user`,
@@ -129,8 +132,8 @@ export const paths = {
       account: `${ROOTS.DASHBOARD}/user/account`,
       edit: (id) => `${ROOTS.DASHBOARD}/user/${id}/edit`,
       demo: {
-        edit: `${ROOTS.DASHBOARD}/user/${MOCK_ID}/edit`,
-      },
+        edit: `${ROOTS.DASHBOARD}/user/${MOCK_ID}/edit`
+      }
     },
     product: {
       root: `${ROOTS.DASHBOARD}/product`,
@@ -139,8 +142,8 @@ export const paths = {
       edit: (id) => `${ROOTS.DASHBOARD}/product/${id}/edit`,
       demo: {
         details: `${ROOTS.DASHBOARD}/product/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/product/${MOCK_ID}/edit`,
-      },
+        edit: `${ROOTS.DASHBOARD}/product/${MOCK_ID}/edit`
+      }
     },
     invoice: {
       root: `${ROOTS.DASHBOARD}/invoice`,
@@ -149,8 +152,8 @@ export const paths = {
       edit: (id) => `${ROOTS.DASHBOARD}/invoice/${id}/edit`,
       demo: {
         details: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}/edit`,
-      },
+        edit: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}/edit`
+      }
     },
     post: {
       root: `${ROOTS.DASHBOARD}/post`,
@@ -159,15 +162,15 @@ export const paths = {
       edit: (title) => `${ROOTS.DASHBOARD}/post/${paramCase(title)}/edit`,
       demo: {
         details: `${ROOTS.DASHBOARD}/post/${paramCase(MOCK_TITLE)}`,
-        edit: `${ROOTS.DASHBOARD}/post/${paramCase(MOCK_TITLE)}/edit`,
-      },
+        edit: `${ROOTS.DASHBOARD}/post/${paramCase(MOCK_TITLE)}/edit`
+      }
     },
     order: {
       root: `${ROOTS.DASHBOARD}/order`,
       details: (id) => `${ROOTS.DASHBOARD}/order/${id}`,
       demo: {
-        details: `${ROOTS.DASHBOARD}/order/${MOCK_ID}`,
-      },
+        details: `${ROOTS.DASHBOARD}/order/${MOCK_ID}`
+      }
     },
     job: {
       root: `${ROOTS.DASHBOARD}/job`,
@@ -176,8 +179,8 @@ export const paths = {
       edit: (id) => `${ROOTS.DASHBOARD}/job/${id}/edit`,
       demo: {
         details: `${ROOTS.DASHBOARD}/job/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/job/${MOCK_ID}/edit`,
-      },
+        edit: `${ROOTS.DASHBOARD}/job/${MOCK_ID}/edit`
+      }
     },
     tour: {
       root: `${ROOTS.DASHBOARD}/tour`,
@@ -186,11 +189,8 @@ export const paths = {
       edit: (id) => `${ROOTS.DASHBOARD}/tour/${id}/edit`,
       demo: {
         details: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`,
-      },
-    },
-  },
-
-
-
+        edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`
+      }
+    }
+  }
 };

@@ -27,23 +27,23 @@ const TABS = [
   {
     value: 'profile',
     label: 'Profile',
-    icon: <Iconify icon="solar:user-id-bold" width={24} />,
+    icon: <Iconify icon="solar:user-id-bold" width={24} />
   },
   {
     value: 'followers',
     label: 'Followers',
-    icon: <Iconify icon="solar:heart-bold" width={24} />,
+    icon: <Iconify icon="solar:heart-bold" width={24} />
   },
   {
     value: 'friends',
     label: 'Friends',
-    icon: <Iconify icon="solar:users-group-rounded-bold" width={24} />,
+    icon: <Iconify icon="solar:users-group-rounded-bold" width={24} />
   },
   {
     value: 'gallery',
     label: 'Gallery',
-    icon: <Iconify icon="solar:gallery-wide-bold" width={24} />,
-  },
+    icon: <Iconify icon="solar:gallery-wide-bold" width={24} />
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -72,17 +72,17 @@ export default function UserProfileView() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'User', href: paths.dashboard.user.root },
-          { name: user?.displayName },
+          { name: user?.displayName }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
       <Card
         sx={{
           mb: 3,
-          height: 290,
+          height: 290
         }}
       >
         <ProfileCover
@@ -105,9 +105,9 @@ export default function UserProfileView() {
               pr: { md: 3 },
               justifyContent: {
                 sm: 'center',
-                md: 'flex-end',
-              },
-            },
+                md: 'flex-end'
+              }
+            }
           }}
         >
           {TABS.map((tab) => (
@@ -121,11 +121,7 @@ export default function UserProfileView() {
       {currentTab === 'followers' && <ProfileFollowers followers={_userFollowers} />}
 
       {currentTab === 'friends' && (
-        <ProfileFriends
-          friends={_userFriends}
-          searchFriends={searchFriends}
-          onSearchFriends={handleSearchFriends}
-        />
+        <ProfileFriends friends={_userFriends} searchFriends={searchFriends} onSearchFriends={handleSearchFriends} />
       )}
 
       {currentTab === 'gallery' && <ProfileGallery gallery={_userGallery} />}
