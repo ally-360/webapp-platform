@@ -27,11 +27,10 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 export default function AccountCompany() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const { company } = useAuthContext();
+  const { company, updateCompany } = useAuthContext();
 
   const UpdateUserSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
-    nit: Yup.string().required('Nit is required'),
     address: Yup.string().required('Address is required'),
     phoneNumber: Yup.string().required('Phone number is required'),
     website: Yup.string().required('Website is required'),
@@ -68,7 +67,8 @@ export default function AccountCompany() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      delete data.nit;
+      await updateCompany(data);
       enqueueSnackbar('Update success!');
       console.info('DATA', data);
     } catch (error) {
@@ -130,7 +130,7 @@ export default function AccountCompany() {
               }}
             >
               <RHFTextField name="name" label="Nombre" />
-              <RHFTextField name="nit" label="Nit" />
+              <RHFTextField disabled name="nit" label="Nit" />
               <RHFTextField name="address" label="Dirección" />
               <RHFPhoneNumber
                 type="string"

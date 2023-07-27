@@ -17,8 +17,6 @@ export default function AccountBilling({ cards, plans, invoices, addressBook }) 
         <AccountBillingPlan plans={plans} cardList={cards} addressBook={addressBook} />
 
         <AccountBillingPayment cards={cards} />
-
-        <AccountBillingAddress addressBook={addressBook} />
       </Grid>
 
       <Grid xs={12} md={4}>
@@ -32,5 +30,5 @@ AccountBilling.propTypes = {
   addressBook: PropTypes.array,
   cards: PropTypes.array,
   invoices: PropTypes.array,
-  plans: PropTypes.array,
+  plans: PropTypes.array
 };

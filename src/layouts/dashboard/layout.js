@@ -10,6 +10,8 @@ import { useSettingsContext } from 'src/components/settings';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
+import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
+import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -87,6 +89,8 @@ export default function DashboardLayout({ children }) {
         {renderNavVertical}
 
         <Main>{children}</Main>
+        <PopupCreateCategory />
+        <PopupCreateBrand />
       </Box>
     </>
   );

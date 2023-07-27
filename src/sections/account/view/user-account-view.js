@@ -38,11 +38,6 @@ const TABS = [
     icon: <Iconify icon="solar:bill-list-bold" width={24} />
   },
   {
-    value: 'notifications',
-    label: 'Notificaciones',
-    icon: <Iconify icon="solar:bell-bing-bold" width={24} />
-  },
-  {
     value: 'security',
     label: 'Cambiar contraseña',
     icon: <Iconify icon="ic:round-vpn-key" width={24} />

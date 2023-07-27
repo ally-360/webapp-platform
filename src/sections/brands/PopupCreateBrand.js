@@ -32,7 +32,7 @@ import RequestService from '../../axios/services/service';
 
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-function PopupCreateBrand({ open, PaperComponent }) {
+function PopupCreateBrand() {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -81,7 +81,7 @@ function PopupCreateBrand({ open, PaperComponent }) {
     }
   }, [brandEdit, defaultValues, reset]);
 
-  const { categories } = useSelector((state) => state.categories);
+  const open = useSelector((state) => state.brands.openPopup);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -111,7 +111,6 @@ function PopupCreateBrand({ open, PaperComponent }) {
     <Dialog
       fullWidth
       maxWidth="sm"
-      PaperComponent={PaperComponent}
       open={open}
       onClose={switchPopupState}
       aria-labelledby="draggable-dialog-title"

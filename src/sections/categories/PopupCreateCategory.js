@@ -37,13 +37,13 @@ import RequestService from '../../axios/services/service';
 
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-function PopupCreateCategory({ open, PaperComponent }) {
+function PopupCreateCategory() {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const theme = useTheme();
   const categoryEdit = useSelector((state) => state.categories.categoryEdit);
   const [categoryEditInfo, setCategoryEditInfo] = useState(null);
-
+  const open = useSelector((state) => state.categories.openPopup);
   useEffect(() => {
     const category = async () => {
       if (categoryEdit) {
@@ -135,7 +135,6 @@ function PopupCreateCategory({ open, PaperComponent }) {
     <Dialog
       fullWidth
       maxWidth="sm"
-      PaperComponent={PaperComponent}
       open={open}
       onClose={switchPopupState}
       aria-labelledby="draggable-dialog-title"
@@ -206,8 +205,7 @@ function PopupCreateCategory({ open, PaperComponent }) {
 }
 
 PopupCreateCategory.propTypes = {
-  open: PropTypes.bool,
-  PaperComponent: PropTypes.func
+  open: PropTypes.bool
 };
 
 export default PopupCreateCategory;

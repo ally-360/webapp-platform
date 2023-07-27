@@ -122,27 +122,27 @@ export function useNavData() {
           },
           {
             title: t('Ventas'),
-            path: paths.dashboard.root,
+            path: paths.dashboard.blank,
             icon: ICONS.ventas
           },
           {
             title: t('Gastos'),
-            path: paths.dashboard.root,
+            path: paths.dashboard.blank,
             icon: ICONS.gastos
           },
           {
             title: t('Contactos'),
-            path: paths.dashboard.root,
+            path: paths.dashboard.blank,
             icon: ICONS.contact
           },
           {
             title: t('Contabilidad'),
-            path: paths.dashboard.root,
+            path: paths.dashboard.blank,
             icon: ICONS.product
           },
           {
             title: t('Reportes'),
-            path: paths.dashboard.root,
+            path: paths.dashboard.blank,
             icon: ICONS.product
           }
         ]

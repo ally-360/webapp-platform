@@ -12,7 +12,8 @@ const initialState = {
   openPopup: false,
   products: [],
   categoryEdit: null,
-  seeCategory: false
+  seeCategory: false,
+  isEmpty: false
 };
 
 const slice = createSlice({
@@ -30,10 +31,10 @@ const slice = createSlice({
       state.error = action.payload;
     },
 
-    // GET PRODUCTS
     getCategories(state, action) {
       state.isLoading = false;
       state.categories = action.payload;
+      state.isEmpty = action.payload.length === 0;
     },
 
     getProducts(state, action) {
@@ -81,7 +82,7 @@ export function deleteCategory(id) {
     dispatch(slice.actions.startLoading());
     try {
       await RequestService.deleteCategory(id);
-      dispatch(slice.actions.deleteCategory(id));
+      dispatch(getCategories());
     } catch (error) {
       dispatch(slice.actions.hasError(error));
     }

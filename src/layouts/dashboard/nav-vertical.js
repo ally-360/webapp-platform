@@ -80,7 +80,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
           <Avatar
             src={user?.profile?.photo}
             alt={user?.profile?.name}
-            color={user.profile?.photo ? 'default' : 'inherit'}
+            color={user?.profile?.photo ? 'default' : 'inherit'}
           >
             {/* {createAvatar(user.displayName).name} */}
             {user?.profile?.name?.charAt(0)}

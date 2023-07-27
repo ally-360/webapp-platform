@@ -14,7 +14,9 @@ import {
   Divider,
   ListItem,
   IconButton,
-  useTheme
+  useTheme,
+  Alert,
+  AlertTitle
 } from '@mui/material';
 
 // redux
@@ -36,7 +38,7 @@ import { enqueueSnackbar } from 'notistack';
 import { ProductListView } from 'src/sections/product/view';
 import { deleteBrand, getBrands, switchPopupState } from 'src/redux/inventory/brandsSlice';
 import MenuBrands from 'src/sections/brands/MenuBrands';
-import PopupCreateCategory from '../PopupCreateBrand';
+import PopupCreateBrand from '../PopupCreateBrand';
 // utils
 
 // hooks
@@ -62,7 +64,7 @@ export default function InventoryBrandsList() {
     dispatch(getBrands());
   }, [dispatch]);
 
-  const { brands, openPopup } = useSelector((state) => state.brands);
+  const { brands, openPopup, isLoading, brandsEmpty } = useSelector((state) => state.brands);
 
   const [expandedCategories, setExpandedCategories] = useState([]);
 
@@ -76,10 +78,10 @@ export default function InventoryBrandsList() {
   };
 
   const handleDelete = async ({ id }) => {
-    console.log(id);
     try {
-      dispatch(deleteBrand(id));
-      enqueueSnackbar('Categoria eliminada', { variant: 'success' });
+      setViewBrand(0);
+      dispatch(deleteBrand({ id }));
+      enqueueSnackbar('Marca elimina', { variant: 'success' });
     } catch (error) {
       console.log(error);
     }
@@ -94,110 +96,119 @@ export default function InventoryBrandsList() {
   };
 
   return (
-    <>
-      <Container ref={componentRef} maxWidth={settings.themeStretch ? false : 'lg'}>
-        <CustomBreadcrumbs
-          heading="Marcas"
-          icon="nimbus:marketing"
-          links={[
-            { name: 'Dashboard', href: paths.dashboard.root },
-            {
-              name: 'Inventario',
-              href: paths.dashboard.inventory
-            },
-            { name: 'Categorias' }
-          ]}
-          sx={{ mb: { xs: 3, md: 5 } }}
-          action={
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={handleClickPopup}
-              startIcon={<Icon icon="mingcute:add-line" />}
-            >
-              Crear Marca
-            </Button>
-          }
-        />
-        <Grid container spacing={2}>
-          <Grid sx={{ height: '100%', position: 'sticky', bottom: '100px', left: 0, top: '60px' }} item xs={12} md={4}>
-            <Card>
-              {brands.length === 0 ? (
-                <Skeleton variant="rectangular" height={400} />
-              ) : (
-                <List sx={{ width: '100%', bgcolor: 'background.paper' }} component="nav">
-                  {brands.map((brand) => (
-                    <Fragment key={brand.id}>
-                      <ListItem
-                        secondaryAction={
-                          <MenuBrands
-                            handleEdit={handleEdit}
-                            handleDelete={handleDelete}
-                            handleView={handleView}
-                            view={viewBrand}
-                            element={brand}
-                          />
-                        }
-                        disablePadding
-                        style={{
-                          backgroundColor:
-                            viewBrand === brand.id
-                              ? '#D6E2F5'
-                              : expandedCategories.includes(brand.id)
-                              ? '#E3F2FD'
-                              : 'white',
-                          color: viewBrand === brand.id ? theme.palette.primary.dark : '#212121'
-                        }}
-                      >
-                        <ListItemButton
-                          sx={{ padding: 1.5, paddingLeft: 2 }}
-                          onClick={() => handleView(brand.id)}
-                          ref={menuRef}
-                        >
-                          <ListItemText
-                            sx={{
-                              span: {
-                                fontWeight: 500
-                              }
-                            }}
-                          >
-                            {brand.name}
-                          </ListItemText>
-                        </ListItemButton>
-                      </ListItem>
-                    </Fragment>
-                  ))}
-                </List>
-              )}
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                {viewBrand === 0 ? (
-                  'seleciona una categoria'
-                ) : (
-                  <>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={12}>
-                        <Typography variant="h5" sx={{ mb: 3 }}>
-                          {brands.find((brand) => brand.id === viewBrand).name}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                    <Divider sx={{ mb: 3 }} />
-                    <Typography variant="h6" sx={{ mb: 3 }}>
-                      Productos asociados
-                    </Typography>
-                    <ProductListView categoryView={brands.find((brand) => brand.id === viewBrand)} />
-                  </>
-                )}
-              </CardContent>
-            </Card>
+    <Container ref={componentRef} maxWidth={settings.themeStretch ? false : 'lg'}>
+      <CustomBreadcrumbs
+        heading="Marcas"
+        icon="nimbus:marketing"
+        links={[
+          { name: 'Dashboard', href: paths.dashboard.root },
+          {
+            name: 'Inventario',
+            href: paths.dashboard.inventory
+          },
+          { name: 'Categorias' }
+        ]}
+        sx={{ mb: { xs: 3, md: 5 } }}
+        action={
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={handleClickPopup}
+            startIcon={<Icon icon="mingcute:add-line" />}
+          >
+            Crear Marca
+          </Button>
+        }
+      />
+      {brandsEmpty && (
+        <Grid mb={2} container spacing={2}>
+          <Grid item xs={12} md={12}>
+            <Alert severity="info">
+              <AlertTitle>Crea una marca</AlertTitle>
+              Puedes crear una marca dando click en el botón superior derecho <strong>"Crear marca"</strong>
+            </Alert>
           </Grid>
         </Grid>
-      </Container>
-      <PopupCreateCategory PaperComponent={PaperComponent} open={openPopup} handleClose={handleClickPopup} />
-    </>
+      )}
+
+      <Grid container spacing={2}>
+        <Grid sx={{ height: '100%', position: 'sticky', bottom: '100px', left: 0, top: '60px' }} item xs={12} md={4}>
+          <Card>
+            {isLoading && <Skeleton variant="rectangular" height={400} />}
+            {!isLoading && (
+              <List sx={{ width: '100%', bgcolor: 'background.paper', minHeight: '200px' }} component="nav">
+                {brands.map((brand) => (
+                  <Fragment key={brand.id}>
+                    <ListItem
+                      secondaryAction={
+                        <MenuBrands
+                          handleEdit={handleEdit}
+                          handleDelete={handleDelete}
+                          handleView={handleView}
+                          view={viewBrand}
+                          element={brand}
+                        />
+                      }
+                      disablePadding
+                      style={{
+                        backgroundColor:
+                          viewBrand === brand.id
+                            ? '#D6E2F5'
+                            : expandedCategories.includes(brand.id)
+                            ? '#E3F2FD'
+                            : 'white',
+                        color: viewBrand === brand.id ? theme.palette.primary.dark : '#212121'
+                      }}
+                    >
+                      <ListItemButton
+                        sx={{ padding: 1.5, paddingLeft: 2 }}
+                        onClick={() => handleView(brand.id)}
+                        ref={menuRef}
+                      >
+                        <ListItemText
+                          sx={{
+                            span: {
+                              fontWeight: 500
+                            }
+                          }}
+                        >
+                          {brand.name}
+                        </ListItemText>
+                      </ListItemButton>
+                    </ListItem>
+                  </Fragment>
+                ))}
+              </List>
+            )}
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={8}>
+          {isLoading && <Skeleton variant="rectangular" height={400} />}
+          {viewBrand === 0 && !isLoading && (
+            <Card sx={{ height: '100%' }}>
+              <CardContent>{brandsEmpty ? '' : 'Seleciona una marca para visualizarla'}</CardContent>
+            </Card>
+          )}
+          {viewBrand !== 0 && !isLoading && !brandsEmpty && (
+            <Card sx={{ height: '100%' }}>
+              <CardContent>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={12}>
+                    <Typography variant="h5" sx={{ mb: 3 }}>
+                      {brands.find((brand) => brand.id === viewBrand).name}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Divider sx={{ mb: 3 }} />
+                <Typography variant="h6" sx={{ mb: 3 }}>
+                  Productos asociados
+                </Typography>
+                <ProductListView categoryView={brands.find((brand) => brand.id === viewBrand)} />
+              </CardContent>
+            </Card>
+          )}
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

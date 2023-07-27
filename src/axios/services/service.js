@@ -10,8 +10,6 @@ import {
 import apiClient from '../axios';
 
 class RequestService {
-  company_id = 'f403346f-e91d-423d-9bbb-6a0168cd3f64';
-
   fetchLoginUser = async ({ databody }) => apiClient(configPostWithToken('/auth/login', databody));
 
   fetchRegisterUser = async ({ databody }) => apiClient(configPostWithToken('/auth/register', databody));

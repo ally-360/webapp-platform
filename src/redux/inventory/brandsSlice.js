@@ -9,7 +9,8 @@ const initialState = {
   openPopup: false,
   products: [],
   brandEdit: null,
-  seeBrand: false
+  seeBrand: false,
+  brandsEmpty: false
 };
 
 const slice = createSlice({
@@ -29,6 +30,7 @@ const slice = createSlice({
     getBrands(state, action) {
       state.isLoading = false;
       state.brands = action.payload;
+      state.brandsEmpty = action.payload.length === 0;
     },
     getProducts(state, action) {
       state.isLoading = false;
@@ -73,7 +75,7 @@ export function deleteBrand(id) {
     dispatch(slice.actions.startLoading());
     try {
       await RequestService.deleteBrand(id);
-      dispatch(slice.actions.deleteBrand(id));
+      dispatch(getBrands());
     } catch (error) {
       dispatch(slice.actions.hasError(error));
     }

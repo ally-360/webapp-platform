@@ -36,7 +36,7 @@ export default function OverviewAppView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Grid container spacing={3}>
-        <Grid xs={12} md={8}>
+        <Grid xs={12} md={12}>
           <AppWelcome
             title={`Bienvenido 👋 \n ${user?.profile?.name}`}
             description=""
@@ -47,10 +47,6 @@ export default function OverviewAppView() {
               </Button>
             }
           />
-        </Grid>
-
-        <Grid xs={12} md={4}>
-          <AppFeatured list={_appFeatured} />
         </Grid>
 
         <Grid xs={12} md={4}>

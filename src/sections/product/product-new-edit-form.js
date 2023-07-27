@@ -41,6 +41,19 @@ import FormProvider, {
   RHFAutocomplete,
   RHFMultiCheckbox
 } from 'src/components/hook-form';
+import { IconButton, MenuItem, TextField, Tooltip, Zoom } from '@mui/material';
+import { Icon } from '@iconify/react';
+import { getCategories, switchPopupState } from 'src/redux/inventory/categoriesSlice';
+import { switchPopupState as switchPopupStateBrand, getBrands } from 'src/redux/inventory/brandsSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import match from 'autosuggest-highlight/match';
+import parse from 'autosuggest-highlight/parse';
+import { Link } from 'react-router-dom';
+import { useTheme } from '@emotion/react';
+import { calculatePriceBase, calculatePriceSale } from 'src/sections/product/common/priceFunctions';
+import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
+import { NumericFormat } from 'react-number-format';
+import ButtonAutocomplete from './common/ButtonAutocomplete';
 
 // ----------------------------------------------------------------------
 
@@ -53,6 +66,17 @@ export default function ProductNewEditForm({ currentProduct }) {
 
   const [includeTaxes, setIncludeTaxes] = useState(false);
 
+  const TAXES_OPTIONS = useMemo(
+    () => [
+      { value: 0, label: '0%' },
+      { value: 5, label: '5%' },
+      { value: 10, label: '10%' },
+      { value: 15, label: '15%' },
+      { value: 19, label: '19%' }
+    ],
+    []
+  );
+
   const NewProductSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
     images: Yup.array().min(1, 'Images is required'),
@@ -60,6 +84,12 @@ export default function ProductNewEditForm({ currentProduct }) {
     category: Yup.string().required('Category is required'),
     price: Yup.number().moreThan(0, 'Price should not be $0.00'),
     description: Yup.string().required('Description is required'),
+
+    barCode: Yup.string(),
+    sku: Yup.string(),
+    priceBase: Yup.number(),
+    priceSale: Yup.number(),
+
     // not required
     taxes: Yup.number(),
     newLabel: Yup.object().shape({
@@ -79,13 +109,14 @@ export default function ProductNewEditForm({ currentProduct }) {
       subDescription: currentProduct?.subDescription || '',
       images: currentProduct?.images || [],
       //
-      code: currentProduct?.code || '',
+      barCode: currentProduct?.barCode || '',
       sku: currentProduct?.sku || '',
-      price: currentProduct?.price || 0,
-      quantity: currentProduct?.quantity || 0,
+      priceBase: currentProduct?.priceBase || 0,
       priceSale: currentProduct?.priceSale || 0,
-      tags: currentProduct?.tags || [],
       taxes: currentProduct?.taxes || 0,
+
+      quantity: currentProduct?.quantity || 0,
+      tags: currentProduct?.tags || [],
       gender: currentProduct?.gender || '',
       category: currentProduct?.category || '',
       colors: currentProduct?.colors || [],
@@ -110,6 +141,10 @@ export default function ProductNewEditForm({ currentProduct }) {
   } = methods;
 
   const values = watch();
+
+  useEffect(() => {
+    console.log('values', values);
+  }, [values]);
 
   useEffect(() => {
     if (currentProduct) {
@@ -167,242 +202,325 @@ export default function ProductNewEditForm({ currentProduct }) {
   const handleChangeIncludeTaxes = useCallback((event) => {
     setIncludeTaxes(event.target.checked);
   }, []);
+  const upMd = useResponsive('up', 'md');
+
+  // Autocomplete category
+
+  const handleClickOpenPopupCategory = () => {
+    dispatch(switchPopupState());
+  };
+
+  const dispatch = useDispatch();
+
+  const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
+  const [searchQueryCategory, setSearchQueryCategory] = useState('');
+
+  const handleCategorySelect = (event, option) => {
+    setSelectedOptionCategory(option); // Actualizar el estado con la opción seleccionada
+    setValue('category', option?.id);
+  };
+
+  const handleInputCategoryChange = (event, value) => {
+    setSearchQueryCategory(value);
+  };
+
+  useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
+
+  const isOptionEqualToValue = (option, value) => {
+    if (option && value) {
+      return option.id === value.id && option.name === value.name;
+    }
+    return false;
+  };
+
+  const theme = useTheme();
+
+  const { categories, isEmpty } = useSelector((state) => state.categories);
+  const isLoadingCategories = useSelector((state) => state.categories.isLoading);
+  // Autocomplete brand
+
+  useEffect(() => {
+    dispatch(getBrands());
+  }, [dispatch]);
+  const [selectedOptionBrand, setSelectedOptionBrand] = useState(''); // Nuevo estado para almacenar la opción seleccionada
+  const { brands, brandsEmpty, isLoading } = useSelector((state) => state.brands);
+  const [searchQueryBrand, setSearchQueryBrand] = useState('');
+
+  const handleInputBrandChange = (event, value) => {
+    setSearchQueryBrand(value);
+  };
+
+  const handleBrandSelect = (event, option) => {
+    setSelectedOptionBrand(option); // Actualizar el estado con la opción seleccionada
+    setValue('brand', option?.id);
+  };
+
+  const handleClickOpenPopupBrand = () => {
+    dispatch(switchPopupStateBrand());
+  };
+
+  // Taxes
+
+  useEffect(() => {
+    const taxPercentage = values.taxes;
+    if (taxPercentage) {
+      const newPriceSale = calculatePriceSale(values.priceBase, taxPercentage);
+      setValue('priceSale', newPriceSale);
+    }
+    if (taxPercentage === 0) {
+      setValue('priceSale', values.priceBase);
+    }
+  }, [values.taxes, values.priceBase]);
 
   const renderDetails = (
-    <>
-      {mdUp && (
-        <Grid md={4}>
-          <Typography variant="h6" sx={{ mb: 0.5 }}>
-            Details
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Title, short description, image...
-          </Typography>
-        </Grid>
-      )}
+    <Grid xs={12} md={8}>
+      <Card sx={{ p: 3, overflow: 'visible', zIndex: 99 }}>
+        <Typography variant="h4">Información general</Typography>
+        <Divider sx={{ mb: 3, mt: 0.5 }} />
 
-      <Grid xs={12} md={8}>
-        <Card>
-          {!mdUp && <CardHeader title="Details" />}
-
-          <Stack spacing={3} sx={{ p: 3 }}>
-            <RHFTextField name="name" label="Product Name" />
-
-            <RHFTextField name="subDescription" label="Sub Description" multiline rows={4} />
-
-            <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Content</Typography>
-              <RHFEditor simple name="description" />
-            </Stack>
-
-            <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Images</Typography>
-              <RHFUpload
-                multiple
-                thumbnail
-                name="images"
-                maxSize={3145728}
-                onDrop={handleDrop}
-                onRemove={handleRemoveFile}
-                onRemoveAll={handleRemoveAllFiles}
-                onUpload={() => console.info('ON UPLOAD')}
-              />
-            </Stack>
-          </Stack>
-        </Card>
-      </Grid>
-    </>
-  );
-
-  const renderProperties = (
-    <>
-      {mdUp && (
-        <Grid md={4}>
-          <Typography variant="h6" sx={{ mb: 0.5 }}>
-            Properties
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Additional functions and attributes...
-          </Typography>
-        </Grid>
-      )}
-
-      <Grid xs={12} md={8}>
-        <Card>
-          {!mdUp && <CardHeader title="Properties" />}
-
-          <Stack spacing={3} sx={{ p: 3 }}>
-            <Box
-              columnGap={2}
-              rowGap={3}
-              display="grid"
-              gridTemplateColumns={{
-                xs: 'repeat(1, 1fr)',
-                md: 'repeat(2, 1fr)'
+        <Stack spacing={3}>
+          <RHFTextField name="name" label="Nombre del producto" />
+          <Stack flexDirection="row" sx={{ flexDirection: { xs: 'column', md: 'row' } }} gap={2}>
+            <RHFTextField
+              name="barCode"
+              label="Código de barras"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Tooltip title="Escanear sku" TransitionComponent={Zoom} arrow>
+                      <IconButton
+                        onClick={() => {
+                          console.log('Hola');
+                        }}
+                      >
+                        <Icon icon="carbon:scan" width={30} height={30} />
+                      </IconButton>
+                    </Tooltip>
+                  </InputAdornment>
+                )
               }}
-            >
-              <RHFTextField name="code" label="Product Code" />
-
-              <RHFTextField name="sku" label="Product SKU" />
-
-              <RHFTextField
-                name="quantity"
-                label="Quantity"
-                placeholder="0"
-                type="number"
-                InputLabelProps={{ shrink: true }}
-              />
-
-              {/* <RHFSelect native name="category" label="Category" InputLabelProps={{ shrink: true }}>
-                {PRODUCT_CATEGORY_GROUP_OPTIONS.map((category) => (
-                  <optgroup key={category.group} label={category.group}>
-                    {category.classify.map((classify) => (
-                      <option key={classify} value={classify}>
-                        {classify}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </RHFSelect> */}
-
-              <RHFMultiSelect checkbox name="colors" label="Colors" options={PRODUCT_COLOR_NAME_OPTIONS} />
-
-              <RHFMultiSelect checkbox name="sizes" label="Sizes" options={PRODUCT_SIZE_OPTIONS} />
-            </Box>
-
-            <RHFAutocomplete
-              name="tags"
-              label="Tags"
-              placeholder="+ Tags"
-              multiple
-              freeSolo
-              options={_tags.map((option) => option)}
-              getOptionLabel={(option) => option}
-              renderOption={(props, option) => (
-                <li {...props} key={option}>
-                  {option}
-                </li>
-              )}
-              renderTags={(selected, getTagProps) =>
-                selected.map((option, index) => (
-                  <Chip
-                    {...getTagProps({ index })}
-                    key={option}
-                    label={option}
-                    size="small"
-                    color="info"
-                    variant="soft"
-                  />
-                ))
-              }
             />
 
-            <Stack spacing={1}>
-              <Typography variant="subtitle2">Gender</Typography>
-              <RHFMultiCheckbox row name="gender" spacing={2} options={PRODUCT_GENDER_OPTIONS} />
-            </Stack>
-
-            <Divider sx={{ borderStyle: 'dashed' }} />
-
-            <Stack direction="row" alignItems="center" spacing={3}>
-              <RHFSwitch name="saleLabel.enabled" label={null} sx={{ m: 0 }} />
-              <RHFTextField
-                name="saleLabel.content"
-                label="Sale Label"
-                fullWidth
-                disabled={!values.saleLabel.enabled}
-              />
-            </Stack>
-
-            <Stack direction="row" alignItems="center" spacing={3}>
-              <RHFSwitch name="newLabel.enabled" label={null} sx={{ m: 0 }} />
-              <RHFTextField name="newLabel.content" label="New Label" fullWidth disabled={!values.newLabel.enabled} />
-            </Stack>
+            <RHFTextField
+              name="sku"
+              label="SKU"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <Tooltip
+                      title="(opcional) es el código interno que cada negocio crea por sí mismo para sus productos"
+                      TransitionComponent={Zoom}
+                      arrow
+                    >
+                      <IconButton>
+                        <Icon icon="ph:question" width={30} height={30} />
+                      </IconButton>
+                    </Tooltip>
+                  </InputAdornment>
+                )
+              }}
+            />
           </Stack>
-        </Card>
-      </Grid>
-    </>
+          <Stack flexDirection="row" sx={{ flexDirection: { xs: 'column', md: 'row' } }} gap={2}>
+            <RHFAutocomplete
+              fullWidth
+              name="category"
+              label="Categoria"
+              value={selectedOptionCategory}
+              getOptionLabel={(option) => (option.name ? option.name : '')}
+              options={categories}
+              inputValue={searchQueryCategory}
+              onInputChange={handleInputCategoryChange}
+              onChange={handleCategorySelect}
+              isOptionEqualToValue={isOptionEqualToValue}
+              loading={isLoadingCategories}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Categoria"
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Box
+                          component={Icon}
+                          icon="carbon:search"
+                          sx={{
+                            ml: 1,
+                            width: 20,
+                            height: 20,
+                            color: 'text.disabled'
+                          }}
+                        />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              )}
+              renderOption={(props, option) => {
+                const matches = match(option.name, searchQueryCategory);
+                const parts = parse(option.name, matches);
+
+                return (
+                  <li {...props}>
+                    <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.primary">
+                        {parts.map((part, index) => (
+                          <span
+                            key={index}
+                            style={{
+                              fontWeight: part.highlight ? 700 : 400,
+                              color: part.highlight ? theme.palette.primary.main : 'inherit'
+                            }}
+                          >
+                            {part.text}
+                          </span>
+                        ))}
+                      </Typography>
+                    </Box>
+                  </li>
+                );
+              }}
+              noOptionsText={
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
+                  {isLoadingCategories && 'Cargando...'}
+                  {isEmpty && !isLoadingCategories && 'No hay marcas registradas'}
+                  {!isLoadingCategories &&
+                    !isEmpty &&
+                    searchQueryCategory &&
+                    `No se encontraron resultados ${searchQueryCategory}`}
+                </Typography>
+              }
+              PaperComponent={({ children }) =>
+                ButtonAutocomplete({
+                  title: 'Crear categoria',
+                  handleOnClick: handleClickOpenPopupCategory,
+                  children
+                })
+              }
+            />
+            <RHFAutocomplete
+              fullWidth
+              name="brand"
+              label="Marca"
+              inputValue={searchQueryBrand}
+              onInputChange={handleInputBrandChange}
+              onChange={handleBrandSelect}
+              isOptionEqualToValue={isOptionEqualToValue}
+              value={selectedOptionBrand}
+              getOptionLabel={(option) => (option.name ? option.name : '')}
+              options={brands}
+              loading={isLoading}
+              renderOption={(props, option) => {
+                const matches = match(option.name, searchQueryBrand);
+                const parts = parse(option.name, matches);
+
+                return (
+                  <li {...props}>
+                    <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.primary">
+                        {parts.map((part, index) => (
+                          <span
+                            key={index}
+                            style={{
+                              fontWeight: part.highlight ? 700 : 400,
+                              color: part.highlight ? theme.palette.primary.main : 'inherit'
+                            }}
+                          >
+                            {part.text}
+                          </span>
+                        ))}
+                      </Typography>
+                    </Box>
+                  </li>
+                );
+              }}
+              noOptionsText={
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
+                  {isLoading && 'Cargando...'}
+                  {brandsEmpty && !isLoading && 'No hay marcas registradas'}
+                  {!isLoading &&
+                    !brandsEmpty &&
+                    searchQueryBrand &&
+                    `No se encontraron resultados ${searchQueryCategory}`}
+                </Typography>
+              }
+              PaperComponent={({ children }) =>
+                ButtonAutocomplete({
+                  title: 'Crear Marca',
+                  handleOnClick: handleClickOpenPopupBrand,
+                  children
+                })
+              }
+            />
+          </Stack>
+
+          <Stack spacing={1.5}>
+            <Typography variant="subtitle2">Descripción</Typography>
+            <RHFEditor simple name="description" />
+          </Stack>
+        </Stack>
+      </Card>
+    </Grid>
   );
 
   const renderPricing = (
-    <>
-      {mdUp && (
-        <Grid md={4}>
-          <Typography variant="h6" sx={{ mb: 0.5 }}>
-            Pricing
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Price related inputs
-          </Typography>
-        </Grid>
-      )}
-
-      <Grid xs={12} md={8}>
-        <Card>
-          {!mdUp && <CardHeader title="Pricing" />}
-
-          <Stack spacing={3} sx={{ p: 3 }}>
-            <RHFTextField
-              name="price"
-              label="Regular Price"
-              placeholder="0.00"
-              type="number"
-              InputLabelProps={{ shrink: true }}
+    <Grid xs={12} md={8}>
+      <Card sx={{ p: 3, overflow: 'visible', zIndex: 99, mt: 4 }}>
+        <Typography variant="h4">Precio</Typography>
+        <Divider sx={{ mb: 3, mt: 0.5 }} />
+        <Stack spacing={3}>
+          <Typography variant="subtitle1">Indica el valor de venta y el costo de compra de tu producto.</Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+            <TextField
+              color="primary"
+              fullWidth
+              label="Precio base"
+              onChange={(e) => {
+                const priceBase = parseFloat(e.target.value);
+                const taxPercentage = values.taxes; // Obtener el porcentaje de impuesto según la opción seleccionada
+                const priceSale = calculatePriceSale(priceBase, taxPercentage); // Calcular el precio total
+                setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
+                setValue('priceSale', priceSale); // Actualizar el valor de Precio Total
+              }}
+              value={values.priceBase}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Box component="span" sx={{ color: 'text.disabled' }}>
-                      $
-                    </Box>
-                  </InputAdornment>
-                )
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                inputComponent: NumericFormatCustom
               }}
             />
 
-            <RHFTextField
-              name="priceSale"
-              label="Sale Price"
+            <RHFSelect name="taxes" label="Impuestos" disabled={includeTaxes}>
+              {TAXES_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </RHFSelect>
+            <TextField
+              fullWidth
+              color="primary"
               placeholder="0.00"
-              type="number"
-              InputLabelProps={{ shrink: true }}
+              label="Precio Total"
+              onChange={(e) => {
+                const priceSale = parseFloat(e.target.value);
+                const taxPercentage = values.taxes; // Obtener el porcentaje de impuesto según la opción seleccionada
+                const priceBase = calculatePriceBase(priceSale, taxPercentage); // Calcular el precio base
+                setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
+                setValue('priceSale', priceSale); // Actualizar el valor de Precio Total
+              }}
+              value={values.priceSale}
               InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Box component="span" sx={{ color: 'text.disabled' }}>
-                      $
-                    </Box>
-                  </InputAdornment>
-                )
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                inputComponent: NumericFormatCustom
               }}
             />
-
-            <FormControlLabel
-              control={<Switch checked={includeTaxes} onChange={handleChangeIncludeTaxes} />}
-              label="Price includes taxes"
-            />
-
-            {!includeTaxes && (
-              <RHFTextField
-                name="taxes"
-                label="Tax (%)"
-                placeholder="0.00"
-                type="number"
-                InputLabelProps={{ shrink: true }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Box component="span" sx={{ color: 'text.disabled' }}>
-                        %
-                      </Box>
-                    </InputAdornment>
-                  )
-                }}
-              />
-            )}
           </Stack>
-        </Card>
-      </Grid>
-    </>
+        </Stack>
+      </Card>
+    </Grid>
   );
 
   const renderActions = (
@@ -421,13 +539,51 @@ export default function ProductNewEditForm({ currentProduct }) {
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        {renderDetails}
+        <Grid item xs={12} md={8}>
+          {renderDetails}
 
-        {renderProperties}
+          {renderPricing}
 
-        {renderPricing}
+          {renderActions}
+        </Grid>
+        <Grid
+          sx={{
+            position: 'sticky ',
+            top: '50px',
+            height: 'fit-content'
+          }}
+          item
+          xs={12}
+          md={4}
+        >
+          <Stack spacing={3}>
+            <Card sx={{ p: 3 }}>
+              <Stack>
+                Inforacion del producto etc etc
+                <Stack spacing={1.5}>
+                  <Typography variant="subtitle2">Images</Typography>
+                  <RHFUpload
+                    multiple
+                    thumbnail
+                    name="images"
+                    maxSize={3145728}
+                    onDrop={handleDrop}
+                    onRemove={handleRemoveFile}
+                    onRemoveAll={handleRemoveAllFiles}
+                    onUpload={() => console.info('ON UPLOAD')}
+                  />
+                </Stack>
+                <Typography variant="h5">{values.name}</Typography>
+                {values.barCode && <Typography variant="subtitle2"> Código: {values.barCode}</Typography>}
+                {values.sku && <Typography variant="subtitle2"> SKU: {values.sku}</Typography>}
+              </Stack>
+            </Card>
 
-        {renderActions}
+            <LoadingButton type="submit" fullWidth variant="contained" size="large" loading={isSubmitting}>
+              Crear producto
+            </LoadingButton>
+          </Stack>
+        </Grid>
       </Grid>
     </FormProvider>
   );
