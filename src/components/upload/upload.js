@@ -38,7 +38,7 @@ export default function Upload({
   const { getRootProps, getInputProps, isDragActive, isDragReject, fileRejections } = useDropzone({
     multiple,
     disabled,
-    ...other,
+    ...other
   });
 
   const hasFile = !!file && !multiple;
@@ -48,31 +48,29 @@ export default function Upload({
   const hasError = isDragReject || !!error;
 
   const renderPlaceholder = (
-    <Stack spacing={3} alignItems="center" justifyContent="center" flexWrap="wrap">
-      <UploadIllustration sx={{ width: 1, maxWidth: 200 }} />
+    <Stack spacing={0} alignItems="center" justifyContent="center" flexWrap="wrap">
+      <UploadIllustration sx={{ width: 1, maxWidth: 100 }} />
       <Stack spacing={1} sx={{ textAlign: 'center' }}>
-        <Typography variant="h6">Drop or Select file</Typography>
+        <Typography variant="h6">Suelta o selecciona una imagen</Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Drop files here or click
+          Suelta una imagen aquí o haga clic en
           <Box
             component="span"
             sx={{
-              mx: 0.5,
+              mx: 0.2,
               color: 'primary.main',
-              textDecoration: 'underline',
+              textDecoration: 'underline'
             }}
           >
-            browse
+            buscar
           </Box>
-          thorough your machine
+          en su computadora.
         </Typography>
       </Stack>
     </Stack>
   );
 
-  const renderSinglePreview = (
-    <SingleFilePreview imgUrl={typeof file === 'string' ? file : file?.preview} />
-  );
+  const renderSinglePreview = <SingleFilePreview imgUrl={typeof file === 'string' ? file : file?.preview} />;
 
   const removeSinglePreview = hasFile && onDelete && (
     <IconButton
@@ -86,8 +84,8 @@ export default function Upload({
         color: (theme) => alpha(theme.palette.common.white, 0.8),
         bgcolor: (theme) => alpha(theme.palette.grey[900], 0.72),
         '&:hover': {
-          bgcolor: (theme) => alpha(theme.palette.grey[900], 0.48),
-        },
+          bgcolor: (theme) => alpha(theme.palette.grey[900], 0.48)
+        }
       }}
     >
       <Iconify icon="mingcute:close-line" width={18} />
@@ -96,11 +94,11 @@ export default function Upload({
 
   const renderMultiPreview = hasFiles && (
     <>
-      <Box sx={{ my: 3 }}>
+      <Box sx={{ my: 0.3 }}>
         <MultiFilePreview files={files} thumbnail={thumbnail} onRemove={onRemove} />
       </Box>
 
-      <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
+      {/* <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
         {onRemoveAll && (
           <Button color="inherit" variant="outlined" size="small" onClick={onRemoveAll}>
             Remove All
@@ -117,7 +115,7 @@ export default function Upload({
             Upload
           </Button>
         )}
-      </Stack>
+      </Stack> */}
     </>
   );
 
@@ -136,23 +134,23 @@ export default function Upload({
           border: (theme) => `1px dashed ${alpha(theme.palette.grey[500], 0.2)}`,
           transition: (theme) => theme.transitions.create(['opacity', 'padding']),
           '&:hover': {
-            opacity: 0.72,
+            opacity: 0.72
           },
           ...(isDragActive && {
-            opacity: 0.72,
+            opacity: 0.72
           }),
           ...(disabled && {
             opacity: 0.48,
-            pointerEvents: 'none',
+            pointerEvents: 'none'
           }),
           ...(hasError && {
             color: 'error.main',
             bgcolor: 'error.lighter',
-            borderColor: 'error.light',
+            borderColor: 'error.light'
           }),
           ...(hasFile && {
-            padding: '24% 0',
-          }),
+            padding: '24% 0'
+          })
         }}
       >
         <input {...getInputProps()} />
@@ -183,5 +181,5 @@ Upload.propTypes = {
   onRemoveAll: PropTypes.func,
   onUpload: PropTypes.func,
   sx: PropTypes.object,
-  thumbnail: PropTypes.bool,
+  thumbnail: PropTypes.bool
 };

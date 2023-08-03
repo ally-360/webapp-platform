@@ -28,19 +28,19 @@ import { useTranslation } from 'react-i18next';
 // ----------------------------------------------------------------------
 
 export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow }) {
-  const { name, priceSale, state, images, sku, globalStock, pdvs, code } = row;
+  const { name, priceSale, state, images, sku, quantityStock, productPdv, barCode } = row;
 
   const { t } = useTranslation();
 
-  const inventoryType =
-    // eslint-disable-next-line no-nested-ternary
-    globalStock > pdvs.minQuantity ? 'Existencias' : globalStock === 0 ? 'Sin exitencias' : 'Pocas existencias';
+  console.log(quantityStock);
 
   const confirm = useBoolean();
 
-  const minQuantityAllPdvs = pdvs.reduce((acc, pdv) => pdv.minQuantity + acc, 0);
-  const maxQuantityAllPdvs = pdvs.reduce((acc, pdv) => pdv.maxQuantity + acc, 0);
-
+  const minQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.minQuantity + acc, 0);
+  const maxQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.maxQuantity + acc, 0);
+  const inventoryType =
+    // eslint-disable-next-line no-nested-ternary
+    quantityStock > minQuantityAllPdvs ? 'Existencias' : quantityStock === 0 ? 'Sin exitencias' : 'Pocas existencias';
   const popover = usePopover();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -73,7 +73,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
             }
             secondary={
               <Box component="div" sx={{ typography: 'body2', color: 'text.disabled' }}>
-                {t('Código')} {code}
+                {t('Código')} {barCode}
               </Box>
             }
           />
@@ -98,44 +98,42 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
           sx={{ typography: 'caption', color: 'text.secondary' }}
         >
           <LinearProgress
-            value={(globalStock * 100) / (maxQuantityAllPdvs !== 0 ? maxQuantityAllPdvs : minQuantityAllPdvs)}
+            value={(quantityStock * 100) / (maxQuantityAllPdvs !== 0 ? maxQuantityAllPdvs : minQuantityAllPdvs)}
             variant="determinate"
             color={
-              (globalStock === 0 && 'error') ||
-              (globalStock < minQuantityAllPdvs && 'low stock' && 'warning') ||
+              (quantityStock === 0 && 'error') ||
+              (quantityStock < minQuantityAllPdvs && 'low stock' && 'warning') ||
               'success'
             }
             sx={{ mb: 1, height: 6, maxWidth: 80 }}
           />
-          {!!globalStock && globalStock} {inventoryType}
-          {pdvs.length > 1 && (
-            <Popover
-              id="mouse-over-popover"
-              sx={{
-                pointerEvents: 'none'
-              }}
-              open={open}
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'center',
-                horizontal: 'left'
-              }}
-              transformOrigin={{
-                vertical: 'center',
-                horizontal: 'right'
-              }}
-              onClose={handlePopoverClose}
-              disableRestoreFocus
-            >
-              {pdvs.map((pdv) => (
-                <Box key={pdv.name} sx={{ p: 0.2 }}>
-                  <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
-                    {pdv.name}: {pdv.quantity} {t('productos')}
-                  </Typography>
-                </Box>
-              ))}
-            </Popover>
-          )}
+          {!!quantityStock && quantityStock} {inventoryType}
+          <Popover
+            id="mouse-over-popover"
+            sx={{
+              pointerEvents: 'none'
+            }}
+            open={open}
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'center',
+              horizontal: 'left'
+            }}
+            transformOrigin={{
+              vertical: 'center',
+              horizontal: 'right'
+            }}
+            onClose={handlePopoverClose}
+            disableRestoreFocus
+          >
+            {productPdv.map((element) => (
+              <Box key={element.pdv} sx={{ p: 0.2 }}>
+                <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
+                  {element.pdv.name}: {element.quantity} {t('productos')}
+                </Typography>
+              </Box>
+            ))}
+          </Popover>
         </TableCell>
 
         <TableCell>{fCurrency(priceSale)}</TableCell>

@@ -12,6 +12,7 @@ import { useEffect } from 'react';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
 import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';
+import FormPDVS from 'src/sections/PDVS/pdv-new-edit-form';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -91,6 +92,7 @@ export default function DashboardLayout({ children }) {
         <Main>{children}</Main>
         <PopupCreateCategory />
         <PopupCreateBrand />
+        <FormPDVS />
       </Box>
     </>
   );

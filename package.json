@@ -1,8 +1,8 @@
 {
-  "name": "@minimal-kit/vite-js",
-  "author": "Minimals",
-  "version": "5.2.0",
-  "description": "Vite & JavaScript",
+  "name": "@pos-app/vite-js",
+  "author": "Daniel E y Juan Pablo V",
+  "version": "1.0",
+  "description": "Pos app",
   "private": true,
   "scripts": {
     "dev": "vite",

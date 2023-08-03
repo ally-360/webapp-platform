@@ -41,7 +41,18 @@ import FormProvider, {
   RHFAutocomplete,
   RHFMultiCheckbox
 } from 'src/components/hook-form';
-import { IconButton, MenuItem, TextField, Tooltip, Zoom } from '@mui/material';
+import {
+  Avatar,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  MenuItem,
+  TextField,
+  Tooltip,
+  Zoom
+} from '@mui/material';
 import { Icon } from '@iconify/react';
 import { getCategories, switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrand, getBrands } from 'src/redux/inventory/brandsSlice';
@@ -53,7 +64,12 @@ import { useTheme } from '@emotion/react';
 import { calculatePriceBase, calculatePriceSale } from 'src/sections/product/common/priceFunctions';
 import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
 import { NumericFormat } from 'react-number-format';
+import MenuCategories from 'src/sections/categories/MenuCategories';
+import { setPopupAssignInventory } from 'src/redux/inventory/productsSlice';
+import PopupAssingInventory from 'src/sections/product/PopupAssignInventory';
+import { switchPopup } from 'src/redux/inventory/pdvsSlice';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
+import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
@@ -78,51 +94,49 @@ export default function ProductNewEditForm({ currentProduct }) {
   );
 
   const NewProductSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    images: Yup.array().min(1, 'Images is required'),
-    tags: Yup.array().min(2, 'Must have at least 2 tags'),
-    category: Yup.string().required('Category is required'),
-    price: Yup.number().moreThan(0, 'Price should not be $0.00'),
-    description: Yup.string().required('Description is required'),
+    name: Yup.string().required('Nombre del producto es requerido'),
+    images: Yup.array().min(1, 'Las imagenes son requeridas'),
+    category: Yup.string().required('La categoria es requerida'),
+    price: Yup.number(),
+    description: Yup.string().optional(),
+    productsPdvs: Yup.array().min(1, 'El punto de venta es requerido'),
 
-    barCode: Yup.string(),
-    sku: Yup.string(),
-    priceBase: Yup.number(),
-    priceSale: Yup.number(),
+    barCode: Yup.string().required('Código de barras es requerido'),
+    sku: Yup.string().optional(),
+    priceBase: Yup.number().moreThan(0, 'El precio debe ser mayo a $0.00'),
+    priceSale: Yup.number().moreThan(0, 'El precio debe ser mayo a $0.00'),
+    quantityStock: Yup.number(),
+    brand: Yup.string(),
+    typeProduct: Yup.number(),
+    state: Yup.boolean(),
+    sellInNegative: Yup.boolean(),
 
     // not required
-    taxes: Yup.number(),
-    newLabel: Yup.object().shape({
-      enabled: Yup.boolean(),
-      content: Yup.string()
-    }),
-    saleLabel: Yup.object().shape({
-      enabled: Yup.boolean(),
-      content: Yup.string()
-    })
+    taxesOption: Yup.number()
   });
 
   const defaultValues = useMemo(
     () => ({
       name: currentProduct?.name || '',
       description: currentProduct?.description || '',
-      subDescription: currentProduct?.subDescription || '',
-      images: currentProduct?.images || [],
+      typeProduct: currentProduct?.typeProduct || 1,
+      images: currentProduct?.images || [
+        'https://media.istockphoto.com/id/499208007/es/foto/coca-cola-cl%C3%A1sica-en-un-frasco-de-vidrio.jpg?s=612x612&w=0&k=20&c=4n-_VfFOTAzahIon4E6jCcd26-gs01in17JKbDQ2PTg='
+      ],
       //
       barCode: currentProduct?.barCode || '',
       sku: currentProduct?.sku || '',
       priceBase: currentProduct?.priceBase || 0,
       priceSale: currentProduct?.priceSale || 0,
-      taxes: currentProduct?.taxes || 0,
+      taxesOption: currentProduct?.taxesOption || 0,
+      productsPdvs: currentProduct?.productsPdvs || [],
+      quantityStock: currentProduct?.quantityStock || 0,
 
-      quantity: currentProduct?.quantity || 0,
-      tags: currentProduct?.tags || [],
-      gender: currentProduct?.gender || '',
-      category: currentProduct?.category || '',
-      colors: currentProduct?.colors || [],
-      sizes: currentProduct?.sizes || [],
-      newLabel: currentProduct?.newLabel || { enabled: false, content: '' },
-      saleLabel: currentProduct?.saleLabel || { enabled: false, content: '' }
+      brand: currentProduct?.brand || '',
+      state: currentProduct?.state || true,
+      sellInNegative: currentProduct?.sellInNegative || false,
+
+      category: currentProduct?.category || ''
     }),
     [currentProduct]
   );
@@ -154,15 +168,22 @@ export default function ProductNewEditForm({ currentProduct }) {
 
   useEffect(() => {
     if (includeTaxes) {
-      setValue('taxes', 0);
+      setValue('taxesOption', 0);
     } else {
-      setValue('taxes', currentProduct?.taxes || 0);
+      setValue('taxesOption', currentProduct?.taxesOption || 0);
     }
-  }, [currentProduct?.taxes, includeTaxes, setValue]);
+  }, [currentProduct?.taxesOption, includeTaxes, setValue]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      setValue('quantityStock', data.productsPdvs.reduce((acc, pdv) => acc + pdv.quantity, 0) || 0);
+      // Cambiar en todos los pdvs el pdv por el id del pdv y dejar el minQuantity y quantity
+      data.productsPdvs = data.productsPdvs.map((pdv) => ({
+        pdv: pdv.id,
+        minQuantity: pdv.minQuantity,
+        quantity: pdv.quantity
+      }));
+      await RequestService.createProduct(data);
       reset();
       enqueueSnackbar(currentProduct ? 'Update success!' : 'Create success!');
       router.push(paths.dashboard.product.root);
@@ -261,10 +282,10 @@ export default function ProductNewEditForm({ currentProduct }) {
     dispatch(switchPopupStateBrand());
   };
 
-  // Taxes
+  // TaxesOption
 
   useEffect(() => {
-    const taxPercentage = values.taxes;
+    const taxPercentage = values.taxesOption;
     if (taxPercentage) {
       const newPriceSale = calculatePriceSale(values.priceBase, taxPercentage);
       setValue('priceSale', newPriceSale);
@@ -272,7 +293,81 @@ export default function ProductNewEditForm({ currentProduct }) {
     if (taxPercentage === 0) {
       setValue('priceSale', values.priceBase);
     }
-  }, [values.taxes, values.priceBase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.taxesOption, values.priceBase]);
+
+  // Assign inventory
+
+  // Edit inventory
+
+  const [pdvEdit, setPdvEdit] = useState(null);
+
+  const handleEditInventory = (pdv, quantity, minQuantity) => {
+    const newPdv = values.productsPdvs.map((item) => {
+      if (item.id === pdv.id) {
+        return {
+          ...item,
+          quantity,
+          minQuantity
+        };
+      }
+      if (item.id === pdvEdit.id) {
+        return {
+          pdv: pdv.name,
+          id: pdv.id,
+          quantity,
+          minQuantity
+        };
+      }
+      return item;
+    });
+    setValue('productsPdvs', newPdv);
+    setPdvEdit(null);
+  };
+
+  const handleClosePopupWarehouse = () => {
+    // setOpenPopupWarehouse(false);
+  };
+
+  // Popup to assign inventory
+  const handleAssignInventory = (pdv, quantity, minQuantity, edit) => {
+    console.log('pdv', pdv);
+    if (edit) {
+      handleEditInventory(pdv, quantity, minQuantity);
+      dispatch(setPopupAssignInventory(false));
+
+      return true;
+    }
+    if (values.productsPdvs.some((item) => item.id === pdv.id)) {
+      enqueueSnackbar(`El punto de venta ${pdv.name} ya esta seleccionada, asignale una cantidad editandola.`, {
+        variant: 'warning'
+      });
+      return false;
+    }
+    setValue('productsPdvs', [
+      ...values.productsPdvs,
+      {
+        pdv: pdv.name,
+        id: pdv.id,
+        quantity,
+        minQuantity
+      }
+    ]);
+    enqueueSnackbar(`El punto de venta ${pdv.name} fue asignado correctamente.`, {
+      variant: 'success'
+    });
+    dispatch(setPopupAssignInventory(false));
+    return true;
+  };
+
+  const setAssignWarehouse = () => {
+    setPdvEdit(null);
+    dispatch(setPopupAssignInventory(true));
+  };
+
+  useEffect(() => {
+    dispatch(switchPopup());
+  }, [dispatch]);
 
   const renderDetails = (
     <Grid xs={12} md={8}>
@@ -475,12 +570,13 @@ export default function ProductNewEditForm({ currentProduct }) {
           <Typography variant="subtitle1">Indica el valor de venta y el costo de compra de tu producto.</Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
             <TextField
+              variant="outlined"
               color="primary"
               fullWidth
               label="Precio base"
               onChange={(e) => {
                 const priceBase = parseFloat(e.target.value);
-                const taxPercentage = values.taxes; // Obtener el porcentaje de impuesto según la opción seleccionada
+                const taxPercentage = values.taxesOption; // Obtener el porcentaje de impuesto según la opción seleccionada
                 const priceSale = calculatePriceSale(priceBase, taxPercentage); // Calcular el precio total
                 setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
                 setValue('priceSale', priceSale); // Actualizar el valor de Precio Total
@@ -492,7 +588,7 @@ export default function ProductNewEditForm({ currentProduct }) {
               }}
             />
 
-            <RHFSelect name="taxes" label="Impuestos" disabled={includeTaxes}>
+            <RHFSelect name="taxesOption" label="Impuestos" disabled={includeTaxes}>
               {TAXES_OPTIONS.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   {option.label}
@@ -506,7 +602,7 @@ export default function ProductNewEditForm({ currentProduct }) {
               label="Precio Total"
               onChange={(e) => {
                 const priceSale = parseFloat(e.target.value);
-                const taxPercentage = values.taxes; // Obtener el porcentaje de impuesto según la opción seleccionada
+                const taxPercentage = values.taxesOption; // Obtener el porcentaje de impuesto según la opción seleccionada
                 const priceBase = calculatePriceBase(priceSale, taxPercentage); // Calcular el precio base
                 setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
                 setValue('priceSale', priceSale); // Actualizar el valor de Precio Total
@@ -523,17 +619,59 @@ export default function ProductNewEditForm({ currentProduct }) {
     </Grid>
   );
 
-  const renderActions = (
-    <>
-      {mdUp && <Grid md={4} />}
-      <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
-        <FormControlLabel control={<Switch defaultChecked />} label="Publish" sx={{ flexGrow: 1, pl: 3 }} />
-
-        <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting}>
-          {!currentProduct ? 'Create Product' : 'Save Changes'}
-        </LoadingButton>
-      </Grid>
-    </>
+  const renderPDVS = (
+    <Grid xs={12} md={8}>
+      <Card sx={{ p: 3, overflow: 'visible', zIndex: 99, mt: 4 }}>
+        <Typography variant="h4">Punto de venta: Inventario</Typography>
+        <Divider sx={{ mb: 3, mt: 0.5 }} />
+        <Stack spacing={3}>
+          <Typography variant="subtitle1">Asigna el punto de venta donde se encuentra el producto.</Typography>
+          <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
+            {values.productsPdvs.map((item) => (
+              <Stack flexDirection="row" alignItems="center">
+                <ListItem
+                  key={item.id}
+                  sx={{ paddingLeft: 0, cursor: 'pointer' }}
+                  onClick={() => {
+                    setPdvEdit(item);
+                    console.log('item', item);
+                    dispatch(setPopupAssignInventory(true));
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar variant="rounded" sx={{ width: 60, height: 60 }}>
+                      <Icon width={40} height={40} icon="tabler:building-warehouse" />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={item.pdv}
+                    secondary={`Cantidad: ${item.quantity} Cantidad minima: ${item.minQuantity}`}
+                  />
+                </ListItem>
+                <MenuCategories
+                  // Buscar el elemento en el array de productsPdvs y pasarlo como parametro
+                  view={false}
+                  element={item}
+                  handleEdit={() => {
+                    setPdvEdit(item);
+                    dispatch(setPopupAssignInventory(true));
+                  }}
+                  handleDelete={() => {
+                    const newPdv = values.productsPdvs.filter((pdv) => pdv.id !== item.id);
+                    setValue('productsPdvs', newPdv);
+                  }}
+                />
+              </Stack>
+            ))}
+          </List>
+          <PopupAssingInventory
+            pdvEdit={pdvEdit}
+            handleAssignInventory={handleAssignInventory}
+            setAssignWarehouse={setAssignWarehouse}
+          />
+        </Stack>
+      </Card>
+    </Grid>
   );
 
   return (
@@ -543,8 +681,7 @@ export default function ProductNewEditForm({ currentProduct }) {
           {renderDetails}
 
           {renderPricing}
-
-          {renderActions}
+          {renderPDVS}
         </Grid>
         <Grid
           sx={{
@@ -559,9 +696,22 @@ export default function ProductNewEditForm({ currentProduct }) {
           <Stack spacing={3}>
             <Card sx={{ p: 3 }}>
               <Stack>
-                Inforacion del producto etc etc
+                <Typography mb={1} variant="h5">
+                  {values.name}
+                </Typography>
+                {values.barCode && (
+                  <Typography mb={1} variant="subtitle2">
+                    {' '}
+                    Código: {values.barCode}
+                  </Typography>
+                )}
+                {values.sku && (
+                  <Typography mb={1} variant="subtitle2">
+                    {' '}
+                    SKU: {values.sku}
+                  </Typography>
+                )}
                 <Stack spacing={1.5}>
-                  <Typography variant="subtitle2">Images</Typography>
                   <RHFUpload
                     multiple
                     thumbnail
@@ -573,13 +723,21 @@ export default function ProductNewEditForm({ currentProduct }) {
                     onUpload={() => console.info('ON UPLOAD')}
                   />
                 </Stack>
-                <Typography variant="h5">{values.name}</Typography>
-                {values.barCode && <Typography variant="subtitle2"> Código: {values.barCode}</Typography>}
-                {values.sku && <Typography variant="subtitle2"> SKU: {values.sku}</Typography>}
+                <Stack>
+                  <RHFSwitch name="state" label="Estado" />
+                  <RHFSwitch name="sellInNegative" label="Vender en negativo" />
+                </Stack>
               </Stack>
             </Card>
 
-            <LoadingButton type="submit" fullWidth variant="contained" size="large" loading={isSubmitting}>
+            <LoadingButton
+              color="primary"
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              loading={isSubmitting}
+            >
               Crear producto
             </LoadingButton>
           </Stack>

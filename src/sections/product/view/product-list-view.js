@@ -50,7 +50,7 @@ const TABLE_HEAD = [
   { id: 'name', label: 'Producto' },
   // { id: 'createdAt', label: 'Create at', width: 160 },
   { id: 'sku', label: 'SKU', width: 160 },
-  { id: 'globalStock', label: 'Cantidad', width: 160 },
+  { id: 'quantityStock', label: 'Cantidad', width: 160 },
   { id: 'priceSale', label: 'Price', width: 140 },
   { id: 'state', label: 'Estado', width: 110 },
   { id: '', width: 88 }
@@ -173,6 +173,7 @@ export default function ProductListView({categoryView}) {
     },
     [ dispatch ]
   );
+  
   useEffect(() => {
     dispatch(getAllProducts());
   }, [dispatch]);
@@ -296,7 +297,7 @@ export default function ProductListView({categoryView}) {
                     height={denseHeight}
                     emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
                   />
-                  <TableNoData notFound={notFound} />
+                  <TableNoData notFound={notFound} text='No tienes productos, puedes dar click en el boton superior derecho "Crear producto"' />
                 </TableBody>
               </Table>
             </Scrollbar>

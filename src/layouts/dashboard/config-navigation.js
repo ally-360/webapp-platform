@@ -51,9 +51,9 @@ const ICONS = {
   analytics: icon('ic_analytics'),
   dashboard: icon('ic_dashboard'),
   inventory: icon('ic_inventory'),
-  ventas: icon('outline-sell'),
-  gastos: icon('ic_shopping'),
-  contact: icon('user-3-fill')
+  ventas: icon('ic_arrow_up'),
+  gastos: icon('ic_arrow_down'),
+  contact: icon('user-3-fill'),
 };
 
 // ----------------------------------------------------------------------

@@ -34,16 +34,17 @@ import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import match from 'autosuggest-highlight/match';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { getAllPDVS, getPDVById, setSeePDV } from 'src/redux/inventory/pdvsSlice';
+import { getAllPDVS, getPDVById, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
 
 import Iconify from 'src/components/iconify';
+import { useAuthContext } from 'src/auth/hooks';
 import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
-export default function FormPDVS({ open, handleClose }) {
+export default function FormPDVS() {
   const dispatch = useDispatch();
 
   const theme = useTheme();
@@ -56,6 +57,11 @@ export default function FormPDVS({ open, handleClose }) {
 
   const [pdvEdit, setPdvEdit] = useState(null);
 
+  // const { open, handleClose } = useSelector((state) => state.pdvs);
+  const open = useSelector((state) => state.pdvs.openPopup);
+  const handleClose = () => {
+    dispatch(switchPopup());
+  };
   const getPdvInfo = React.useCallback(async () => {
     const resp = await dispatch(getPDVById(editId));
     const municipio = resp.location;
@@ -90,6 +96,10 @@ export default function FormPDVS({ open, handleClose }) {
     main: Yup.boolean().optional()
   });
 
+  // Get company from user
+
+  const { company } = useAuthContext();
+
   const defaultValues = useMemo(
     () => ({
       name: pdvEdit?.name || '',
@@ -99,10 +109,10 @@ export default function FormPDVS({ open, handleClose }) {
       address: pdvEdit?.address || '',
       phoneNumber: pdvEdit?.phoneNumber || '',
       // TODO: extraer el company id del usuario logueado
-      company: { id: 'f403346f-e91d-423d-9bbb-6a0168cd3f64' },
+      company: company?.id || '',
       main: pdvEdit?.main || false
     }),
-    [pdvEdit]
+    [pdvEdit, company]
   );
 
   const methods = useForm({
@@ -117,6 +127,13 @@ export default function FormPDVS({ open, handleClose }) {
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
+
+  // useEffect(() => {
+  //   if (company) {
+  //     setValue('company', company.id);
+  //   }
+  //   console.log(company);
+  // }, [company, setValue]);
 
   useEffect(() => {
     if (pdvEdit) {
@@ -159,9 +176,11 @@ export default function FormPDVS({ open, handleClose }) {
       );
       dispatch(handleClose());
     } catch (error) {
-      enqueueSnackbar(t('No se ha podido crear el punto de venta, verifica los datos nuevamente'), {
-        variant: 'error'
-      });
+      if (error.response.status === 400) {
+        enqueueSnackbar(t('No se ha podido crear el punto de venta, verifica los datos nuevamente'), {
+          variant: 'error'
+        });
+      }
       console.log(error);
     }
   });

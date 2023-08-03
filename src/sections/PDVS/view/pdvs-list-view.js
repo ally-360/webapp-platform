@@ -333,10 +333,6 @@ export default function PdvsListView() {
           </Button>
         }
       />
-      <FormPDVS
-      open={openPopup}
-      handleClose={switchPopup}      
-      />
     </>
   );
 }

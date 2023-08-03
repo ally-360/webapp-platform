@@ -4,90 +4,12 @@ import RequestService from '../../axios/services/service';
 
 // constantes
 const initialState = {
-  products: [
-    {
-      id: '2339afda-7f2c-4ee2-a27f-c13f188736d2',
-      name: 'Quatro',
-      description: 'Esta es la descripcion de la Quatro',
-      code: '224511963',
-      images: ['https://th.bing.com/th/id/OIP.BIAIQ1b7jooENmUDLQlgWQAAAA?pid=ImgDet&rs=1'],
-      typeProduct: 2,
-      state: true,
-      sellInNegative: true,
-      taxesOption: 19,
-      sku: 'A156548C',
-      priceSale: 19500,
-      priceBase: 12300,
-      globalStock: 60,
-      pdvs: [
-        {
-          name: 'Cali',
-          minQuantity: 10,
-          maxQuantity: 200,
-          quantity: 60
-        }
-      ],
-      category: 'Cerveza'
-    },
-    {
-      id: '7339afda-7f2c-4ee2-a27f-c13f188736d2',
-      name: 'auatro',
-      description: 'Esta es la descripcion de la Quatro',
-      code: '224511963',
-      images: ['https://th.bing.com/th/id/OIP.BIAIQ1b7jooENmUDLQlgWQAAAA?pid=ImgDet&rs=1'],
-      typeProduct: 2,
-      state: true,
-      sellInNegative: true,
-      taxesOption: 19,
-      sku: 'B156548C',
-      priceSale: 19500,
-      priceBase: 12300,
-      globalStock: 0,
-      pdvs: [
-        {
-          name: 'Cali',
-          minQuantity: 10,
-          maxQuantity: 200,
-          quantity: 60
-        }
-      ],
-      category: 'Cerveza'
-    },
-    {
-      id: '1339afda-7f2c-4ee2-a27f-c13f188736d2',
-      name: 'buatro',
-      description: 'Esta es la descripcion de la Quatro',
-      code: '224511963',
-      images: ['https://th.bing.com/th/id/OIP.BIAIQ1b7jooENmUDLQlgWQAAAA?pid=ImgDet&rs=1'],
-      typeProduct: 2,
-      state: true,
-      sellInNegative: true,
-      taxesOption: 19,
-      sku: 'A156548C',
-      priceSale: 39500,
-      priceBase: 12300,
-      globalStock: 120,
-      pdvs: [
-        {
-          name: 'Cali',
-          minQuantity: 10,
-          maxQuantity: 200,
-          quantity: 60
-        },
-        {
-          name: 'Palmira',
-          minQuantity: 10,
-          maxQuantity: 200,
-          quantity: 60
-        }
-      ],
-      category: 'Cerveza'
-    }
-  ],
+  products: [],
   productsLoading: false,
   error: null,
   success: null,
-  productsEmpty: false
+  productsEmpty: false,
+  popupAssignInventory: false
 };
 
 const productSlice = createSlice({
@@ -108,7 +30,7 @@ const productSlice = createSlice({
       state.productsLoading = false;
       state.error = null;
       state.success = true;
-      state.productsEmpty = false;
+      state.productsEmpty = action.payload.length === 0;
     },
     getAllProductsError(state, action) {
       state.products = [];
@@ -129,13 +51,16 @@ const productSlice = createSlice({
       state.error = action.payload;
       state.success = false;
       state.productsEmpty = true;
+    },
+    setPopupAssignInventory(state, action) {
+      state.popupAssignInventory = action.payload;
     }
   }
 });
 
 export default productSlice.reducer;
 
-export const { getAllProductsSuccess, getAllProductsError } = productSlice.actions;
+export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInventory } = productSlice.actions;
 
 // Actions
 

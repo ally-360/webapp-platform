@@ -32,7 +32,6 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
           }}
           error={!!error}
           helperText={error ? error?.message : helperText}
-          {...other}
           onFocus={() => setIsFocused(true)} // Establece isFocused a true cuando se hace focus
           onBlur={() => setIsFocused(false)} // Establece isFocused a false cuando se pierde el focus
           sx={{
@@ -48,6 +47,7 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
               color: `${theme.palette.primary.main}!important` // Cambia el color del label cuando se hace focus
             }
           }}
+          {...other}
         />
       )}
     />
