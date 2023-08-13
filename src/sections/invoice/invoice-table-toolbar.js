@@ -15,6 +15,7 @@ import Select from '@mui/material/Select';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { useTranslation } from 'react-i18next';
 
 // ----------------------------------------------------------------------
 
@@ -23,7 +24,7 @@ export default function InvoiceTableToolbar({
   onFilters,
   //
   dateError,
-  serviceOptions,
+  serviceOptions
 }) {
   const popover = usePopover();
 
@@ -34,12 +35,11 @@ export default function InvoiceTableToolbar({
     [onFilters]
   );
 
+  const { t } = useTranslation();
+
   const handleFilterService = useCallback(
     (event) => {
-      onFilters(
-        'service',
-        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value
-      );
+      onFilters('service', typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value);
     },
     [onFilters]
   );
@@ -65,17 +65,17 @@ export default function InvoiceTableToolbar({
         alignItems={{ xs: 'flex-end', md: 'center' }}
         direction={{
           xs: 'column',
-          md: 'row',
+          md: 'row'
         }}
         sx={{
           p: 2.5,
-          pr: { xs: 2.5, md: 1 },
+          pr: { xs: 2.5, md: 1 }
         }}
       >
-        <FormControl
+        {/* <FormControl
           sx={{
             flexShrink: 0,
-            width: { xs: 1, md: 180 },
+            width: { xs: 1, md: 180 }
           }}
         >
           <InputLabel>Service</InputLabel>
@@ -95,30 +95,30 @@ export default function InvoiceTableToolbar({
               </MenuItem>
             ))}
           </Select>
-        </FormControl>
+        </FormControl> */}
 
         <DatePicker
-          label="Start date"
+          label={t('Start date')}
           value={filters.startDate}
           onChange={handleFilterStartDate}
           slotProps={{ textField: { fullWidth: true } }}
           sx={{
-            maxWidth: { md: 180 },
+            maxWidth: { md: 180 }
           }}
         />
 
         <DatePicker
-          label="End date"
+          label={t('End date')}
           value={filters.endDate}
           onChange={handleFilterEndDate}
           slotProps={{
             textField: {
               fullWidth: true,
-              error: dateError,
-            },
+              error: dateError
+            }
           }}
           sx={{
-            maxWidth: { md: 180 },
+            maxWidth: { md: 180 }
           }}
         />
 
@@ -127,13 +127,13 @@ export default function InvoiceTableToolbar({
             fullWidth
             value={filters.name}
             onChange={handleFilterName}
-            placeholder="Search customer or invoice number..."
+            placeholder={t('Search customer or invoice number...')}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
                   <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
                 </InputAdornment>
-              ),
+              )
             }}
           />
 
@@ -143,12 +143,7 @@ export default function InvoiceTableToolbar({
         </Stack>
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -184,5 +179,5 @@ InvoiceTableToolbar.propTypes = {
   dateError: PropTypes.bool,
   filters: PropTypes.object,
   onFilters: PropTypes.func,
-  serviceOptions: PropTypes.array,
+  serviceOptions: PropTypes.array
 };

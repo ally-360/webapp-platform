@@ -6,6 +6,7 @@ import { paths } from 'src/routes/paths';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
+import { useTranslation } from 'react-i18next';
 import InvoiceNewEditForm from '../invoice-new-edit-form';
 
 // ----------------------------------------------------------------------
@@ -13,25 +14,27 @@ import InvoiceNewEditForm from '../invoice-new-edit-form';
 export default function InvoiceCreateView() {
   const settings = useSettingsContext();
 
+  const { t } = useTranslation();
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Create a new invoice"
+        heading={t('Crear factura')}
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
-            name: 'Invoice',
-            href: paths.dashboard.invoice.root,
+            name: 'Facturas de venta',
+            href: paths.dashboard.sales.root
           },
           {
-            name: 'New Invoice',
-          },
+            name: 'Nueva factura'
+          }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 

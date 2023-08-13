@@ -14,26 +14,31 @@ export default function InvoiceNewEditStatusDate() {
   const values = watch();
 
   return (
-    <Stack
-      spacing={2}
-      direction={{ xs: 'column', sm: 'row' }}
-      sx={{ p: 3, bgcolor: 'background.neutral' }}
-    >
-      <RHFTextField
-        disabled
-        name="invoiceNumber"
-        label="Invoice number"
-        value={values.invoiceNumber}
-      />
+    <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ p: 3, bgcolor: 'background.neutral' }}>
+      <RHFTextField disabled name="invoiceNumber" label="Número de factura" value={values.invoiceNumber} />
 
       <RHFSelect
         fullWidth
         name="status"
-        label="Status"
+        label="Estado"
         InputLabelProps={{ shrink: true }}
         PaperPropsSx={{ textTransform: 'capitalize' }}
       >
         {['paid', 'pending', 'overdue', 'draft'].map((option) => (
+          <MenuItem key={option} value={option}>
+            {option}
+          </MenuItem>
+        ))}
+      </RHFSelect>
+
+      <RHFSelect
+        fullWidth
+        name="method"
+        label="Método de pago"
+        InputLabelProps={{ shrink: true }}
+        PaperPropsSx={{ textTransform: 'capitalize' }}
+      >
+        {['Contado', 'Credito'].map((option) => (
           <MenuItem key={option} value={option}>
             {option}
           </MenuItem>
@@ -45,7 +50,7 @@ export default function InvoiceNewEditStatusDate() {
         control={control}
         render={({ field, fieldState: { error } }) => (
           <DatePicker
-            label="Date create"
+            label="Fecha"
             value={field.value}
             onChange={(newValue) => {
               field.onChange(newValue);
@@ -54,8 +59,8 @@ export default function InvoiceNewEditStatusDate() {
               textField: {
                 fullWidth: true,
                 error: !!error,
-                helperText: error?.message,
-              },
+                helperText: error?.message
+              }
             }}
           />
         )}
@@ -66,7 +71,7 @@ export default function InvoiceNewEditStatusDate() {
         control={control}
         render={({ field, fieldState: { error } }) => (
           <DatePicker
-            label="Due date"
+            label="Vencimiento"
             value={field.value}
             onChange={(newValue) => {
               field.onChange(newValue);
@@ -75,8 +80,8 @@ export default function InvoiceNewEditStatusDate() {
               textField: {
                 fullWidth: true,
                 error: !!error,
-                helperText: error?.message,
-              },
+                helperText: error?.message
+              }
             }}
           />
         )}

@@ -17,6 +17,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import FormProvider from 'src/components/hook-form';
 //
+import { useNavigate } from 'react-router';
 import InvoiceNewEditDetails from './invoice-new-edit-details';
 import InvoiceNewEditAddress from './invoice-new-edit-address';
 import InvoiceNewEditStatusDate from './invoice-new-edit-status-date';
@@ -25,7 +26,7 @@ import InvoiceNewEditStatusDate from './invoice-new-edit-status-date';
 
 export default function InvoiceNewEditForm({ currentInvoice }) {
   const router = useRouter();
-
+  const navigate = useNavigate();
   const loadingSave = useBoolean();
 
   const loadingSend = useBoolean();
@@ -43,11 +44,12 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
     // not required
     taxes: Yup.number(),
     status: Yup.string(),
+    method: Yup.string(),
     discount: Yup.number(),
     shipping: Yup.number(),
     invoiceFrom: Yup.mixed(),
     totalAmount: Yup.number(),
-    invoiceNumber: Yup.string(),
+    invoiceNumber: Yup.string()
   });
 
   const defaultValues = useMemo(
@@ -58,27 +60,26 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
       taxes: currentInvoice?.taxes || 0,
       shipping: currentInvoice?.shipping || 0,
       status: currentInvoice?.status || 'draft',
+      method: currentInvoice?.method || 'Contado',
       discount: currentInvoice?.discount || 0,
       invoiceFrom: currentInvoice?.invoiceFrom || _addressBooks[0],
       invoiceTo: currentInvoice?.invoiceTo || null,
-      items: currentInvoice?.items || [
-        { title: '', description: '', service: '', quantity: 1, price: 0, total: 0 },
-      ],
-      totalAmount: currentInvoice?.totalAmount || 0,
+      items: currentInvoice?.items || [{ title: '', description: '', service: '', quantity: 1, price: 0, total: 0 }],
+      totalAmount: currentInvoice?.totalAmount || 0
     }),
     [currentInvoice]
   );
 
   const methods = useForm({
     resolver: yupResolver(NewInvoiceSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
 
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const handleSaveAsDraft = handleSubmit(async (data) => {
@@ -123,22 +124,33 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
 
       <Stack justifyContent="flex-end" direction="row" spacing={2} sx={{ mt: 3 }}>
         <LoadingButton
-          color="inherit"
+          color="error"
+          size="large"
+          variant="outlined"
+          onClick={() => {
+            navigate(-1);
+          }}
+        >
+          Cancelar
+        </LoadingButton>
+        <LoadingButton
+          color="primary"
           size="large"
           variant="outlined"
           loading={loadingSave.value && isSubmitting}
           onClick={handleSaveAsDraft}
         >
-          Save as Draft
+          Guardar cotización
         </LoadingButton>
 
         <LoadingButton
           size="large"
+          color="primary"
           variant="contained"
           loading={loadingSend.value && isSubmitting}
           onClick={handleCreateAndSend}
         >
-          {currentInvoice ? 'Update' : 'Create'} & Send
+          {currentInvoice ? 'Guardar' : 'Crear factura'}
         </LoadingButton>
       </Stack>
     </FormProvider>
@@ -146,5 +158,5 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
 }
 
 InvoiceNewEditForm.propTypes = {
-  currentInvoice: PropTypes.object,
+  currentInvoice: PropTypes.object
 };

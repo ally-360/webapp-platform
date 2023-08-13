@@ -53,7 +53,7 @@ const ICONS = {
   inventory: icon('ic_inventory'),
   ventas: icon('ic_arrow_up'),
   gastos: icon('ic_arrow_down'),
-  contact: icon('user-3-fill'),
+  contact: icon('user-3-fill')
 };
 
 // ----------------------------------------------------------------------
@@ -122,8 +122,14 @@ export function useNavData() {
           },
           {
             title: t('Ventas'),
-            path: paths.dashboard.blank,
-            icon: ICONS.ventas
+            path: paths.dashboard.sales.root,
+            icon: ICONS.ventas,
+            children: [
+              {
+                title: t('Facturas de venta'),
+                path: paths.dashboard.sales.root
+              }
+            ]
           },
           {
             title: t('Gastos'),

@@ -111,7 +111,7 @@ export const paths = {
       brands: `${ROOTS.DASHBOARD}/inventory/brands`
     },
     sales: {
-      list: `${ROOTS.DASHBOARD}/sales`,
+      root: `${ROOTS.DASHBOARD}/sales`,
       newSale: `${ROOTS.DASHBOARD}/sales/new-sale`
     },
     pos: `${ROOTS.DASHBOARD}/pos`,

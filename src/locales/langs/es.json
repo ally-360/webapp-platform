@@ -56,6 +56,13 @@
   "Activo" : "Activo",
   "Inactivo" : "Inactivo",
   "Código" : "Código",
+  "Paid" : "Pagadas",
+  "Pending" : "Pendientes",
+  "Overdue" : "Vencidas",
+  "Draft" : "Borrador",
+  "Start date" : "Creada",
+  "End date" : "Vencimiento",
+  "Search customer or invoice number..." : "Buscar cliente o número de factura...",
   "demo": {
   "title": "Inglés"
   }

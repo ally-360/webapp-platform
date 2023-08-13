@@ -17,7 +17,10 @@ import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 
 // components
 import Iconify from 'src/components/iconify';
-import { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { RHFAutocomplete, RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllProducts } from 'src/redux/inventory/productsSlice';
+import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
 
 // ----------------------------------------------------------------------
 
@@ -26,7 +29,7 @@ export default function InvoiceNewEditDetails() {
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'items',
+    name: 'items'
   });
 
   const values = watch();
@@ -49,6 +52,7 @@ export default function InvoiceNewEditDetails() {
       quantity: 1,
       price: 0,
       total: 0,
+      taxes: 0
     });
   };
 
@@ -67,14 +71,8 @@ export default function InvoiceNewEditDetails() {
 
   const handleSelectService = useCallback(
     (index, option) => {
-      setValue(
-        `items[${index}].price`,
-        INVOICE_SERVICE_OPTIONS.find((service) => service.name === option)?.price
-      );
-      setValue(
-        `items[${index}].total`,
-        values.items.map((item) => item.quantity * item.price)[index]
-      );
+      setValue(`items[${index}].price`, INVOICE_SERVICE_OPTIONS.find((service) => service.name === option)?.price);
+      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
     },
     [setValue, values.items]
   );
@@ -82,10 +80,7 @@ export default function InvoiceNewEditDetails() {
   const handleChangeQuantity = useCallback(
     (event, index) => {
       setValue(`items[${index}].quantity`, Number(event.target.value));
-      setValue(
-        `items[${index}].total`,
-        values.items.map((item) => item.quantity * item.price)[index]
-      );
+      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
     },
     [setValue, values.items]
   );
@@ -93,20 +88,14 @@ export default function InvoiceNewEditDetails() {
   const handleChangePrice = useCallback(
     (event, index) => {
       setValue(`items[${index}].price`, Number(event.target.value));
-      setValue(
-        `items[${index}].total`,
-        values.items.map((item) => item.quantity * item.price)[index]
-      );
+      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
+      // setValue('taxes', )
     },
     [setValue, values.items]
   );
 
   const renderTotal = (
-    <Stack
-      spacing={2}
-      alignItems="flex-end"
-      sx={{ mt: 3, textAlign: 'right', typography: 'body2' }}
-    >
+    <Stack spacing={2} alignItems="flex-end" sx={{ mt: 3, textAlign: 'right', typography: 'body2' }}>
       <Stack direction="row">
         <Box sx={{ color: 'text.secondary' }}>Subtotal</Box>
         <Box sx={{ width: 160, typography: 'subtitle2' }}>{fCurrency(subTotal) || '-'}</Box>
@@ -117,7 +106,7 @@ export default function InvoiceNewEditDetails() {
         <Box
           sx={{
             width: 160,
-            ...(values.shipping && { color: 'error.main' }),
+            ...(values.shipping && { color: 'error.main' })
           }}
         >
           {values.shipping ? `- ${fCurrency(values.shipping)}` : '-'}
@@ -129,7 +118,7 @@ export default function InvoiceNewEditDetails() {
         <Box
           sx={{
             width: 160,
-            ...(values.discount && { color: 'error.main' }),
+            ...(values.discount && { color: 'error.main' })
           }}
         >
           {values.discount ? `- ${fCurrency(values.discount)}` : '-'}
@@ -148,21 +137,67 @@ export default function InvoiceNewEditDetails() {
     </Stack>
   );
 
+  // Nueva logica
+
+  // Obtenemos los productos
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllProducts());
+  }, [dispatch]);
+
+  const { products } = useSelector((state) => state.products);
+
+  useEffect(() => {
+    console.log(products);
+  }, [products]);
+
+  // Función para eliminar etiquetas HTML
+  function stripHTMLTags(html) {
+    const temporalDiv = document.createElement('div');
+    temporalDiv.innerHTML = html;
+    return temporalDiv.textContent || temporalDiv.innerText || '';
+  }
+
+  const handleSelectProduct = useCallback(
+    (index, option) => {
+      setValue(`items[${index}].title`, option);
+      setValue(`items[${index}].price`, option.priceSale);
+      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
+      setValue(`taxes`, values.taxes + (option.priceSale - option.priceBase));
+      setValue(`items[${index}].description`, stripHTMLTags(option.description));
+    },
+    [setValue, values.items, values.taxes]
+  );
+
+  useEffect(() => {
+    console.log(values);
+  }, [values]);
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h6" sx={{ color: 'text.disabled', mb: 3 }}>
-        Details:
+        Productos:
       </Typography>
 
       <Stack divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} spacing={3}>
         {fields.map((item, index) => (
           <Stack key={item.id} alignItems="flex-end" spacing={1.5}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ width: 1 }}>
-              <RHFTextField
-                size="small"
+              <RHFAutocomplete
                 name={`items[${index}].title`}
-                label="Title"
+                size="small"
+                label="Producto"
                 InputLabelProps={{ shrink: true }}
+                options={products}
+                onInputChange={(event, value) => console.log(value)}
+                getOptionLabel={(option) => option.name || ''}
+                getOptionSelected={(option, value) => option.name === value.name}
+                onChange={(event, value) => handleSelectProduct(index, value)}
+                sx={{
+                  minWidth: { md: 250 }
+                }}
               />
 
               <RHFTextField
@@ -172,13 +207,13 @@ export default function InvoiceNewEditDetails() {
                 InputLabelProps={{ shrink: true }}
               />
 
-              <RHFSelect
+              {/* <RHFSelect
                 name={`items[${index}].service`}
                 size="small"
                 label="Service"
                 InputLabelProps={{ shrink: true }}
                 sx={{
-                  maxWidth: { md: 160 },
+                  maxWidth: { md: 160 }
                 }}
               >
                 <MenuItem
@@ -200,11 +235,11 @@ export default function InvoiceNewEditDetails() {
                     {service.name}
                   </MenuItem>
                 ))}
-              </RHFSelect>
+              </RHFSelect> */}
 
               <RHFTextField
-                size="small"
                 type="number"
+                size="small"
                 name={`items[${index}].quantity`}
                 label="Quantity"
                 placeholder="0"
@@ -225,9 +260,9 @@ export default function InvoiceNewEditDetails() {
                     <InputAdornment position="start">
                       <Box sx={{ typography: 'subtitle2', color: 'text.disabled' }}>$</Box>
                     </InputAdornment>
-                  ),
+                  )
                 }}
-                sx={{ maxWidth: { md: 96 } }}
+                sx={{ maxWidth: { md: 120 } }}
               />
 
               <RHFTextField
@@ -237,20 +272,20 @@ export default function InvoiceNewEditDetails() {
                 name={`items[${index}].total`}
                 label="Total"
                 placeholder="0.00"
-                value={values.items[index].total === 0 ? '' : values.items[index].total.toFixed(2)}
+                value={values.items[index].total === 0 ? '' : values.items[index].total.toFixed(1)}
                 onChange={(event) => handleChangePrice(event, index)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
                       <Box sx={{ typography: 'subtitle2', color: 'text.disabled' }}>$</Box>
                     </InputAdornment>
-                  ),
+                  )
                 }}
                 sx={{
-                  maxWidth: { md: 104 },
+                  maxWidth: { md: 130 },
                   [`& .${inputBaseClasses.input}`]: {
-                    textAlign: { md: 'right' },
-                  },
+                    textAlign: { md: 'right' }
+                  }
                 }}
               />
             </Stack>
@@ -261,7 +296,7 @@ export default function InvoiceNewEditDetails() {
               startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
               onClick={() => handleRemove(index)}
             >
-              Remove
+              Eliminar
             </Button>
           </Stack>
         ))}
@@ -269,50 +304,29 @@ export default function InvoiceNewEditDetails() {
 
       <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
 
-      <Stack
-        spacing={3}
-        direction={{ xs: 'column', md: 'row' }}
-        alignItems={{ xs: 'flex-end', md: 'center' }}
-      >
+      <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-end', md: 'center' }}>
         <Button
-          size="small"
           color="primary"
+          variant="outlined"
           startIcon={<Iconify icon="mingcute:add-line" />}
           onClick={handleAdd}
           sx={{ flexShrink: 0 }}
         >
-          Add Item
+          Agregar producto
         </Button>
 
-        <Stack
-          spacing={2}
-          justifyContent="flex-end"
-          direction={{ xs: 'column', md: 'row' }}
-          sx={{ width: 1 }}
-        >
-          <RHFTextField
-            size="small"
-            label="Shipping($)"
-            name="shipping"
-            type="number"
-            sx={{ maxWidth: { md: 120 } }}
-          />
+        <Stack spacing={2} justifyContent="flex-end" direction={{ xs: 'column', md: 'row' }} sx={{ width: 1 }}>
+          <RHFTextField size="small" label="Envio($)" name="shipping" type="number" sx={{ maxWidth: { md: 120 } }} />
 
           <RHFTextField
             size="small"
-            label="Discount($)"
+            label="Descuento($)"
             name="discount"
             type="number"
             sx={{ maxWidth: { md: 120 } }}
           />
 
-          <RHFTextField
-            size="small"
-            label="Taxes(%)"
-            name="taxes"
-            type="number"
-            sx={{ maxWidth: { md: 120 } }}
-          />
+          <RHFTextField size="small" label="Impuestos(%)" name="taxes" type="number" sx={{ maxWidth: { md: 120 } }} />
         </Stack>
       </Stack>
 

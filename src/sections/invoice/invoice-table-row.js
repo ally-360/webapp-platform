@@ -24,14 +24,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export default function InvoiceTableRow({
-  row,
-  selected,
-  onSelectRow,
-  onViewRow,
-  onEditRow,
-  onDeleteRow,
-}) {
+export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditRow, onDeleteRow }) {
   const { sent, invoiceNumber, createDate, dueDate, status, invoiceTo, totalAmount } = row;
 
   const confirm = useBoolean();
@@ -58,12 +51,7 @@ export default function InvoiceTableRow({
               </Typography>
             }
             secondary={
-              <Link
-                noWrap
-                variant="body2"
-                onClick={onViewRow}
-                sx={{ color: 'text.disabled', cursor: 'pointer' }}
-              >
+              <Link noWrap variant="body2" onClick={onViewRow} sx={{ color: 'text.disabled', cursor: 'pointer' }}>
                 {invoiceNumber}
               </Link>
             }
@@ -78,7 +66,7 @@ export default function InvoiceTableRow({
             secondaryTypographyProps={{
               mt: 0.5,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </TableCell>
@@ -91,14 +79,18 @@ export default function InvoiceTableRow({
             secondaryTypographyProps={{
               mt: 0.5,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </TableCell>
 
         <TableCell>{fCurrency(totalAmount)}</TableCell>
+        {/* Cobrado */}
+        <TableCell>{fCurrency(totalAmount)}</TableCell>
+        {/* Por cobrar */}
+        <TableCell>{fCurrency(totalAmount)}</TableCell>
 
-        <TableCell align="center">{sent}</TableCell>
+        {/* <TableCell align="center">{sent}</TableCell> */}
 
         <TableCell>
           <Label
@@ -121,12 +113,7 @@ export default function InvoiceTableRow({
         </TableCell>
       </TableRow>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem
           onClick={() => {
             onViewRow();
@@ -182,5 +169,5 @@ InvoiceTableRow.propTypes = {
   onSelectRow: PropTypes.func,
   onViewRow: PropTypes.func,
   row: PropTypes.object,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

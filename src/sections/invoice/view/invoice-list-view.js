@@ -39,9 +39,10 @@ import {
   TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
-  TablePaginationCustom,
+  TablePaginationCustom
 } from 'src/components/table';
 //
+import { useTranslation } from 'react-i18next';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -50,13 +51,15 @@ import InvoiceTableFiltersResult from '../invoice-table-filters-result';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'invoiceNumber', label: 'Customer' },
-  { id: 'createDate', label: 'Create' },
-  { id: 'dueDate', label: 'Due' },
-  { id: 'price', label: 'Amount' },
-  { id: 'sent', label: 'Sent', align: 'center' },
-  { id: 'status', label: 'Status' },
-  { id: '' },
+  { id: 'invoiceNumber', label: 'Cliente' },
+  { id: 'createDate', label: 'Creada' },
+  { id: 'dueDate', label: 'Vencimiento' },
+  { id: 'price', label: 'Valor' },
+  { id: 'price', label: 'Cobrado' },
+  { id: 'price', label: 'Por cobrar' },
+  // { id: 'sent', label: 'Sent', align: 'center' },
+  { id: 'status', label: 'Estado' },
+  { id: '' }
 ];
 
 const defaultFilters = {
@@ -64,7 +67,7 @@ const defaultFilters = {
   service: [],
   status: 'all',
   startDate: null,
-  endDate: null,
+  endDate: null
 };
 
 // ----------------------------------------------------------------------
@@ -85,15 +88,13 @@ export default function InvoiceListView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
+    filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters,
-    dateError,
+    dateError
   });
 
   const dataInPage = dataFiltered.slice(
@@ -122,11 +123,11 @@ export default function InvoiceListView() {
   const getPercentByStatus = (status) => (getInvoiceLength(status) / tableData.length) * 100;
 
   const TABS = [
-    { value: 'all', label: 'All', color: 'default', count: tableData.length },
-    { value: 'paid', label: 'Paid', color: 'success', count: getInvoiceLength('paid') },
-    { value: 'pending', label: 'Pending', color: 'warning', count: getInvoiceLength('pending') },
-    { value: 'overdue', label: 'Overdue', color: 'error', count: getInvoiceLength('overdue') },
-    { value: 'draft', label: 'Draft', color: 'default', count: getInvoiceLength('draft') },
+    { value: 'all', label: 'Todas', color: 'default', count: tableData.length },
+    { value: 'paid', label: 'Pagadas', color: 'success', count: getInvoiceLength('paid') },
+    { value: 'pending', label: 'Pendientes', color: 'warning', count: getInvoiceLength('pending') },
+    { value: 'overdue', label: 'Vencidas', color: 'error', count: getInvoiceLength('overdue') }
+    // { value: 'draft', label: 'Draft', color: 'default', count: getInvoiceLength('draft') }
   ];
 
   const handleFilters = useCallback(
@@ -134,7 +135,7 @@ export default function InvoiceListView() {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
-        [name]: value,
+        [name]: value
       }));
     },
     [table]
@@ -157,7 +158,7 @@ export default function InvoiceListView() {
     table.onUpdatePageDeleteRows({
       totalRows: tableData.length,
       totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
+      totalRowsFiltered: dataFiltered.length
     });
   }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
@@ -186,42 +187,44 @@ export default function InvoiceListView() {
     setFilters(defaultFilters);
   }, []);
 
+  const { t } = useTranslation();
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="List"
+          heading={t('Facturas de venta')}
           links={[
             {
               name: 'Dashboard',
-              href: paths.dashboard.root,
+              href: paths.dashboard.root
             },
             {
-              name: 'Invoice',
-              href: paths.dashboard.invoice.root,
+              name: 'Facturas de venta',
+              href: paths.dashboard.sales.root
             },
             {
-              name: 'List',
-            },
+              name: 'Lista'
+            }
           ]}
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.invoice.new}
+              href={paths.dashboard.sales.newSale}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              New Invoice
+              {t('Nueva factura')}
             </Button>
           }
           sx={{
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 3, md: 5 }
           }}
         />
 
         <Card
           sx={{
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 3, md: 5 }
           }}
         >
           <Scrollbar>
@@ -266,14 +269,14 @@ export default function InvoiceListView() {
                 color={theme.palette.error.main}
               />
 
-              <InvoiceAnalytic
+              {/* <InvoiceAnalytic
                 title="Draft"
                 total={getInvoiceLength('draft')}
                 percent={getPercentByStatus('draft')}
                 price={getTotalAmount('draft')}
                 icon="solar:file-corrupted-bold-duotone"
                 color={theme.palette.text.secondary}
-              />
+              /> */}
             </Stack>
           </Scrollbar>
         </Card>
@@ -284,7 +287,7 @@ export default function InvoiceListView() {
             onChange={handleFilterStatus}
             sx={{
               px: 2.5,
-              boxShadow: `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+              boxShadow: `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
             }}
           >
             {TABS.map((tab) => (
@@ -295,9 +298,7 @@ export default function InvoiceListView() {
                 iconPosition="end"
                 icon={
                   <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
-                    }
+                    variant={((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'}
                     color={tab.color}
                   >
                     {tab.count}
@@ -386,10 +387,7 @@ export default function InvoiceListView() {
 
                 <TableBody>
                   {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
+                    .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
                     .map((row) => (
                       <InvoiceTableRow
                         key={row.id}
@@ -480,9 +478,7 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
   }
 
   if (service.length) {
-    inputData = inputData.filter((invoice) =>
-      invoice.items.some((filterItem) => service.includes(filterItem.service))
-    );
+    inputData = inputData.filter((invoice) => invoice.items.some((filterItem) => service.includes(filterItem.service)));
   }
 
   if (!dateError) {

@@ -9,13 +9,13 @@ export const NumericFormatCustom = React.forwardRef((props, ref) => {
     <NumericFormat
       {...other}
       getInputRef={ref}
-      onValueChange={(values) => {
-        onChange({
-          target: {
-            value: values.value
-          }
-        });
-      }}
+      // onValueChange={(values) => {
+      //   onChange({
+      //     target: {
+      //       value: values.value
+      //     }
+      //   });
+      // }}
       thousandSeparator
       valueIsNumericString
     />

@@ -9,28 +9,18 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { fShortenNumber, fCurrency } from 'src/utils/format-number';
 // components
 import Iconify from 'src/components/iconify';
+import { useTranslation } from 'react-i18next';
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceAnalytic({ title, total, icon, color, percent, price }) {
+  const { t } = useTranslation();
   return (
-    <Stack
-      spacing={2.5}
-      direction="row"
-      alignItems="center"
-      justifyContent="center"
-      sx={{ width: 1, minWidth: 200 }}
-    >
+    <Stack spacing={2.5} direction="row" alignItems="center" justifyContent="center" sx={{ width: 1, minWidth: 200 }}>
       <Stack alignItems="center" justifyContent="center" sx={{ position: 'relative' }}>
         <Iconify icon={icon} width={32} sx={{ color, position: 'absolute' }} />
 
-        <CircularProgress
-          variant="determinate"
-          value={percent}
-          size={56}
-          thickness={2}
-          sx={{ color, opacity: 0.48 }}
-        />
+        <CircularProgress variant="determinate" value={percent} size={56} thickness={2} sx={{ color, opacity: 0.48 }} />
 
         <CircularProgress
           variant="determinate"
@@ -42,16 +32,16 @@ export default function InvoiceAnalytic({ title, total, icon, color, percent, pr
             left: 0,
             opacity: 0.48,
             position: 'absolute',
-            color: (theme) => alpha(theme.palette.grey[500], 0.16),
+            color: (theme) => alpha(theme.palette.grey[500], 0.16)
           }}
         />
       </Stack>
 
       <Stack spacing={0.5}>
-        <Typography variant="subtitle1">{title}</Typography>
+        <Typography variant="subtitle1">{t(title)}</Typography>
 
         <Box component="span" sx={{ color: 'text.disabled', typography: 'body2' }}>
-          {fShortenNumber(total)} invoices
+          {fShortenNumber(total)} {t('Faturas')}
         </Box>
 
         <Typography variant="subtitle2">{fCurrency(price)}</Typography>
@@ -66,5 +56,5 @@ InvoiceAnalytic.propTypes = {
   percent: PropTypes.number,
   price: PropTypes.number,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

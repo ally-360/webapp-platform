@@ -114,6 +114,14 @@ export const dashboardRoutes = [
         ]
       },
       {
+        path: 'sales',
+        children: [
+          { element: <InvoiceListPage />, index: true },
+
+          { path: 'new-sale', element: <InvoiceCreatePage /> }
+        ]
+      },
+      {
         path: 'user',
         children: [
           { element: <UserProfilePage />, index: true },

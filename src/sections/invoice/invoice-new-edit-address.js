@@ -13,15 +13,17 @@ import { _addressBooks } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 //
+import { useSelector } from 'react-redux';
+import { useAuthContext } from 'src/auth/hooks';
+import logoPlaceholder from '../../../public/assets/logo-placeholder-1.png';
 import { AddressListDialog } from '../address';
-
 // ----------------------------------------------------------------------
 
 export default function InvoiceNewEditAddress() {
   const {
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors }
   } = useFormContext();
 
   const upMd = useResponsive('up', 'md');
@@ -34,22 +36,17 @@ export default function InvoiceNewEditAddress() {
 
   const to = useBoolean();
 
+  const { company } = useAuthContext();
+
   return (
     <>
-      <Stack
-        spacing={{ xs: 3, md: 5 }}
-        direction={{ xs: 'column', md: 'row' }}
-        divider={
-          <Divider
-            flexItem
-            orientation={upMd ? 'vertical' : 'horizontal'}
-            sx={{ borderStyle: 'dashed' }}
-          />
-        }
-        sx={{ p: 3 }}
-      >
+      <Stack spacing={{ xs: 3, md: 5 }} direction={{ xs: 'column', md: 'row' }} sx={{ p: 3 }}>
+        <Stack sx={{ width: 1, maxWidth: '150px', justifyContent: 'center', alignItems: 'center' }}>
+          <img src={logoPlaceholder} alt="logo" width="100px" height="100px" />
+        </Stack>
+
         <Stack sx={{ width: 1 }}>
-          <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
+          {/* <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
             <Typography variant="h6" sx={{ color: 'text.disabled', flexGrow: 1 }}>
               From:
             </Typography>
@@ -57,19 +54,19 @@ export default function InvoiceNewEditAddress() {
             <IconButton onClick={from.onTrue}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>
-          </Stack>
-
+          </Stack> */}
           <Stack spacing={1}>
-            <Typography variant="subtitle2">{invoiceFrom.name}</Typography>
-            <Typography variant="body2">{invoiceFrom.fullAddress}</Typography>
-            <Typography variant="body2"> {invoiceFrom.phoneNumber}</Typography>
+            <Typography variant="h6">{company.name}</Typography>
+            <Typography variant="body2">Identificación: {company.nit}</Typography>
+            <Typography variant="body2">Teléfono: {company.phoneNumber}</Typography>
           </Stack>
+          {console.log('company', company)}
         </Stack>
-
+        <Divider flexItem orientation={upMd ? 'vertical' : 'horizontal'} sx={{ borderStyle: 'dashed' }} />
         <Stack sx={{ width: 1 }}>
           <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
             <Typography variant="h6" sx={{ color: 'text.disabled', flexGrow: 1 }}>
-              To:
+              Cliente:
             </Typography>
 
             <IconButton onClick={to.onTrue}>
@@ -99,18 +96,14 @@ export default function InvoiceNewEditAddress() {
         onSelect={(address) => setValue('invoiceFrom', address)}
         list={_addressBooks}
         action={
-          <Button
-            size="small"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            sx={{ alignSelf: 'flex-end' }}
-          >
-            New
+          <Button size="small" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ alignSelf: 'flex-end' }}>
+            Nuevo
           </Button>
         }
       />
 
       <AddressListDialog
-        title="Customers"
+        title="Clientes"
         open={to.value}
         onClose={to.onFalse}
         selected={(selectedId) => invoiceTo?.id === selectedId}
@@ -118,11 +111,12 @@ export default function InvoiceNewEditAddress() {
         list={_addressBooks}
         action={
           <Button
+            color="primary"
             size="small"
             startIcon={<Iconify icon="mingcute:add-line" />}
             sx={{ alignSelf: 'flex-end' }}
           >
-            New
+            Crear
           </Button>
         }
       />
