@@ -8,7 +8,7 @@ export default function AccountPage() {
   return (
     <>
       <Helmet>
-        <title> POS: Mi cuenta</title>
+        <title> Ally360: Mi cuenta</title>
       </Helmet>
 
       <AccountView />

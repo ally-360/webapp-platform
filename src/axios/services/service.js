@@ -28,6 +28,8 @@ class RequestService {
 
   createProduct = async (databody) => apiClient(configPostWithToken('/product', databody));
 
+  getProductById = async (id) => apiClient(configGetWithToken(`/product/${id}`));
+
   deleteProduct = async (id) => apiClient(configDeleteWithToken(`/product/${id}`));
 
   // Categories

@@ -21,6 +21,8 @@ import { Link, Avatar, Typography, useTheme } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import Paper from 'src/theme/overrides/components/paper';
 import { useAuthContext } from 'src/auth/hooks';
+import { useSettingsContext } from 'src/components/settings';
+import LogoMini from 'src/components/logo/logoMini';
 import { NAV } from '../config-layout';
 import { useNavData } from './config-navigation';
 import { NavToggleButton, NavUpgrade } from '../_common';
@@ -41,6 +43,8 @@ export default function NavVertical({ openNav, onCloseNav }) {
   const theme = useTheme();
 
   const pathname = usePathname();
+
+  const settings = useSettingsContext();
 
   const lgUp = useResponsive('up', 'lg');
 
@@ -64,8 +68,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
         }
       }}
     >
-      <Logo sx={{ mt: 3, ml: 4, mb: 1 }} />
-
+      <Logo sx={{ mt: 3.5, ml: 2, mb: 2.5 }} />
       <Link component={RouterLink} underline="none" to={paths.dashboard.user.account}>
         <AccountStyle
           style={{

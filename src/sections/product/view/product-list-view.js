@@ -95,7 +95,7 @@ export default function ProductListView({categoryView}) {
     }
   }, [products]);
 
-  // TODO: descomentar cuando funcione correctamente el endpoint de productos de categoria
+  // TODO: descomentar cuando funcione correctamente el endpoint de productos de categoria front.
 
   // useEffect(() => {
   //   if (categoryView?.products) {

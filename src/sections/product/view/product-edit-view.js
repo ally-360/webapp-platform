@@ -9,6 +9,9 @@ import { useGetProduct } from 'src/api/product';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
+import { useDispatch, useSelector } from 'react-redux';
+import { getProductById } from 'src/redux/inventory/productsSlice';
+import { useEffect } from 'react';
 import ProductNewEditForm from '../product-new-edit-form';
 
 // ----------------------------------------------------------------------
@@ -16,22 +19,29 @@ import ProductNewEditForm from '../product-new-edit-form';
 export default function ProductEditView({ id }) {
   const settings = useSettingsContext();
 
-  const { product: currentProduct } = useGetProduct(id);
+  // const { product: currentProduct } = useGetProduct(id);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getProductById(id));
+  }, [dispatch, id]);
+
+  const { product: currentProduct } = useSelector((state) => state.products);
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Edit"
+        heading="Editar"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Product',
-            href: paths.dashboard.product.root,
+            href: paths.dashboard.product.root
           },
-          { name: currentProduct?.name },
+          { name: currentProduct?.name }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -41,5 +51,5 @@ export default function ProductEditView({ id }) {
 }
 
 ProductEditView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

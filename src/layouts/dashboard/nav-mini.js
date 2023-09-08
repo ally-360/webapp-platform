@@ -13,6 +13,7 @@ import { Avatar, Link } from '@mui/material';
 import MyAvatar from 'src/layouts/dashboard/MyAvatar';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { paths } from 'src/routes/paths';
+import LogoMini from 'src/components/logo/logoMini';
 import { NAV } from '../config-layout';
 import { useNavData } from './config-navigation';
 import { NavToggleButton } from '../_common';
@@ -49,7 +50,7 @@ export default function NavMini() {
           ...hideScroll.x
         }}
       >
-        <Logo sx={{ mx: 'auto', my: 2 }} />
+        <LogoMini sx={{ mx: 'auto', my: 2.5 }} />
         <Link
           component={RouterLink}
           underline="none"

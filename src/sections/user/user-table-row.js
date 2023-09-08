@@ -69,7 +69,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
 
         <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
-          <Tooltip title="Quick Edit" placement="top" arrow>
+          <Tooltip title="Edición rapida" placement="top" arrow>
             <IconButton color={quickEdit.value ? 'inherit' : 'default'} onClick={quickEdit.onTrue}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>
@@ -83,12 +83,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
       <UserQuickEditForm currentUser={row} open={quickEdit.value} onClose={quickEdit.onFalse} />
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
         <MenuItem
           onClick={() => {
             confirm.onTrue();
@@ -131,5 +126,5 @@ UserTableRow.propTypes = {
   onEditRow: PropTypes.func,
   onSelectRow: PropTypes.func,
   row: PropTypes.object,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

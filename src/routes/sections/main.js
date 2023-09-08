@@ -49,18 +49,18 @@ export const mainRoutes = [
           { element: <ProductListPage />, index: true },
           { path: 'list', element: <ProductListPage /> },
           { path: ':id', element: <ProductDetailsPage /> },
-          { path: 'checkout', element: <ProductCheckoutPage /> },
-        ],
+          { path: 'checkout', element: <ProductCheckoutPage /> }
+        ]
       },
       {
         path: 'post',
         children: [
           { element: <PostListPage />, index: true },
           { path: 'list', element: <PostListPage /> },
-          { path: ':title', element: <PostDetailsPage /> },
-        ],
-      },
-    ],
+          { path: ':title', element: <PostDetailsPage /> }
+        ]
+      }
+    ]
   },
   {
     element: (
@@ -72,8 +72,8 @@ export const mainRoutes = [
     ),
     children: [
       { path: 'pricing', element: <PricingPage /> },
-      { path: 'payment', element: <PaymentPage /> },
-    ],
+      { path: 'payment', element: <PaymentPage /> }
+    ]
   },
   {
     element: (
@@ -88,7 +88,7 @@ export const mainRoutes = [
       { path: 'maintenance', element: <MaintenancePage /> },
       { path: '500', element: <Page500 /> },
       { path: '404', element: <Page404 /> },
-      { path: '403', element: <Page403 /> },
-    ],
-  },
+      { path: '403', element: <Page403 /> }
+    ]
+  }
 ];

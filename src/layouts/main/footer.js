@@ -26,20 +26,20 @@ const LINKS = [
     children: [
       { name: 'About us', href: paths.about },
       { name: 'Contact us', href: paths.contact },
-      { name: 'FAQs', href: paths.faqs },
-    ],
+      { name: 'FAQs', href: paths.faqs }
+    ]
   },
   {
     headline: 'Legal',
     children: [
       { name: 'Terms and Condition', href: '#' },
-      { name: 'Privacy Policy', href: '#' },
-    ],
+      { name: 'Privacy Policy', href: '#' }
+    ]
   },
   {
     headline: 'Contact',
-    children: [{ name: 'support@minimals.cc', href: '#' }],
-  },
+    children: [{ name: 'support@minimals.cc', href: '#' }]
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -56,7 +56,7 @@ export default function Footer() {
         py: 5,
         textAlign: 'center',
         position: 'relative',
-        bgcolor: 'background.default',
+        bgcolor: 'background.default'
       }}
     >
       <Container>
@@ -76,7 +76,7 @@ export default function Footer() {
       component="footer"
       sx={{
         position: 'relative',
-        bgcolor: 'background.default',
+        bgcolor: 'background.default'
       }}
     >
       <Divider />
@@ -85,7 +85,7 @@ export default function Footer() {
         sx={{
           pt: 10,
           pb: 5,
-          textAlign: { xs: 'center', md: 'unset' },
+          textAlign: { xs: 'center', md: 'unset' }
         }}
       >
         <Logo sx={{ mb: 3 }} />
@@ -94,7 +94,7 @@ export default function Footer() {
           container
           justifyContent={{
             xs: 'center',
-            md: 'space-between',
+            md: 'space-between'
           }}
         >
           <Grid xs={8} md={3}>
@@ -102,10 +102,10 @@ export default function Footer() {
               variant="body2"
               sx={{
                 maxWidth: 270,
-                mx: { xs: 'auto', md: 'unset' },
+                mx: { xs: 'auto', md: 'unset' }
               }}
             >
-              POS APP licencia de uso de software.
+              Ally360 licencia de uso de software.
             </Typography>
 
             <Stack
@@ -113,7 +113,7 @@ export default function Footer() {
               justifyContent={{ xs: 'center', md: 'flex-start' }}
               sx={{
                 mt: 3,
-                mb: { xs: 5, md: 0 },
+                mb: { xs: 5, md: 0 }
               }}
             >
               {_socials.map((social) => (
@@ -121,8 +121,8 @@ export default function Footer() {
                   key={social.name}
                   sx={{
                     '&:hover': {
-                      bgcolor: alpha(social.color, 0.08),
-                    },
+                      bgcolor: alpha(social.color, 0.08)
+                    }
                   }}
                 >
                   <Iconify color={social.color} icon={social.icon} />
@@ -145,13 +145,7 @@ export default function Footer() {
                   </Typography>
 
                   {list.children.map((link) => (
-                    <Link
-                      key={link.name}
-                      component={RouterLink}
-                      href={link.href}
-                      color="inherit"
-                      variant="body2"
-                    >
+                    <Link key={link.name} component={RouterLink} href={link.href} color="inherit" variant="body2">
                       {link.name}
                     </Link>
                   ))}

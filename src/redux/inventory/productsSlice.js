@@ -5,6 +5,7 @@ import RequestService from '../../axios/services/service';
 // constantes
 const initialState = {
   products: [],
+  product: null,
   productsLoading: false,
   error: null,
   success: null,
@@ -31,6 +32,13 @@ const productSlice = createSlice({
       state.error = null;
       state.success = true;
       state.productsEmpty = action.payload.length === 0;
+    },
+    getProductByIdSuccess(state, action) {
+      state.product = action.payload;
+      state.productsLoading = false;
+      state.error = null;
+      state.success = true;
+      state.productsEmpty = false;
     },
     getAllProductsError(state, action) {
       state.products = [];
@@ -60,7 +68,8 @@ const productSlice = createSlice({
 
 export default productSlice.reducer;
 
-export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInventory } = productSlice.actions;
+export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInventory, getProductByIdSuccess } =
+  productSlice.actions;
 
 // Actions
 
@@ -69,6 +78,17 @@ export const getAllProducts = () => async (dispatch, getState) => {
     dispatch(productSlice.actions.startLoading());
     const resp = await RequestService.getProducts();
     dispatch(productSlice.actions.getAllProductsSuccess(resp.data));
+  } catch (error) {
+    console.log(error);
+    dispatch(productSlice.actions.hasError(error));
+  }
+};
+
+export const getProductById = (id) => async (dispatch, getState) => {
+  try {
+    dispatch(productSlice.actions.startLoading());
+    const resp = await RequestService.getProductById(id);
+    dispatch(productSlice.actions.getProductByIdSuccess(resp.data));
   } catch (error) {
     console.log(error);
     dispatch(productSlice.actions.hasError(error));

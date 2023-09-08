@@ -60,7 +60,7 @@ export default function ProductTableToolbar({
     let rowIndex = 2; // Start from the second row to avoid overwriting the header
 
     data.forEach((product) => {
-      product.pdvs.forEach((pdv) => {
+      product.productPdv.forEach((pdv) => {
         const rowData = {
           id: product.id,
           name: product.name,
@@ -74,8 +74,8 @@ export default function ProductTableToolbar({
           sku: product.sku,
           priceSale: product.priceSale,
           priceBase: product.priceBase,
-          globalStock: product.globalStock,
-          pdvName: pdv.name,
+          quantityStock: product.quantityStock,
+          pdvName: pdv.pdv.name,
           minQuantity: pdv.minQuantity,
           maxQuantity: pdv.maxQuantity,
           pdvQuantity: pdv.quantity,

@@ -129,7 +129,7 @@ export default function ProductNewEditForm({ currentProduct }) {
       priceBase: currentProduct?.priceBase || 0,
       priceSale: currentProduct?.priceSale || 0,
       taxesOption: currentProduct?.taxesOption || 0,
-      productsPdvs: currentProduct?.productsPdvs || [],
+      productsPdvs: currentProduct?.productPdv || [],
       quantityStock: currentProduct?.quantityStock || 0,
 
       brand: currentProduct?.brand || '',
@@ -628,9 +628,8 @@ export default function ProductNewEditForm({ currentProduct }) {
           <Typography variant="subtitle1">Asigna el punto de venta donde se encuentra el producto.</Typography>
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
             {values.productsPdvs.map((item) => (
-              <Stack flexDirection="row" alignItems="center">
+              <Stack key={item.id} flexDirection="row" alignItems="center">
                 <ListItem
-                  key={item.id}
                   sx={{ paddingLeft: 0, cursor: 'pointer' }}
                   onClick={() => {
                     setPdvEdit(item);
@@ -644,7 +643,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={item.pdv}
+                    primary={item.pdv ? item.pdv.name : item.pdv}
                     secondary={`Cantidad: ${item.quantity} Cantidad minima: ${item.minQuantity}`}
                   />
                 </ListItem>

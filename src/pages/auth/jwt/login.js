@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title> POS: Login</title>
+        <title> Ally360: Login</title>
       </Helmet>
 
       <JwtLoginView />

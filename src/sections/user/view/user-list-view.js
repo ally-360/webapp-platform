@@ -35,7 +35,7 @@ import {
   TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
-  TablePaginationCustom,
+  TablePaginationCustom
 } from 'src/components/table';
 //
 import UserTableRow from '../user-table-row';
@@ -47,18 +47,18 @@ import UserTableFiltersResult from '../user-table-filters-result';
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name' },
-  { id: 'phoneNumber', label: 'Phone Number', width: 180 },
+  { id: 'name', label: 'Nombre' },
+  { id: 'phoneNumber', label: 'Teléfono', width: 180 },
   { id: 'company', label: 'Company', width: 220 },
   { id: 'role', label: 'Role', width: 180 },
   { id: 'status', label: 'Status', width: 100 },
-  { id: '', width: 88 },
+  { id: '', width: 88 }
 ];
 
 const defaultFilters = {
   name: '',
   role: [],
-  status: 'all',
+  status: 'all'
 };
 
 // ----------------------------------------------------------------------
@@ -79,7 +79,7 @@ export default function UserListView() {
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
-    filters,
+    filters
   });
 
   const dataInPage = dataFiltered.slice(
@@ -98,7 +98,7 @@ export default function UserListView() {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
-        [name]: value,
+        [name]: value
       }));
     },
     [table]
@@ -121,7 +121,7 @@ export default function UserListView() {
     table.onUpdatePageDeleteRows({
       totalRows: tableData.length,
       totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
+      totalRowsFiltered: dataFiltered.length
     });
   }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
@@ -147,24 +147,25 @@ export default function UserListView() {
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="List"
+          heading="Lista de contactos"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'User', href: paths.dashboard.user.root },
-            { name: 'List' },
+            { name: 'Contactos', href: paths.dashboard.user.root },
+            { name: 'Lista' }
           ]}
           action={
             <Button
               component={RouterLink}
               href={paths.dashboard.user.new}
               variant="contained"
+              color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              New User
+              Crear contacto
             </Button>
           }
           sx={{
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 3, md: 5 }
           }}
         />
 
@@ -174,7 +175,7 @@ export default function UserListView() {
             onChange={handleFilterStatus}
             sx={{
               px: 2.5,
-              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
             }}
           >
             {STATUS_OPTIONS.map((tab) => (
@@ -185,9 +186,7 @@ export default function UserListView() {
                 label={tab.label}
                 icon={
                   <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
-                    }
+                    variant={((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'}
                     color={
                       (tab.value === 'active' && 'success') ||
                       (tab.value === 'pending' && 'warning') ||
@@ -196,15 +195,11 @@ export default function UserListView() {
                     }
                   >
                     {tab.value === 'all' && _userList.length}
-                    {tab.value === 'active' &&
-                      _userList.filter((user) => user.status === 'active').length}
+                    {tab.value === 'active' && _userList.filter((user) => user.status === 'active').length}
 
-                    {tab.value === 'pending' &&
-                      _userList.filter((user) => user.status === 'pending').length}
-                    {tab.value === 'banned' &&
-                      _userList.filter((user) => user.status === 'banned').length}
-                    {tab.value === 'rejected' &&
-                      _userList.filter((user) => user.status === 'rejected').length}
+                    {tab.value === 'pending' && _userList.filter((user) => user.status === 'pending').length}
+                    {tab.value === 'banned' && _userList.filter((user) => user.status === 'banned').length}
+                    {tab.value === 'rejected' && _userList.filter((user) => user.status === 'rejected').length}
                   </Label>
                 }
               />
@@ -269,10 +264,7 @@ export default function UserListView() {
 
                 <TableBody>
                   {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
+                    .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
                     .map((row) => (
                       <UserTableRow
                         key={row.id}
@@ -350,9 +342,7 @@ function applyFilter({ inputData, comparator, filters }) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (name) {
-    inputData = inputData.filter(
-      (user) => user.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
-    );
+    inputData = inputData.filter((user) => user.name.toLowerCase().indexOf(name.toLowerCase()) !== -1);
   }
 
   if (status !== 'all') {

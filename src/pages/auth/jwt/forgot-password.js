@@ -8,7 +8,7 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <Helmet>
-        <title> POS: Olvide contraseña</title>
+        <title> Ally360: Olvide contraseña</title>
       </Helmet>
 
       <JWTForgotPasswordView />

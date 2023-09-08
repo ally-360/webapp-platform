@@ -28,9 +28,7 @@ export default function NavToggleButton({ sx, ...other }) {
   return (
     <IconButton
       size="small"
-      onClick={() =>
-        settings.onUpdate('themeLayout', settings.themeLayout === 'vertical' ? 'mini' : 'vertical')
-      }
+      onClick={() => settings.onUpdate('themeLayout', settings.themeLayout === 'vertical' ? 'mini' : 'vertical')}
       sx={{
         p: 0.5,
         top: 32,
@@ -40,24 +38,20 @@ export default function NavToggleButton({ sx, ...other }) {
         border: `dashed 1px ${theme.palette.divider}`,
         ...bgBlur({ opacity: 0.48, color: theme.palette.background.default }),
         '&:hover': {
-          bgcolor: 'background.default',
+          bgcolor: 'background.default'
         },
-        ...sx,
+        ...sx
       }}
       {...other}
     >
       <Iconify
         width={16}
-        icon={
-          settings.themeLayout === 'vertical'
-            ? 'eva:arrow-ios-back-fill'
-            : 'eva:arrow-ios-forward-fill'
-        }
+        icon={settings.themeLayout === 'vertical' ? 'eva:arrow-ios-back-fill' : 'eva:arrow-ios-forward-fill'}
       />
     </IconButton>
   );
 }
 
 NavToggleButton.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

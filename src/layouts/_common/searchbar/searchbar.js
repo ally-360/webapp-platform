@@ -46,7 +46,9 @@ function Searchbar() {
   }, [search]);
 
   const handleKeyDown = (event) => {
-    if (event.key === 'k' && event.metaKey) {
+    console.log(event);
+    if (event.key === 'q' && event.ctrlKey) {
+      console.log('entrou');
       search.onToggle();
       setSearchQuery('');
     }
@@ -72,7 +74,7 @@ function Searchbar() {
 
   const dataFiltered = applyFilter({
     inputData: getAllItems({ data: navData }),
-    query: searchQuery,
+    query: searchQuery
   });
 
   const notFound = searchQuery && !dataFiltered.length;
@@ -111,7 +113,7 @@ function Searchbar() {
         <Iconify icon="eva:search-fill" />
       </IconButton>
 
-      {mdUp && <Label sx={{ px: 0.75, fontSize: 12, color: 'text.secondary' }}>⌘K</Label>}
+      {mdUp && <Label sx={{ px: 0.75, fontSize: 12, color: 'text.secondary' }}>Control + Q</Label>}
     </Stack>
   );
 
@@ -126,18 +128,18 @@ function Searchbar() {
         onClose={handleClose}
         transitionDuration={{
           enter: theme.transitions.duration.shortest,
-          exit: 0,
+          exit: 0
         }}
         PaperProps={{
           sx: {
             mt: 15,
-            overflow: 'unset',
-          },
+            overflow: 'unset'
+          }
         }}
         sx={{
           [`& .${dialogClasses.container}`]: {
-            alignItems: 'flex-start',
-          },
+            alignItems: 'flex-start'
+          }
         }}
       >
         <Box sx={{ p: 3, borderBottom: `solid 1px ${theme.palette.divider}` }}>
@@ -154,7 +156,7 @@ function Searchbar() {
             }
             endAdornment={<Label sx={{ letterSpacing: 1, color: 'text.secondary' }}>esc</Label>}
             inputProps={{
-              sx: { typography: 'h6' },
+              sx: { typography: 'h6' }
             }}
           />
         </Box>

@@ -42,6 +42,14 @@ const InvoiceListPage = lazy(() => import('src/pages/dashboard/invoice/list'));
 const InvoiceDetailsPage = lazy(() => import('src/pages/dashboard/invoice/details'));
 const InvoiceCreatePage = lazy(() => import('src/pages/dashboard/invoice/new'));
 const InvoiceEditPage = lazy(() => import('src/pages/dashboard/invoice/edit'));
+
+// Sales
+
+const SalesInvoiceListPage = lazy(() => import('src/pages/dashboard/sales/invoice/list'));
+const SalesInvoiceCreatePage = lazy(() => import('src/pages/dashboard/sales/invoice/new'));
+const SalesInvoiceEditPage = lazy(() => import('src/pages/dashboard/sales/invoice/edit'));
+const SalesInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/sales/invoice/details'));
+
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
 const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
@@ -116,9 +124,10 @@ export const dashboardRoutes = [
       {
         path: 'sales',
         children: [
-          { element: <InvoiceListPage />, index: true },
-
-          { path: 'new-sale', element: <InvoiceCreatePage /> }
+          { element: <SalesInvoiceListPage />, index: true },
+          { path: 'new-sale', element: <SalesInvoiceCreatePage /> },
+          { path: ':id', element: <SalesInvoiceDetailsPage /> },
+          { path: ':id/edit', element: <SalesInvoiceEditPage /> }
         ]
       },
       {

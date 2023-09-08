@@ -126,8 +126,8 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
             onClose={handlePopoverClose}
             disableRestoreFocus
           >
-            {productPdv.map((element) => (
-              <Box key={element.pdv} sx={{ p: 0.2 }}>
+            {productPdv.map((element, index) => (
+              <Box key={index} sx={{ p: 0.2 }}>
                 <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
                   {element.pdv.name}: {element.quantity} {t('productos')}
                 </Typography>
