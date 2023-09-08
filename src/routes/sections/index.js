@@ -4,6 +4,7 @@ import MainLayout from 'src/layouts/main';
 // config
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 //
+import { AuthGuard, GuestGuard, IndexGuard } from 'src/auth/guard';
 import { mainRoutes, HomePage } from './main';
 import { authRoutes } from './auth';
 import { authDemoRoutes } from './auth-demo';
@@ -25,7 +26,7 @@ export default function Router() {
     // SET INDEX PAGE WITH HOME PAGE
     {
       path: '/',
-      element: <MainLayout>{/* <HomePage /> */}</MainLayout>
+      element: <IndexGuard />
     },
 
     // Auth routes
