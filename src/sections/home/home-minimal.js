@@ -14,20 +14,20 @@ import { MotionViewport, varFade } from 'src/components/animate';
 const CARDS = [
   {
     icon: ' /assets/icons/home/ic_make_brand.svg',
-    title: 'Branding',
-    description: 'Consistent design makes it easy to brand your own.',
+    title: 'Manejo de inventario',
+    description: 'Consistent design makes it easy to brand your own.'
   },
   {
     icon: ' /assets/icons/home/ic_design.svg',
-    title: 'UI & UX Design',
+    title: 'Cuentas',
     description:
-      'The kit is built on the principles of the atomic design system. It helps you to create projects fastest and easily customized packages for your projects.',
+      'The kit is built on the principles of the atomic design system. It helps you to create projects fastest and easily customized packages for your projects.'
   },
   {
     icon: ' /assets/icons/home/ic_development.svg',
-    title: 'Development',
-    description: 'Easy to customize and extend, saving you time and money.',
-  },
+    title: 'Facturación electronica',
+    description: 'Easy to customize and extend, saving you time and money.'
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -37,25 +37,26 @@ export default function HomeMinimal() {
     <Container
       component={MotionViewport}
       sx={{
-        py: { xs: 10, md: 15 },
+        py: { xs: 10, md: 15 }
       }}
     >
       <Stack
         spacing={3}
         sx={{
           textAlign: 'center',
-          mb: { xs: 5, md: 10 },
+          mb: { xs: 5, md: 10 }
         }}
       >
         <m.div variants={varFade().inUp}>
           <Typography component="div" variant="overline" sx={{ color: 'text.disabled' }}>
-            POS App
+            Ally360
           </Typography>
         </m.div>
 
         <m.div variants={varFade().inDown}>
           <Typography variant="h2">
-            What Minimal <br /> helps you?
+            Caracteristicas
+            <br />
           </Typography>
         </m.div>
       </Stack>
@@ -66,7 +67,7 @@ export default function HomeMinimal() {
         alignItems="center"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
       >
         {CARDS.map((card, index) => (
@@ -83,17 +84,12 @@ export default function HomeMinimal() {
                       theme.palette.mode === 'light'
                         ? alpha(theme.palette.grey[500], 0.16)
                         : alpha(theme.palette.common.black, 0.4)
-                    }`,
-                  }),
-                }),
+                    }`
+                  })
+                })
               }}
             >
-              <Box
-                component="img"
-                src={card.icon}
-                alt={card.title}
-                sx={{ mx: 'auto', width: 48, height: 48 }}
-              />
+              <Box component="img" src={card.icon} alt={card.title} sx={{ mx: 'auto', width: 48, height: 48 }} />
 
               <Typography variant="h5" sx={{ mt: 8, mb: 2 }}>
                 {card.title}

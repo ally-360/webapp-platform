@@ -28,7 +28,7 @@ import { MotionContainer, varFade } from 'src/components/animate';
 const StyledRoot = styled('div')(({ theme }) => ({
   ...bgGradient({
     color: alpha(theme.palette.background.default, theme.palette.mode === 'light' ? 0.9 : 0.94),
-    imgUrl: '/assets/background/overlay_3.jpg',
+    imgUrl: '/assets/background/overlay_3.jpg'
   }),
   width: '100%',
   height: '100vh',
@@ -36,8 +36,8 @@ const StyledRoot = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     top: 0,
     left: 0,
-    position: 'fixed',
-  },
+    position: 'fixed'
+  }
 }));
 
 const StyledWrapper = styled('div')(({ theme }) => ({
@@ -45,8 +45,8 @@ const StyledWrapper = styled('div')(({ theme }) => ({
   overflow: 'hidden',
   position: 'relative',
   [theme.breakpoints.up('md')]: {
-    marginTop: HEADER.H_DESKTOP_OFFSET,
-  },
+    marginTop: HEADER.H_DESKTOP_OFFSET
+  }
 }));
 
 const StyledTextGradient = styled(m.h1)(({ theme }) => ({
@@ -63,8 +63,8 @@ const StyledTextGradient = styled(m.h1)(({ theme }) => ({
   fontSize: `${64 / 16}rem`,
   fontFamily: "'Barlow', sans-serif",
   [theme.breakpoints.up('md')]: {
-    fontSize: `${96 / 16}rem`,
-  },
+    fontSize: `${96 / 16}rem`
+  }
 }));
 
 const StyledEllipseTop = styled('div')(({ theme }) => ({
@@ -76,7 +76,7 @@ const StyledEllipseTop = styled('div')(({ theme }) => ({
   position: 'absolute',
   filter: 'blur(100px)',
   WebkitFilter: 'blur(100px)',
-  backgroundColor: alpha(theme.palette.primary.darker, 0.12),
+  backgroundColor: alpha(theme.palette.primary.darker, 0.12)
 }));
 
 const StyledEllipseBottom = styled('div')(({ theme }) => ({
@@ -88,13 +88,13 @@ const StyledEllipseBottom = styled('div')(({ theme }) => ({
   position: 'absolute',
   filter: 'blur(100px)',
   WebkitFilter: 'blur(100px)',
-  backgroundColor: alpha(theme.palette.primary.darker, 0.12),
+  backgroundColor: alpha(theme.palette.primary.darker, 0.12)
 }));
 
 const StyledPolygon = styled('div')(({ opacity = 1, anchor = 'left', theme }) => ({
   ...bgBlur({
     opacity,
-    color: theme.palette.background.default,
+    color: theme.palette.background.default
   }),
   zIndex: 9,
   bottom: 0,
@@ -103,12 +103,12 @@ const StyledPolygon = styled('div')(({ opacity = 1, anchor = 'left', theme }) =>
   position: 'absolute',
   clipPath: 'polygon(0% 0%, 100% 100%, 0% 100%)',
   ...(anchor === 'left' && {
-    left: 0,
+    left: 0
   }),
   ...(anchor === 'right' && {
     right: 0,
-    transform: 'scaleX(-1)',
-  }),
+    transform: 'scaleX(-1)'
+  })
 }));
 
 // ----------------------------------------------------------------------
@@ -148,7 +148,7 @@ export default function HomeHero() {
     repeatType: 'loop',
     ease: 'linear',
     duration: 60 * 4,
-    repeat: Infinity,
+    repeat: Infinity
   };
 
   const opacity = 1 - percent / 100;
@@ -165,15 +165,15 @@ export default function HomeHero() {
         maxWidth: 480,
         opacity: opacity > 0 ? opacity : 0,
         mt: {
-          md: `-${HEADER.H_DESKTOP + percent * 2.5}px`,
-        },
+          md: `-${HEADER.H_DESKTOP + percent * 2.5}px`
+        }
       }}
     >
       <m.div variants={varFade().in}>
         <Typography
           variant="h2"
           sx={{
-            textAlign: 'center',
+            textAlign: 'center'
           }}
         >
           Start a <br />
@@ -188,7 +188,7 @@ export default function HomeHero() {
             repeatType: 'reverse',
             ease: 'linear',
             duration: 20,
-            repeat: Infinity,
+            repeat: Infinity
           }}
         >
           Minimal
@@ -197,19 +197,13 @@ export default function HomeHero() {
 
       <m.div variants={varFade().in}>
         <Typography variant="body2" sx={{ textAlign: 'center' }}>
-          The starting point for your next project is based on MUI.Easy customization Helps you
-          build apps faster and better.
+          The starting point for your next project is based on MUI.Easy customization Helps you build apps faster and
+          better.
         </Typography>
       </m.div>
 
       <m.div variants={varFade().in}>
-        <Stack
-          spacing={0.75}
-          direction="row"
-          alignItems="center"
-          justifyContent="center"
-          sx={{ my: 3 }}
-        >
+        <Stack spacing={0.75} direction="row" alignItems="center" justifyContent="center" sx={{ my: 3 }}>
           <Rating readOnly value={4.95} precision={0.1} max={5} />
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             <Box component="strong" sx={{ mr: 0.5, color: 'text.primary' }}>
@@ -272,11 +266,7 @@ export default function HomeHero() {
         <Stack spacing={2} direction="row" justifyContent="center">
           {['figma', 'js', 'ts', 'nextjs', 'vite'].map((platform) => (
             <m.div key={platform} variants={varFade().in}>
-              <Box
-                component="img"
-                src={`/assets/icons/platforms/ic_${platform}.svg`}
-                sx={{ width: 24, height: 24 }}
-              />
+              <Box component="img" src={`/assets/icons/platforms/ic_${platform}.svg`} sx={{ width: 24, height: 24 }} />
             </m.div>
           ))}
         </Stack>
@@ -292,7 +282,7 @@ export default function HomeHero() {
         height: '150%',
         position: 'absolute',
         opacity: opacity > 0 ? opacity : 0,
-        transform: `skew(${-16 - percent / 24}deg, ${4 - percent / 16}deg)`,
+        transform: `skew(${-16 - percent / 24}deg, ${4 - percent / 16}deg)`
       }}
     >
       <Stack
@@ -300,7 +290,7 @@ export default function HomeHero() {
         variants={varFade().in}
         sx={{
           width: 344,
-          position: 'relative',
+          position: 'relative'
         }}
       >
         <Box
@@ -308,11 +298,7 @@ export default function HomeHero() {
           animate={{ y: ['0%', '100%'] }}
           transition={transition}
           alt={isLight ? 'light_1' : 'dark_1'}
-          src={
-            isLight
-              ? `/assets/images/home/hero/light_1.webp`
-              : `/assets/images/home/hero/dark_1.webp`
-          }
+          src={isLight ? `/assets/images/home/hero/light_1.webp` : `/assets/images/home/hero/dark_1.webp`}
           sx={{ position: 'absolute', mt: -5 }}
         />
         <Box
@@ -320,30 +306,18 @@ export default function HomeHero() {
           animate={{ y: ['-100%', '0%'] }}
           transition={transition}
           alt={isLight ? 'light_1' : 'dark_1'}
-          src={
-            isLight
-              ? `/assets/images/home/hero/light_1.webp`
-              : `/assets/images/home/hero/dark_1.webp`
-          }
+          src={isLight ? `/assets/images/home/hero/light_1.webp` : `/assets/images/home/hero/dark_1.webp`}
           sx={{ position: 'absolute' }}
         />
       </Stack>
 
-      <Stack
-        component={m.div}
-        variants={varFade().in}
-        sx={{ width: 720, position: 'relative', ml: -5 }}
-      >
+      <Stack component={m.div} variants={varFade().in} sx={{ width: 720, position: 'relative', ml: -5 }}>
         <Box
           component={m.img}
           animate={{ y: ['100%', '0%'] }}
           transition={transition}
           alt={isLight ? 'light_2' : 'dark_2'}
-          src={
-            isLight
-              ? `/assets/images/home/hero/light_2.webp`
-              : `/assets/images/home/hero/dark_2.webp`
-          }
+          src={isLight ? `/assets/images/home/hero/light_2.webp` : `/assets/images/home/hero/dark_2.webp`}
           sx={{ position: 'absolute', mt: -5 }}
         />
         <Box
@@ -351,11 +325,7 @@ export default function HomeHero() {
           animate={{ y: ['0%', '-100%'] }}
           transition={transition}
           alt={isLight ? 'light_2' : 'dark_2'}
-          src={
-            isLight
-              ? `/assets/images/home/hero/light_2.webp`
-              : `/assets/images/home/hero/dark_2.webp`
-          }
+          src={isLight ? `/assets/images/home/hero/light_2.webp` : `/assets/images/home/hero/dark_2.webp`}
           sx={{ position: 'absolute' }}
         />
       </Stack>
@@ -384,8 +354,8 @@ export default function HomeHero() {
         ref={heroRef}
         sx={{
           ...(hide && {
-            opacity: 0,
-          }),
+            opacity: 0
+          })
         }}
       >
         <StyledWrapper>
