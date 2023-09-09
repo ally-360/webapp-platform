@@ -8,7 +8,7 @@ export default function JobListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Job List</title>
+        <title> Ally360: Job List</title>
       </Helmet>
 
       <JobListView />

@@ -435,7 +435,7 @@ export default function FormPDVS() {
               <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
                 {pdvEdit ? 'Confirmar edición' : 'Crear Punto De Venta'}
               </LoadingButton>
-              <Button startIcon color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
+              <Button color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
                 Cancelar
               </Button>
             </>

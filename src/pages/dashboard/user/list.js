@@ -8,7 +8,7 @@ export default function UserListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Contactos</title>
+        <title> Ally360: Contactos</title>
       </Helmet>
 
       <UserListView />

@@ -8,7 +8,7 @@ export default function ProductCreatePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new product</title>
+        <title> Ally360: Create a new product</title>
       </Helmet>
 
       <ProductCreateView />

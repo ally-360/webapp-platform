@@ -14,7 +14,7 @@ export default function PostEditPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Post Edit</title>
+        <title> Ally360: Post Edit</title>
       </Helmet>
 
       <PostEditView title={`${title}`} />

@@ -8,7 +8,7 @@ export default function ProductListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Product List</title>
+        <title> Ally360: Product List</title>
       </Helmet>
 
       <ProductListView />

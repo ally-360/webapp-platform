@@ -8,7 +8,7 @@ export default function UserProfilePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: User Profile</title>
+        <title> Ally360: User Profile</title>
       </Helmet>
 
       <UserProfileView />

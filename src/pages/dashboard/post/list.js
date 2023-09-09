@@ -8,7 +8,7 @@ export default function PostListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Post List</title>
+        <title> Ally360: Post List</title>
       </Helmet>
 
       <PostListView />

@@ -24,9 +24,11 @@ export default function UserTableFiltersResult({
     onFilters('status', 'all');
   };
 
-  const handleRemoveRole = (inputValue) => {
-    const newValue = filters.role.filter((item) => item !== inputValue);
-    onFilters('role', newValue);
+  const handleRemoveMunicipio = (inputValue) => {
+    console.log(inputValue);
+    const newValue = filters.municipio.id !== inputValue.id ? inputValue : '';
+    onFilters('municipio', newValue);
+    console.log(inputValue);
   };
 
   return (
@@ -37,27 +39,35 @@ export default function UserTableFiltersResult({
           results found
         </Box>
       </Box>
+      {console.log(filters.municipio)}
 
       <Stack flexGrow={1} spacing={1} direction="row" flexWrap="wrap" alignItems="center">
         {filters.status !== 'all' && (
-          <Block label="Status:">
-            <Chip size="small" label={filters.status} onDelete={handleRemoveStatus} />
+          <Block label="Tipo:">
+            <Chip
+              size="small"
+              label={filters.status === 'customers' ? 'Clientes' : 'Proveedores'}
+              onDelete={handleRemoveStatus}
+            />
           </Block>
         )}
 
-        {!!filters.role.length && (
-          <Block label="Role:">
-            {filters.role.map((item) => (
-              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveRole(item)} />
-            ))}
+        {filters.municipio && (
+          <Block label="Municipio:">
+            {/* {filters.municipio.map((item) => (
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveMunicipio(item)} />
+            ))} */}
+            {filters.municipio && (
+              <Chip
+                size="small"
+                label={filters.municipio.name}
+                onDelete={() => handleRemoveMunicipio(filters.municipio)}
+              />
+            )}
           </Block>
         )}
 
-        <Button
-          color="error"
-          onClick={onResetFilters}
-          startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-        >
+        <Button color="error" onClick={onResetFilters} startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
           Clear
         </Button>
       </Stack>
@@ -69,7 +79,7 @@ UserTableFiltersResult.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
-  results: PropTypes.number,
+  results: PropTypes.number
 };
 
 // ----------------------------------------------------------------------
@@ -86,7 +96,7 @@ function Block({ label, children, sx, ...other }) {
         borderRadius: 1,
         overflow: 'hidden',
         borderStyle: 'dashed',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -104,5 +114,5 @@ function Block({ label, children, sx, ...other }) {
 Block.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

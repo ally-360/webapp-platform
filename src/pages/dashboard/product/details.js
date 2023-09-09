@@ -14,7 +14,7 @@ export default function ProductDetailsPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Product Details</title>
+        <title> Ally360: Product Details</title>
       </Helmet>
 
       <ProductDetailsView id={`${id}`} />

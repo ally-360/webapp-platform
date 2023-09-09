@@ -44,20 +44,20 @@ import UserTableFiltersResult from '../user-table-filters-result';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...USER_STATUS_OPTIONS];
+const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, ...USER_STATUS_OPTIONS];
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Nombre' },
+  { id: 'name', label: 'Nombre o razón social' },
   { id: 'phoneNumber', label: 'Teléfono', width: 180 },
-  { id: 'company', label: 'Company', width: 220 },
-  { id: 'role', label: 'Role', width: 180 },
-  { id: 'status', label: 'Status', width: 100 },
+  { id: 'company', label: 'Dirección', width: 220 },
+  { id: 'municipio', label: 'Municipio', width: 180 },
+  { id: 'status', label: 'Tipo', width: 100 },
   { id: '', width: 88 }
 ];
 
 const defaultFilters = {
   name: '',
-  role: [],
+  municipio: '',
   status: 'all'
 };
 
@@ -172,6 +172,7 @@ export default function UserListView() {
         <Card>
           <Tabs
             value={filters.status}
+            color="primary"
             onChange={handleFilterStatus}
             sx={{
               px: 2.5,
@@ -184,22 +185,17 @@ export default function UserListView() {
                 iconPosition="end"
                 value={tab.value}
                 label={tab.label}
+                color="primary"
                 icon={
                   <Label
                     variant={((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'}
                     color={
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
-                      'default'
+                      (tab.value === 'customers' && 'success') || (tab.value === 'providers' && 'warning') || 'primary'
                     }
                   >
                     {tab.value === 'all' && _userList.length}
-                    {tab.value === 'active' && _userList.filter((user) => user.status === 'active').length}
-
-                    {tab.value === 'pending' && _userList.filter((user) => user.status === 'pending').length}
-                    {tab.value === 'banned' && _userList.filter((user) => user.status === 'banned').length}
-                    {tab.value === 'rejected' && _userList.filter((user) => user.status === 'rejected').length}
+                    {tab.value === 'customers' && _userList.filter((user) => user.status === 'customers').length}
+                    {tab.value === 'providers' && _userList.filter((user) => user.status === 'providers').length}
                   </Label>
                 }
               />
@@ -329,7 +325,7 @@ export default function UserListView() {
 // ----------------------------------------------------------------------
 
 function applyFilter({ inputData, comparator, filters }) {
-  const { name, status, role } = filters;
+  const { name, status, municipio } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -349,8 +345,9 @@ function applyFilter({ inputData, comparator, filters }) {
     inputData = inputData.filter((user) => user.status === status);
   }
 
-  if (role.length) {
-    inputData = inputData.filter((user) => role.includes(user.role));
+  if (Object.entries(municipio).length !== 0) {
+    console.log(municipio);
+    inputData = inputData.filter((user) => user.municipio.id === municipio.id);
   }
 
   return inputData;

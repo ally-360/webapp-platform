@@ -8,7 +8,7 @@ export default function CategoriesListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Categorias</title>
+        <title> Ally360: Categorias</title>
       </Helmet>
 
       <CategoriesListView />

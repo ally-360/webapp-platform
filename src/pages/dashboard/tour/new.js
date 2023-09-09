@@ -8,7 +8,7 @@ export default function TourCreatePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new tour</title>
+        <title> Ally360: Create a new tour</title>
       </Helmet>
 
       <TourCreateView />

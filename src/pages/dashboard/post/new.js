@@ -8,7 +8,7 @@ export default function PostCreatePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new post</title>
+        <title> Ally360: Create a new post</title>
       </Helmet>
 
       <PostCreateView />

@@ -195,7 +195,7 @@ function PopupCreateCategory() {
           <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
             {categoryEdit ? 'Confirmar edición' : 'Crear Categoria'}
           </LoadingButton>
-          <Button startIcon color="primary" variant="outlined" onClick={() => dispatch(switchPopupState())}>
+          <Button color="primary" variant="outlined" onClick={() => dispatch(switchPopupState())}>
             Cancelar
           </Button>
         </DialogActions>
@@ -203,9 +203,5 @@ function PopupCreateCategory() {
     </Dialog>
   );
 }
-
-PopupCreateCategory.propTypes = {
-  open: PropTypes.bool
-};
 
 export default PopupCreateCategory;

@@ -158,7 +158,7 @@ function PopupCreateBrand() {
           <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
             {brandEdit ? 'Confirmar edición' : 'Crear Marca'}
           </LoadingButton>
-          <Button startIcon color="primary" variant="outlined" onClick={() => dispatch(switchPopupState())}>
+          <Button color="primary" variant="outlined" onClick={() => dispatch(switchPopupState())}>
             Cancelar
           </Button>
         </DialogActions>
@@ -166,10 +166,5 @@ function PopupCreateBrand() {
     </Dialog>
   );
 }
-
-PopupCreateBrand.propTypes = {
-  open: PropTypes.bool,
-  PaperComponent: PropTypes.func
-};
 
 export default PopupCreateBrand;

@@ -8,7 +8,7 @@ export default function PDVSListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Puntos de venta</title>
+        <title> Ally360: Puntos de venta</title>
       </Helmet>
 
       <PDVSListView />

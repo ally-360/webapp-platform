@@ -14,7 +14,7 @@ export default function InvoiceEditPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Invoice Edit</title>
+        <title> Ally360: Invoice Edit</title>
       </Helmet>
 
       <InvoiceEditView id={`${id}`} />

@@ -8,7 +8,7 @@ export default function InvoiceListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Invoice List</title>
+        <title> Ally360: Invoice List</title>
       </Helmet>
 
       <InvoiceListView />

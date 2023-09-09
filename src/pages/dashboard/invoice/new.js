@@ -8,7 +8,7 @@ export default function InvoiceCreatePage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Create a new invoice</title>
+        <title> Ally360: Create a new invoice</title>
       </Helmet>
 
       <InvoiceCreateView />

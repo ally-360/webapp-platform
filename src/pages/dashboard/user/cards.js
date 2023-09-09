@@ -8,7 +8,7 @@ export default function UserCardsPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: User Cards</title>
+        <title> Ally360: User Cards</title>
       </Helmet>
 
       <UserCardsView />

@@ -14,7 +14,7 @@ export default function TourDetailsPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Analytics</title>
+        <title> Ally360: Analytics</title>
       </Helmet>
 
       <TourDetailsView id={`${id}`} />

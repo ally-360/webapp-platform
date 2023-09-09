@@ -8,7 +8,7 @@ export default function BrandsListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Marcas</title>
+        <title> Ally360: Marcas</title>
       </Helmet>
 
       <BrandsListView />

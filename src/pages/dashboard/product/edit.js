@@ -14,7 +14,7 @@ export default function ProductEditPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Product Edit</title>
+        <title> Ally360: Product Edit</title>
       </Helmet>
 
       <ProductEditView id={`${id}`} />

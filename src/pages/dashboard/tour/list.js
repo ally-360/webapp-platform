@@ -8,7 +8,7 @@ export default function TourListPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Tour List</title>
+        <title> Ally360: Tour List</title>
       </Helmet>
 
       <TourListView />

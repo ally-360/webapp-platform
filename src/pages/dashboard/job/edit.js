@@ -14,7 +14,7 @@ export default function JobEditPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard: Dashboard: Job Edit</title>
+        <title> Ally360: Job Edit</title>
       </Helmet>
 
       <JobEditView id={`${id}`} />
