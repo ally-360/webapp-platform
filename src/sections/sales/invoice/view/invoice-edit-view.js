@@ -21,20 +21,21 @@ export default function InvoiceEditView({ id }) {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
+        icon="solar:bill-list-bold-duotone"
         heading="Edit"
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Invoice',
-            href: paths.dashboard.invoice.root,
+            href: paths.dashboard.invoice.root
           },
-          { name: currentInvoice?.invoiceNumber },
+          { name: currentInvoice?.invoiceNumber }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -44,5 +45,5 @@ export default function InvoiceEditView({ id }) {
 }
 
 InvoiceEditView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

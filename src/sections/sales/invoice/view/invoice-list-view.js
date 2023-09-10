@@ -194,6 +194,7 @@ export default function InvoiceListView() {
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
           heading={t('Facturas de venta')}
+          icon="solar:bill-list-bold-duotone"
           links={[
             {
               name: 'Dashboard',
@@ -212,6 +213,7 @@ export default function InvoiceListView() {
               component={RouterLink}
               href={paths.dashboard.sales.newSale}
               variant="contained"
+              color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
               {t('Nueva factura')}

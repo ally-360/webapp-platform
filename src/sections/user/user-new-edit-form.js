@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -29,7 +29,18 @@ import FormProvider, {
   RHFTextField,
   RHFUploadAvatar,
   RHFAutocomplete,
+  RHFSelect
 } from 'src/components/hook-form';
+import { CardHeader, Divider, IconButton, Tooltip, Zoom } from '@mui/material';
+import { Icon } from '@iconify/react';
+import MenuItem from '@mui/material/MenuItem';
+import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
+import parse from 'autosuggest-highlight/parse';
+import match from 'autosuggest-highlight/match';
+import { useSettingsContext } from 'src/components/settings';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
+import { useTheme } from '@emotion/react';
 
 // ----------------------------------------------------------------------
 
@@ -39,45 +50,55 @@ export default function UserNewEditForm({ currentUser }) {
   const { enqueueSnackbar } = useSnackbar();
 
   const NewUserSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
+    name: Yup.lazy((value) => {
+      console.log('value', value);
+      if (value && value.identificationObject.type === 'NIT' && value.typePerson === 'Juridica') {
+        return Yup.string().required('Name is required');
+      }
+      return Yup.object().shape({
+        name: Yup.string().required('First Name is required'),
+        lastanem: Yup.string().required('Last Name is required')
+      });
+    }),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
     phoneNumber: Yup.string().required('Phone number is required'),
+    phoneNumber2: Yup.string().required('Phone number is required'),
     address: Yup.string().required('Address is required'),
-    country: Yup.string().required('Country is required'),
-    company: Yup.string().required('Company is required'),
-    state: Yup.string().required('State is required'),
     city: Yup.string().required('City is required'),
-    role: Yup.string().required('Role is required'),
-    zipCode: Yup.string().required('Zip code is required'),
-    avatarUrl: Yup.mixed().nullable().required('Avatar is required'),
     // not required
-    status: Yup.string(),
-    isVerified: Yup.boolean(),
+    identificationObject: Yup.object().shape({
+      type: Yup.string().required('Type is required'),
+      number: Yup.string().required('Number is required'),
+      dv: Yup.string().optional()
+    })
   });
 
   const defaultValues = useMemo(
     () => ({
       name: currentUser?.name || '',
-      city: currentUser?.city || '',
-      role: currentUser?.role || '',
       email: currentUser?.email || '',
-      state: currentUser?.state || '',
-      status: currentUser?.status || '',
       address: currentUser?.address || '',
-      country: currentUser?.country || '',
-      zipCode: currentUser?.zipCode || '',
-      company: currentUser?.company || '',
-      avatarUrl: currentUser?.avatarUrl || null,
       phoneNumber: currentUser?.phoneNumber || '',
-      isVerified: currentUser?.isVerified || true,
+      phoneNumber2: currentUser?.phoneNumber2 || '',
+      type: currentUser?.type || 'Customer',
+      identificationObject: currentUser?.identificationObject || {
+        type: 'CC',
+        number: '',
+        dv: ''
+      },
+      typePerson: currentUser?.typePerson || 'Natural',
+      departamento: currentUser?.departamento || null,
+      municipio: currentUser?.municipio || null
     }),
     [currentUser]
   );
 
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
-    defaultValues,
+    defaultValues
   });
+
+  const theme = useTheme();
 
   const {
     reset,
@@ -85,7 +106,7 @@ export default function UserNewEditForm({ currentUser }) {
     control,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -102,178 +123,278 @@ export default function UserNewEditForm({ currentUser }) {
     }
   });
 
-  const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const file = acceptedFiles[0];
+  useEffect(() => {
+    if (values.identificationObject.type === 'NIT' && values.typePerson === 'Juridica') {
+      setValue('name', '');
+    } else {
+      setValue('name', { name: '', lastname: '' });
+    }
+  }, [values.identificationObject, values.typePerson, setValue]);
 
-      const newFile = Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      });
+  useEffect(() => console.log('values', values), [values]);
 
-      if (file) {
-        setValue('avatarUrl', newFile, { shouldValidate: true });
+  // ----------------------------------------------------------------------
+
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getAllMunicipios());
+  }, [dispatch]);
+  const { locations } = useSelector((state) => state.locations);
+  const departmentValue = watch('departamento');
+  const [searchQueryMunicipio, setSearchQueryMunicipio] = useState('');
+  const [searchQueryDepartamento, setSearchQueryDepartamento] = useState('');
+  const [municipios, setMunicipios] = useState([]);
+
+  useEffect(() => {
+    if (departmentValue) {
+      setMunicipios(departmentValue.towns);
+      const selectedMunicipio = watch('municipio');
+      if (selectedMunicipio) {
+        const municipioExist = departmentValue.towns.filter((municipio) => municipio.name === selectedMunicipio.name);
+        if (municipioExist.length === 0) {
+          setValue('municipio', '');
+          setSearchQueryMunicipio('');
+        }
       }
-    },
-    [setValue]
-  );
+    } else {
+      setMunicipios([]);
+      setValue('municipio', null);
+      setSearchQueryMunicipio('');
+    }
+  }, [departmentValue, locations, setValue, watch]);
+
+  const handleInputDepartamentoChange = (event, value) => {
+    setSearchQueryDepartamento(value);
+  };
+
+  const handleInputMunicipioChange = (event, value) => {
+    setSearchQueryMunicipio(value);
+  };
+
+  const isOptionEqualToValue = (option, value = '') => {
+    if (option && value) {
+      return option.id === value.id && option.name === value.name;
+    }
+    return false;
+  };
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        <Grid xs={12} md={4}>
-          <Card sx={{ pt: 10, pb: 5, px: 3 }}>
-            {currentUser && (
-              <Label
-                color={
-                  (values.status === 'active' && 'success') ||
-                  (values.status === 'banned' && 'error') ||
-                  'warning'
-                }
-                sx={{ position: 'absolute', top: 24, right: 24 }}
-              >
-                {values.status}
-              </Label>
-            )}
-
-            <Box sx={{ mb: 5 }}>
-              <RHFUploadAvatar
-                name="avatarUrl"
-                maxSize={3145728}
-                onDrop={handleDrop}
-                helperText={
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 3,
-                      mx: 'auto',
-                      display: 'block',
-                      textAlign: 'center',
-                      color: 'text.disabled',
-                    }}
-                  >
-                    Allowed *.jpeg, *.jpg, *.png, *.gif
-                    <br /> max size of {fData(3145728)}
-                  </Typography>
-                }
-              />
-            </Box>
-
-            {currentUser && (
-              <FormControlLabel
-                labelPlacement="start"
-                control={
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        {...field}
-                        checked={field.value !== 'active'}
-                        onChange={(event) =>
-                          field.onChange(event.target.checked ? 'banned' : 'active')
-                        }
-                      />
-                    )}
-                  />
-                }
-                label={
-                  <>
-                    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      Banned
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Apply disable account
-                    </Typography>
-                  </>
-                }
-                sx={{ mx: 0, mb: 3, width: 1, justifyContent: 'space-between' }}
-              />
-            )}
-
-            <RHFSwitch
-              name="isVerified"
-              labelPlacement="start"
-              label={
-                <>
-                  <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                    Email Verified
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Disabling this will automatically send the user a verification email
-                  </Typography>
-                </>
-              }
-              sx={{ mx: 0, width: 1, justifyContent: 'space-between' }}
-            />
-
-            {currentUser && (
-              <Stack justifyContent="center" alignItems="center" sx={{ mt: 3 }}>
-                <Button variant="soft" color="error">
-                  Delete User
-                </Button>
-              </Stack>
-            )}
-          </Card>
-        </Grid>
-
         <Grid xs={12} md={8}>
-          <Card sx={{ p: 3 }}>
+          <Card sx={{ p: 3, overflow: 'visible', zIndex: 99 }}>
+            <Typography variant="h4">Información general</Typography>
+            <Divider sx={{ mb: 3, mt: 0.5 }} />
+
             <Box
               rowGap={3}
               columnGap={2}
               display="grid"
               gridTemplateColumns={{
                 xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
+                sm: 'repeat(2, 1fr)'
               }}
             >
-              <RHFTextField name="name" label="Full Name" />
-              <RHFTextField name="email" label="Email Address" />
-              <RHFTextField name="phoneNumber" label="Phone Number" />
+              <RHFSelect name="type" label="Tipo de contacto">
+                <MenuItem value="Customer">Cliente</MenuItem>
+                <MenuItem value="Provider">Proveedor</MenuItem>
+              </RHFSelect>
+              <RHFSelect name="identificationObject.type" label="Tipo de contacto">
+                <MenuItem value="CC">CC - Cédula de ciudadania</MenuItem>
+                <MenuItem value="NIT">NIT - Número de identificación tributaria</MenuItem>
+              </RHFSelect>
 
+              {values.identificationObject.type === 'NIT' && (
+                <RHFSelect name="typePerson" label="Tipo de persona* ">
+                  <MenuItem value="Natural">Natural</MenuItem>
+                  <MenuItem value="Juridica">Juridica</MenuItem>
+                </RHFSelect>
+              )}
+
+              {/* Si es NIT y Juridica se manda Razón social o nombre completo */}
+
+              {values.identificationObject.type === 'CC' ||
+              (values.identificationObject.type === 'NIT' && values.typePerson === 'Natural') ? (
+                <>
+                  <RHFTextField name="identificationObject.number" label="Número de identificación *" />
+
+                  <RHFTextField name="name.name" label="Nombres" />
+                  <RHFTextField name="name.lastname" label="Apellidos" />
+                </>
+              ) : (
+                values.identificationObject.type === 'NIT' &&
+                values.typePerson === 'Juridica' && (
+                  <>
+                    <Stack direction="row" alignItems="center" gap={1}>
+                      <RHFTextField
+                        sx={{ flex: 3 }}
+                        name="identificationObject.number"
+                        label="Número de identificación *"
+                      />
+                      <RHFTextField sx={{ flex: 1 }} name="identificationObject.dv" label="DV *" />
+                    </Stack>
+                    <RHFTextField name="name" label="Razón social / Nombre completo *" />
+                  </>
+                )
+              )}
               <RHFAutocomplete
-                name="country"
-                label="Country"
-                options={countries.map((country) => country.label)}
-                getOptionLabel={(option) => option}
-                isOptionEqualToValue={(option, value) => option === value}
+                name="departamento"
+                placeholder="Ej: Valle del Cauca"
+                fullWidth
+                label="Departamento"
+                onInputChange={handleInputDepartamentoChange}
+                isOptionEqualToValue={isOptionEqualToValue}
+                getOptionLabel={(option) => (option.name ? option.name : '')}
+                options={locations}
                 renderOption={(props, option) => {
-                  const { code, label, phone } = countries.filter(
-                    (country) => country.label === option
-                  )[0];
-
-                  if (!label) {
-                    return null;
-                  }
+                  const matches = match(option.name, searchQueryDepartamento);
+                  const parts = parse(option.name, matches);
 
                   return (
-                    <li {...props} key={label}>
-                      <Iconify
-                        key={label}
-                        icon={`circle-flags:${code.toLowerCase()}`}
-                        width={28}
-                        sx={{ mr: 1 }}
-                      />
-                      {label} ({code}) +{phone}
+                    <li {...props}>
+                      <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.primary">
+                          {parts.map((part, index) => (
+                            <span
+                              key={index}
+                              style={{
+                                fontWeight: part.highlight ? 700 : 400,
+                                color: part.highlight ? theme.palette.primary.main : 'inherit'
+                              }}
+                            >
+                              {part.text}
+                            </span>
+                          ))}
+                        </Typography>
+                      </Box>
                     </li>
                   );
                 }}
+                noOptionsText={
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
+                    No hay resultados para {searchQueryMunicipio}
+                  </Typography>
+                }
               />
+              <RHFAutocomplete
+                name="municipio"
+                fullWidth
+                placeholder="Ej: Cali"
+                label="Municipio"
+                onInputChange={handleInputMunicipioChange}
+                isOptionEqualToValue={isOptionEqualToValue}
+                getOptionLabel={(option) => (option.name ? option.name : '')}
+                options={municipios}
+                renderOption={(props, option) => {
+                  const matches = match(option.name, searchQueryMunicipio);
+                  const parts = parse(option.name, matches);
 
-              <RHFTextField name="state" label="State/Region" />
-              <RHFTextField name="city" label="City" />
-              <RHFTextField name="address" label="Address" />
-              <RHFTextField name="zipCode" label="Zip/Code" />
-              <RHFTextField name="company" label="Company" />
-              <RHFTextField name="role" label="Role" />
+                  return (
+                    <li {...props}>
+                      <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" color="text.primary">
+                          {parts.map((part, index) => (
+                            <span
+                              key={index}
+                              style={{
+                                fontWeight: part.highlight ? 700 : 400,
+                                color: part.highlight ? theme.palette.primary.main : 'inherit'
+                              }}
+                            >
+                              {part.text}
+                            </span>
+                          ))}
+                        </Typography>
+                      </Box>
+                    </li>
+                  );
+                }}
+                noOptionsText={
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
+                    {municipios.length === 0
+                      ? 'Seleciona un departamento'
+                      : `No hay resultados para ${searchQueryMunicipio}`}
+                  </Typography>
+                }
+              />
+              {/* Colocar departamento y municipio */}
+              <RHFTextField name="address" label="Dirección *" />
             </Box>
-
-            <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                {!currentUser ? 'Create User' : 'Save Changes'}
-              </LoadingButton>
-            </Stack>
           </Card>
+
+          <Card sx={{ p: 3, mt: 3 }}>
+            <Typography variant="h4">Contacto</Typography>
+            <Divider sx={{ mb: 3, mt: 0.5 }} />
+
+            <Box
+              rowGap={3}
+              columnGap={2}
+              display="grid"
+              gridTemplateColumns={{
+                xs: 'repeat(1, 1fr)',
+                sm: 'repeat(2, 1fr)'
+              }}
+            >
+              <RHFTextField name="email" label="Correo electrónico" />
+              <RHFPhoneNumber
+                fullWidth
+                label="Celular"
+                name="phoneNumber"
+                type="string"
+                variant="outlined"
+                placeholder="Ej: 300 123 4567"
+                defaultCountry="co"
+                countryCodeEditable={false}
+                onlyCountries={['co']}
+              />
+              <RHFTextField name="phoneNumber2" label="Teléfono" />
+            </Box>
+          </Card>
+        </Grid>
+        <Grid
+          sx={{
+            position: 'sticky ',
+            top: '50px',
+            height: 'fit-content'
+          }}
+          item
+          xs={12}
+          md={4}
+        >
+          <Stack spacing={3}>
+            <Card sx={{ p: 3 }}>
+              <Stack direction="row" alignItems="center">
+                <RHFSwitch sx={{ margin: 0 }} label="Enviar estado de cuenta al correo" name="isVerified" />
+                <Tooltip
+                  title="En cada factura enviada por correo, tu cliente recibirá su estado de cuenta."
+                  TransitionComponent={Zoom}
+                  arrow
+                >
+                  <IconButton>
+                    <Icon icon="ph:question" width={20} height={20} />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+              <LoadingButton
+                color="primary"
+                type="submit"
+                sx={{ mt: 3 }}
+                fullWidth
+                variant="outlined"
+                loading={isSubmitting}
+              >
+                Guardar y crear otro
+              </LoadingButton>
+              <Stack direction="row" alignItems="center" sx={{ mt: 1.5 }} gap={1.5}>
+                <Button fullWidth variant="outlined" color="error">
+                  Cancelar
+                </Button>
+                <LoadingButton color="primary" type="submit" fullWidth variant="contained" loading={isSubmitting}>
+                  {!currentUser ? 'Guardar' : 'Guardar cambios'}
+                </LoadingButton>
+              </Stack>
+            </Card>
+          </Stack>
         </Grid>
       </Grid>
     </FormProvider>
@@ -281,5 +402,5 @@ export default function UserNewEditForm({ currentUser }) {
 }
 
 UserNewEditForm.propTypes = {
-  currentUser: PropTypes.object,
+  currentUser: PropTypes.object
 };

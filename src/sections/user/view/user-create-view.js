@@ -6,6 +6,7 @@ import { paths } from 'src/routes/paths';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
+import { Icon } from '@iconify/react';
 import UserNewEditForm from '../user-new-edit-form';
 
 // ----------------------------------------------------------------------
@@ -16,20 +17,21 @@ export default function UserCreateView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Create a new user"
+        icon="icons8:add-user"
+        heading="Nuevo contacto"
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
-            name: 'User',
-            href: paths.dashboard.user.root,
+            name: 'Contactos',
+            href: paths.dashboard.user.list
           },
-          { name: 'New user' },
+          { name: 'Nuevo contacto' }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 

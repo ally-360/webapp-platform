@@ -4,11 +4,7 @@ import { paths } from 'src/routes/paths';
 // locales
 import { useLocales } from 'src/locales';
 // components
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
 import SvgColor from 'src/components/svg-color';
-import { IconButton, Tooltip, Zoom } from '@mui/material';
-import { Icon } from '@iconify/react';
 import { useDispatch } from 'react-redux';
 import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
@@ -191,18 +187,18 @@ export function useNavData() {
           //   ]
           // },
 
-          // INVOICE
-          {
-            title: t('invoice'),
-            path: paths.dashboard.invoice.root,
-            icon: ICONS.invoice,
-            children: [
-              { title: t('list'), path: paths.dashboard.invoice.root },
-              { title: t('details'), path: paths.dashboard.invoice.demo.details },
-              { title: t('create'), path: paths.dashboard.invoice.new },
-              { title: t('edit'), path: paths.dashboard.invoice.demo.edit }
-            ]
-          },
+          // // INVOICE
+          // {
+          //   title: t('invoice'),
+          //   path: paths.dashboard.invoice.root,
+          //   icon: ICONS.invoice,
+          //   children: [
+          //     { title: t('list'), path: paths.dashboard.invoice.root },
+          //     { title: t('details'), path: paths.dashboard.invoice.demo.details },
+          //     { title: t('create'), path: paths.dashboard.invoice.new },
+          //     { title: t('edit'), path: paths.dashboard.invoice.demo.edit }
+          //   ]
+          // },
 
           // // BLOG
           // {

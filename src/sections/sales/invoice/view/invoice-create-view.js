@@ -19,6 +19,7 @@ export default function InvoiceCreateView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
+        icon="solar:bill-list-bold-duotone"
         heading={t('Crear factura')}
         links={[
           {
