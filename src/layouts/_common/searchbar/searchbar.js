@@ -46,9 +46,7 @@ function Searchbar() {
   }, [search]);
 
   const handleKeyDown = (event) => {
-    console.log(event);
     if (event.key === 'q' && event.ctrlKey) {
-      console.log('entrou');
       search.onToggle();
       setSearchQuery('');
     }

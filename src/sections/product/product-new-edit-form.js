@@ -287,6 +287,7 @@ export default function ProductNewEditForm({ currentProduct }) {
   useEffect(() => {
     const taxPercentage = values.taxesOption;
     if (taxPercentage) {
+      console.log('entra');
       const newPriceSale = calculatePriceSale(values.priceBase, taxPercentage);
       setValue('priceSale', newPriceSale);
     }
@@ -575,10 +576,13 @@ export default function ProductNewEditForm({ currentProduct }) {
               fullWidth
               label="Precio base"
               onChange={(e) => {
-                const priceBase = parseFloat(e.target.value);
+                console.log(e);
+                const priceBase = e.target.value;
+                console.log('target value', e.target.value);
+                console.log('priceBase', e.target.value);
+                setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
                 const taxPercentage = values.taxesOption; // Obtener el porcentaje de impuesto según la opción seleccionada
                 const priceSale = calculatePriceSale(priceBase, taxPercentage); // Calcular el precio total
-                setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
                 setValue('priceSale', priceSale); // Actualizar el valor de Precio Total
               }}
               value={values.priceBase}
@@ -599,7 +603,7 @@ export default function ProductNewEditForm({ currentProduct }) {
               fullWidth
               color="primary"
               placeholder="0.00"
-              label="Precio Total"
+              label="Precio Totalñlñll"
               onChange={(e) => {
                 const priceSale = parseFloat(e.target.value);
                 const taxPercentage = values.taxesOption; // Obtener el porcentaje de impuesto según la opción seleccionada

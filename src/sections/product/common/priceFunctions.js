@@ -1,5 +1,8 @@
 export function calculatePriceSale(priceBase, taxPercentage) {
-  if (priceBase === 0 || Number.isNaN(priceBase) || typeof priceBase === 'string') return 0;
+  // if (priceBase === 0 || Number.isNaN(priceBase) || typeof priceBase === 'string') return 0;
+  // PriceBase to number
+  priceBase = Number(priceBase);
+
   if (taxPercentage === 0) return priceBase;
 
   const taxAmount = (priceBase * taxPercentage) / 100; // Calcular el monto del impuesto
