@@ -13,7 +13,13 @@ const initialState = {
   products: [],
   categoryEdit: null,
   seeCategory: false,
-  isEmpty: false
+  isEmpty: false,
+
+  // Detail category
+  viewCategoryById: null,
+  viewCategoryProducts: [],
+  viewCategoryByIdLoading: false,
+  viewCategoryByIdError: false
 };
 
 const slice = createSlice({
@@ -53,6 +59,22 @@ const slice = createSlice({
       } else {
         state.categoryEdit = null;
       }
+    },
+
+    // Detail category
+    startLoadingViewCategoryById(state) {
+      state.viewCategoryByIdLoading = true;
+    },
+    hasErrorViewCategoryById(state, action) {
+      state.viewCategoryByIdLoading = false;
+      state.viewCategoryByIdError = action.payload;
+    },
+    getViewCategoryById(state, action) {
+      state.viewCategoryByIdLoading = false;
+      state.viewCategoryById = action.payload;
+    },
+    getViewCategoryProducts(state, action) {
+      state.viewCategoryProducts = action.payload;
     }
   }
 });
@@ -117,6 +139,22 @@ export function getProductsInCategory(name) {
     } catch (error) {
       console.error(error);
       dispatch(slice.actions.hasError(error));
+    }
+  };
+}
+
+// ----------------------------------------------------------------------
+
+export function getViewCategoryById(id) {
+  return async (dispatch) => {
+    dispatch(slice.actions.startLoadingViewCategoryById());
+    try {
+      const response = await RequestService.getCategoryById(id);
+      dispatch(slice.actions.getViewCategoryById(response.data));
+      dispatch(slice.actions.getViewCategoryProducts(response.data.products));
+      console.log(response.data.products);
+    } catch (error) {
+      dispatch(slice.actions.hasErrorViewCategoryById(error));
     }
   };
 }

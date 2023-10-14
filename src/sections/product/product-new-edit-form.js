@@ -366,9 +366,9 @@ export default function ProductNewEditForm({ currentProduct }) {
     dispatch(setPopupAssignInventory(true));
   };
 
-  useEffect(() => {
-    dispatch(switchPopup());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(switchPopup());
+  // }, [dispatch]);
 
   const renderDetails = (
     <Grid xs={12} md={8}>

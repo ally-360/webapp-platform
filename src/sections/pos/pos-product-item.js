@@ -17,14 +17,23 @@ import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
 import { ColorPreview } from 'src/components/color-utils';
 //
+import { Typography } from '@mui/material';
 import { useCheckoutContext } from '../checkout/context';
 
 // ----------------------------------------------------------------------
 
-export default function ProductItem({ product }) {
+export default function PosProductItem({ product }) {
   const { onAddToCart } = useCheckoutContext();
 
-  const { id, name, coverUrl, price, colors, available, sizes, priceSale, newLabel, saleLabel } = product;
+  // const { id, name, images[0], price, colors, available, sizes, priceSale, newLabel, saleLabel } = product;
+  const { id, name, images, priceSale, sku, quantityStock } = product;
+
+  console.log(product);
+
+  const colors = ['red', 'blue'];
+  const available = true;
+  const sizes = ['S', 'M', 'L'];
+  const saleLabel = { enabled: true, content: 'Sale' };
 
   const linkTo = paths.product.details(id);
 
@@ -32,9 +41,9 @@ export default function ProductItem({ product }) {
     const newProduct = {
       id,
       name,
-      coverUrl,
+      images,
       available,
-      price,
+      priceSale,
       colors: [colors[0]],
       size: sizes[0],
       quantity: 1
@@ -46,16 +55,16 @@ export default function ProductItem({ product }) {
     }
   };
 
-  const renderLabels = (newLabel.enabled || saleLabel.enabled) && (
+  const renderLabels = (quantityStock || saleLabel.enabled) && (
     <Stack direction="row" alignItems="center" spacing={1} sx={{ position: 'absolute', zIndex: 9, top: 16, right: 16 }}>
-      {newLabel.enabled && (
+      {quantityStock > 0 && (
         <Label variant="filled" color="info">
-          {newLabel.content}
+          <strong>Disponibles </strong> {` ${quantityStock}`}
         </Label>
       )}
-      {saleLabel.enabled && (
+      {!quantityStock && (
         <Label variant="filled" color="error">
-          {saleLabel.content}
+          Sin unidades
         </Label>
       )}
     </Stack>
@@ -63,7 +72,7 @@ export default function ProductItem({ product }) {
 
   const renderImg = (
     <Box sx={{ position: 'relative', p: 1 }}>
-      {!!available && (
+      {!!quantityStock && (
         <Fab
           color="warning"
           size="medium"
@@ -86,14 +95,14 @@ export default function ProductItem({ product }) {
         </Fab>
       )}
 
-      <Tooltip title={!available && 'Out of stock'} placement="bottom-end">
+      <Tooltip title={!quantityStock && 'Out of stock'} placement="bottom-end">
         <Image
           alt={name}
-          src={coverUrl}
+          src={images[0]}
           ratio="1/1"
           sx={{
             borderRadius: 1.5,
-            ...(!available && {
+            ...(!quantityStock && {
               opacity: 0.48,
               filter: 'grayscale(1)'
             })
@@ -104,23 +113,16 @@ export default function ProductItem({ product }) {
   );
 
   const renderContent = (
-    <Stack spacing={2.5} sx={{ p: 3, pt: 2 }}>
+    <Stack spacing={0.5} sx={{ p: 2, pt: 0.6 }}>
       <Link component={RouterLink} href={linkTo} color="inherit" variant="subtitle2" noWrap>
         {name}
+        <Typography variant="subtitle2" color="GrayText" sx={{ fontSize: 11 }} noWrap>
+          <strong>SKU:</strong> {sku}
+        </Typography>
       </Link>
 
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <ColorPreview colors={colors} />
-
-        <Stack direction="row" spacing={0.5} sx={{ typography: 'subtitle1' }}>
-          {priceSale && (
-            <Box component="span" sx={{ color: 'text.disabled', textDecoration: 'line-through' }}>
-              {fCurrency(priceSale)}
-            </Box>
-          )}
-
-          <Box component="span">{fCurrency(price)}</Box>
-        </Stack>
+      <Stack direction="row" justifyContent="right" spacing={0.5} sx={{ typography: 'subtitle1' }}>
+        <Box component="span">{fCurrency(priceSale)}</Box>
       </Stack>
     </Stack>
   );
@@ -142,6 +144,6 @@ export default function ProductItem({ product }) {
   );
 }
 
-ProductItem.propTypes = {
+PosProductItem.propTypes = {
   product: PropTypes.object
 };

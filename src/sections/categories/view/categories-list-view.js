@@ -27,7 +27,12 @@ import Collapse from '@mui/material/Collapse';
 
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { useTranslation } from 'react-i18next';
-import { deleteCategory, getCategories, switchPopupState } from 'src/redux/inventory/categoriesSlice';
+import {
+  deleteCategory,
+  getCategories,
+  getViewCategoryById,
+  switchPopupState
+} from 'src/redux/inventory/categoriesSlice';
 import { useSettingsContext } from 'src/components/settings';
 import { paths } from 'src/routes/paths';
 import Label from 'src/components/label';
@@ -44,14 +49,6 @@ import RequestService from '../../../axios/services/service';
 
 // hooks
 
-function PaperComponent(props) {
-  return (
-    <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
-      <Paper {...props} />
-    </Draggable>
-  );
-}
-
 export default function InvetoryCategoriesList() {
   const settings = useSettingsContext();
   const componentRef = useRef();
@@ -59,7 +56,9 @@ export default function InvetoryCategoriesList() {
 
   // const theme = useTheme();
   const dispatch = useDispatch();
-  const { categories, openPopup, isEmpty, isLoading } = useSelector((state) => state.categories);
+  const { categories, openPopup, isEmpty, isLoading, viewCategoryById, viewCategoryByIdLoading } = useSelector(
+    (state) => state.categories
+  );
 
   // Get categories and get products in category from API
   useEffect(() => {
@@ -71,23 +70,15 @@ export default function InvetoryCategoriesList() {
   // states for menu options in categories
   const [viewCategory, setViewCategory] = useState(0);
 
-  const [viewCategoryInfo, setViewCategoryInfo] = useState({});
+  // const [viewCategoryInfo, setViewCategoryInfo] = useState({});
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const getCategoryById = async () => {
-    try {
-      const resp = await RequestService.getCategoryById(viewCategory);
-      setViewCategoryInfo(resp.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   useEffect(() => {
     if (viewCategory !== 0) {
-      getCategoryById();
+      dispatch(getViewCategoryById(viewCategory));
     }
-  }, [viewCategory]);
+  }, [viewCategory, dispatch]);
 
   const { products } = useSelector((state) => state.categories);
 
@@ -155,7 +146,8 @@ export default function InvetoryCategoriesList() {
           <Grid item xs={12} md={12}>
             <Alert severity="info">
               <AlertTitle>Crea una categoria</AlertTitle>
-              Puedes crear una categoria dando click en el botón superior derecho <strong>"Crear categoria"</strong>
+              Puedes crear una categoria dando click en el botón superior derecho
+              <strong>&quot;Crear categoria&quot;</strong>
             </Alert>
           </Grid>
         </Grid>
@@ -260,13 +252,13 @@ export default function InvetoryCategoriesList() {
         </Grid>
 
         <Grid item xs={12} md={8}>
-          {isLoading && <Skeleton variant="rectangular" height={400} />}
+          {isLoading || (viewCategoryByIdLoading && <Skeleton variant="rounded" height={400} />)}
           {viewCategory === 0 && !isLoading && (
             <Card sx={{ height: '100%' }}>
               <CardContent>{isEmpty ? '' : 'Seleciona una marca para visualizarla'}</CardContent>
             </Card>
           )}
-          {viewCategory !== 0 && !isLoading && !isEmpty && (
+          {viewCategory !== 0 && !viewCategoryByIdLoading && viewCategoryById !== null && !isEmpty && (
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 {viewCategory === 0 ? (
@@ -276,21 +268,21 @@ export default function InvetoryCategoriesList() {
                     <Grid container spacing={2}>
                       <Grid item xs={12} md={12}>
                         <Typography variant="h5" sx={{ mb: 3 }}>
-                          {viewCategoryInfo.name}
-                          {console.log(viewCategoryInfo)}
+                          {viewCategoryById.name}
+                          {console.log(viewCategoryById)}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 1 }}>
-                          {viewCategoryInfo.categoryMainCategory !== null && (
+                          {viewCategoryById.categoryMainCategory !== null && (
                             <>
                               <strong>Categoria Padre: </strong>
-                              {viewCategoryInfo?.categoryMainCategory?.name}
+                              {viewCategoryById?.categoryMainCategory?.name}
                             </>
                           )}
                         </Typography>
                         <Typography variant="body2" sx={{ mb: 3 }}>
                           {/* Description for category */}
                           <strong>Descripción: </strong>
-                          {viewCategoryInfo.description}
+                          {viewCategoryById.description}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -314,7 +306,7 @@ export default function InvetoryCategoriesList() {
                       }}
                     /> */}
                     {/* Insertar tabla de productos */}
-                    <ProductListView categoryView={categories.find((category) => category.id === viewCategory)} />
+                    <ProductListView categoryView={viewCategoryById} />
                   </>
                 )}
               </CardContent>

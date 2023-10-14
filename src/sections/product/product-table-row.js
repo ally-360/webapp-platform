@@ -126,13 +126,15 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
             onClose={handlePopoverClose}
             disableRestoreFocus
           >
-            {productPdv.map((element, index) => (
-              <Box key={index} sx={{ p: 0.2 }}>
-                <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
-                  {element.pdv.name}: {element.quantity} {t('productos')}
-                </Typography>
-              </Box>
-            ))}
+            {/* Validar si el objeto tiene > 0 */}
+            {Object.keys(productPdv).length > 0 &&
+              productPdv.map((element, index) => (
+                <Box key={index} sx={{ p: 0.2 }}>
+                  <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
+                    {element.pdv.name}: {element.quantity} {t('productos')}
+                  </Typography>
+                </Box>
+              ))}
           </Popover>
         </TableCell>
 

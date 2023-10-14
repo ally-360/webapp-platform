@@ -50,43 +50,38 @@ export default function UserNewEditForm({ currentUser }) {
   const { enqueueSnackbar } = useSnackbar();
 
   const NewUserSchema = Yup.object().shape({
-    name: Yup.lazy((value) => {
-      console.log('value', value);
-      if (value && value.identificationObject.type === 'NIT' && value.typePerson === 'Juridica') {
-        return Yup.string().required('Name is required');
-      }
-      return Yup.object().shape({
-        name: Yup.string().required('First Name is required'),
-        lastanem: Yup.string().required('Last Name is required')
-      });
-    }),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    phoneNumber: Yup.string().required('Phone number is required'),
-    phoneNumber2: Yup.string().required('Phone number is required'),
-    address: Yup.string().required('Address is required'),
-    city: Yup.string().required('City is required'),
+    name: Yup.string().required('Nombre es requerido'),
+    lastName: Yup.string().optional(),
+    email: Yup.string().required('Correo electronico es requerido').email('Ingrese un correo valido'),
+    phoneNumber: Yup.string().required('Número de celular es requerido'),
+    phoneNumber2: Yup.string().optional(),
+    address: Yup.string().required('Dirección es requerida'),
+    type: Yup.number().required('Tipo de contacto es requerido'),
     // not required
-    identificationObject: Yup.object().shape({
-      type: Yup.string().required('Type is required'),
-      number: Yup.string().required('Number is required'),
-      dv: Yup.string().optional()
+    identity: Yup.object().shape({
+      type: Yup.number().required('Tipo de identificación es requerido'),
+      number: Yup.number().required('Number is required'),
+      dv: Yup.number().nullable().optional(),
+      typePerson: Yup.number().optional()
     })
   });
 
   const defaultValues = useMemo(
     () => ({
       name: currentUser?.name || '',
+      lastName: currentUser?.lastName || null,
       email: currentUser?.email || '',
       address: currentUser?.address || '',
-      phoneNumber: currentUser?.phoneNumber || '',
-      phoneNumber2: currentUser?.phoneNumber2 || '',
-      type: currentUser?.type || 'Customer',
-      identificationObject: currentUser?.identificationObject || {
-        type: 'CC',
-        number: '',
-        dv: ''
+      phoneNumber: currentUser?.phoneNumber || null,
+      phoneNumber2: currentUser?.phoneNumber2 || null,
+      // Tipo de contacto
+      type: currentUser?.type || 1,
+      identity: currentUser?.identity || {
+        type: 1,
+        number: null,
+        dv: null,
+        typePerson: 1
       },
-      typePerson: currentUser?.typePerson || 'Natural',
       departamento: currentUser?.departamento || null,
       municipio: currentUser?.municipio || null
     }),
@@ -112,26 +107,26 @@ export default function UserNewEditForm({ currentUser }) {
   const values = watch();
 
   const onSubmit = handleSubmit(async (data) => {
+    console.log('data', data);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Remove department
+      const { departamento, ...rest } = data;
+      console.log('rest send', rest);
+      // Enviar rest al backend
+
       reset();
       enqueueSnackbar(currentUser ? 'Update success!' : 'Create success!');
       router.push(paths.dashboard.user.list);
-      console.info('DATA', data);
     } catch (error) {
       console.error(error);
     }
   });
 
   useEffect(() => {
-    if (values.identificationObject.type === 'NIT' && values.typePerson === 'Juridica') {
-      setValue('name', '');
-    } else {
-      setValue('name', { name: '', lastname: '' });
-    }
-  }, [values.identificationObject, values.typePerson, setValue]);
-
-  useEffect(() => console.log('values', values), [values]);
+    // Remove department
+    const { departamento, ...rest } = values;
+    console.log('rest', rest);
+  }, [values]);
 
   // ----------------------------------------------------------------------
 
@@ -196,42 +191,42 @@ export default function UserNewEditForm({ currentUser }) {
               }}
             >
               <RHFSelect name="type" label="Tipo de contacto">
-                <MenuItem value="Customer">Cliente</MenuItem>
-                <MenuItem value="Provider">Proveedor</MenuItem>
+                <MenuItem value={1}>Cliente</MenuItem>
+                <MenuItem value={2}>Proveedor</MenuItem>
               </RHFSelect>
-              <RHFSelect name="identificationObject.type" label="Tipo de contacto">
-                <MenuItem value="CC">CC - Cédula de ciudadania</MenuItem>
-                <MenuItem value="NIT">NIT - Número de identificación tributaria</MenuItem>
+              <RHFSelect name="identity.type" label="Tipo de contacto">
+                <MenuItem value={1}>CC - Cédula de ciudadania</MenuItem>
+                <MenuItem value={2}>NIT - Número de identificación tributaria</MenuItem>
               </RHFSelect>
 
-              {values.identificationObject.type === 'NIT' && (
-                <RHFSelect name="typePerson" label="Tipo de persona* ">
-                  <MenuItem value="Natural">Natural</MenuItem>
-                  <MenuItem value="Juridica">Juridica</MenuItem>
+              {values.identity.type === 2 && (
+                <RHFSelect name="identity.typePerson" label="Tipo de persona* ">
+                  <MenuItem value={1}>Natural</MenuItem>
+                  <MenuItem value={2}>Juridica</MenuItem>
                 </RHFSelect>
               )}
 
               {/* Si es NIT y Juridica se manda Razón social o nombre completo */}
 
-              {values.identificationObject.type === 'CC' ||
-              (values.identificationObject.type === 'NIT' && values.typePerson === 'Natural') ? (
+              {values.identity.type === 1 || (values.identity.type === 2 && values.identity.typePerson === 1) ? (
                 <>
-                  <RHFTextField name="identificationObject.number" label="Número de identificación *" />
+                  <RHFTextField name="identity.number" type="number" label="Número de identificación *" />
 
-                  <RHFTextField name="name.name" label="Nombres" />
-                  <RHFTextField name="name.lastname" label="Apellidos" />
+                  <RHFTextField name="name" label="Nombres" />
+                  <RHFTextField name="lastName" label="Apellidos" />
                 </>
               ) : (
-                values.identificationObject.type === 'NIT' &&
-                values.typePerson === 'Juridica' && (
+                values.identity.type === 2 &&
+                values.identity.typePerson === 2 && (
                   <>
                     <Stack direction="row" alignItems="center" gap={1}>
                       <RHFTextField
                         sx={{ flex: 3 }}
-                        name="identificationObject.number"
+                        name="identity.number"
+                        type="number"
                         label="Número de identificación *"
                       />
-                      <RHFTextField sx={{ flex: 1 }} name="identificationObject.dv" label="DV *" />
+                      <RHFTextField sx={{ flex: 1 }} type="number" name="identity.dv" label="DV *" />
                     </Stack>
                     <RHFTextField name="name" label="Razón social / Nombre completo *" />
                   </>
@@ -364,7 +359,7 @@ export default function UserNewEditForm({ currentUser }) {
           <Stack spacing={3}>
             <Card sx={{ p: 3 }}>
               <Stack direction="row" alignItems="center">
-                <RHFSwitch sx={{ margin: 0 }} label="Enviar estado de cuenta al correo" name="isVerified" />
+                <RHFSwitch sx={{ margin: 0 }} label="Enviar estado de cuenta al correo" name="sendEmail" />
                 <Tooltip
                   title="En cada factura enviada por correo, tu cliente recibirá su estado de cuenta."
                   TransitionComponent={Zoom}

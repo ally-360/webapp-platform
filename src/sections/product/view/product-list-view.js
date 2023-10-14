@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+/* eslint-disable no-nested-ternary */
 import isEqual from 'lodash/isEqual';
 import { useState, useEffect, useCallback, useRef } from 'react';
 // @mui
@@ -36,10 +36,9 @@ import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
-import { LoadingButton } from '@mui/lab';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteProduct, getAllProducts } from 'src/redux/inventory/productsSlice';
+import { getViewCategoryById } from 'src/redux/inventory/categoriesSlice';
 import ProductTableRow from '../product-table-row';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
@@ -48,7 +47,6 @@ import ProductTableFiltersResult from '../product-table-filters-result';
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Producto' },
-  // { id: 'createdAt', label: 'Create at', width: 160 },
   { id: 'sku', label: 'SKU', width: 160 },
   { id: 'quantityStock', label: 'Cantidad', width: 160 },
   { id: 'priceSale', label: 'Price', width: 140 },
@@ -71,7 +69,7 @@ const defaultFilters = {
 // ----------------------------------------------------------------------
 
 // eslint-disable-next-line react/prop-types
-export default function ProductListView({categoryView}) {
+export default function ProductListView({ categoryView }) {
   const router = useRouter();
 
   // Ref component to print
@@ -86,25 +84,25 @@ export default function ProductListView({categoryView}) {
   const [filters, setFilters] = useState(defaultFilters);
 
   const { products, productsLoading, productsEmpty } = useSelector((state) => state.products);
+  const { viewCategoryById } = useSelector((state) => state.categories);
 
   const confirm = useBoolean();
 
   useEffect(() => {
-    if (products.length) {
+    if (products.length && !viewCategoryById) {
       setTableData(products);
     }
-  }, [products]);
+  }, [products, viewCategoryById]);
 
   // TODO: descomentar cuando funcione correctamente el endpoint de productos de categoria front.
 
-  // useEffect(() => {
-  //   if (categoryView?.products) {
-  //     setTableData(categoryView.products? categoryView.products : []);
-  //   }
-  //   // console.log(categoryView?.products);
-    
-
-  // }, [categoryView]);
+  useEffect(() => {
+    if (viewCategoryById?.products) {
+      console.log(viewCategoryById.products);
+      setTableData(viewCategoryById.products ? viewCategoryById.products : []);
+    }
+    console.log(viewCategoryById);
+  }, [viewCategoryById]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -171,157 +169,168 @@ export default function ProductListView({categoryView}) {
     (id) => {
       dispatch(deleteProduct(id));
     },
-    [ dispatch ]
+    [dispatch]
   );
-  
+
   useEffect(() => {
-    dispatch(getAllProducts());
-  }, [dispatch]);
+    if (!categoryView) {
+      dispatch(getAllProducts());
+    }
+  }, [dispatch, categoryView]);
 
   return (
     <>
-    {!categoryView? (
-      <Container 
-        ref={componentRef}
-      
-      maxWidth={settings.themeStretch ? false : 'lg'}>
-        <CustomBreadcrumbs
-          heading="Productos"
-          icon="icon-park-outline:ad-product"
-          links={[
-            { name: 'Dashboard', href: paths.dashboard.root },
-            {
-              name: 'Inventario',
-              href: paths.dashboard.inventory.list
-            },
-            { name: 'Productos' }
-          ]}
-          action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.product.new}
-              variant="contained"
-              color="primary"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Crear producto
-            </Button>
-          }
-          sx={{ mb: { xs: 3, md: 5 } }}
-        />
-
-
-        <Card>
-          <ProductTableToolbar
-            filters={filters}
-            componentRef={componentRef}
-            dataFiltered={dataFiltered}
-            onFilters={handleFilters}
-            //
-            stockOptions={PRODUCT_STOCK_OPTIONS}
-            publishOptions={PUBLISH_OPTIONS}
+      {!categoryView ? (
+        <Container ref={componentRef} maxWidth={settings.themeStretch ? false : 'lg'}>
+          <CustomBreadcrumbs
+            heading="Productos"
+            icon="icon-park-outline:ad-product"
+            links={[
+              { name: 'Dashboard', href: paths.dashboard.root },
+              {
+                name: 'Inventario',
+                href: paths.dashboard.inventory.list
+              },
+              { name: 'Productos' }
+            ]}
+            action={
+              <>
+                <Button
+                  component={RouterLink}
+                  href={paths.dashboard.product.new}
+                  variant="contained"
+                  color="primary"
+                  style={{ marginRight: 10 }}
+                  startIcon={<Iconify width={24} icon="mdi:box-variant-closed-add" />}
+                >
+                  Abastecer
+                </Button>
+                <Button
+                  component={RouterLink}
+                  href={paths.dashboard.product.new}
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Iconify icon="mingcute:add-line" />}
+                >
+                  Crear producto
+                </Button>
+              </>
+            }
+            sx={{ mb: { xs: 3, md: 5 } }}
           />
 
-          {canReset && (
-            <ProductTableFiltersResult
+          <Card>
+            <ProductTableToolbar
               filters={filters}
+              componentRef={componentRef}
+              dataFiltered={dataFiltered}
               onFilters={handleFilters}
               //
-              onResetFilters={handleResetFilters}
-              //
-              results={dataFiltered.length}
-              sx={{ p: 2.5, pt: 0 }}
+              stockOptions={PRODUCT_STOCK_OPTIONS}
+              publishOptions={PUBLISH_OPTIONS}
             />
-          )}
 
-          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={table.dense}
-              numSelected={table.selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={confirm.onTrue}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row.id)
-                    )
-                  }
-                />
+            {canReset && (
+              <ProductTableFiltersResult
+                filters={filters}
+                onFilters={handleFilters}
+                //
+                onResetFilters={handleResetFilters}
+                //
+                results={dataFiltered.length}
+                sx={{ p: 2.5, pt: 0 }}
+              />
+            )}
 
-                <TableBody>
-                  {productsLoading ? (
-                    [...Array(table.rowsPerPage)].map((i, index) => (
-                      <TableSkeleton key={index} sx={{ height: denseHeight }} />
-                    ))
-                  ) : (
-                    <>
-                      {dataFiltered
-                        .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
-                        .map((row) => (
-                          <ProductTableRow
-                            key={row.id}
-                            row={row}
-                            selected={table.selected.includes(row.id)}
-                            onSelectRow={() => table.onSelectRow(row.id)}
-                            onDeleteRow={() => handleDeleteRow(row.id)}
-                            onEditRow={() => handleEditRow(row.id)}
-                            onViewRow={() => handleViewRow(row.id)}
-                          />
-                        ))}
-                    </>
-                  )}
-
-                  <TableEmptyRows
-                    height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
+            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+              <TableSelectedAction
+                dense={table.dense}
+                numSelected={table.selected.length}
+                rowCount={tableData.length}
+                onSelectAllRows={(checked) =>
+                  table.onSelectAllRows(
+                    checked,
+                    tableData.map((row) => row.id)
+                  )
+                }
+                action={
+                  <Tooltip title="Delete">
+                    <IconButton color="primary" onClick={confirm.onTrue}>
+                      <Iconify icon="solar:trash-bin-trash-bold" />
+                    </IconButton>
+                  </Tooltip>
+                }
+              />
+              <Scrollbar>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headLabel={TABLE_HEAD}
+                    rowCount={tableData.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        tableData.map((row) => row.id)
+                      )
+                    }
                   />
-                  <TableNoData notFound={notFound} text='No tienes productos, puedes dar click en el boton superior derecho "Crear producto"' />
-                </TableBody>
-              </Table>
-            </Scrollbar>
-          </TableContainer>
 
-          <TablePaginationCustom
-            count={dataFiltered.length}
-            page={table.page}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-            //
-            dense={table.dense}
-            onChangeDense={table.onChangeDense}
-          />
-        </Card>
+                  <TableBody>
+                    {productsLoading ? (
+                      [...Array(table.rowsPerPage)].map((i, index) => (
+                        <TableSkeleton key={index} sx={{ height: denseHeight }} />
+                      ))
+                    ) : (
+                      <>
+                        {dataFiltered
+                          .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
+                          .map((row) => (
+                            <ProductTableRow
+                              key={row.id}
+                              row={row}
+                              selected={table.selected.includes(row.id)}
+                              onSelectRow={() => table.onSelectRow(row.id)}
+                              onDeleteRow={() => handleDeleteRow(row.id)}
+                              onEditRow={() => handleEditRow(row.id)}
+                              onViewRow={() => handleViewRow(row.id)}
+                            />
+                          ))}
+                      </>
+                    )}
 
-      </Container>
+                    <TableEmptyRows
+                      height={denseHeight}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
+                    />
+                    <TableNoData
+                      notFound={notFound}
+                      text='No tienes productos, puedes dar click en el boton superior derecho "Crear producto"'
+                    />
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            </TableContainer>
 
-        ):(
-          <>
-                <ProductTableToolbar
+            <TablePaginationCustom
+              count={dataFiltered.length}
+              page={table.page}
+              rowsPerPage={table.rowsPerPage}
+              onPageChange={table.onChangePage}
+              onRowsPerPageChange={table.onChangeRowsPerPage}
+              //
+              dense={table.dense}
+              onChangeDense={table.onChangeDense}
+            />
+          </Card>
+        </Container>
+      ) : (
+        <>
+          <ProductTableToolbar
             filters={filters}
-            categoryView={categoryView}
+            categoryView={viewCategoryById}
             componentRef={componentRef}
             dataFiltered={dataFiltered}
             onFilters={handleFilters}
@@ -408,8 +417,8 @@ export default function ProductListView({categoryView}) {
             dense={table.dense}
             onChangeDense={table.onChangeDense}
           />
-          </>
-        )}
+        </>
+      )}
 
       <ConfirmDialog
         open={confirm.value}
@@ -464,13 +473,17 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (stock.length) {
     const inputDataWithInventoryType = inputData.map((product) => {
-      // eslint-disable-next-line no-nested-ternary
-      const inventoryType = product.globalStock > product.pdvs.minQuantity ? 'Existencias' : product.globalStock === 0 ? 'Sin existencias' : 'Pocas existencias';
+      const inventoryType =
+        product.globalStock > product.pdvs.minQuantity
+          ? 'Existencias'
+          : product.globalStock === 0
+          ? 'Sin existencias'
+          : 'Pocas existencias';
       return {
         ...product,
         inventoryType
       };
-    })
+    });
     inputData = inputDataWithInventoryType.filter((product) => stock.includes(product.inventoryType));
   }
 

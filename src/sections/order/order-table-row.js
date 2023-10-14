@@ -22,6 +22,8 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { useEffect } from 'react';
+import { useSettingsContext } from 'src/components/settings';
 
 // ----------------------------------------------------------------------
 
@@ -46,8 +48,8 @@ export default function OrderTableRow({ row, selected, onViewRow, onSelectRow, o
           sx={{
             cursor: 'pointer',
             '&:hover': {
-              textDecoration: 'underline',
-            },
+              textDecoration: 'underline'
+            }
           }}
         >
           {orderNumber}
@@ -73,7 +75,7 @@ export default function OrderTableRow({ row, selected, onViewRow, onSelectRow, o
           secondaryTypographyProps={{
             mt: 0.5,
             component: 'span',
-            typography: 'caption',
+            typography: 'caption'
           }}
         />
       </TableCell>
@@ -102,8 +104,8 @@ export default function OrderTableRow({ row, selected, onViewRow, onSelectRow, o
           onClick={collapse.onToggle}
           sx={{
             ...(collapse.value && {
-              bgcolor: 'action.hover',
-            }),
+              bgcolor: 'action.hover'
+            })
           }}
         >
           <Iconify icon="eva:arrow-ios-downward-fill" />
@@ -119,12 +121,7 @@ export default function OrderTableRow({ row, selected, onViewRow, onSelectRow, o
   const renderSecondary = (
     <TableRow>
       <TableCell sx={{ p: 0, border: 'none' }} colSpan={8}>
-        <Collapse
-          in={collapse.value}
-          timeout="auto"
-          unmountOnExit
-          sx={{ bgcolor: 'background.neutral' }}
-        >
+        <Collapse in={collapse.value} timeout="auto" unmountOnExit sx={{ bgcolor: 'background.neutral' }}>
           <Stack component={Paper} sx={{ m: 1.5 }}>
             {items.map((item) => (
               <Stack
@@ -134,26 +131,22 @@ export default function OrderTableRow({ row, selected, onViewRow, onSelectRow, o
                 sx={{
                   p: (theme) => theme.spacing(1.5, 2, 1.5, 1.5),
                   '&:not(:last-of-type)': {
-                    borderBottom: (theme) => `solid 2px ${theme.palette.background.neutral}`,
-                  },
+                    borderBottom: (theme) => `solid 2px ${theme.palette.background.neutral}`
+                  }
                 }}
               >
-                <Avatar
-                  src={item.coverUrl}
-                  variant="rounded"
-                  sx={{ width: 48, height: 48, mr: 2 }}
-                />
+                <Avatar src={item.coverUrl} variant="rounded" sx={{ width: 48, height: 48, mr: 2 }} />
 
                 <ListItemText
                   primary={item.name}
                   secondary={item.sku}
                   primaryTypographyProps={{
-                    typography: 'body2',
+                    typography: 'body2'
                   }}
                   secondaryTypographyProps={{
                     component: 'span',
                     color: 'text.disabled',
-                    mt: 0.5,
+                    mt: 0.5
                   }}
                 />
 
@@ -174,12 +167,7 @@ export default function OrderTableRow({ row, selected, onViewRow, onSelectRow, o
 
       {renderSecondary}
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
         <MenuItem
           onClick={() => {
             confirm.onTrue();
@@ -222,5 +210,5 @@ OrderTableRow.propTypes = {
   onSelectRow: PropTypes.func,
   onViewRow: PropTypes.func,
   row: PropTypes.object,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

@@ -13,6 +13,7 @@ import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
 import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';
 import FormPDVS from 'src/sections/PDVS/pdv-new-edit-form';
+import { useLocation } from 'react-router';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -43,6 +44,23 @@ export default function DashboardLayout({ children }) {
   const renderHorizontal = <NavHorizontal />;
 
   const renderNavVertical = <NavVertical openNav={nav.value} onCloseNav={nav.onFalse} />;
+
+  const location = useLocation(); // Obtiene la ubicación actual desde React Router
+
+  useEffect(() => {
+    if (
+      location.pathname === '/dashboard/pos' &&
+      settings.themeStretch === false &&
+      settings.themeLayout === 'horizontal'
+    ) {
+      settings.onUpdate('themeStretch', true);
+      settings.onUpdate('themeLayout', 'mini');
+    }
+    if (location.pathname !== '/dashboard/pos' && settings.themeStretch === true && settings.themeLayout === 'mini') {
+      settings.onUpdate('themeStretch', false);
+      settings.onUpdate('themeLayout', 'horizontal');
+    }
+  }, [location, settings]);
 
   if (isHorizontal) {
     return (
