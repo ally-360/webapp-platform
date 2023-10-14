@@ -22,6 +22,8 @@ import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 //
+import { useDispatch, useSelector } from 'react-redux';
+import { getProductById } from 'src/redux/inventory/productsSlice';
 import { ProductDetailsSkeleton } from '../product-skeleton';
 import ProductDetailsReview from '../product-details-review';
 import ProductDetailsSummary from '../product-details-summary';
@@ -35,24 +37,32 @@ const SUMMARY = [
   {
     title: '100% Original',
     description: 'Chocolate bar candy canes ice cream toffee cookie halvah.',
-    icon: 'solar:verified-check-bold',
+    icon: 'solar:verified-check-bold'
   },
   {
     title: '10 Day Replacement',
     description: 'Marshmallow biscuit donut dragée fruitcake wafer.',
-    icon: 'solar:clock-circle-bold',
+    icon: 'solar:clock-circle-bold'
   },
   {
     title: 'Year Warranty',
     description: 'Cotton candy gingerbread cake I love sugar sweet.',
-    icon: 'solar:shield-check-bold',
-  },
+    icon: 'solar:shield-check-bold'
+  }
 ];
 
 // ----------------------------------------------------------------------
 
 export default function ProductDetailsView({ id }) {
-  const { product, productLoading, productError } = useGetProduct(id);
+  // const { product, productsLoading, error } = useGetProduct(id);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getProductById(id));
+  }, [dispatch, id]);
+
+  const { product, productsLoading, error } = useSelector((state) => state.products);
 
   const settings = useSettingsContext();
 
@@ -79,7 +89,7 @@ export default function ProductDetailsView({ id }) {
   const renderError = (
     <EmptyContent
       filled
-      title={`${productError?.message}`}
+      title={`${error?.message}`}
       action={
         <Button
           component={RouterLink}
@@ -103,24 +113,49 @@ export default function ProductDetailsView({ id }) {
         publish={publish || ''}
         onChangePublish={handleChangePublish}
         publishOptions={PRODUCT_PUBLISH_OPTIONS}
+        stateProduct={product.state}
       />
+      <Card sx={{ p: 3 }}>
+        <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
+          <Grid xs={12} md={4} lg={4}>
+            <ProductDetailsCarousel product={product} />
+          </Grid>
 
-      <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
-        <Grid xs={12} md={6} lg={7}>
-          <ProductDetailsCarousel product={product} />
+          <Grid xs={12} md={8} lg={8}>
+            <ProductDetailsSummary disabledActions product={product} />
+          </Grid>
         </Grid>
+      </Card>
 
-        <Grid xs={12} md={6} lg={5}>
-          <ProductDetailsSummary disabledActions product={product} />
-        </Grid>
-      </Grid>
+      <Card sx={{ p: 3, mt: 2 }}>
+        <Typography mb={1} variant="h5">
+          Inventario
+        </Typography>
+      </Card>
 
+      <Card sx={{ p: 3, mt: 2 }}>
+        <Typography mb={1} variant="h5">
+          Facturas
+        </Typography>
+      </Card>
+
+      <Card sx={{ p: 3, mt: 2 }}>
+        <Typography mb={1} variant="h5">
+          Historial
+        </Typography>
+      </Card>
+
+      <Card sx={{ p: 3, mt: 2 }}>
+        <Typography mb={1} variant="h5">
+          Contabilidad
+        </Typography>
+      </Card>
       <Box
         gap={5}
         display="grid"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
         sx={{ my: 10 }}
       >
@@ -145,44 +180,50 @@ export default function ProductDetailsView({ id }) {
           onChange={handleChangeTab}
           sx={{
             px: 3,
-            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
           }}
         >
           {[
             {
               value: 'description',
-              label: 'Description',
+              label: 'Inventario'
             },
             {
               value: 'reviews',
-              label: `Reviews (${product.reviews.length})`,
+              label: `Facturas`
             },
+            {
+              value: 'reviews',
+              label: `Contabilidad`
+            },
+            {
+              value: 'reviews',
+              label: `Historial`
+            }
           ].map((tab) => (
             <Tab key={tab.value} value={tab.value} label={tab.label} />
           ))}
         </Tabs>
 
-        {currentTab === 'description' && (
-          <ProductDetailsDescription description={product?.description} />
-        )}
+        {currentTab === 'description' && <ProductDetailsDescription description={product?.description} />}
 
-        {currentTab === 'reviews' && (
+        {/* {currentTab === 'reviews' && (
           <ProductDetailsReview
             ratings={product.ratings}
             reviews={product.reviews}
             totalRatings={product.totalRatings}
             totalReviews={product.totalReviews}
           />
-        )}
+        )} */}
       </Card>
     </>
   );
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
-      {productLoading && renderSkeleton}
+      {productsLoading && renderSkeleton}
 
-      {productError && renderError}
+      {error && renderError}
 
       {product && renderProduct}
     </Container>
@@ -190,5 +231,5 @@ export default function ProductDetailsView({ id }) {
 }
 
 ProductDetailsView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

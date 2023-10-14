@@ -10,6 +10,7 @@ import { bgGradient } from 'src/theme/css';
 import Image from 'src/components/image';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
 import Carousel, { CarouselArrowIndex, useCarousel } from 'src/components/carousel';
+import { Grid, TextField, Typography } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -19,23 +20,23 @@ const StyledThumbnailsContainer = styled('div')(({ length, theme }) => ({
   position: 'relative',
   margin: theme.spacing(0, 'auto'),
   '& .slick-slide': {
-    lineHeight: 0,
+    lineHeight: 0
   },
 
   ...(length === 1 && {
-    maxWidth: THUMB_SIZE * 1 + 16,
+    maxWidth: THUMB_SIZE * 1 + 16
   }),
 
   ...(length === 2 && {
-    maxWidth: THUMB_SIZE * 2 + 32,
+    maxWidth: THUMB_SIZE * 2 + 32
   }),
 
   ...((length === 3 || length === 4) && {
-    maxWidth: THUMB_SIZE * 3 + 48,
+    maxWidth: THUMB_SIZE * 3 + 48
   }),
 
   ...(length >= 5 && {
-    maxWidth: THUMB_SIZE * 6,
+    maxWidth: THUMB_SIZE * 6
   }),
 
   ...(length > 3 && {
@@ -43,20 +44,20 @@ const StyledThumbnailsContainer = styled('div')(({ length, theme }) => ({
       ...bgGradient({
         direction: 'to left',
         startColor: `${alpha(theme.palette.background.default, 0)} 0%`,
-        endColor: `${theme.palette.background.default} 100%`,
+        endColor: `${theme.palette.background.default} 100%`
       }),
       top: 0,
       zIndex: 9,
       content: "''",
       height: '100%',
       position: 'absolute',
-      width: (THUMB_SIZE * 2) / 3,
+      width: (THUMB_SIZE * 2) / 3
     },
     '&:after': {
       right: 0,
-      transform: 'scaleX(-1)',
-    },
-  }),
+      transform: 'scaleX(-1)'
+    }
+  })
 }));
 
 // ----------------------------------------------------------------------
@@ -65,7 +66,7 @@ export default function ProductDetailsCarousel({ product }) {
   const theme = useTheme();
 
   const slides = product.images.map((img) => ({
-    src: img,
+    src: img
   }));
 
   const lightbox = useLightBox(slides);
@@ -73,7 +74,7 @@ export default function ProductDetailsCarousel({ product }) {
   const carouselLarge = useCarousel({
     rtl: false,
     draggable: false,
-    adaptiveHeight: true,
+    adaptiveHeight: true
   });
 
   const carouselThumb = useCarousel({
@@ -83,7 +84,7 @@ export default function ProductDetailsCarousel({ product }) {
     focusOnSelect: true,
     variableWidth: true,
     centerPadding: '0px',
-    slidesToShow: slides.length > 3 ? 3 : slides.length,
+    slidesToShow: slides.length > 3 ? 3 : slides.length
   });
 
   useEffect(() => {
@@ -103,14 +104,10 @@ export default function ProductDetailsCarousel({ product }) {
         mb: 3,
         borderRadius: 2,
         overflow: 'hidden',
-        position: 'relative',
+        position: 'relative'
       }}
     >
-      <Carousel
-        {...carouselLarge.carouselSettings}
-        asNavFor={carouselThumb.nav}
-        ref={carouselLarge.carouselRef}
-      >
+      <Carousel {...carouselLarge.carouselSettings} asNavFor={carouselThumb.nav} ref={carouselLarge.carouselRef}>
         {slides.map((slide) => (
           <Image
             key={slide.src}
@@ -134,11 +131,7 @@ export default function ProductDetailsCarousel({ product }) {
 
   const renderThumbnails = (
     <StyledThumbnailsContainer length={slides.length}>
-      <Carousel
-        {...carouselThumb.carouselSettings}
-        asNavFor={carouselLarge.nav}
-        ref={carouselThumb.carouselRef}
-      >
+      <Carousel {...carouselThumb.carouselSettings} asNavFor={carouselLarge.nav} ref={carouselThumb.carouselRef}>
         {slides.map((item, index) => (
           <Box key={item.src} sx={{ px: 0.5 }}>
             <Avatar
@@ -153,8 +146,8 @@ export default function ProductDetailsCarousel({ product }) {
                 cursor: 'pointer',
                 ...(carouselLarge.currentIndex === index && {
                   opacity: 1,
-                  border: `solid 2.5px ${theme.palette.primary.main}`,
-                }),
+                  border: `solid 2.5px ${theme.palette.primary.main}`
+                })
               }}
             />
           </Box>
@@ -167,13 +160,52 @@ export default function ProductDetailsCarousel({ product }) {
     <Box
       sx={{
         '& .slick-slide': {
-          float: theme.direction === 'rtl' ? 'right' : 'left',
-        },
+          float: theme.direction === 'rtl' ? 'right' : 'left'
+        }
       }}
     >
       {renderLargeImg}
 
-      {renderThumbnails}
+      <Grid container spacing={1}>
+        <Grid item xs={12} md={13}>
+          <Typography variant="h5">Precio Total</Typography>
+          <Typography variant="h4" gutterBottom>
+            ${product?.priceSale} COP
+          </Typography>
+        </Grid>
+        {/* <Grid item xs={12} md={4}>
+          <Typography variant="subtitle1" gutterBottom>
+            NIT
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            {company?.nit}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Typography variant="subtitle1" gutterBottom>
+            Dirección
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            {company?.address}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Typography variant="subtitle1" gutterBottom>
+            Teléfono
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            {company?.phoneNumber}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Typography variant="subtitle1" gutterBottom>
+            Cantidad de empleados
+          </Typography>
+          <Typography variant="body2" gutterBottom>
+            {company?.quantityEmployees}
+          </Typography>
+        </Grid> */}
+      </Grid>
 
       <Lightbox
         index={lightbox.selected}
@@ -187,5 +219,5 @@ export default function ProductDetailsCarousel({ product }) {
 }
 
 ProductDetailsCarousel.propTypes = {
-  product: PropTypes.object,
+  product: PropTypes.object
 };

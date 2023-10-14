@@ -113,6 +113,10 @@ export function useNavData() {
                 openPopup() {
                   dispatch(switchPopup());
                 }
+              },
+              {
+                title: t('Ajuste de inventario'),
+                path: paths.dashboard.inventory.pdvs
               }
             ]
           },

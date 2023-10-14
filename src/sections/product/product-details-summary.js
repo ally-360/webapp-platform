@@ -26,38 +26,43 @@ import IncrementerButton from './common/incrementer-button';
 
 // ----------------------------------------------------------------------
 
-export default function ProductDetailsSummary({
-  items,
-  product,
-  onAddCart,
-  onGotoStep,
-  disabledActions,
-  ...other
-}) {
+export default function ProductDetailsSummary({ items, product, onAddCart, onGotoStep, disabledActions, ...other }) {
   const router = useRouter();
 
   const {
     id,
     name,
-    sizes,
+    // sizes,
     price,
-    coverUrl,
-    colors,
-    newLabel,
-    available,
-    priceSale,
-    saleLabel,
-    totalRatings,
-    totalReviews,
-    inventoryType,
-    subDescription,
+    // coverUrl,
+    // colors,
+    // newLabel,
+    // available,
+    priceSale
+    // saleLabel,
+    // totalRatings,
+    // totalReviews,
+    // inventoryType,
+    // subDescription
   } = product;
+
+  console.log(product);
+
+  const sizes = ['XS', 'S', 'M', 'L', 'XL'];
+  const colors = ['red', 'blue', 'green', 'yellow', 'black', 'white'];
+  const newLabel = { enabled: true, content: 'New' };
+  const available = 10;
+  const coverUrl = 'https://source.unsplash.com/random';
+  const totalRatings = 4.5;
+  const totalReviews = 100;
+  const inventoryType = 'in stock';
+  const subDescription = 'Free shipping worldwide';
+  const saleLabel = { enabled: true, content: 'Sale' };
 
   const existProduct = !!items?.length && items.map((item) => item.id).includes(id);
 
   const isMaxQuantity =
-    !!items?.length &&
-    items.filter((item) => item.id === id).map((item) => item.quantity)[0] >= available;
+    !!items?.length && items.filter((item) => item.id === id).map((item) => item.quantity)[0] >= available;
 
   const defaultValues = {
     id,
@@ -67,11 +72,11 @@ export default function ProductDetailsSummary({
     price,
     colors: colors[0],
     size: sizes[4],
-    quantity: available < 1 ? 0 : 1,
+    quantity: available < 1 ? 0 : 1
   };
 
   const methods = useForm({
-    defaultValues,
+    defaultValues
   });
 
   const { reset, watch, control, setValue, handleSubmit } = methods;
@@ -91,7 +96,7 @@ export default function ProductDetailsSummary({
         onAddCart?.({
           ...data,
           colors: [values.colors],
-          subTotal: data.price * data.quantity,
+          subTotal: data.price * data.quantity
         });
       }
       onGotoStep?.(0);
@@ -106,7 +111,7 @@ export default function ProductDetailsSummary({
       onAddCart?.({
         ...values,
         colors: [values.colors],
-        subTotal: values.price * values.quantity,
+        subTotal: values.price * values.quantity
       });
     } catch (error) {
       console.error(error);
@@ -116,10 +121,7 @@ export default function ProductDetailsSummary({
   const renderPrice = (
     <Box sx={{ typography: 'h5' }}>
       {priceSale && (
-        <Box
-          component="span"
-          sx={{ color: 'text.disabled', textDecoration: 'line-through', mr: 0.5 }}
-        >
+        <Box component="span" sx={{ color: 'text.disabled', textDecoration: 'line-through', mr: 0.5 }}>
           {fCurrency(priceSale)}
         </Box>
       )}
@@ -130,82 +132,20 @@ export default function ProductDetailsSummary({
 
   const renderShare = (
     <Stack direction="row" spacing={3} justifyContent="center">
-      <Link
-        variant="subtitle2"
-        sx={{ color: 'text.secondary', display: 'inline-flex', alignItems: 'center' }}
-      >
+      <Link variant="subtitle2" sx={{ color: 'text.secondary', display: 'inline-flex', alignItems: 'center' }}>
         <Iconify icon="mingcute:add-line" width={16} sx={{ mr: 1 }} />
         Compare
       </Link>
 
-      <Link
-        variant="subtitle2"
-        sx={{ color: 'text.secondary', display: 'inline-flex', alignItems: 'center' }}
-      >
+      <Link variant="subtitle2" sx={{ color: 'text.secondary', display: 'inline-flex', alignItems: 'center' }}>
         <Iconify icon="solar:heart-bold" width={16} sx={{ mr: 1 }} />
         Favorite
       </Link>
 
-      <Link
-        variant="subtitle2"
-        sx={{ color: 'text.secondary', display: 'inline-flex', alignItems: 'center' }}
-      >
+      <Link variant="subtitle2" sx={{ color: 'text.secondary', display: 'inline-flex', alignItems: 'center' }}>
         <Iconify icon="solar:share-bold" width={16} sx={{ mr: 1 }} />
         Share
       </Link>
-    </Stack>
-  );
-
-  const renderColorOptions = (
-    <Stack direction="row">
-      <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
-        Color
-      </Typography>
-
-      <Controller
-        name="colors"
-        control={control}
-        render={({ field }) => (
-          <ColorPicker
-            colors={colors}
-            selected={field.value}
-            onSelectColor={(color) => field.onChange(color)}
-            limit={4}
-          />
-        )}
-      />
-    </Stack>
-  );
-
-  const renderSizeOptions = (
-    <Stack direction="row">
-      <Typography variant="subtitle2" sx={{ flexGrow: 1 }}>
-        Size
-      </Typography>
-
-      <RHFSelect
-        name="size"
-        size="small"
-        helperText={
-          <Link underline="always" color="textPrimary">
-            Size Chart
-          </Link>
-        }
-        sx={{
-          maxWidth: 88,
-          [`& .${formHelperTextClasses.root}`]: {
-            mx: 0,
-            mt: 1,
-            textAlign: 'right',
-          },
-        }}
-      >
-        {sizes.map((size) => (
-          <MenuItem key={size} value={size}>
-            {size}
-          </MenuItem>
-        ))}
-      </RHFSelect>
     </Stack>
   );
 
@@ -265,7 +205,7 @@ export default function ProductDetailsSummary({
       alignItems="center"
       sx={{
         color: 'text.disabled',
-        typography: 'body2',
+        typography: 'body2'
       }}
     >
       <Rating size="small" value={totalRatings} precision={0.1} readOnly sx={{ mr: 1 }} />
@@ -288,7 +228,7 @@ export default function ProductDetailsSummary({
         color:
           (inventoryType === 'out of stock' && 'error.main') ||
           (inventoryType === 'low stock' && 'warning.main') ||
-          'success.main',
+          'success.main'
       }}
     >
       {inventoryType}
@@ -311,20 +251,6 @@ export default function ProductDetailsSummary({
 
           {renderSubDescription}
         </Stack>
-
-        <Divider sx={{ borderStyle: 'dashed' }} />
-
-        {renderColorOptions}
-
-        {renderSizeOptions}
-
-        {renderQuantity}
-
-        <Divider sx={{ borderStyle: 'dashed' }} />
-
-        {renderActions}
-
-        {renderShare}
       </Stack>
     </FormProvider>
   );
@@ -335,5 +261,5 @@ ProductDetailsSummary.propTypes = {
   disabledActions: PropTypes.bool,
   onAddCart: PropTypes.func,
   onGotoStep: PropTypes.func,
-  product: PropTypes.object,
+  product: PropTypes.object
 };

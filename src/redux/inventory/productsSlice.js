@@ -5,12 +5,14 @@ import RequestService from '../../axios/services/service';
 // constantes
 const initialState = {
   products: [],
-  product: null,
   productsLoading: false,
   error: null,
   success: null,
   productsEmpty: false,
-  popupAssignInventory: false
+  popupAssignInventory: false,
+
+  // Product detail
+  product: null
 };
 
 const productSlice = createSlice({

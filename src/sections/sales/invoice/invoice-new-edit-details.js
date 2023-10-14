@@ -57,6 +57,7 @@ export default function InvoiceNewEditDetails() {
   const [productsOptions, setProductsOptions] = useState([]);
 
   useEffect(() => {
+    console.log('Productos activos', products);
     setProductsOptions(products);
   }, [products]);
 
@@ -126,23 +127,28 @@ export default function InvoiceNewEditDetails() {
         ) {
           enqueueSnackbar('Debes seleccionar un punto de venta primero', { variant: 'warning' });
         }
-
+        console.log('todos los productos', products);
         const product = products.find((item) => item.id === values.items[index].title.id);
-        const stock = product.stock.find((item) => item.pdv === values.items[index].pdv);
+        const stock = product.productPdv.find((item) => item.pdv.id === values.items[index].pdv);
+        console.log('stock', stock);
         if (event.target.value > stock.quantity) {
           enqueueSnackbar('No hay suficiente stock', { variant: 'warning' });
           return;
         }
-
-        return;
       } else if (event.target.value > values.items[index].title.quantityStock) {
         enqueueSnackbar('No hay suficiente stock', { variant: 'warning' });
         return;
       }
       setValue(`items[${index}].quantity`, Number(event.target.value));
       setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
+      // multiplicar la cantidad por los impuestos del producto y asignarlo a taxes
+      setValue(
+        `items[${index}].taxes`,
+        values.items[index].quantity * (values.items[index].title.priceSale - values.items[index].title.priceBase)
+      );
+      setValue('taxes', sum(values.items.map((item) => item.taxes)));
     },
-    [setValue, values.items, PDV]
+    [setValue, values.items, PDV, products]
   );
 
   const handleChangePrice = useCallback(
@@ -162,7 +168,7 @@ export default function InvoiceNewEditDetails() {
       </Stack>
 
       <Stack direction="row">
-        <Box sx={{ color: 'text.secondary' }}>Shipping</Box>
+        <Box sx={{ color: 'text.secondary' }}>Costo de envio</Box>
         <Box
           sx={{
             width: 160,
@@ -174,7 +180,7 @@ export default function InvoiceNewEditDetails() {
       </Stack>
 
       <Stack direction="row">
-        <Box sx={{ color: 'text.secondary' }}>Discount</Box>
+        <Box sx={{ color: 'text.secondary' }}>Descuento</Box>
         <Box
           sx={{
             width: 160,
@@ -186,7 +192,7 @@ export default function InvoiceNewEditDetails() {
       </Stack>
 
       <Stack direction="row">
-        <Box sx={{ color: 'text.secondary' }}>Taxes</Box>
+        <Box sx={{ color: 'text.secondary' }}>Impuestos</Box>
         <Box sx={{ width: 160 }}>{values.taxes ? fCurrency(values.taxes) : '-'}</Box>
       </Stack>
 
@@ -222,6 +228,8 @@ export default function InvoiceNewEditDetails() {
       setValue(`items[${index}].price`, option.priceSale);
       setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
       setValue(`items[${index}].taxes`, option.priceSale - option.priceBase);
+      // sumar el total de los impuestos de todos los productos y asignarlo a taxes
+      setValue('taxes', sum(values.items.map((item) => item.taxes)));
       setValue(`items[${index}].description`, stripHTMLTags(option.description));
       setValue(`items[${index}].reference`, option.sku !== '' ? option.sku : option.barCode);
     },
@@ -326,11 +334,19 @@ export default function InvoiceNewEditDetails() {
                     maxWidth: { md: '250px' }
                   }}
                 >
-                  {pdvs.map((option) => (
+                  {/* {pdvs.map((option) => (
                     <MenuItem key={option.id} value={option.id}>
                       {option.name}
                     </MenuItem>
-                  ))}
+                  ))} */}
+                  {/* Buscar los pdvs que tenga el producto */}
+
+                  {values.items[index].title.id !== undefined &&
+                    values.items[index].title.productPdv.map((item) => (
+                      <MenuItem key={item.pdv.id} value={item.pdv.id}>
+                        {item.pdv.name}
+                      </MenuItem>
+                    ))}
                 </RHFSelect>
               )}
 
@@ -347,36 +363,6 @@ export default function InvoiceNewEditDetails() {
                 label="Referencia"
                 InputLabelProps={{ shrink: true }}
               />
-
-              {/* <RHFSelect
-                name={`items[${index}].service`}
-                size="small"
-                label="Service"
-                InputLabelProps={{ shrink: true }}
-                sx={{
-                  maxWidth: { md: 160 }
-                }}
-              >
-                <MenuItem
-                  value=""
-                  onClick={() => handleClearService(index)}
-                  sx={{ fontStyle: 'italic', color: 'text.secondary' }}
-                >
-                  None
-                </MenuItem>
-
-                <Divider sx={{ borderStyle: 'dashed' }} />
-
-                {INVOICE_SERVICE_OPTIONS.map((service) => (
-                  <MenuItem
-                    key={service.id}
-                    value={service.name}
-                    onClick={() => handleSelectService(index, service.name)}
-                  >
-                    {service.name}
-                  </MenuItem>
-                ))}
-              </RHFSelect> */}
 
               <RHFTextField
                 type="number"
@@ -467,7 +453,7 @@ export default function InvoiceNewEditDetails() {
             sx={{ maxWidth: { md: 120 } }}
           />
 
-          <RHFTextField size="small" label="Impuestos(%)" name="taxes" type="number" sx={{ maxWidth: { md: 120 } }} />
+          {/* <RHFTextField size="small" label="Impuestos(%)" name="taxes" type="number" sx={{ maxWidth: { md: 120 } }} /> */}
         </Stack>
       </Stack>
 

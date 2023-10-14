@@ -6,28 +6,16 @@ import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
-import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Unstable_Grid2';
-import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
-import FormControlLabel from '@mui/material/FormControlLabel';
 // routes
 import { paths } from 'src/routes/paths';
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
-// _mock
-import {
-  _tags,
-  PRODUCT_SIZE_OPTIONS,
-  PRODUCT_GENDER_OPTIONS,
-  PRODUCT_COLOR_NAME_OPTIONS,
-  PRODUCT_CATEGORY_GROUP_OPTIONS
-} from 'src/_mock';
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import { useRouter } from 'src/routes/hook';
@@ -37,9 +25,7 @@ import FormProvider, {
   RHFUpload,
   RHFSwitch,
   RHFTextField,
-  RHFMultiSelect,
-  RHFAutocomplete,
-  RHFMultiCheckbox
+  RHFAutocomplete
 } from 'src/components/hook-form';
 import {
   Avatar,
@@ -59,15 +45,12 @@ import { switchPopupState as switchPopupStateBrand, getBrands } from 'src/redux/
 import { useDispatch, useSelector } from 'react-redux';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
-import { Link } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import { calculatePriceBase, calculatePriceSale } from 'src/sections/product/common/priceFunctions';
 import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
-import { NumericFormat } from 'react-number-format';
 import MenuCategories from 'src/sections/categories/MenuCategories';
 import { setPopupAssignInventory } from 'src/redux/inventory/productsSlice';
 import PopupAssingInventory from 'src/sections/product/PopupAssignInventory';
-import { switchPopup } from 'src/redux/inventory/pdvsSlice';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
 import RequestService from '../../axios/services/service';
 
@@ -103,7 +86,7 @@ export default function ProductNewEditForm({ currentProduct }) {
 
     barCode: Yup.string().required('Código de barras es requerido'),
     sku: Yup.string().optional(),
-    priceBase: Yup.number().moreThan(0, 'El precio debe ser mayo a $0.00'),
+    priceBase: Yup.number().moreThan(100, 'El precio debe ser mayo a $0.00'),
     priceSale: Yup.number().moreThan(0, 'El precio debe ser mayo a $0.00'),
     quantityStock: Yup.number(),
     brand: Yup.string(),
@@ -324,10 +307,6 @@ export default function ProductNewEditForm({ currentProduct }) {
     });
     setValue('productsPdvs', newPdv);
     setPdvEdit(null);
-  };
-
-  const handleClosePopupWarehouse = () => {
-    // setOpenPopupWarehouse(false);
   };
 
   // Popup to assign inventory
@@ -603,7 +582,7 @@ export default function ProductNewEditForm({ currentProduct }) {
               fullWidth
               color="primary"
               placeholder="0.00"
-              label="Precio Totalñlñll"
+              label="Precio Total"
               onChange={(e) => {
                 const priceSale = parseFloat(e.target.value);
                 const taxPercentage = values.taxesOption; // Obtener el porcentaje de impuesto según la opción seleccionada
