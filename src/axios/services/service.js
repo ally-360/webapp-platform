@@ -1,12 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import axios from 'axios';
-import {
-  configGet,
-  configGetWithToken,
-  configPostWithToken,
-  configPatchWithToken,
-  configDeleteWithToken
-} from '../configFetch';
+import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
 import apiClient from '../axios';
 
 class RequestService {
@@ -90,6 +84,18 @@ class RequestService {
 
   getCities = async ({ department }) =>
     axios.get(`https://www.datos.gov.co/resource/xdk5-pm3f.json?departamento=${department}`);
+
+  // Contacts
+
+  getContacts = async () => apiClient(configGetWithToken('/contacts'));
+
+  createContact = async (databody) => apiClient(configPostWithToken('/contacts', databody));
+
+  getContactById = async (id) => apiClient(configGetWithToken(`/contacts/${id}`));
+
+  deleteContact = async (id) => apiClient(configDeleteWithToken(`/contacts/${id}`));
+
+  updateContact = async ({ id, databody }) => apiClient(configPatchWithToken(`/contacts/${id}`, databody));
 }
 
 export default new RequestService();

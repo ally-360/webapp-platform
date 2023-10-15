@@ -22,7 +22,7 @@ import UserQuickEditForm from './user-quick-edit-form';
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { name, avatarUrl, company, municipio, status, email, phoneNumber } = row;
+  const { name, lastname, avatarUrl, address, town, type, email, phoneNumber } = row;
 
   const confirm = useBoolean();
 
@@ -41,7 +41,7 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
           <Avatar alt={name} src={avatarUrl} sx={{ mr: 2 }} />
 
           <ListItemText
-            primary={name}
+            primary={name && type === 1 ? `${name} ${lastname}` : name}
             secondary={email}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{ component: 'span', color: 'text.disabled' }}
@@ -50,21 +50,18 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{phoneNumber}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{company}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{address}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{municipio.name}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{town.name}</TableCell>
 
         <TableCell>
           <Label
             variant="soft"
             color={
-              (status === 'active' && 'success') ||
-              (status === 'pending' && 'warning') ||
-              (status === 'banned' && 'error') ||
-              'default'
+              (type === 1 && 'success') || (type === 2 && 'warning') || (type === 'banned' && 'error') || 'default'
             }
           >
-            {status}
+            {type === 1 ? 'Cliente' : 'Proveedor'}
           </Label>
         </TableCell>
 

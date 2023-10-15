@@ -41,6 +41,8 @@ import { useSettingsContext } from 'src/components/settings';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import { useTheme } from '@emotion/react';
+import { createContact } from 'src/redux/inventory/contactsSlice';
+import { store } from 'src/redux/store';
 
 // ----------------------------------------------------------------------
 
@@ -51,7 +53,7 @@ export default function UserNewEditForm({ currentUser }) {
 
   const NewUserSchema = Yup.object().shape({
     name: Yup.string().required('Nombre es requerido'),
-    lastName: Yup.string().optional(),
+    lastname: Yup.string().optional(),
     email: Yup.string().required('Correo electronico es requerido').email('Ingrese un correo valido'),
     phoneNumber: Yup.string().required('Número de celular es requerido'),
     phoneNumber2: Yup.string().optional(),
@@ -69,7 +71,7 @@ export default function UserNewEditForm({ currentUser }) {
   const defaultValues = useMemo(
     () => ({
       name: currentUser?.name || '',
-      lastName: currentUser?.lastName || null,
+      lastname: currentUser?.lastname || null,
       email: currentUser?.email || '',
       address: currentUser?.address || '',
       phoneNumber: currentUser?.phoneNumber || null,
@@ -83,10 +85,11 @@ export default function UserNewEditForm({ currentUser }) {
         typePerson: 1
       },
       departamento: currentUser?.departamento || null,
-      municipio: currentUser?.municipio || null
+      town: currentUser?.town || null
     }),
     [currentUser]
   );
+  const dispatch = useDispatch();
 
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
@@ -98,7 +101,6 @@ export default function UserNewEditForm({ currentUser }) {
   const {
     reset,
     watch,
-    control,
     setValue,
     handleSubmit,
     formState: { isSubmitting }
@@ -112,11 +114,23 @@ export default function UserNewEditForm({ currentUser }) {
       // Remove department
       const { departamento, ...rest } = data;
       console.log('rest send', rest);
-      // Enviar rest al backend
+      dispatch(createContact(rest));
 
-      reset();
-      enqueueSnackbar(currentUser ? 'Update success!' : 'Create success!');
-      router.push(paths.dashboard.user.list);
+      // Espera a que se complete el proceso de crear el contacto
+      // Esto asume que tienes una forma de saber cuándo el proceso ha finalizado, como un valor de "loading" o similar.
+      while (store.getState().contacts.contactLoading) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+
+      if (store.getState().contacts.contactError) {
+        enqueueSnackbar(store.getState().contacts.contactError, { variant: 'error' });
+      } else {
+        reset();
+        enqueueSnackbar(
+          currentUser ? 'Se ha actualizado correctamente el usuario!' : 'Se ha creado correctamente el contacto!'
+        );
+        router.push(paths.dashboard.user.list);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -130,7 +144,6 @@ export default function UserNewEditForm({ currentUser }) {
 
   // ----------------------------------------------------------------------
 
-  const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getAllMunicipios());
   }, [dispatch]);
@@ -143,17 +156,17 @@ export default function UserNewEditForm({ currentUser }) {
   useEffect(() => {
     if (departmentValue) {
       setMunicipios(departmentValue.towns);
-      const selectedMunicipio = watch('municipio');
+      const selectedMunicipio = watch('town');
       if (selectedMunicipio) {
-        const municipioExist = departmentValue.towns.filter((municipio) => municipio.name === selectedMunicipio.name);
+        const municipioExist = departmentValue.towns.filter((town) => town.name === selectedMunicipio.name);
         if (municipioExist.length === 0) {
-          setValue('municipio', '');
+          setValue('town', '');
           setSearchQueryMunicipio('');
         }
       }
     } else {
       setMunicipios([]);
-      setValue('municipio', null);
+      setValue('town', null);
       setSearchQueryMunicipio('');
     }
   }, [departmentValue, locations, setValue, watch]);
@@ -213,7 +226,7 @@ export default function UserNewEditForm({ currentUser }) {
                   <RHFTextField name="identity.number" type="number" label="Número de identificación *" />
 
                   <RHFTextField name="name" label="Nombres" />
-                  <RHFTextField name="lastName" label="Apellidos" />
+                  <RHFTextField name="lastname" label="Apellidos" />
                 </>
               ) : (
                 values.identity.type === 2 &&
@@ -272,7 +285,7 @@ export default function UserNewEditForm({ currentUser }) {
                 }
               />
               <RHFAutocomplete
-                name="municipio"
+                name="town"
                 fullWidth
                 placeholder="Ej: Cali"
                 label="Municipio"
@@ -340,7 +353,8 @@ export default function UserNewEditForm({ currentUser }) {
                 placeholder="Ej: 300 123 4567"
                 defaultCountry="co"
                 countryCodeEditable={false}
-                onlyCountries={['co']}
+
+                // onlyCountries={['co']}
               />
               <RHFTextField name="phoneNumber2" label="Teléfono" />
             </Box>

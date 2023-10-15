@@ -6,8 +6,8 @@ import { _mock } from './_mock';
 // ----------------------------------------------------------------------
 
 export const USER_STATUS_OPTIONS = [
-  { value: 'customers', label: 'Clientes' },
-  { value: 'providers', label: 'Proveedores' }
+  { value: 1, label: 'Clientes' },
+  { value: 2, label: 'Proveedores' }
 ];
 
 export const _userAbout = {

@@ -1,5 +1,5 @@
 import isEqual from 'lodash/isEqual';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -38,6 +38,8 @@ import {
   TablePaginationCustom
 } from 'src/components/table';
 //
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllContacts } from 'src/redux/inventory/contactsSlice';
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import UserTableFiltersResult from '../user-table-filters-result';
@@ -72,7 +74,19 @@ export default function UserListView() {
 
   const confirm = useBoolean();
 
-  const [tableData, setTableData] = useState(_userList);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllContacts());
+  }, [dispatch]);
+
+  const { contacts } = useSelector((state) => state.contacts);
+
+  const [tableData, setTableData] = useState([]);
+
+  useEffect(() => {
+    setTableData(contacts);
+  }, [contacts]);
 
   const [filters, setFilters] = useState(defaultFilters);
 
@@ -189,13 +203,11 @@ export default function UserListView() {
                 icon={
                   <Label
                     variant={((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'}
-                    color={
-                      (tab.value === 'customers' && 'success') || (tab.value === 'providers' && 'warning') || 'primary'
-                    }
+                    color={(tab.value === 1 && 'success') || (tab.value === 2 && 'warning') || 'primary'}
                   >
-                    {tab.value === 'all' && _userList.length}
-                    {tab.value === 'customers' && _userList.filter((user) => user.status === 'customers').length}
-                    {tab.value === 'providers' && _userList.filter((user) => user.status === 'providers').length}
+                    {tab.value === 'all' && tableData.length}
+                    {tab.value === 1 && tableData.filter((user) => user.type === 1).length}
+                    {tab.value === 2 && tableData.filter((user) => user.type === 2).length}
                   </Label>
                 }
               />
@@ -342,7 +354,8 @@ function applyFilter({ inputData, comparator, filters }) {
   }
 
   if (status !== 'all') {
-    inputData = inputData.filter((user) => user.status === status);
+    console.log(status);
+    inputData = inputData.filter((user) => user.type === status);
   }
 
   if (Object.entries(municipio).length !== 0) {
