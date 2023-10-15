@@ -342,9 +342,9 @@ export default function InvoiceNewEditDetails() {
                   {/* Buscar los pdvs que tenga el producto */}
 
                   {values.items[index].title.id !== undefined &&
-                    values.items[index].title.productPdv.map((item) => (
-                      <MenuItem key={item.pdv.id} value={item.pdv.id}>
-                        {item.pdv.name}
+                    values.items[index].title.productPdv.map((pdvObject) => (
+                      <MenuItem key={pdvObject.pdv.id} value={pdvObject.pdv.id}>
+                        {pdvObject.pdv.name}
                       </MenuItem>
                     ))}
                 </RHFSelect>
