@@ -63,6 +63,10 @@
   "Start date" : "Creada",
   "End date" : "Vencimiento",
   "Search customer or invoice number..." : "Buscar cliente o número de factura...",
+  "property municipio should not exist": "La propiedad municipio no debería existir",
+  "property sendEmail should not exist": "La propiedad sendEmail no debería existir",
+  "The address format is invalid": "El formato de dirección es inválido",
+  "phoneNumber2 must be a valid phone number": "Número de teléfono debe ser un número válido",
   "demo": {
   "title": "Inglés"
   }

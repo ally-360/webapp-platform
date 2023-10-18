@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 // routes
 import { useParams } from 'src/routes/hook';
-import { InvoiceDetailsView } from 'src/sections/sales/invoice/view';
+import { InvoiceDetailsView } from 'src/sections/bill/invoice/view';
 // sections
 
 // ----------------------------------------------------------------------
@@ -14,7 +14,7 @@ export default function InvoiceDetailsPage() {
   return (
     <>
       <Helmet>
-        <title> Ally360: Factura de venta</title>
+        <title> Ally360: Factura de compra</title>
       </Helmet>
 
       <InvoiceDetailsView id={`${id}`} />

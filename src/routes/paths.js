@@ -117,7 +117,18 @@ export const paths = {
       edit: (id) => `${ROOTS.DASHBOARD}/sales/${id}/edit`
     },
     pos: `${ROOTS.DASHBOARD}/pos`,
+    bill: {
+      root: `${ROOTS.DASHBOARD}/bill`,
+      newBill: `${ROOTS.DASHBOARD}/bill/new-bill`,
+      details: (id) => `${ROOTS.DASHBOARD}/bill/${id}`,
+      edit: (id) => `${ROOTS.DASHBOARD}/bill/${id}/edit`,
 
+      // Recepciones de compra -  abastecer productos
+      provide: `${ROOTS.DASHBOARD}/bill/provide`,
+      newProvide: `${ROOTS.DASHBOARD}/bill/new-provide`,
+      provideDetails: (id) => `${ROOTS.DASHBOARD}/bill/provide/${id}`,
+      provideEdit: (id) => `${ROOTS.DASHBOARD}/bill/provide/${id}/edit`
+    },
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
       ecommerce: `${ROOTS.DASHBOARD}/ecommerce`,

@@ -50,6 +50,13 @@ const SalesInvoiceCreatePage = lazy(() => import('src/pages/dashboard/sales/invo
 const SalesInvoiceEditPage = lazy(() => import('src/pages/dashboard/sales/invoice/edit'));
 const SalesInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/sales/invoice/details'));
 
+// BILL
+
+const BillInvoiceListPage = lazy(() => import('src/pages/dashboard/bill/invoice/list'));
+const BillInvoiceCreatePage = lazy(() => import('src/pages/dashboard/bill/invoice/new'));
+const BillInvoiceEditPage = lazy(() => import('src/pages/dashboard/bill/invoice/edit'));
+const BillInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/bill/invoice/details'));
+
 // POS
 
 const PosListView = lazy(() => import('src/pages/dashboard/pos/list'));
@@ -137,6 +144,15 @@ export const dashboardRoutes = [
           { path: 'new-sale', element: <SalesInvoiceCreatePage /> },
           { path: ':id', element: <SalesInvoiceDetailsPage /> },
           { path: ':id/edit', element: <SalesInvoiceEditPage /> }
+        ]
+      },
+      {
+        path: 'bill',
+        children: [
+          { element: <BillInvoiceListPage />, index: true },
+          { path: 'new-bill', element: <BillInvoiceCreatePage /> },
+          { path: ':id', element: <BillInvoiceDetailsPage /> },
+          { path: ':id/edit', element: <BillInvoiceEditPage /> }
         ]
       },
       {

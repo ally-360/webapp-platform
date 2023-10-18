@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -43,6 +44,7 @@ import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import { useTheme } from '@emotion/react';
 import { createContact } from 'src/redux/inventory/contactsSlice';
 import { store } from 'src/redux/store';
+import { useTranslation } from 'react-i18next';
 
 // ----------------------------------------------------------------------
 
@@ -50,6 +52,7 @@ export default function UserNewEditForm({ currentUser }) {
   const router = useRouter();
 
   const { enqueueSnackbar } = useSnackbar();
+  const { t } = useTranslation();
 
   const NewUserSchema = Yup.object().shape({
     name: Yup.string().required('Nombre es requerido'),
@@ -61,7 +64,7 @@ export default function UserNewEditForm({ currentUser }) {
     type: Yup.number().required('Tipo de contacto es requerido'),
     // not required
     identity: Yup.object().shape({
-      type: Yup.number().required('Tipo de identificación es requerido'),
+      typeDocument: Yup.number().required('Tipo de identificación es requerido'),
       number: Yup.number().required('Number is required'),
       dv: Yup.number().nullable().optional(),
       typePerson: Yup.number().optional()
@@ -79,9 +82,9 @@ export default function UserNewEditForm({ currentUser }) {
       // Tipo de contacto
       type: currentUser?.type || 1,
       identity: currentUser?.identity || {
-        type: 1,
+        typeDocument: 1,
         number: null,
-        dv: null,
+        dv: 0,
         typePerson: 1
       },
       departamento: currentUser?.departamento || null,
@@ -116,14 +119,18 @@ export default function UserNewEditForm({ currentUser }) {
       console.log('rest send', rest);
       dispatch(createContact(rest));
 
-      // Espera a que se complete el proceso de crear el contacto
-      // Esto asume que tienes una forma de saber cuándo el proceso ha finalizado, como un valor de "loading" o similar.
       while (store.getState().contacts.contactLoading) {
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
 
       if (store.getState().contacts.contactError) {
-        enqueueSnackbar(store.getState().contacts.contactError, { variant: 'error' });
+        // enqueueSnackbar(store.getState().contacts.contactError, { variant: 'error' });
+        const errorMessages = store.getState().contacts.contactError.message;
+        if (errorMessages && errorMessages.length > 0) {
+          const translatedErrors = errorMessages.map((error) => t(error));
+          const combinedMessage = translatedErrors.join(' | ');
+          enqueueSnackbar(combinedMessage, { variant: 'error' });
+        }
       } else {
         reset();
         enqueueSnackbar(
@@ -207,12 +214,12 @@ export default function UserNewEditForm({ currentUser }) {
                 <MenuItem value={1}>Cliente</MenuItem>
                 <MenuItem value={2}>Proveedor</MenuItem>
               </RHFSelect>
-              <RHFSelect name="identity.type" label="Tipo de contacto">
+              <RHFSelect name="identity.typeDocument" label="Tipo de contacto">
                 <MenuItem value={1}>CC - Cédula de ciudadania</MenuItem>
                 <MenuItem value={2}>NIT - Número de identificación tributaria</MenuItem>
               </RHFSelect>
 
-              {values.identity.type === 2 && (
+              {values.identity.typeDocument === 2 && (
                 <RHFSelect name="identity.typePerson" label="Tipo de persona* ">
                   <MenuItem value={1}>Natural</MenuItem>
                   <MenuItem value={2}>Juridica</MenuItem>
@@ -221,7 +228,8 @@ export default function UserNewEditForm({ currentUser }) {
 
               {/* Si es NIT y Juridica se manda Razón social o nombre completo */}
 
-              {values.identity.type === 1 || (values.identity.type === 2 && values.identity.typePerson === 1) ? (
+              {values.identity.typeDocument === 1 ||
+              (values.identity.typeDocument === 2 && values.identity.typePerson === 1) ? (
                 <>
                   <RHFTextField name="identity.number" type="number" label="Número de identificación *" />
 
@@ -229,7 +237,7 @@ export default function UserNewEditForm({ currentUser }) {
                   <RHFTextField name="lastname" label="Apellidos" />
                 </>
               ) : (
-                values.identity.type === 2 &&
+                values.identity.typeDocument === 2 &&
                 values.identity.typePerson === 2 && (
                   <>
                     <Stack direction="row" alignItems="center" gap={1}>

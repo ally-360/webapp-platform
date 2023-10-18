@@ -133,16 +133,16 @@ export function useNavData() {
           },
           {
             title: t('Gastos'),
-            path: paths.dashboard.blank,
+            path: paths.dashboard.bill.root,
             icon: ICONS.gastos,
             children: [
               {
                 title: t('Facturas de compra'),
-                path: paths.dashboard.blank
+                path: paths.dashboard.bill.root
               },
               {
                 title: t('Recepiones de compra'),
-                path: paths.dashboard.blank
+                path: paths.dashboard.bill.provide
               }
             ]
           },
