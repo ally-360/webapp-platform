@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 // auth
 import { AuthGuard } from 'src/auth/guard';
@@ -152,7 +152,11 @@ export const dashboardRoutes = [
           { element: <BillInvoiceListPage />, index: true },
           { path: 'new-bill', element: <BillInvoiceCreatePage /> },
           { path: ':id', element: <BillInvoiceDetailsPage /> },
-          { path: ':id/edit', element: <BillInvoiceEditPage /> }
+          { path: ':id/edit', element: <BillInvoiceEditPage /> },
+          { path: 'provide', element: <BillInvoiceListPage /> },
+          { path: 'new-provide', element: <BillInvoiceCreatePage /> },
+          { path: 'provide/:id', element: <BillInvoiceDetailsPage /> },
+          { path: 'provide/:id/edit', element: <BillInvoiceEditPage /> }
         ]
       },
       {

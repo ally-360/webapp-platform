@@ -1,5 +1,5 @@
 import sumBy from 'lodash/sumBy';
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -81,7 +81,7 @@ export default function InvoiceListView() {
 
   const table = useTable({ defaultOrderBy: 'createDate' });
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(0);
 
   const [tableData, setTableData] = useState(_invoices);
 

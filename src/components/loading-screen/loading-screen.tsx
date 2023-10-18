@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import LinearProgress from '@mui/material/LinearProgress';
+import React from 'react';
 
 // ----------------------------------------------------------------------
 
-export default function LoadingScreen({ sx, ...other }) {
+export default function LoadingScreen({ sx, ...other }: LoadingScreenProps) {
   return (
     <Box
       sx={{
@@ -16,7 +16,7 @@ export default function LoadingScreen({ sx, ...other }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -25,6 +25,6 @@ export default function LoadingScreen({ sx, ...other }) {
   );
 }
 
-LoadingScreen.propTypes = {
-  sx: PropTypes.object,
-};
+interface LoadingScreenProps {
+  sx?: React.CSSProperties;
+}
