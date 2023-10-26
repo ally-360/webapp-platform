@@ -146,7 +146,7 @@ export function getProfile() {
   return async (dispatch) => {
     dispatch(slice.actions.startLoading());
     try {
-      const user = (await RequestService.fetchGetUserById({ id: userId })).data;
+      const user = (await RequestService.fetchGetUserById(userId)).data;
       dispatch(slice.actions.getProfileSuccess(user.profile));
     } catch (error) {
       dispatch(slice.actions.hasError(error));

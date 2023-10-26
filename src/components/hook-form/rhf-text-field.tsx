@@ -1,12 +1,18 @@
-import PropTypes from 'prop-types';
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material';
-import { useState } from 'react';
+import React, { useState } from 'react';
 // ----------------------------------------------------------------------
 
-export default function RHFTextField({ name, helperText, type, ...other }) {
+interface RHFTextFieldProps {
+  name: string;
+  helperText?: string;
+  type?: string;
+  [x: string]: unknown;
+}
+
+export default function RHFTextField({ name, helperText, type, ...other }: RHFTextFieldProps) {
   const { control } = useFormContext();
   const theme = useTheme(); // Obtiene el tema actual de Material-UI
   const [isFocused, setIsFocused] = useState(false); // Estado para rastrear el focus
@@ -53,9 +59,3 @@ export default function RHFTextField({ name, helperText, type, ...other }) {
     />
   );
 }
-
-RHFTextField.propTypes = {
-  helperText: PropTypes.object,
-  name: PropTypes.string,
-  type: PropTypes.string
-};

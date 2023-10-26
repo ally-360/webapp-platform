@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 import { useEffect, useReducer, useCallback, useMemo } from 'react';
 // utils
-import axios, { endpoints } from 'src/utils/axios';
 //
 // eslint-disable-next-line import/no-extraneous-dependencies
 import jwtDecode from 'jwt-decode';
+import { AuthCredentials, RegisterUser, getUserResponse, tokenSchema } from 'src/auth/interfaces/userInterfaces';
 import { AuthContext } from './auth-context';
-import { isValidToken, setSession } from './utils';
+import { setSession } from './utils';
 import RequestService from '../../../axios/services/service';
 
 // ----------------------------------------------------------------------
@@ -44,7 +44,7 @@ const reducer = (state, action) => {
     return {
       ...state,
       isAuthenticated: true,
-      isFirstLogin: user.firstLogin,
+      isFirstLogin: user?.firstLogin || false,
       user
     };
   }
@@ -87,7 +87,7 @@ const reducer = (state, action) => {
 
 const STORAGE_KEY = 'accessToken';
 
-export function AuthProvider({ children }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const initialize = useCallback(async () => {
@@ -96,53 +96,7 @@ export function AuthProvider({ children }) {
 
       if (accessToken) {
         setSession(accessToken);
-        const token = jwtDecode(accessToken);
-        const userId = token.id;
-        const user = (await RequestService.fetchGetUserById({ id: userId })).data;
-        state.user = user;
-        console.log(user);
-        console.log(token);
-
-        if (user.profile?.company?.id) {
-          const company = (await RequestService.getCompanyById(user.profile?.company?.id, true)).data;
-          console.log(company);
-          const Setcompany = company;
-
-          dispatch({
-            type: 'UPDATE_COMPANY',
-            payload: {
-              company: Setcompany
-            }
-          });
-
-          if (company.pdvs?.length > 0) {
-            const SetpdvCompany = company.pdvs;
-            dispatch({
-              type: 'UPDATE_PDV',
-              payload: {
-                pdvCompany: SetpdvCompany
-              }
-            });
-          } else {
-            dispatch({
-              type: 'UPDATE_PDV',
-              payload: {
-                pdvCompany: null
-              }
-            });
-          }
-        }
-
-        console.log(state);
-
-        dispatch({
-          type: 'INITIAL',
-          payload: {
-            isAuthenticated: true,
-            isFirstLogin: user.firstLogin,
-            user
-          }
-        });
+        await setUserInformation(accessToken);
       } else {
         dispatch({
           type: 'INITIAL',
@@ -171,23 +125,13 @@ export function AuthProvider({ children }) {
     initialize();
   }, [initialize]);
 
-  // LOGIN
-  const login = useCallback(async (email, password) => {
-    const response = await RequestService.fetchLoginUser({
-      databody: {
-        email,
-        password
-      }
-    });
-    setSession(response.data);
-    // Set user to redux
-    const token = jwtDecode(response.data);
-    console.log(token);
-    const user = (await RequestService.fetchGetUserById({ id: token.id })).data;
+  const setUserInformation = useCallback(async (accessToken: string): Promise<getUserResponse> => {
+    // Desencripta el token y obtiene el usuario por el id
+    const token: tokenSchema = jwtDecode(accessToken);
+    const user = (await RequestService.fetchGetUserById(token.id)).data;
 
     if (user.profile?.company?.id) {
-      const company = (await RequestService.getCompanyById(user.profile?.company?.id, true)).data;
-      const Setcompany = company;
+      const Setcompany = (await RequestService.getCompanyById(user.profile?.company?.id, true)).data;
 
       dispatch({
         type: 'UPDATE_COMPANY',
@@ -196,12 +140,12 @@ export function AuthProvider({ children }) {
         }
       });
 
-      if (company.pdvs?.length > 0) {
-        const SetpdvCompany = company.pdvs;
+      if (Setcompany.pdvs?.length > 0) {
+        const { pdvs } = Setcompany;
         dispatch({
           type: 'UPDATE_PDV',
           payload: {
-            pdvCompany: SetpdvCompany
+            pdvCompany: pdvs
           }
         });
       } else {
@@ -215,32 +159,41 @@ export function AuthProvider({ children }) {
     }
 
     dispatch({
-      type: 'LOGIN',
+      type: 'INITIAL',
       payload: {
+        isAuthenticated: true,
         isFirstLogin: user.firstLogin,
         user
       }
     });
+
+    return user;
   }, []);
 
-  // REGISTER
-  const register = useCallback(async (email, password, firstName, lastName, tel, dni) => {
-    const dniString = dni.toString();
-    const response = await RequestService.fetchRegisterUser({
-      databody: {
-        password,
-        profile: {
-          name: firstName,
-          lastname: lastName,
-          email,
-          personalPhoneNumber: tel,
-          dni: dniString,
-          company: { id: null },
-          photo:
-            'https://img.freepik.com/foto-gratis/hombre-pelo-corto-traje-negocios-que-lleva-dos-registros_549566-318.jpg'
+  // LOGIN
+  const login = useCallback(
+    async ({ email, password }: AuthCredentials): Promise<void> => {
+      const response = await RequestService.fetchLoginUser({
+        email,
+        password
+      });
+      setSession(response.data);
+      // Set user to redux
+      const user = await setUserInformation(response.data);
+      dispatch({
+        type: 'LOGIN',
+        payload: {
+          isFirstLogin: user.firstLogin,
+          user
         }
-      }
-    });
+      });
+    },
+    [setUserInformation]
+  );
+
+  // REGISTER
+  const register = useCallback(async (data: RegisterUser) => {
+    const response = await RequestService.fetchRegisterUser(data);
 
     dispatch({
       type: 'REGISTER'
@@ -279,7 +232,7 @@ export function AuthProvider({ children }) {
         id: state.user.profile?.id,
         databody: { company: { id: response.data.id } }
       });
-      const user = (await RequestService.fetchGetUserById({ id: token.id })).data;
+      const user = (await RequestService.fetchGetUserById(token.id)).data;
       state.user = user;
 
       dispatch({
@@ -302,7 +255,7 @@ export function AuthProvider({ children }) {
   // Hace el update del usuario y actualiza el estado del usuario. no del perfil
   const updateProfile = useCallback(async (id, databody) => {
     await RequestService.updateUser({ id, databody });
-    const user = (await RequestService.fetchGetUserById({ id })).data;
+    const user = (await RequestService.fetchGetUserById(id)).data;
     dispatch({
       type: 'LOGIN',
       payload: {
@@ -314,7 +267,7 @@ export function AuthProvider({ children }) {
 
   const updateProfileInfo = useCallback(async (id, databody) => {
     await RequestService.updateProfile({ id, databody });
-    const user = (await RequestService.fetchGetUserById({ id })).data;
+    const user = (await RequestService.fetchGetUserById(id)).data;
     dispatch({
       type: 'LOGIN',
       payload: {

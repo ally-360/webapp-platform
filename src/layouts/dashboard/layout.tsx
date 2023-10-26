@@ -8,7 +8,7 @@ import { useResponsive } from 'src/hooks/use-responsive';
 import { useSettingsContext } from 'src/components/settings';
 //
 import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
 import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';

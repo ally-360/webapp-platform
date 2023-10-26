@@ -4,13 +4,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
-  FormControl,
-  InputLabel,
   MenuItem,
-  Select,
   Stack,
-  TextField,
   Slide,
   Box,
   IconButton,
@@ -20,7 +15,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
@@ -69,6 +63,7 @@ function PopupCreateCategory() {
     }[categoryEditInfo]
   );
 
+  // Memoriza el valor predeterminado para evitar que se vuelva a calcular en cada renderizado.
   const defaultValues = useMemo(
     () => ({
       name: categoryEditInfo ? categoryEditInfo.name : '',
@@ -87,8 +82,6 @@ function PopupCreateCategory() {
 
   const {
     reset,
-    watch,
-    setValue,
     handleSubmit,
     formState: { isSubmitting }
   } = methods;

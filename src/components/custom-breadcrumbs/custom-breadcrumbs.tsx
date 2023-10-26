@@ -12,7 +12,28 @@ import LinkItem from './link-item';
 
 // ----------------------------------------------------------------------
 
-export default function CustomBreadcrumbs({ icon, links, action, heading, moreLink, activeLast, sx, ...other }) {
+type CustomBreadcrumbsProps = {
+  icon: string;
+  links: Array<{ href?: string; name?: string }>;
+  action: React.ReactNode;
+  heading: string;
+  moreLink: string[];
+  activeLast: boolean;
+  sx?: object;
+
+  [x: string]: unknown;
+};
+
+export default function CustomBreadcrumbs({
+  icon,
+  links,
+  action,
+  heading,
+  moreLink,
+  activeLast,
+  sx,
+  ...other
+}: CustomBreadcrumbsProps) {
   const lastLink = links[links.length - 1].name;
 
   return (
@@ -32,7 +53,7 @@ export default function CustomBreadcrumbs({ icon, links, action, heading, moreLi
           {/* BREADCRUMBS */}
           {!!links.length && (
             <Breadcrumbs separator={<Separator />} {...other}>
-              {links.map((link) => (
+              {links.map((link: { href?: string; name?: string }) => (
                 <LinkItem key={link.name || ''} link={link} activeLast={activeLast} disabled={link.name === lastLink} />
               ))}
             </Breadcrumbs>
@@ -45,7 +66,7 @@ export default function CustomBreadcrumbs({ icon, links, action, heading, moreLi
       {/* MORE LINK */}
       {!!moreLink && (
         <Box sx={{ mt: 2 }}>
-          {moreLink.map((href) => (
+          {moreLink.map((href: string) => (
             <Link key={href} href={href} variant="body2" target="_blank" rel="noopener" sx={{ display: 'table' }}>
               {href}
             </Link>

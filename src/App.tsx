@@ -45,10 +45,7 @@ import { AuthProvider, AuthConsumer } from 'src/auth/context/jwt';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Provider } from 'react-redux';
 import { store } from 'src/redux/store';
-// import { AuthProvider, AuthConsumer } from 'src/auth/context/auth0';
-// import { AuthProvider, AuthConsumer } from 'src/auth/context/amplify';
-// import { AuthProvider, AuthConsumer } from 'src/auth/context/firebase';
-
+import React from 'react';
 // ----------------------------------------------------------------------
 
 export default function App() {

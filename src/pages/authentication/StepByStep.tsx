@@ -17,11 +17,6 @@ import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompan
 import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
 import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
 
-// components
-// import RegisterCompanyForm from './company/RegisterCompanyForm';
-// import RegisterSummary from './company/RegisterSummary';
-// import RegisterPDVForm from './company/RegisterPDVForm';
-
 const steps = ['Crear empresa', 'Puntos de venta', 'Resumen'];
 
 const RootStyle = styled(Container)(({ theme }) => ({

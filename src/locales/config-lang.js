@@ -1,5 +1,5 @@
 // @mui
-import { enUS, frFR, zhCN, viVN, arSA, esES } from '@mui/material/locale';
+import { enUS, esES } from '@mui/material/locale';
 
 // PLEASE REMOVE `LOCAL STORAGE` WHEN YOU CHANGE SETTINGS.
 // ----------------------------------------------------------------------
@@ -19,7 +19,7 @@ export const allLangs = [
   }
 ];
 
-export const defaultLang = allLangs[0]; // English
+export const defaultLang = allLangs[1]; // Espanish
 
 // GET MORE COUNTRY FLAGS
 // https://icon-sets.iconify.design/flagpack/

@@ -1,6 +1,5 @@
-import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -25,7 +24,7 @@ import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { enqueueSnackbar } from 'notistack';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-
+import { RegisterSchema } from 'src/auth/interfaces/yupSchemas';
 // ----------------------------------------------------------------------
 
 export default function JwtRegisterView() {
@@ -39,33 +38,19 @@ export default function JwtRegisterView() {
 
   const returnTo = searchParams.get('returnTo');
 
-  const password = useBoolean();
-
-  const RegisterSchema = Yup.object().shape({
-    firstName: Yup.string()
-      .min(3, 'Ingrese un nombre valido')
-      .max(50, 'Ingrese un nombre valido')
-      .required('Ingrese el nombre'),
-    lastName: Yup.string()
-      .min(3, 'Ingrese un apellido valido')
-      .max(50, 'Ingrese un apellido más corto')
-      .required('Ingrese el apellido'),
-    email: Yup.string().email('Ingrese un correo valido').required('Correo es requerido'),
-    password: Yup.string().required('La contraseña es requerida'),
-    tel: Yup.string(),
-    dni: Yup.string()
-      .min(10, 'Ingrese un número de Cédula de ciudadanía')
-      .max(10, 'Ingrese un número de Cédula de ciudadanía')
-      .required('Ingrese un número de Cédula de ciudadanía')
-  });
+  const password = useBoolean(false); // Pass a default value of false to useBoolean
 
   const defaultValues = {
-    firstName: '',
-    lastName: '',
-    email: '',
     password: '',
-    tel: '',
-    dni: ''
+    profile: {
+      personalPhoneNumber: '',
+      dni: '',
+      name: '',
+      lastname: '',
+      email: '',
+      // agregar un avatar generico de internet
+      photo: 'https://i.pravatar.cc/300'
+    }
   };
 
   const methods = useForm({
@@ -81,12 +66,12 @@ export default function JwtRegisterView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await register?.(data.email, data.password, data.firstName, data.lastName, data.tel, data.dni);
+      await register?.(data);
       router.push(returnTo || PATH_AFTER_LOGIN);
       enqueueSnackbar('Registro del usuario completado', {
         variant: 'success'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       enqueueSnackbar(`Error al registrar el usuario ${error.message}`, {
         variant: 'error'
@@ -130,13 +115,13 @@ export default function JwtRegisterView() {
         {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="firstName" label="Nombre" />
-          <RHFTextField name="lastName" label="Apellido" />
+          <RHFTextField name="profile.name" label="Nombre" />
+          <RHFTextField name="profile.lastname" label="Apellido" />
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFPhoneNumber
-            name="tel"
+            name="profile.personalPhoneNumber"
             label="Teléfono"
             fullWidth
             type="string"
@@ -146,10 +131,10 @@ export default function JwtRegisterView() {
             countryCodeEditable={false}
             onlyCountries={['co']}
           />
-          <RHFTextField name="dni" label="Cédula de ciudadania" />
+          <RHFTextField name="profile.dni" label="Cédula de ciudadania" />
         </Stack>
 
-        <RHFTextField name="email" label="Correo electrónico" />
+        <RHFTextField name="profile.email" label="Correo electrónico" />
 
         <RHFTextField
           name="password"

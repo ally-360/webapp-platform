@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import Box from '@mui/material/Box';
@@ -12,15 +11,33 @@ import FormHelperText from '@mui/material/FormHelperText';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import { useTheme } from '@mui/material';
-import { useState } from 'react';
-
+import React, { useState } from 'react';
 // ----------------------------------------------------------------------
 
-export function RHFSelect({ name, native, maxHeight = 220, helperText, children, PaperPropsSx, ...other }) {
+interface RHFSelectProps {
+  // Name es solo para el controlador de React Hook Form, no permite modificar el valor, solo es de lectura.
+  readonly name: string;
+  native?: boolean;
+  maxHeight?: number;
+  helperText?: string;
+  children?: React.ReactNode;
+  PaperPropsSx?: object;
+  [x: string]: unknown;
+}
+
+export function RHFSelect({
+  name,
+  native,
+  maxHeight = 220,
+  helperText,
+  children,
+  PaperPropsSx,
+  ...other
+}: RHFSelectProps) {
   const { control } = useFormContext();
   const theme = useTheme(); // Obtiene el tema actual de Material-UI
   const [isFocused, setIsFocused] = useState(false); // Estado para rastrear el focus
-
+  console.log('isFocused', isFocused);
   return (
     <Controller
       name={name}
@@ -70,21 +87,34 @@ export function RHFSelect({ name, native, maxHeight = 220, helperText, children,
   );
 }
 
-RHFSelect.propTypes = {
-  PaperPropsSx: PropTypes.object,
-  children: PropTypes.node,
-  helperText: PropTypes.object,
-  maxHeight: PropTypes.number,
-  name: PropTypes.string,
-  native: PropTypes.bool
-};
-
 // ----------------------------------------------------------------------
 
-export function RHFMultiSelect({ name, chip, label, options, checkbox, placeholder, helperText, sx, ...other }) {
+interface RHFAutocompleteProps {
+  name: string;
+  label: string;
+  options: Array<{ value: string; label: string }>;
+  placeholder?: string;
+  checkbox?: boolean;
+  helperText?: string;
+  chip?: boolean;
+  sx?: object;
+  [x: string]: unknown;
+}
+
+export function RHFMultiSelect({
+  name,
+  chip,
+  label,
+  options,
+  checkbox,
+  placeholder,
+  helperText,
+  sx,
+  ...other
+}: RHFAutocompleteProps) {
   const { control } = useFormContext();
 
-  const renderValues = (selectedIds) => {
+  const renderValues = (selectedIds: string) => {
     const selectedItems = options.filter((item) => selectedIds.includes(item.value));
 
     if (!selectedItems.length && placeholder) {
@@ -152,14 +182,3 @@ export function RHFMultiSelect({ name, chip, label, options, checkbox, placehold
     />
   );
 }
-
-RHFMultiSelect.propTypes = {
-  checkbox: PropTypes.bool,
-  chip: PropTypes.bool,
-  helperText: PropTypes.object,
-  label: PropTypes.string,
-  name: PropTypes.string,
-  options: PropTypes.array,
-  placeholder: PropTypes.string,
-  sx: PropTypes.object
-};

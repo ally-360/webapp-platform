@@ -1,6 +1,5 @@
-import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -24,6 +23,8 @@ import { useAuthContext } from 'src/auth/hooks';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { Box } from '@mui/material';
+import { AuthCredentials } from 'src/auth/interfaces/userInterfaces';
+import { LoginSchema } from 'src/auth/interfaces/yupSchemas';
 
 // ----------------------------------------------------------------------
 
@@ -32,20 +33,15 @@ export default function JwtLoginView() {
 
   const router = useRouter();
 
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   const searchParams = useSearchParams();
 
   const returnTo = searchParams.get('returnTo');
 
-  const password = useBoolean();
+  const viewPassword = useBoolean(false); // Pass a default value of false to useBoolean
 
-  const LoginSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required')
-  });
-
-  const defaultValues = {
+  const defaultValues: AuthCredentials = {
     email: 'example@example.com',
     password: 'myPassword123'
   };
@@ -61,15 +57,15 @@ export default function JwtLoginView() {
     formState: { isSubmitting }
   } = methods;
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: AuthCredentials) => {
+    const { email, password } = data;
     try {
-      await login?.(data.email, data.password);
-
+      await login({ email, password });
       router.push(returnTo || PATH_AFTER_LOGIN);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
       reset();
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+      setErrorMsg(typeof error === 'string' ? error : (error as Error).message);
     }
   });
 
@@ -91,14 +87,14 @@ export default function JwtLoginView() {
 
       <RHFTextField
         name="password"
-        label="Password"
+        label="Contraseña"
         color="primary"
-        type={password.value ? 'text' : 'password'}
+        type={viewPassword.value ? 'text' : 'password'}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton onClick={password.onToggle} edge="end">
-                <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+              <IconButton onClick={viewPassword.onToggle} edge="end">
+                <Iconify icon={viewPassword.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
           )
@@ -110,7 +106,7 @@ export default function JwtLoginView() {
         color="inherit"
         underline="always"
         component={RouterLink}
-        to={paths.auth.jwt.forgotPassword}
+        href={paths.auth.jwt.forgotPassword}
         sx={{ alignSelf: 'flex-end' }}
       >
         ¿Olvidaste tu contraseña?
@@ -122,7 +118,7 @@ export default function JwtLoginView() {
       <Box width="smUp">
         <Typography variant="body2" align="center">
           ¿No tienes una cuenta?&nbsp;
-          <Link variant="subtitle2" component={RouterLink} to={paths.auth.jwt.register}>
+          <Link variant="subtitle2" component={RouterLink} href={paths.auth.jwt.register}>
             Registrate
           </Link>
         </Typography>
@@ -133,7 +129,6 @@ export default function JwtLoginView() {
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       {renderHead}
-
       {renderForm}
     </FormProvider>
   );

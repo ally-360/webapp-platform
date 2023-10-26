@@ -4,12 +4,11 @@ import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
 // components
 import Logo from 'src/components/logo';
 import Scrollbar from 'src/components/scrollbar';
@@ -19,10 +18,8 @@ import { NavSectionVertical } from 'src/components/nav-section';
 import styled from '@emotion/styled';
 import { Link, Avatar, Typography, useTheme } from '@mui/material';
 import { paths } from 'src/routes/paths';
-import Paper from 'src/theme/overrides/components/paper';
 import { useAuthContext } from 'src/auth/hooks';
 import { useSettingsContext } from 'src/components/settings';
-import LogoMini from 'src/components/logo/logoMini';
 import { NAV } from '../config-layout';
 import { useNavData } from './config-navigation';
 import { NavToggleButton, NavUpgrade } from '../_common';

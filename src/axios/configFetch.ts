@@ -1,4 +1,6 @@
-export const configGetWithToken = (url) => {
+import { AxiosRequestConfig } from 'axios';
+
+export const configGetWithToken = (url: string): AxiosRequestConfig => {
   const localUser = localStorage.getItem('accessToken');
   console.log(localUser);
   return {
@@ -11,7 +13,7 @@ export const configGetWithToken = (url) => {
   };
 };
 
-export const configGetWithTokenParametrized = (url, param) => ({
+export const configGetWithTokenParametrized = (url: string, param: string): AxiosRequestConfig => ({
   method: 'get',
   url,
   headers: {
@@ -20,7 +22,7 @@ export const configGetWithTokenParametrized = (url, param) => ({
   }
 });
 
-export const configGet = (url) => ({
+export const configGet = (url: string): AxiosRequestConfig => ({
   method: 'get',
   url,
   headers: {
@@ -28,7 +30,7 @@ export const configGet = (url) => ({
   }
 });
 
-export const configPatchWithToken = (url, databody) => {
+export const configPatchWithToken = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
   console.log(localUser);
   return {
@@ -42,7 +44,7 @@ export const configPatchWithToken = (url, databody) => {
   };
 };
 
-export const configPostWithToken = (url, databody) => {
+export const configPostWithToken = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
   return {
     method: 'post',
@@ -55,7 +57,7 @@ export const configPostWithToken = (url, databody) => {
   };
 };
 
-export const configPostFileXlsx = (url, databody) => {
+export const configPostFileXlsx = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
   return {
     method: 'post',
@@ -69,7 +71,7 @@ export const configPostFileXlsx = (url, databody) => {
   };
 };
 
-export const configPostFileDocx = (url, databody) => {
+export const configPostFileDocx = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
   return {
     method: 'post',
@@ -83,7 +85,7 @@ export const configPostFileDocx = (url, databody) => {
     data: databody
   };
 };
-export const configPostFilePdf = (url, databody) => {
+export const configPostFilePdf = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
   return {
     method: 'post',
@@ -98,7 +100,7 @@ export const configPostFilePdf = (url, databody) => {
   };
 };
 
-export const configPutWithToken = (url, databody) => {
+export const configPutWithToken = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
   return {
     method: 'put',
@@ -111,7 +113,7 @@ export const configPutWithToken = (url, databody) => {
   };
 };
 
-export const configDeleteWithToken = (url) => {
+export const configDeleteWithToken = (url: string) => {
   const localUser = localStorage.getItem('accessToken');
   return {
     method: 'delete',
