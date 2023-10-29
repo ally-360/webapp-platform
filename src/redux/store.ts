@@ -6,6 +6,7 @@ import categoriesReducer from './inventory/categoriesSlice';
 import brandsReducer from './inventory/brandsSlice';
 import userReducer from './inventory/user';
 import contactsReducer from './inventory/contactsSlice';
+import stepByStepReducer from './inventory/stepByStepSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     categories: categoriesReducer,
     brands: brandsReducer,
     user: userReducer,
-    contacts: contactsReducer
+    contacts: contactsReducer,
+    stepByStep: stepByStepReducer
   }
 });

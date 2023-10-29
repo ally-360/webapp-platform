@@ -1,49 +1,37 @@
-import * as Yup from 'yup';
-import { Form, FormikProvider, useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
 import React, { useState } from 'react';
-import { Alert, IconButton, InputAdornment, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Alert, IconButton, MenuItem, Stack, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import MuiPhoneNumber from 'material-ui-phone-number-2';
-import Zoom from '@mui/material/Zoom';
-import { Icon, InlineIcon } from '@iconify/react';
-import PropTypes from 'prop-types';
+import { Icon } from '@iconify/react';
 import { useAuthContext } from 'src/auth/hooks';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormProvider from 'src/components/hook-form/form-provider';
-import { RHFTextField } from 'src/components/hook-form';
+import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
+import { RegisterCompanySchema } from 'src/auth/interfaces/yupSchemas';
+import { RegisterCompany } from 'src/auth/interfaces/userInterfaces';
+import { useDispatch, useSelector } from 'react-redux';
+import { setPrevValuesCompany, setStep } from 'src/redux/inventory/stepByStepSlice';
+import { RootState } from 'src/redux/store';
 import RequestService from '../../../axios/services/service';
+import { economicActivityOptions, quantityEmployeesOptions } from './optionsCommon';
 
-export default function RegisterCompanyForm({ setActiveStep, activeStep, setPrevValues, prevValues }) {
+export default function RegisterCompanyForm() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const { createCompany } = useAuthContext();
 
-  const RegisterCompanySchema = Yup.object().shape({
-    name: Yup.string()
-      .min(3, 'Ingrese un nombre valido')
-      .max(50, 'Ingrese un nombre valido')
-      .required('Ingrese el nombre'),
-    address: Yup.string()
-      .min(3, 'Ingrese una dirección valida')
-      .max(50, 'Ingrese una dirección valida')
-      .required('Ingrese la dirección'),
-    nit: Yup.string().required('Ingrese un número de NIT valido'),
-    phoneNumber: Yup.string().required('Ingrese un número de teléfono valido'),
-    quantityEmployees: Yup.string().required('Ingrese la cantidad de empleados'),
-    economicActivity: Yup.string().required('Ingrese la actividad económica'),
-    website: Yup.string().required('Ingrese una URL valida')
-  });
+  const dispatch = useDispatch();
+  const { prevValuesCompany } = useSelector((state: RootState) => state.stepByStep);
 
   const defaultValues = {
-    name: prevValues?.name || '',
-    address: prevValues?.address || '',
-    nit: prevValues?.nit || '',
-    phoneNumber: prevValues?.phoneNumber || '',
-    website: prevValues?.website || '',
-    quantityEmployees: prevValues?.quantityEmployees || '',
-    economicActivity: prevValues?.economicActivity || ''
+    name: prevValuesCompany?.name || '',
+    address: prevValuesCompany?.address || '',
+    nit: prevValuesCompany?.nit || '',
+    phoneNumber: prevValuesCompany?.phoneNumber || '',
+    website: prevValuesCompany?.website || '',
+    quantityEmployees: prevValuesCompany?.quantityEmployees || '',
+    economicActivity: prevValuesCompany?.economicActivity || ''
   };
 
   const methods = useForm({
@@ -52,17 +40,17 @@ export default function RegisterCompanyForm({ setActiveStep, activeStep, setPrev
   });
 
   const {
-    reset,
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
   const [errorMsg, setErrorMsg] = useState('');
+  console.log(prevValuesCompany);
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: RegisterCompany) => {
     try {
-      console.log(prevValues);
-      if (prevValues.id) {
-        await RequestService.updateCompany({ databody: data, id: prevValues.id });
+      console.log(prevValuesCompany);
+      if (prevValuesCompany?.id) {
+        await RequestService.updateCompany({ databody: data, id: prevValuesCompany.id });
         enqueueSnackbar('Actualización de la empresa completado', {
           variant: 'success',
           action: (key) => (
@@ -71,8 +59,10 @@ export default function RegisterCompanyForm({ setActiveStep, activeStep, setPrev
             </IconButton>
           )
         });
+        // agregar el id
+        dispatch(setPrevValuesCompany({ ...data, id: prevValuesCompany.id }));
       } else {
-        await createCompany({ databody: data });
+        await createCompany(data);
         enqueueSnackbar('Registro de la empresa completado', {
           variant: 'success',
           action: (key) => (
@@ -81,10 +71,9 @@ export default function RegisterCompanyForm({ setActiveStep, activeStep, setPrev
             </IconButton>
           )
         });
-        setPrevValues(data);
       }
-      setActiveStep(1);
-    } catch (error) {
+      dispatch(setStep(1));
+    } catch (error: any) {
       console.error(error);
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
@@ -104,12 +93,9 @@ export default function RegisterCompanyForm({ setActiveStep, activeStep, setPrev
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFTextField fullWidth label="NIT" name="nit" />
           <RHFPhoneNumber
-            fullWidth
             label="Teléfono"
             name="phoneNumber"
             type="string"
-            variant="outlined"
-            placeholder="Ej: 300 123 4567"
             defaultCountry="co"
             countryCodeEditable={false}
             onlyCountries={['co']}
@@ -119,8 +105,20 @@ export default function RegisterCompanyForm({ setActiveStep, activeStep, setPrev
           <RHFTextField fullWidth label="Sitio web" name="website" />
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="Cantidad de empleados" name="quantityEmployees" />
-          <RHFTextField fullWidth label="Actividad económica" name="economicActivity" />
+          <RHFSelect fullWidth label="Cantidad de empleados" name="quantityEmployees">
+            {quantityEmployeesOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.value}
+              </MenuItem>
+            ))}
+          </RHFSelect>
+          <RHFSelect fullWidth label="Actividad económica" name="economicActivity">
+            {economicActivityOptions.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.value}
+              </MenuItem>
+            ))}
+          </RHFSelect>
         </Stack>
       </Stack>
       <LoadingButton
@@ -137,12 +135,3 @@ export default function RegisterCompanyForm({ setActiveStep, activeStep, setPrev
     </FormProvider>
   );
 }
-
-RegisterCompanyForm.propTypes = {
-  nextStep: PropTypes.func,
-  activeStep: PropTypes.number,
-  handleBack: PropTypes.func,
-  setPrevValues: PropTypes.func,
-  prevValues: PropTypes.object,
-  setActiveStep: PropTypes.func
-};

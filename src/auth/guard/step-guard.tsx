@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter, useSearchParams } from 'src/routes/hook';
@@ -8,7 +8,7 @@ import { useAuthContext } from '../hooks';
 
 // ----------------------------------------------------------------------
 
-export default function StepGuard({ children }) {
+export default function StepGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -21,6 +21,7 @@ export default function StepGuard({ children }) {
     if (authenticated && isFirstLogin === true) {
       router.replace(returnTo);
     }
+    console.log('authenticated', authenticated);
   }, [authenticated, returnTo, router, isFirstLogin]);
 
   useEffect(() => {

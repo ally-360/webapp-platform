@@ -66,7 +66,7 @@ export default function JwtRegisterView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await register?.(data);
+      await register(data);
       router.push(returnTo || PATH_AFTER_LOGIN);
       enqueueSnackbar('Registro del usuario completado', {
         variant: 'success'
@@ -76,7 +76,7 @@ export default function JwtRegisterView() {
       enqueueSnackbar(`Error al registrar el usuario ${error.message}`, {
         variant: 'error'
       });
-      reset();
+      // reset();
       setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
@@ -123,13 +123,10 @@ export default function JwtRegisterView() {
           <RHFPhoneNumber
             name="profile.personalPhoneNumber"
             label="Teléfono"
-            fullWidth
             type="string"
-            variant="outlined"
-            placeholder="Ej:3001234567"
             defaultCountry="co"
-            countryCodeEditable={false}
             onlyCountries={['co']}
+            countryCodeEditable={false}
           />
           <RHFTextField name="profile.dni" label="Cédula de ciudadania" />
         </Stack>

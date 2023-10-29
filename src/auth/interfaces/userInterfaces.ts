@@ -4,11 +4,19 @@
 // }
 
 import * as Yup from 'yup';
-import { LoginSchema, RegisterSchema } from './yupSchemas';
+import { LoginSchema, RegisterCompanySchema, RegisterSchema } from './yupSchemas';
 
 export type AuthCredentials = Yup.InferType<typeof LoginSchema>;
 
 export type RegisterUser = Yup.InferType<typeof RegisterSchema>;
+
+export type RegisterCompany = Yup.InferType<typeof RegisterCompanySchema>;
+
+// Extender interfaz de registerCompany
+
+export interface responseCompany extends RegisterCompany {
+  id: string;
+}
 
 export interface tokenSchema {
   id: string;
@@ -55,4 +63,22 @@ export interface getCompanyResponse {
   website: string;
   quantityEmployees: string;
   economicActivity: string;
+}
+
+// TODO: retornar en location el departamento y la ciudad
+export interface getPDVResponse {
+  id: string;
+  name: string;
+  description: string;
+  address: string;
+  phoneNumber: string;
+  main: boolean;
+  location?: Location;
+  departamento?: string;
+  municipio?: string;
+}
+
+export interface Location {
+  id: number;
+  name?: string;
 }

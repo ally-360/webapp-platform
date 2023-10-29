@@ -1,11 +1,7 @@
-import * as Yup from 'yup';
-import { Form, FormikProvider, useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
-import { Alert, Autocomplete, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import { Icon } from '@iconify/react';
-import PropTypes from 'prop-types';
 import { useAuthContext } from 'src/auth/hooks';
 import { LoadingButton } from '@mui/lab';
 import { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
@@ -18,31 +14,35 @@ import { Box, useTheme } from '@mui/system';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import RequestService from '../../../axios/services/service';
+import { getPDVResponse } from 'src/auth/interfaces/userInterfaces';
+import { setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
+import { RegisterPDVSchema } from 'src/auth/interfaces/yupSchemas';
 
-export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValues, prevValues }) {
+// ----------------------------------------------------------------------
+
+interface Municipio {
+  id: string;
+  name: string;
+}
+
+export default function RegisterPDVForm() {
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const { company, createPDV } = useAuthContext();
+  const { activeStep, prevValuesCompany } = useSelector((state) => state.stepByStep);
   const theme = useTheme();
 
-  const RegisterPDVSchema = Yup.object().shape({
-    name: Yup.string().required('Nombre requerido'),
-    description: Yup.string().required('Descripción requerida'),
-    departamento: Yup.object().required('Departamento requerido'),
-    municipio: Yup.object().required('Ciudad requerida'),
-    address: Yup.string().required('Dirección requerida'),
-    phoneNumber: Yup.string().required('Teléfono requerido')
-  });
+  const preValuesPDV: getPDVResponse = useSelector((state) => state.stepByStep.prevValuesPDV);
+  const { locations } = useSelector((state) => state.locations);
 
   const defaultValues = {
-    name: prevValues?.name || '',
-    description: prevValues?.description || '',
-    departamento: prevValues?.departamento || '',
-    municipio: prevValues?.location?.id || '',
-    address: prevValues?.address || '',
+    name: preValuesPDV?.name || '',
+    description: preValuesPDV?.description || '',
+    departamento: preValuesPDV?.departamento || {},
+    municipio: preValuesPDV?.location || {},
+    address: preValuesPDV?.address || '',
     main: true,
-    phoneNumber: prevValues?.phoneNumber || '',
-    company: { id: company[0] ? company[0].id : company.id }
+    phoneNumber: preValuesPDV?.phoneNumber || '',
+    company: { id: prevValuesCompany.id } || {}
   };
 
   const methods = useForm({
@@ -51,7 +51,6 @@ export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValu
   });
 
   const {
-    reset,
     handleSubmit,
     setValue,
     watch,
@@ -59,37 +58,34 @@ export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValu
   } = methods;
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [municipios, setMunicipios] = useState([]);
+  const [municipios, setMunicipios] = useState<Array<Municipio>>([]);
 
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getAllMunicipios());
   }, [dispatch]);
-  const { locations } = useSelector((state) => state.locations);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const databody = {
-        name: data.name,
-        description: data.description,
-        address: data.address,
-        phoneNumber: data.phoneNumber,
-        main: data.main,
-        company: { id: data.company.id },
-        location: {
-          id: data.municipio.id
-        }
+      const databody: getPDVResponse = {
+        ...data,
+        location: { id: data.municipio.id }
       };
+
+      delete databody.municipio;
+      delete databody.departamento;
+
       await createPDV(databody);
       // TODO: faltan municipios en el endpoint (cali por ejemplo)
 
       enqueueSnackbar('Registro del punto de venta completado', {
         variant: 'success'
       });
-      setPrevValues(data);
+
       // TODO: si tengo prevValues, entonces hago un update, sino hago un create
 
-      setActiveStep(2);
+      dispatch(setPrevValuesPDV(databody));
+      dispatch(setStep(2));
     } catch (error) {
       console.error(error);
       setErrorMsg(typeof error === 'string' ? error : error.message);
@@ -122,7 +118,7 @@ export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValu
   };
 
   useEffect(() => {
-    if (departmentValue) {
+    if (Object.entries(departmentValue).length !== 0) {
       setMunicipios(departmentValue.towns);
       const selectedMunicipio = watch('municipio');
       if (selectedMunicipio) {
@@ -234,7 +230,7 @@ export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValu
             }}
             noOptionsText={
               <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                {municipios.length === 0
+                {Object.entries(departmentValue).length === 0
                   ? 'Seleciona un departamento'
                   : `No hay resultados para ${searchQueryMunicipio}`}
               </Typography>
@@ -244,10 +240,7 @@ export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValu
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFTextField fullWidth label="Dirección" name="address" />
           <RHFPhoneNumber
-            fullWidth
             type="string"
-            variant="outlined"
-            placeholder="Ej: 300 123 4567"
             defaultCountry="co"
             countryCodeEditable={false}
             onlyCountries={['co']}
@@ -256,7 +249,7 @@ export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValu
           />
         </Stack>
         <Stack sx={{ marginTop: 8 }} direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Button color="primary" onClick={handleBack} variant="outlined" component="label">
+          <Button color="primary" onClick={() => dispatch(setStep(0))} variant="outlined" component="label">
             Anterior
           </Button>
           <LoadingButton
@@ -274,11 +267,3 @@ export default function RegisterPDVForm({ setActiveStep, handleBack, setPrevValu
     </FormProvider>
   );
 }
-
-RegisterPDVForm.propTypes = {
-  nextStep: PropTypes.func,
-  handleBack: PropTypes.func,
-  setPrevValues: PropTypes.func,
-  prevValues: PropTypes.object,
-  setActiveStep: PropTypes.func
-};

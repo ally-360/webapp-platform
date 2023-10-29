@@ -4,7 +4,15 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 //
 // eslint-disable-next-line import/no-extraneous-dependencies
 import jwtDecode from 'jwt-decode';
-import { AuthCredentials, RegisterUser, getUserResponse, tokenSchema } from 'src/auth/interfaces/userInterfaces';
+import {
+  AuthCredentials,
+  RegisterCompany,
+  RegisterUser,
+  getCompanyResponse,
+  getUserResponse,
+  tokenSchema
+} from 'src/auth/interfaces/userInterfaces';
+import { setPrevValuesCompany } from 'src/redux/inventory/stepByStepSlice';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 import RequestService from '../../../axios/services/service';
@@ -17,7 +25,21 @@ import RequestService from '../../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
-const initialState = {
+interface initialStateInterface {
+  user: getUserResponse | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  isFirstLogin: boolean;
+  company: getCompanyResponse | null;
+  pdvCompany: any;
+}
+
+interface reducerInterface {
+  type: 'INITIAL' | 'LOGIN' | 'REGISTER' | 'UPDATE_COMPANY' | 'UPDATE_PDV' | 'LOGOUT';
+  payload?: any;
+}
+
+const initialState: initialStateInterface = {
   user: null,
   loading: true,
   isAuthenticated: false,
@@ -26,7 +48,7 @@ const initialState = {
   pdvCompany: null
 };
 
-const reducer = (state, action) => {
+const reducer = (state: initialStateInterface, action: reducerInterface) => {
   if (action.type === 'INITIAL') {
     const { isAuthenticated, user, isFirstLogin } = action.payload;
     return {
@@ -224,10 +246,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const createCompany = useCallback(
-    async ({ databody }) => {
+    async (databody: RegisterCompany) => {
       const accessToken = window.localStorage.getItem('accessToken');
-      const token = jwtDecode(accessToken);
-      const response = await RequestService.createCompany({ databody });
+      const token: tokenSchema = jwtDecode(accessToken as string);
+      const response = await RequestService.createCompany(databody);
+      const dataCompany: getCompanyResponse = response.data;
       await RequestService.updateProfile({
         id: state.user.profile?.id,
         databody: { company: { id: response.data.id } }
@@ -248,6 +271,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           company: response.data
         }
       });
+
+      dispatch(setPrevValuesCompany(dataCompany));
     },
     [state]
   );

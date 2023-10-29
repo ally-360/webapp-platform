@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import axios, { AxiosResponse } from 'axios';
-import { AuthCredentials, RegisterUser } from 'src/auth/interfaces/userInterfaces';
+import { AuthCredentials, RegisterCompany, RegisterUser } from 'src/auth/interfaces/userInterfaces';
 import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
 import apiClient from '../axios';
 
@@ -69,7 +69,7 @@ class RequestService {
 
   updateCompany = async ({ id, databody }) => apiClient(configPatchWithToken(`/company/${id}`, databody));
 
-  createCompany = async ({ databody }) => apiClient(configPostWithToken('/company', databody));
+  createCompany = async (databody: RegisterCompany) => apiClient(configPostWithToken('/company', databody));
 
   getCompanyById = async (id, r) => apiClient(configGetWithToken(`/company/${id}?r=true`));
 

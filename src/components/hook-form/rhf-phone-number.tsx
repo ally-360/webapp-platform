@@ -1,13 +1,22 @@
-import PropTypes from 'prop-types';
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import { useTheme } from '@mui/material';
-import { useState } from 'react';
+import React, { useState } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import MuiPhoneNumber from 'material-ui-phone-number-2';
 // ----------------------------------------------------------------------
 
-export default function RHFPhoneNumber({ name, helperText, type, ...other }) {
+type RHFPhoneNumberProps = {
+  name: string;
+  helperText?: string;
+  label: string;
+  type: string;
+  defaultCountry?: string;
+  onlyCountries?: string[];
+  countryCodeEditable?: boolean;
+};
+
+export default function RHFPhoneNumber({ name, helperText, ...other }: RHFPhoneNumberProps): JSX.Element {
   const { control } = useFormContext();
   const theme = useTheme(); // Obtiene el tema actual de Material-UI
   const [isFocused, setIsFocused] = useState(false); // Estado para rastrear el focus
@@ -50,9 +59,3 @@ export default function RHFPhoneNumber({ name, helperText, type, ...other }) {
     />
   );
 }
-
-RHFPhoneNumber.propTypes = {
-  helperText: PropTypes.object,
-  name: PropTypes.string,
-  type: PropTypes.string
-};

@@ -4,11 +4,16 @@ import { m } from 'framer-motion';
 import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 //
+import React from 'react';
 import Logo from '../logo';
 
 // ----------------------------------------------------------------------
 
-export default function SplashScreen({ sx, ...other }) {
+interface SplashScreenProps {
+  sx?: object;
+}
+
+export default function SplashScreen({ sx, ...other }: SplashScreenProps) {
   return (
     <Box
       sx={{

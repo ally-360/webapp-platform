@@ -67,6 +67,7 @@
   "property sendEmail should not exist": "La propiedad sendEmail no debería existir",
   "The address format is invalid": "El formato de dirección es inválido",
   "phoneNumber2 must be a valid phone number": "Número de teléfono debe ser un número válido",
+  "password must be longer than or equal to 6 characters": "La contraseña debe ser mayor o igual a 6 caracteres",
   "demo": {
   "title": "Inglés"
   }

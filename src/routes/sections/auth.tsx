@@ -1,13 +1,12 @@
-import { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 // auth
-import { GuestGuard } from 'src/auth/guard';
+import { AuthGuard, GuestGuard } from 'src/auth/guard';
 // layouts
 import CompactLayout from 'src/layouts/compact';
 import AuthClassicLayout from 'src/layouts/auth/classic';
 // components
 import { SplashScreen } from 'src/components/loading-screen';
-import AuthModernLayout from 'src/layouts/auth/modern';
 import AuthModernCompactLayout from 'src/layouts/auth/modern-compact';
 import AuthClassicLayoutRegister from 'src/layouts/auth/classicRegister';
 
@@ -121,11 +120,11 @@ const authJwt = {
 const stepByStep = {
   path: 'step-by-step',
   element: (
-    <GuestGuard>
+    <AuthGuard>
       <Suspense fallback={<SplashScreen />}>
         <SetpBySetp />
       </Suspense>
-    </GuestGuard>
+    </AuthGuard>
   )
 };
 

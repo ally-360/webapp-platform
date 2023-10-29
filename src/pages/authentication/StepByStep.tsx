@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 // material
 import Box from '@mui/material/Box';
 import Stepper from '@mui/material/Stepper';
-import Step from '@mui/material/Step';
-import StepLabel from '@mui/material/StepLabel';
+import Step, { StepProps } from '@mui/material/Step';
+import StepLabel, { StepLabelProps } from '@mui/material/StepLabel';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Stack, styled } from '@mui/material';
@@ -16,6 +16,8 @@ import { useAuthContext } from 'src/auth/hooks';
 import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyForm';
 import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
 import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
+import { useDispatch, useSelector } from 'react-redux';
+import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
 
 const steps = ['Crear empresa', 'Puntos de venta', 'Resumen'];
 
@@ -38,53 +40,32 @@ const ContentStyle = styled('div')(({ theme }) => ({
 }));
 
 export default function StepByStep() {
+  const dispatch = useDispatch();
+
+  const { activeStep } = useSelector((state) => state.stepByStep);
+
   // Setp by step
-  const [activeStep, setActiveStep] = useState(0);
-  const [skipped, setSkipped] = useState(new Set());
+  const [skipped, setSkipped] = useState<Set<number>>(new Set());
   const { company, pdvCompany } = useAuthContext();
 
-  const isStepOptional = (step) => step === 3;
-
-  const isStepSkipped = (step) => skipped.has(step);
-
-  const handleNext = () => {
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
-    }
-
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const [prevValues, setPrevValues] = useState({});
-  const [preValuesPDV, setPreValuesPDV] = useState({});
+  // State steps
+  const isStepOptional = (step: number) => step === 3;
+  const isStepSkipped = (step: number) => skipped.has(step);
 
   useEffect(() => {
-    console.log('Esta es la empresa en el setp by setp');
     console.log(company);
     if (company && company.id) {
-      setActiveStep(1);
-      setPrevValues(company);
+      dispatch(setStep(1));
+      dispatch(setPrevValuesCompany(company));
     }
-  }, [company]);
+  }, [company, dispatch]);
 
   useEffect(() => {
-    console.log('Este es el pdv en el step by step');
     if (pdvCompany) {
-      setActiveStep(2);
-      setPreValuesPDV(pdvCompany);
+      dispatch(setStep(2));
+      dispatch(setPrevValuesPDV(pdvCompany));
     }
-  }, [pdvCompany]);
+  }, [pdvCompany, dispatch]);
 
   // Logout
   const { logout } = useAuthContext();
@@ -108,8 +89,8 @@ export default function StepByStep() {
           <Box sx={{ width: '100%' }}>
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label, index) => {
-                const stepProps = {};
-                const labelProps = {};
+                const stepProps: StepProps = {};
+                const labelProps: StepLabelProps = {};
                 if (isStepOptional(index)) {
                   labelProps.optional = <Typography variant="caption">Opcional</Typography>;
                 }
@@ -124,45 +105,16 @@ export default function StepByStep() {
               })}
             </Stepper>
             <Stack direction="row" spacing={2} sx={{ mt: 2 }} justifyContent="flex-end">
-              <Button color="primary" size="small" variant="outlined" onClick={handleLogout}>
+              <Button color="error" size="small" variant="outlined" onClick={handleLogout}>
                 Cerrar sesión
               </Button>
             </Stack>
-            {activeStep === steps.length ? (
-              <>
-                <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
-                  <Box sx={{ flex: '1 1 auto' }} />
-                  <Button onClick={handleReset}>Reset</Button>
-                </Box>
-              </>
-            ) : null}
           </Box>
-          {activeStep === 0 && (
-            <RegisterCompanyForm
-              prevValues={prevValues}
-              setPrevValues={setPrevValues}
-              nextStep={handleNext}
-              activeStep={activeStep}
-              handleBack={handleBack}
-              setActiveStep={setActiveStep}
-            />
-          )}
+          {activeStep === 0 && <RegisterCompanyForm />}
 
-          {activeStep === 1 && (
-            <RegisterPDVForm
-              setActiveStep={setActiveStep}
-              prevValues={preValuesPDV}
-              setPrevValues={setPreValuesPDV}
-              nextStep={handleNext}
-              activeStep={activeStep}
-              handleBack={handleBack}
-            />
-          )}
+          {activeStep === 1 && <RegisterPDVForm />}
 
-          {activeStep === 2 && (
-            <RegisterSummary nextStep={handleNext} activeStep={activeStep} handleBack={handleBack} />
-          )}
+          {activeStep === 2 && <RegisterSummary />}
         </ContentStyle>
       </Container>
     </RootStyle>

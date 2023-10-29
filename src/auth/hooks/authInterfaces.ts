@@ -1,7 +1,81 @@
-import { AuthCredentials, RegisterUser } from '../interfaces/userInterfaces';
+import { AuthCredentials, RegisterUser, getCompanyResponse, getPDVResponse } from '../interfaces/userInterfaces';
 
 export interface AuthContextType {
+  /**
+   * Datos del usuario autenticado.
+   */
+  user: object; // TODO: agregar interfaz de usuario
+
+  /**
+   * Retorna true si la aplicación está cargando el estado de autenticación.
+   */
+  loading: boolean;
+
+  /**
+   * Retorna true si el usuario está autenticado.
+   */
+  authenticated: boolean;
+
+  /**
+   * Retorna true si el usuario es nuevo y es su primera vez iniciando sesión.
+   */
+  isFirstLogin: boolean;
+  /**
+   * Datos de la empresa a la que pertenece el usuario.
+   */
+  company: getCompanyResponse; // TODO: agregar interfaz de company
+  /**
+   * Datos de los puntos de venta de la empresa a la que pertenece el usuario.
+   */
+  pdvCompany: getPDVResponse; // TODO: agregar interfaz de pdvCompany
+  method: 'jwt';
+
+  /**
+   * Inicia sesión en la aplicación.
+   * @param data datos del usuario para iniciar sesión.
+   */
   login: (data: AuthCredentials) => Promise<void>;
+
+  /**
+   * Registra un nuevo usuario en la base de datos.
+   * @param data datos del usuario a registrar.
+   */
   register: (data: RegisterUser) => Promise<void>;
-  // ... otras propiedades y métodos que tu contexto pueda tener
+
+  /**
+   * Cierra la sesión del usuario actual y limpia la sesión.
+   */
+  logout: () => Promise<void>;
+
+  // TODO: agregar interfaz de todos los de aqui abajo
+
+  /**
+   * Actualiza los datos de la empresa a la que pertenece el usuario.
+   */
+  updateCompany: (data: object) => Promise<void>;
+
+  /**
+   * Actualiza los datos de los puntos de venta de la empresa a la que pertenece el usuario.
+   */
+  updatePdvCompany: (data: object) => Promise<void>;
+
+  /**
+   * Crea una nueva empresa.
+   * @param data datos de la empresa a crear.
+   */
+  createCompany: (data: object) => Promise<void>;
+  /**
+   * Crea un nuevo punto de venta.
+   */
+  createPDV: (data: object) => Promise<void>;
+
+  /**
+   * Actualiza los datos del usuario actual.
+   */
+  updateProfile: (data: object) => Promise<void>;
+
+  /**
+   * Actualiza los datos del perfil actual.
+   */
+  updateProfileInfo: (data: object) => Promise<void>;
 }

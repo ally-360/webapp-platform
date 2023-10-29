@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -17,7 +17,7 @@ const loginPaths = {
 
 // ----------------------------------------------------------------------
 
-export default function AuthGuard({ children }) {
+export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const { authenticated, method, isFirstLogin } = useAuthContext();
