@@ -11,9 +11,9 @@ import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterCompanySchema } from 'src/auth/interfaces/yupSchemas';
 import { RegisterCompany } from 'src/auth/interfaces/userInterfaces';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setPrevValuesCompany, setStep } from 'src/redux/inventory/stepByStepSlice';
-import { RootState } from 'src/redux/store';
+import { useAppSelector } from 'src/hooks/store';
 import RequestService from '../../../axios/services/service';
 import { economicActivityOptions, quantityEmployeesOptions } from './optionsCommon';
 
@@ -22,7 +22,7 @@ export default function RegisterCompanyForm() {
   const { createCompany } = useAuthContext();
 
   const dispatch = useDispatch();
-  const { prevValuesCompany } = useSelector((state: RootState) => state.stepByStep);
+  const { prevValuesCompany } = useAppSelector((state) => state.stepByStep);
 
   const defaultValues = {
     name: prevValuesCompany?.name || '',

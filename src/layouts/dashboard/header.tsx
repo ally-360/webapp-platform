@@ -15,7 +15,7 @@ import Logo from 'src/components/logo';
 import SvgColor from 'src/components/svg-color';
 import { useSettingsContext } from 'src/components/settings';
 //
-import { useEffect } from 'react';
+import React from 'react';
 import { HEADER, NAV } from '../config-layout';
 import {
   Searchbar,
@@ -25,7 +25,6 @@ import {
   ContactsPopover,
   NotificationsPopover
 } from '../_common';
-
 // ----------------------------------------------------------------------
 
 export default function Header({ onOpenNav }) {

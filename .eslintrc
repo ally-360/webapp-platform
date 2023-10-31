@@ -58,6 +58,7 @@
       "react/no-array-index-key": 0,
       "no-promise-executor-return": 0,
       "react/require-default-props": 0,
+      "@typescript-eslint/no-non-null-assertion": 0,
       "react/jsx-filename-extension": 0,
       "import/extensions": [
         "error",
