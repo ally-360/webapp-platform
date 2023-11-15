@@ -1,10 +1,7 @@
-// https://github.com/vitejs/vite/discussions/3448
 import path from 'path';
 import fs from 'fs/promises';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-
-// ----------------------------------------------------------------------
 
 export default defineConfig({
   plugins: [react()],
@@ -14,8 +11,8 @@ export default defineConfig({
     },
   },
   esbuild: {
-    loader: 'jsx',
-    include: /src\/.*\.jsx?$/,
+    loader: 'tsx',
+    include: /src\/.*\.tsx?$/,
     exclude: [],
   },
   server: {
@@ -25,10 +22,10 @@ export default defineConfig({
     esbuildOptions: {
       plugins: [
         {
-          name: 'load-js-files-as-jsx',
+          name: 'load-ts-files-as-tsx',
           setup(build) {
-            build.onLoad({ filter: /src\/.*\.js$/ }, async (args) => ({
-              loader: 'jsx',
+            build.onLoad({ filter: /src\/.*\.ts$/ }, async (args) => ({
+              loader: 'tsx',
               contents: await fs.readFile(args.path, 'utf8'),
             }));
           },

@@ -1,5 +1,5 @@
 // @mui
-import { enUS, frFR, zhCN, viVN, arSA } from '@mui/material/locale';
+import { enUS, esES } from '@mui/material/locale';
 
 // PLEASE REMOVE `LOCAL STORAGE` WHEN YOU CHANGE SETTINGS.
 // ----------------------------------------------------------------------
@@ -9,35 +9,17 @@ export const allLangs = [
     label: 'English',
     value: 'en',
     systemValue: enUS,
-    icon: 'flagpack:gb-nir',
+    icon: 'flagpack:gb-nir'
   },
   {
-    label: 'French',
-    value: 'fr',
-    systemValue: frFR,
-    icon: 'flagpack:fr',
-  },
-  {
-    label: 'Vietnamese',
-    value: 'vi',
-    systemValue: viVN,
-    icon: 'flagpack:vn',
-  },
-  {
-    label: 'Chinese',
-    value: 'cn',
-    systemValue: zhCN,
-    icon: 'flagpack:cn',
-  },
-  {
-    label: 'Arabic',
-    value: 'ar',
-    systemValue: arSA,
-    icon: 'flagpack:sa',
-  },
+    label: 'Español',
+    value: 'es',
+    systemValue: esES,
+    icon: 'flagpack:es'
+  }
 ];
 
-export const defaultLang = allLangs[0]; // English
+export const defaultLang = allLangs[1]; // Espanish
 
 // GET MORE COUNTRY FLAGS
 // https://icon-sets.iconify.design/flagpack/
