@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
-import * as Yup from 'yup';
-import { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -20,12 +19,12 @@ import { useResponsive } from 'src/hooks/use-responsive';
 import { useSnackbar } from 'src/components/snackbar';
 import { useRouter } from 'src/routes/hook';
 import FormProvider, {
-  RHFSelect,
   RHFEditor,
   RHFUpload,
   RHFSwitch,
   RHFTextField,
-  RHFAutocomplete
+  RHFAutocomplete,
+  RHFSelect
 } from 'src/components/hook-form';
 import {
   Avatar,
@@ -42,24 +41,26 @@ import {
 import { Icon } from '@iconify/react';
 import { getCategories, switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrand, getBrands } from 'src/redux/inventory/brandsSlice';
-import { useDispatch, useSelector } from 'react-redux';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import { useTheme } from '@emotion/react';
-import { calculatePriceBase, calculatePriceSale } from 'src/sections/product/common/priceFunctions';
-import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
 import MenuCategories from 'src/sections/categories/MenuCategories';
 import { setPopupAssignInventory } from 'src/redux/inventory/productsSlice';
 import PopupAssingInventory from 'src/sections/product/PopupAssignInventory';
+import { NewProductSchema } from 'src/interfaces/inventory/productsSchemas';
+import { NewProductInterface, PDVproduct } from 'src/interfaces/inventory/productsInterface';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
 import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
-export default function ProductNewEditForm({ currentProduct }) {
+export default function ProductNewEditForm({ currentProduct }: { currentProduct: NewProductInterface }) {
   const router = useRouter();
+  console.log('currentProduct', currentProduct);
+  const mdUp = useResponsive('up', 'md', true);
 
-  const mdUp = useResponsive('up', 'md');
+  const dispatch = useAppDispatch();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -76,28 +77,6 @@ export default function ProductNewEditForm({ currentProduct }) {
     []
   );
 
-  const NewProductSchema = Yup.object().shape({
-    name: Yup.string().required('Nombre del producto es requerido'),
-    images: Yup.array().min(1, 'Las imagenes son requeridas'),
-    category: Yup.string().required('La categoria es requerida'),
-    price: Yup.number(),
-    description: Yup.string().optional(),
-    productsPdvs: Yup.array().min(1, 'El punto de venta es requerido'),
-
-    barCode: Yup.string().required('Código de barras es requerido'),
-    sku: Yup.string().optional(),
-    priceBase: Yup.number().moreThan(100, 'El precio debe ser mayo a $0.00'),
-    priceSale: Yup.number().moreThan(0, 'El precio debe ser mayo a $0.00'),
-    quantityStock: Yup.number(),
-    brand: Yup.string(),
-    typeProduct: Yup.number(),
-    state: Yup.boolean(),
-    sellInNegative: Yup.boolean(),
-
-    // not required
-    taxesOption: Yup.number()
-  });
-
   const defaultValues = useMemo(
     () => ({
       name: currentProduct?.name || '',
@@ -109,13 +88,19 @@ export default function ProductNewEditForm({ currentProduct }) {
       //
       barCode: currentProduct?.barCode || '',
       sku: currentProduct?.sku || '',
-      priceBase: currentProduct?.priceBase || 0,
-      priceSale: currentProduct?.priceSale || 0,
+      priceBase: currentProduct?.priceBase || '',
+      priceSale: currentProduct?.priceSale || '',
       taxesOption: currentProduct?.taxesOption || 0,
-      productsPdvs: currentProduct?.productPdv || [],
+      productsPdvs:
+        currentProduct?.productPdv.map((item) => ({
+          pdv: item.pdv.name,
+          id: item.pdv.id,
+          quantity: item.quantity,
+          minQuantity: item.minQuantity
+        })) || [],
       quantityStock: currentProduct?.quantityStock || 0,
 
-      brand: currentProduct?.brand || '',
+      brand: currentProduct?.brand.id || '',
       state: currentProduct?.state || true,
       sellInNegative: currentProduct?.sellInNegative || false,
 
@@ -134,18 +119,24 @@ export default function ProductNewEditForm({ currentProduct }) {
     watch,
     setValue,
     handleSubmit,
-    formState: { isSubmitting }
+    formState: { isSubmitting, errors }
   } = methods;
 
   const values = watch();
 
   useEffect(() => {
     console.log('values', values);
-  }, [values]);
+    console.log('errors', errors);
+  }, [values, errors]);
+  const [selectedOptionBrand, setSelectedOptionBrand] = useState('');
+  const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
+  const [searchQueryBrand, setSearchQueryBrand] = useState('');
 
   useEffect(() => {
     if (currentProduct) {
       reset(defaultValues);
+      handleBrandSelect(null, currentProduct.brand);
+      handleCategorySelect(null, currentProduct.category);
     }
   }, [currentProduct, defaultValues, reset]);
 
@@ -159,16 +150,24 @@ export default function ProductNewEditForm({ currentProduct }) {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      setValue('quantityStock', data.productsPdvs.reduce((acc, pdv) => acc + pdv.quantity, 0) || 0);
+      setValue('quantityStock', data.productsPdvs.reduce((acc: number, pdv: PDVproduct) => acc + pdv.quantity, 0) || 0);
       // Cambiar en todos los pdvs el pdv por el id del pdv y dejar el minQuantity y quantity
-      data.productsPdvs = data.productsPdvs.map((pdv) => ({
+      data.productsPdvs = data.productsPdvs.map((pdv: PDVproduct) => ({
         pdv: pdv.id,
         minQuantity: pdv.minQuantity,
         quantity: pdv.quantity
       }));
+      if (currentProduct) {
+        // TODO BACKEND: el patch da error
+        await RequestService.updateProduct({ id: currentProduct.id, databody: data });
+        enqueueSnackbar('Se ha editado correctamente!');
+        router.push(paths.dashboard.product.root);
+        reset();
+        return;
+      }
       await RequestService.createProduct(data);
       reset();
-      enqueueSnackbar(currentProduct ? 'Update success!' : 'Create success!');
+      enqueueSnackbar(currentProduct ? 'Se ha editado correctamente!' : 'Creación exitosa!');
       router.push(paths.dashboard.product.root);
       console.info('DATA', data);
     } catch (error) {
@@ -211,12 +210,9 @@ export default function ProductNewEditForm({ currentProduct }) {
   // Autocomplete category
 
   const handleClickOpenPopupCategory = () => {
-    dispatch(switchPopupState());
+    dispatch(switchPopupState(false));
   };
 
-  const dispatch = useDispatch();
-
-  const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
   const [searchQueryCategory, setSearchQueryCategory] = useState('');
 
   const handleCategorySelect = (event, option) => {
@@ -241,16 +237,14 @@ export default function ProductNewEditForm({ currentProduct }) {
 
   const theme = useTheme();
 
-  const { categories, isEmpty } = useSelector((state) => state.categories);
-  const isLoadingCategories = useSelector((state) => state.categories.isLoading);
+  const { categories, isEmpty } = useAppSelector((state) => state.categories);
+  const isLoadingCategories = useAppSelector((state) => state.categories.isLoading);
   // Autocomplete brand
 
   useEffect(() => {
     dispatch(getBrands());
   }, [dispatch]);
-  const [selectedOptionBrand, setSelectedOptionBrand] = useState(''); // Nuevo estado para almacenar la opción seleccionada
-  const { brands, brandsEmpty, isLoading } = useSelector((state) => state.brands);
-  const [searchQueryBrand, setSearchQueryBrand] = useState('');
+  const { brands, brandsEmpty, isLoading } = useAppSelector((state) => state.brands);
 
   const handleInputBrandChange = (event, value) => {
     setSearchQueryBrand(value);
@@ -262,32 +256,37 @@ export default function ProductNewEditForm({ currentProduct }) {
   };
 
   const handleClickOpenPopupBrand = () => {
-    dispatch(switchPopupStateBrand());
+    dispatch(switchPopupStateBrand(false));
   };
-
+  const priceBase = watch('priceBase');
+  const tax = watch('taxesOption');
   // TaxesOption
-
   useEffect(() => {
-    const taxPercentage = values.taxesOption;
-    if (taxPercentage) {
-      console.log('entra');
-      const newPriceSale = calculatePriceSale(values.priceBase, taxPercentage);
-      setValue('priceSale', newPriceSale);
+    if (tax === 0) {
+      setValue('priceSale', priceBase);
+      return;
     }
-    if (taxPercentage === 0) {
-      setValue('priceSale', values.priceBase);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.taxesOption, values.priceBase]);
+    if (priceBase && tax) {
+      // si es 0 no se le agrega impuesto
+      console.log('tax', tax);
 
+      const priceBaseNumber = priceBase;
+      const taxAmount = priceBaseNumber * (tax / 100);
+      console.log('taxAmount', taxAmount);
+      const priceSale = priceBaseNumber + taxAmount;
+      console.log('priceBaseNumber', priceBaseNumber);
+      console.log('priceSale', priceSale);
+      setValue('priceSale', priceSale.toFixed(0));
+    }
+  }, [priceBase, tax, setValue]);
   // Assign inventory
 
   // Edit inventory
 
-  const [pdvEdit, setPdvEdit] = useState(null);
+  const [pdvEdit, setPdvEdit] = useState<PDVproduct | null>(null);
 
-  const handleEditInventory = (pdv, quantity, minQuantity) => {
-    const newPdv = values.productsPdvs.map((item) => {
+  const handleEditInventory = (pdv: PDVproduct, quantity: number, minQuantity: number) => {
+    const newPdv = values.productsPdvs.map((item: PDVproduct) => {
       if (item.id === pdv.id) {
         return {
           ...item,
@@ -295,14 +294,17 @@ export default function ProductNewEditForm({ currentProduct }) {
           minQuantity
         };
       }
-      if (item.id === pdvEdit.id) {
-        return {
-          pdv: pdv.name,
-          id: pdv.id,
-          quantity,
-          minQuantity
-        };
+      if (pdvEdit) {
+        if (item.id === pdvEdit.id) {
+          return {
+            pdv: pdv.name,
+            id: pdv.id,
+            quantity,
+            minQuantity
+          };
+        }
       }
+
       return item;
     });
     setValue('productsPdvs', newPdv);
@@ -310,7 +312,7 @@ export default function ProductNewEditForm({ currentProduct }) {
   };
 
   // Popup to assign inventory
-  const handleAssignInventory = (pdv, quantity, minQuantity, edit) => {
+  const handleAssignInventory = (pdv: PDVproduct, quantity: number, minQuantity: number, edit: boolean) => {
     console.log('pdv', pdv);
     if (edit) {
       handleEditInventory(pdv, quantity, minQuantity);
@@ -318,7 +320,7 @@ export default function ProductNewEditForm({ currentProduct }) {
 
       return true;
     }
-    if (values.productsPdvs.some((item) => item.id === pdv.id)) {
+    if (values.productsPdvs.some((item: PDVproduct) => item.id === pdv.id)) {
       enqueueSnackbar(`El punto de venta ${pdv.name} ya esta seleccionada, asignale una cantidad editandola.`, {
         variant: 'warning'
       });
@@ -415,6 +417,9 @@ export default function ProductNewEditForm({ currentProduct }) {
                 <TextField
                   {...params}
                   placeholder="Categoria"
+                  // set error
+                  error={errors.category}
+                  helperText={errors.category?.message}
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (
@@ -477,14 +482,40 @@ export default function ProductNewEditForm({ currentProduct }) {
               }
             />
             <RHFAutocomplete
-              fullWidth
               name="brand"
+              fullWidth
               label="Marca"
               inputValue={searchQueryBrand}
               onInputChange={handleInputBrandChange}
               onChange={handleBrandSelect}
               isOptionEqualToValue={isOptionEqualToValue}
               value={selectedOptionBrand}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Marca"
+                  // set error
+                  error={errors.brand}
+                  helperText={errors.brand?.message}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Box
+                          component={Icon}
+                          icon="carbon:search"
+                          sx={{
+                            ml: 1,
+                            width: 20,
+                            height: 20,
+                            color: 'text.disabled'
+                          }}
+                        />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              )}
               getOptionLabel={(option) => (option.name ? option.name : '')}
               options={brands}
               loading={isLoading}
@@ -533,8 +564,9 @@ export default function ProductNewEditForm({ currentProduct }) {
           </Stack>
 
           <Stack spacing={1.5}>
+            {/* TODO Backend: poner opcional la descripción */}
             <Typography variant="subtitle2">Descripción</Typography>
-            <RHFEditor simple name="description" />
+            <RHFEditor name="description" />
           </Stack>
         </Stack>
       </Card>
@@ -549,28 +581,14 @@ export default function ProductNewEditForm({ currentProduct }) {
         <Stack spacing={3}>
           <Typography variant="subtitle1">Indica el valor de venta y el costo de compra de tu producto.</Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            <TextField
-              variant="outlined"
-              color="primary"
-              fullWidth
-              label="Precio base"
-              onChange={(e) => {
-                console.log(e);
-                const priceBase = e.target.value;
-                console.log('target value', e.target.value);
-                console.log('priceBase', e.target.value);
-                setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
-                const taxPercentage = values.taxesOption; // Obtener el porcentaje de impuesto según la opción seleccionada
-                const priceSale = calculatePriceSale(priceBase, taxPercentage); // Calcular el precio total
-                setValue('priceSale', priceSale); // Actualizar el valor de Precio Total
-              }}
-              value={values.priceBase}
+            {/* Agregar precios */}
+            <RHFTextField
+              name="priceBase"
+              label="Precio de venta"
               InputProps={{
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                inputComponent: NumericFormatCustom
+                startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}
             />
-
             <RHFSelect name="taxesOption" label="Impuestos" disabled={includeTaxes}>
               {TAXES_OPTIONS.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
@@ -578,23 +596,14 @@ export default function ProductNewEditForm({ currentProduct }) {
                 </MenuItem>
               ))}
             </RHFSelect>
-            <TextField
-              fullWidth
-              color="primary"
-              placeholder="0.00"
-              label="Precio Total"
-              onChange={(e) => {
-                const priceSale = parseFloat(e.target.value);
-                const taxPercentage = values.taxesOption; // Obtener el porcentaje de impuesto según la opción seleccionada
-                const priceBase = calculatePriceBase(priceSale, taxPercentage); // Calcular el precio base
-                setValue('priceBase', priceBase); // Actualizar el valor de Precio Base
-                setValue('priceSale', priceSale); // Actualizar el valor de Precio Total
-              }}
-              value={values.priceSale}
+
+            <RHFTextField
+              name="priceSale"
+              label="Precio de venta"
               InputProps={{
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                inputComponent: NumericFormatCustom
+                startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}
+              disabled
             />
           </Stack>
         </Stack>
@@ -610,7 +619,7 @@ export default function ProductNewEditForm({ currentProduct }) {
         <Stack spacing={3}>
           <Typography variant="subtitle1">Asigna el punto de venta donde se encuentra el producto.</Typography>
           <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-            {values.productsPdvs.map((item) => (
+            {values.productsPdvs.map((item: PDVproduct) => (
               <Stack key={item.id} flexDirection="row" alignItems="center">
                 <ListItem
                   sx={{ paddingLeft: 0, cursor: 'pointer' }}
@@ -626,12 +635,11 @@ export default function ProductNewEditForm({ currentProduct }) {
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={item.pdv ? item.pdv.name : item.pdv}
+                    primary={item.pdv}
                     secondary={`Cantidad: ${item.quantity} Cantidad minima: ${item.minQuantity}`}
                   />
                 </ListItem>
                 <MenuCategories
-                  // Buscar el elemento en el array de productsPdvs y pasarlo como parametro
                   view={false}
                   element={item}
                   handleEdit={() => {
@@ -639,7 +647,7 @@ export default function ProductNewEditForm({ currentProduct }) {
                     dispatch(setPopupAssignInventory(true));
                   }}
                   handleDelete={() => {
-                    const newPdv = values.productsPdvs.filter((pdv) => pdv.id !== item.id);
+                    const newPdv = values.productsPdvs.filter((pdv: PDVproduct) => pdv.id !== item.id);
                     setValue('productsPdvs', newPdv);
                   }}
                 />
@@ -651,6 +659,12 @@ export default function ProductNewEditForm({ currentProduct }) {
             handleAssignInventory={handleAssignInventory}
             setAssignWarehouse={setAssignWarehouse}
           />
+          {/* Agregar errores del pdv */}
+          {errors.productsPdvs && (
+            <Typography variant="subtitle2" color="error">
+              {errors.productsPdvs.message}
+            </Typography>
+          )}
         </Stack>
       </Card>
     </Grid>
@@ -689,7 +703,6 @@ export default function ProductNewEditForm({ currentProduct }) {
                 )}
                 {values.sku && (
                   <Typography mb={1} variant="subtitle2">
-                    {' '}
                     SKU: {values.sku}
                   </Typography>
                 )}
@@ -720,7 +733,7 @@ export default function ProductNewEditForm({ currentProduct }) {
               size="large"
               loading={isSubmitting}
             >
-              Crear producto
+              {currentProduct ? 'Editar producto' : 'Crear producto'}
             </LoadingButton>
           </Stack>
         </Grid>

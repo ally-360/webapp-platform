@@ -86,8 +86,10 @@ export const getAllProducts = () => async (dispatch, getState) => {
   }
 };
 
-export const getProductById = (id) => async (dispatch, getState) => {
+export const getProductById = (id: string) => async (dispatch, getState) => {
   try {
+    // quitar el producto anterior
+    dispatch(productSlice.actions.getProductByIdSuccess(null));
     dispatch(productSlice.actions.startLoading());
     const resp = await RequestService.getProductById(id);
     dispatch(productSlice.actions.getProductByIdSuccess(resp.data));

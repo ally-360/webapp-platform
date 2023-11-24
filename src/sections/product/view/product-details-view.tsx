@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -16,16 +16,14 @@ import { PRODUCT_PUBLISH_OPTIONS } from 'src/_mock';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 // api
-import { useGetProduct } from 'src/api/product';
 // components
 import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 //
-import { useDispatch, useSelector } from 'react-redux';
 import { getProductById } from 'src/redux/inventory/productsSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { ProductDetailsSkeleton } from '../product-skeleton';
-import ProductDetailsReview from '../product-details-review';
 import ProductDetailsSummary from '../product-details-summary';
 import ProductDetailsToolbar from '../product-details-toolbar';
 import ProductDetailsCarousel from '../product-details-carousel';
@@ -53,16 +51,16 @@ const SUMMARY = [
 
 // ----------------------------------------------------------------------
 
-export default function ProductDetailsView({ id }) {
+export default function ProductDetailsView({ id }: { id: string }) {
   // const { product, productsLoading, error } = useGetProduct(id);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(getProductById(id));
   }, [dispatch, id]);
 
-  const { product, productsLoading, error } = useSelector((state) => state.products);
+  const { product, productsLoading, error } = useAppSelector((state) => state.products);
 
   const settings = useSettingsContext();
 

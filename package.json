@@ -1,8 +1,8 @@
 {
-  "name": "@pos-app/vite-js",
+  "name": "@Ally360-app/vite-js",
   "author": "Daniel E y Juan Pablo V",
   "version": "1.0",
-  "description": "Pos app",
+  "description": "Ally360 app",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -78,6 +78,7 @@
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.0",
+    "react-currency-input-field": "^3.6.11",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.5",
     "react-dropzone": "^14.2.3",
@@ -116,6 +117,7 @@
     "@babel/core": "^7.22.6",
     "@babel/plugin-syntax-flow": "^7.22.5",
     "@babel/plugin-transform-react-jsx": "^7.22.5",
+    "@types/autosuggest-highlight": "^3.2.2",
     "@types/react": "^18.2.29",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",

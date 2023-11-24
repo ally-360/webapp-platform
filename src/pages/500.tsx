@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 // sections
 import { View500 } from 'src/sections/error';
-
+import React from 'react';
 // ----------------------------------------------------------------------
 
 export default function Page500() {

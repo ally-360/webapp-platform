@@ -1,10 +1,19 @@
 /* eslint-disable class-methods-use-this */
 import axios, { AxiosResponse } from 'axios';
-import { AuthCredentials, RegisterCompany, RegisterUser } from 'src/auth/interfaces/userInterfaces';
+import {
+  AuthCredentials,
+  RegisterCompany,
+  RegisterUser,
+  getUserResponse,
+  updateProfile
+} from 'src/auth/interfaces/userInterfaces';
 import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
 import apiClient from '../axios';
 
 class RequestService {
+  /**
+   *
+   */
   fetchLoginUser = async (databody: AuthCredentials): Promise<AxiosResponse> =>
     apiClient(configPostWithToken('/auth/login', databody));
 
@@ -15,13 +24,17 @@ class RequestService {
 
   fetchGetUserById = async (id: string): Promise<AxiosResponse> => apiClient(configGetWithToken(`/user/${id}`));
 
-  updateUser = async ({ id, databody }) => apiClient(configPatchWithToken(`/user/${id}`, databody));
+  updateUser = async ({ id, databody }: { id: string; databody: getUserResponse }) =>
+    apiClient(configPatchWithToken(`/user/${id}`, databody));
 
-  updateProfile = async ({ id, databody }) => apiClient(configPatchWithToken(`/profile/${id}`, databody));
+  updateProfile = async ({ id, databody }: { id: string; databody: updateProfile }) =>
+    apiClient(configPatchWithToken(`/profile/${id}`, databody));
 
   // Products
 
   getProducts = async () => apiClient(configGetWithToken('/product'));
+
+  updateProduct = async ({ id, databody }) => apiClient(configPatchWithToken(`/product/${id}`, databody));
 
   createProduct = async (databody) => apiClient(configPostWithToken('/product', databody));
 

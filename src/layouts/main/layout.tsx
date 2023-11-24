@@ -4,12 +4,13 @@ import Box from '@mui/material/Box';
 // routes
 import { usePathname } from 'src/routes/hook';
 //
+import React from 'react';
 import Footer from './footer';
 import Header from './header';
 
 // ----------------------------------------------------------------------
 
-export default function MainLayout({ children }) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const isHome = pathname === '/';
@@ -23,8 +24,8 @@ export default function MainLayout({ children }) {
         sx={{
           flexGrow: 1,
           ...(!isHome && {
-            pt: { xs: 8, md: 10 },
-          }),
+            pt: { xs: 8, md: 10 }
+          })
         }}
       >
         {children}
@@ -36,5 +37,5 @@ export default function MainLayout({ children }) {
 }
 
 MainLayout.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };
