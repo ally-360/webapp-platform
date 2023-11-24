@@ -1,19 +1,22 @@
-import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import FormHelperText from '@mui/material/FormHelperText';
 //
 import Editor from '../editor';
-
 // ----------------------------------------------------------------------
 
-export default function RHFEditor({ name, helperText, ...other }) {
+interface RHFEditorProps {
+  name: string;
+  helperText?: any;
+}
+
+export default function RHFEditor({ name, helperText, ...other }: RHFEditorProps) {
   const {
     control,
     watch,
     setValue,
-    formState: { isSubmitSuccessful },
+    formState: { isSubmitSuccessful }
   } = useFormContext();
 
   const values = watch();
@@ -21,7 +24,7 @@ export default function RHFEditor({ name, helperText, ...other }) {
   useEffect(() => {
     if (values[name] === '<p><br></p>') {
       setValue(name, '', {
-        shouldValidate: !isSubmitSuccessful,
+        shouldValidate: !isSubmitSuccessful
       });
     }
   }, [isSubmitSuccessful, name, setValue, values]);
@@ -49,8 +52,3 @@ export default function RHFEditor({ name, helperText, ...other }) {
     />
   );
 }
-
-RHFEditor.propTypes = {
-  helperText: PropTypes.string,
-  name: PropTypes.string,
-};

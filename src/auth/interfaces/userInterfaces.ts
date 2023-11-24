@@ -12,26 +12,8 @@ export type RegisterUser = Yup.InferType<typeof RegisterSchema>;
 
 export type RegisterCompany = Yup.InferType<typeof RegisterCompanySchema>;
 
-// Extender interfaz de registerCompany
-
 export interface responseCompany extends RegisterCompany {
   id: string;
-}
-
-export interface tokenSchema {
-  id: string;
-  verified: boolean;
-  verifyToken: unknown;
-  profile: ProfileToken;
-  iat: number;
-  exp: number;
-}
-
-export interface ProfileToken {
-  email: string;
-  company: {
-    id?: string | null;
-  };
 }
 
 export interface getUserResponse {
@@ -63,6 +45,19 @@ export interface getCompanyResponse {
   website: string;
   quantityEmployees: string;
   economicActivity: string;
+}
+
+export interface updateProfile {
+  id: string;
+  email: string;
+  name: string;
+  lastname: string;
+  dni: string;
+  personalPhoneNumber: string;
+  photo: string;
+  company: {
+    id: string;
+  };
 }
 
 // TODO: retornar en location el departamento y la ciudad
