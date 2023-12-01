@@ -79,7 +79,8 @@ const productSlice = createSlice({
     },
     setPopupAssignInventory(state, action) {
       state.popupAssignInventory = action.payload;
-    }
+    },
+    changeStatusProduct(state, action) {}
   }
 });
 
@@ -104,7 +105,6 @@ export const getAllProducts = () => async (dispatch: Dispatch, getState: RootSta
 export const getProductById = (id: string) => async (dispatch: Dispatch) => {
   try {
     // quitar el producto anterior
-    dispatch(productSlice.actions.getProductByIdSuccess(null));
     dispatch(productSlice.actions.startLoading());
     const resp = await RequestService.getProductById(id);
     dispatch(productSlice.actions.getProductByIdSuccess(resp.data));
@@ -124,3 +124,16 @@ export const deleteProduct = (id: string) => async (dispatch: Dispatch) => {
     dispatch(productSlice.actions.deleteProductError(error));
   }
 };
+
+export const UpdateProduct =
+  ({ id, databody }: { id: string; databody: object }) =>
+  async (dispatch: Dispatch) => {
+    try {
+      dispatch(productSlice.actions.startLoading());
+      await RequestService.updateProduct({ id, databody });
+      dispatch(getProductById(id));
+    } catch (error) {
+      console.log(error);
+      dispatch(productSlice.actions.hasError(error));
+    }
+  };

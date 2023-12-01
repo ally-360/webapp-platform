@@ -172,7 +172,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
 
       {error && renderError}
 
-      {product && renderProduct}
+      {product && !productsLoading && renderProduct}
     </Container>
   );
 }

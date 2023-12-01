@@ -34,7 +34,8 @@ class RequestService {
 
   getProducts = async () => apiClient(configGetWithToken('/product'));
 
-  updateProduct = async ({ id, databody }) => apiClient(configPatchWithToken(`/product/${id}`, databody));
+  updateProduct = async ({ id, databody }: { id: string; databody: object }) =>
+    apiClient(configPatchWithToken(`/product/${id}`, databody));
 
   createProduct = async (databody) => apiClient(configPostWithToken('/product', databody));
 

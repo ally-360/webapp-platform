@@ -10,6 +10,8 @@ import { RouterLink } from 'src/routes/components';
 import { Divider } from '@mui/material';
 import React from 'react';
 import { paths } from 'src/routes/paths';
+import { UpdateProduct } from 'src/redux/inventory/productsSlice';
+import { useAppDispatch } from 'src/hooks/store';
 // ----------------------------------------------------------------------
 
 interface ProductDetailsToolbarProps {
@@ -27,6 +29,19 @@ export default function ProductDetailsToolbar({
   sx,
   ...other
 }: ProductDetailsToolbarProps) {
+  const dispatch = useAppDispatch();
+  const changeState = () => {
+    console.log('changeState');
+    dispatch(
+      UpdateProduct({
+        id,
+        databody: {
+          state: !stateProduct
+        }
+      })
+    );
+  };
+
   return (
     <Stack
       spacing={1.5}
@@ -79,11 +94,9 @@ export default function ProductDetailsToolbar({
       </Button>
       <Divider orientation="vertical" flexItem />
 
-      {stateProduct && (
-        <Button variant="outlined" color={stateProduct ? 'error' : 'primary'} component={RouterLink}>
-          {stateProduct ? 'Desactivar' : 'Activar'}
-        </Button>
-      )}
+      <Button onClick={changeState} variant="outlined" color={stateProduct ? 'error' : 'primary'}>
+        {stateProduct ? 'Desactivar' : 'Activar'}
+      </Button>
     </Stack>
   );
 }
