@@ -3,7 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { useParams } from 'src/routes/hook';
 // sections
 import { ProductDetailsView } from 'src/sections/product/view';
-
+import React from 'react';
 // ----------------------------------------------------------------------
 
 export default function ProductDetailsPage() {
@@ -14,7 +14,7 @@ export default function ProductDetailsPage() {
   return (
     <>
       <Helmet>
-        <title> Ally360: Product Details</title>
+        <title> Ally360: Detalle del producto</title>
       </Helmet>
 
       <ProductDetailsView id={`${id}`} />

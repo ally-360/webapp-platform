@@ -8,15 +8,15 @@ import { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormProvider from 'src/components/hook-form/form-provider';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import { Box, useTheme } from '@mui/system';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { getPDVResponse } from 'src/auth/interfaces/userInterfaces';
+import { getPDVResponse } from 'src/interfaces/auth/userInterfaces';
 import { setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
-import { RegisterPDVSchema } from 'src/auth/interfaces/yupSchemas';
+import { RegisterPDVSchema } from 'src/interfaces/auth/yupSchemas';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
@@ -26,13 +26,13 @@ interface Municipio {
 }
 
 export default function RegisterPDVForm() {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
-  const { company, createPDV } = useAuthContext();
-  const { activeStep, prevValuesCompany } = useSelector((state) => state.stepByStep);
+  const { enqueueSnackbar } = useSnackbar();
+  const { createPDV } = useAuthContext();
+  const { activeStep, prevValuesCompany } = useAppSelector((state) => state.stepByStep);
   const theme = useTheme();
 
-  const preValuesPDV: getPDVResponse = useSelector((state) => state.stepByStep.prevValuesPDV);
-  const { locations } = useSelector((state) => state.locations);
+  const preValuesPDV: getPDVResponse | undefined = useAppSelector((state) => state.stepByStep.preValuesPDV);
+  const { locations } = useAppSelector((state) => state.locations);
 
   const defaultValues = {
     name: preValuesPDV?.name || '',
@@ -42,7 +42,7 @@ export default function RegisterPDVForm() {
     address: preValuesPDV?.address || '',
     main: true,
     phoneNumber: preValuesPDV?.phoneNumber || '',
-    company: { id: prevValuesCompany.id } || {}
+    company: { id: prevValuesCompany?.id } || {}
   };
 
   const methods = useForm({
@@ -60,7 +60,7 @@ export default function RegisterPDVForm() {
 
   const [municipios, setMunicipios] = useState<Array<Municipio>>([]);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(getAllMunicipios());
   }, [dispatch]);
@@ -107,7 +107,7 @@ export default function RegisterPDVForm() {
   //   // setMunicipios(municipiosOfDepartment);
   // }, [values.departamento, department]);
 
-  const departmentValue = watch('departamento');
+  const departmentValue: object = watch('departamento');
   const [searchQueryMunicipio, setSearchQueryMunicipio] = React.useState('');
   const [searchQueryDepartamento, setSearchQueryDepartamento] = React.useState('');
   const isOptionEqualToValue = (option, value = '') => {
@@ -118,7 +118,7 @@ export default function RegisterPDVForm() {
   };
 
   useEffect(() => {
-    if (Object.entries(departmentValue).length !== 0) {
+    if (departmentValue && Object.entries(departmentValue).length !== 0) {
       setMunicipios(departmentValue.towns);
       const selectedMunicipio = watch('municipio');
       if (selectedMunicipio) {
@@ -136,11 +136,15 @@ export default function RegisterPDVForm() {
   }, [departmentValue, locations, setValue, watch]);
 
   const handleInputDepartamentoChange = (event, value) => {
-    setSearchQueryDepartamento(value);
+    setSearchQueryDepartamento(value || '');
+    console.log(value);
+    console.log(departmentValue);
   };
 
   const handleInputMunicipioChange = (event, value) => {
-    setSearchQueryMunicipio(value);
+    setSearchQueryMunicipio(value || '');
+    console.log(value);
+    console.log(departmentValue);
   };
 
   return (
@@ -230,9 +234,11 @@ export default function RegisterPDVForm() {
             }}
             noOptionsText={
               <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                {Object.entries(departmentValue).length === 0
+                {departmentValue && Object.keys(departmentValue).length === 0
                   ? 'Seleciona un departamento'
-                  : `No hay resultados para ${searchQueryMunicipio}`}
+                  : searchQueryMunicipio.length > 0
+                  ? `No hay resultados para ${searchQueryMunicipio}`
+                  : 'Seleciona un departamento primero'}
               </Typography>
             }
           />

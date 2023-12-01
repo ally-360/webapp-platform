@@ -85,7 +85,7 @@ export default function RegisterSummary() {
                 Nombre
               </Typography>
               <Typography variant="body2" gutterBottom>
-                {pdvCompany?.name}
+                {pdvCompany?.name ? pdvCompany?.name : pdvCompany[0].name}
               </Typography>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -93,7 +93,7 @@ export default function RegisterSummary() {
                 Descripción
               </Typography>
               <Typography variant="body2" gutterBottom>
-                {pdvCompany?.description}
+                {pdvCompany?.description ? pdvCompany?.description : pdvCompany[0].description}
               </Typography>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -101,7 +101,7 @@ export default function RegisterSummary() {
                 Dirección
               </Typography>
               <Typography variant="body2" gutterBottom>
-                {pdvCompany?.address}
+                {pdvCompany?.address ? pdvCompany?.address : pdvCompany[0].address}
               </Typography>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -109,7 +109,7 @@ export default function RegisterSummary() {
                 Teléfono
               </Typography>
               <Typography variant="body2" gutterBottom>
-                {pdvCompany?.phoneNumber}
+                {pdvCompany?.phoneNumber ? pdvCompany?.phoneNumber : pdvCompany[0].phoneNumber}
               </Typography>
             </Grid>
           </Grid>

@@ -30,3 +30,14 @@ export interface PDVproduct {
   minQuantity: number;
   quantity: number;
 }
+
+export interface getProductResponse extends NewProductInterface {
+  id: string;
+  quantityStock: number;
+  category: NewProductInterface['category'] & {
+    name: string;
+  };
+  brand: NewProductInterface['brand'] & {
+    name: string;
+  };
+}

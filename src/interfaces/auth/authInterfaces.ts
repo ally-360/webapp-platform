@@ -1,4 +1,4 @@
-import { AuthCredentials, RegisterUser, getCompanyResponse, getPDVResponse } from '../interfaces/userInterfaces';
+import { AuthCredentials, RegisterUser, getCompanyResponse, getPDVResponse } from './userInterfaces';
 
 export interface AuthContextType {
   /**

@@ -1,6 +1,6 @@
 /* eslint-disable no-else-return */
 import sum from 'lodash/sum';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Box from '@mui/material/Box';
@@ -19,13 +19,11 @@ import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 import { RHFAutocomplete, RHFSelect, RHFTextField } from 'src/components/hook-form';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
-import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
 import { enqueueSnackbar } from 'notistack';
-import { IconButton, Select, Tooltip } from '@mui/material';
-import { useAuthContext } from 'src/auth/hooks';
+import { IconButton, Tooltip } from '@mui/material';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
@@ -43,16 +41,16 @@ export default function InvoiceNewEditDetails() {
 
   const subTotal = sum(totalOnRow);
 
-  const totalAmount = subTotal - values.discount - values.shipping + values.taxes;
+  const totalAmount = subTotal - values.discount - values.shipping + values.totalTaxes;
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(getAllProducts());
     dispatch(getAllPDVS());
   }, [dispatch]);
 
-  const { products } = useSelector((state) => state.products);
+  const { products } = useAppSelector((state) => state.products);
 
   const [productsOptions, setProductsOptions] = useState([]);
 
@@ -146,7 +144,7 @@ export default function InvoiceNewEditDetails() {
         `items[${index}].taxes`,
         values.items[index].quantity * (values.items[index].title.priceSale - values.items[index].title.priceBase)
       );
-      setValue('taxes', sum(values.items.map((item) => item.taxes)));
+      setValue('totalTaxes', sum(values.items.map((item) => item.taxes)));
     },
     [setValue, values.items, PDV, products]
   );
@@ -193,7 +191,7 @@ export default function InvoiceNewEditDetails() {
 
       <Stack direction="row">
         <Box sx={{ color: 'text.secondary' }}>Impuestos</Box>
-        <Box sx={{ width: 160 }}>{values.taxes ? fCurrency(values.taxes) : '-'}</Box>
+        <Box sx={{ width: 160 }}>{values.totalTaxes ? fCurrency(values.totalTaxes) : '-'}</Box>
       </Stack>
 
       <Stack direction="row" sx={{ typography: 'subtitle1' }}>
@@ -229,7 +227,7 @@ export default function InvoiceNewEditDetails() {
       setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
       setValue(`items[${index}].taxes`, option.priceSale - option.priceBase);
       // sumar el total de los impuestos de todos los productos y asignarlo a taxes
-      setValue('taxes', sum(values.items.map((item) => item.taxes)));
+      setValue('totalTaxes', sum(values.items.map((item) => item.taxes)));
       setValue(`items[${index}].description`, stripHTMLTags(option.description));
       setValue(`items[${index}].reference`, option.sku !== '' ? option.sku : option.barCode);
     },
@@ -240,7 +238,7 @@ export default function InvoiceNewEditDetails() {
     console.log(values);
   }, [values]);
 
-  const { pdvs } = useSelector((state) => state.pdvs);
+  const { pdvs } = useAppSelector((state) => state.pdvs);
   const PDVSoptions = [
     { id: 0, name: 'Punto De Venta para cada producto' },
     ...pdvs.map((pdv) => ({ id: pdv.id, name: pdv.name }))
@@ -368,7 +366,7 @@ export default function InvoiceNewEditDetails() {
                 type="number"
                 size="small"
                 name={`items[${index}].quantity`}
-                label="Quantity"
+                label="Cantidad"
                 placeholder="0"
                 onChange={(event) => handleChangeQuantity(event, index)}
                 InputLabelProps={{ shrink: true }}
@@ -379,7 +377,7 @@ export default function InvoiceNewEditDetails() {
                 size="small"
                 type="number"
                 name={`items[${index}].price`}
-                label="Price"
+                label="Precio"
                 placeholder="0.00"
                 onChange={(event) => handleChangePrice(event, index)}
                 InputProps={{
@@ -444,14 +442,6 @@ export default function InvoiceNewEditDetails() {
 
         <Stack spacing={2} justifyContent="flex-end" direction={{ xs: 'column', md: 'row' }} sx={{ width: 1 }}>
           <RHFTextField size="small" label="Envio($)" name="shipping" type="number" sx={{ maxWidth: { md: 120 } }} />
-
-          <RHFTextField
-            size="small"
-            label="Descuento($)"
-            name="discount"
-            type="number"
-            sx={{ maxWidth: { md: 120 } }}
-          />
 
           {/* <RHFTextField size="small" label="Impuestos(%)" name="taxes" type="number" sx={{ maxWidth: { md: 120 } }} /> */}
         </Stack>

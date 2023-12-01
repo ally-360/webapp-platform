@@ -27,25 +27,23 @@ import InvoiceNewEditStatusDate from './invoice-new-edit-status-date';
 export default function InvoiceNewEditForm({ currentInvoice }) {
   const router = useRouter();
   const navigate = useNavigate();
-  const loadingSave = useBoolean();
-
-  const loadingSend = useBoolean();
+  const loadingSave = useBoolean(false);
+  const loadingSend = useBoolean(false);
 
   const NewInvoiceSchema = Yup.object().shape({
-    invoiceTo: Yup.mixed().nullable().required('Invoice to is required'),
-    createDate: Yup.mixed().nullable().required('Create date is required'),
+    invoiceProvider: Yup.mixed().nullable().required('El proveedor es requerido'),
+    createDate: Yup.mixed().nullable().required('Fecha de creación es requerida '),
     dueDate: Yup.mixed()
-      .required('Due date is required')
+      .required('La fecha de vencimiento es requerida')
       .test(
         'date-min',
         'Due date must be later than create date',
         (value, { parent }) => value.getTime() > parent.createDate.getTime()
       ),
     // not required
-    taxes: Yup.number(),
+    totalTaxes: Yup.number(),
     status: Yup.string(),
     method: Yup.string(),
-    discount: Yup.number(),
     shipping: Yup.number(),
     invoiceFrom: Yup.mixed(),
     totalAmount: Yup.number(),
@@ -57,12 +55,11 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
       invoiceNumber: currentInvoice?.invoiceNumber || 'INV-1990',
       createDate: currentInvoice?.createDate || new Date(),
       dueDate: currentInvoice?.dueDate || null,
-      taxes: currentInvoice?.taxes || 0,
+      totalTaxes: currentInvoice?.totalTaxes || 0,
       shipping: currentInvoice?.shipping || 0,
       status: currentInvoice?.status || 'draft',
       method: currentInvoice?.method || 'Contado',
       paymentTerm: currentInvoice?.paymentTerm || '',
-      discount: currentInvoice?.discount || 0,
       invoiceFrom: currentInvoice?.invoiceFrom || _addressBooks[0],
       invoiceTo: currentInvoice?.invoiceTo || null,
       items: currentInvoice?.items || [{ title: '', description: '', service: '', quantity: 1, price: 0, total: 0 }],

@@ -10,9 +10,10 @@ import {
   RegisterUser,
   getCompanyResponse,
   getUserResponse,
-  tokenSchema
-} from 'src/auth/interfaces/userInterfaces';
+  updateProfile
+} from 'src/interfaces/auth/userInterfaces';
 import { setPrevValuesCompany } from 'src/redux/inventory/stepByStepSlice';
+import { tokenSchema } from 'src/interfaces/auth/tokenInterface';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 import RequestService from '../../../axios/services/service';
@@ -224,7 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const updateCompany = useCallback(
-    async (databody) => {
+    async (databody: updateProfile) => {
       const response = await RequestService.updateCompany({ databody, id: state.company.id });
       dispatch({
         type: 'UPDATE_COMPANY',
@@ -253,7 +254,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const dataCompany: getCompanyResponse = response.data;
       await RequestService.updateProfile({
         id: state.user.profile?.id,
-        databody: { company: { id: response.data.id } }
+        databody: { company: { id: response?.data?.id } }
       });
       const user = (await RequestService.fetchGetUserById(token.id)).data;
       state.user = user;

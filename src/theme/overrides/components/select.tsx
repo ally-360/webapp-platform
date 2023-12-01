@@ -12,29 +12,29 @@ export default function Select(theme) {
   return {
     MuiSelect: {
       defaultProps: {
-        IconComponent: Icon,
+        IconComponent: Icon
       },
       styleOverrides: {
         icon: {
           right: 10,
           width: 18,
           height: 18,
-          top: 'calc(50% - 9px)',
-        },
-      },
+          top: 'calc(50% - 9px)'
+        }
+      }
     },
     MuiNativeSelect: {
       defaultProps: {
-        IconComponent: Icon,
+        IconComponent: Icon
       },
       styleOverrides: {
         icon: {
           right: 10,
           width: 18,
           height: 18,
-          top: 'calc(50% - 9px)',
-        },
-      },
-    },
+          top: 'calc(50% - 9px)'
+        }
+      }
+    }
   };
 }

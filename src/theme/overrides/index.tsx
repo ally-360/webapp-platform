@@ -1,5 +1,6 @@
 import merge from 'lodash/merge';
 //
+import { Theme } from '@mui/material/styles';
 import Fab from './components/fab';
 import Card from './components/card';
 import Chip from './components/chip';
@@ -47,7 +48,7 @@ import LoadingButton from './components/loading-button';
 
 // ----------------------------------------------------------------------
 
-export function componentsOverrides(theme) {
+export function componentsOverrides(theme: Theme) {
   const components = merge(
     Fab(theme),
     Tabs(theme),

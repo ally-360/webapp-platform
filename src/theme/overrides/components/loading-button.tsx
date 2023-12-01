@@ -9,22 +9,22 @@ export default function LoadingButton(theme) {
         root: ({ ownerState }) => ({
           ...(ownerState.variant === 'soft' && {
             [`& .${loadingButtonClasses.loadingIndicatorStart}`]: {
-              left: 10,
+              left: 10
             },
             [`& .${loadingButtonClasses.loadingIndicatorEnd}`]: {
-              right: 14,
+              right: 14
             },
             ...(ownerState.size === 'small' && {
               [`& .${loadingButtonClasses.loadingIndicatorStart}`]: {
-                left: 10,
+                left: 10
               },
               [`& .${loadingButtonClasses.loadingIndicatorEnd}`]: {
-                right: 10,
-              },
-            }),
-          }),
-        }),
-      },
-    },
+                right: 10
+              }
+            })
+          })
+        })
+      }
+    }
   };
 }

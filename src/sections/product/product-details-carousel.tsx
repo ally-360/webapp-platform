@@ -10,7 +10,7 @@ import { bgGradient } from 'src/theme/css';
 import Image from 'src/components/image';
 import Lightbox, { useLightBox } from 'src/components/lightbox';
 import Carousel, { CarouselArrowIndex, useCarousel } from 'src/components/carousel';
-import { Grid, TextField, Typography } from '@mui/material';
+import { Grid } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -167,12 +167,6 @@ export default function ProductDetailsCarousel({ product }) {
       {renderLargeImg}
 
       <Grid container spacing={1}>
-        <Grid item xs={12} md={13}>
-          <Typography variant="h5">Precio Total</Typography>
-          <Typography variant="h4" gutterBottom>
-            ${product?.priceSale} COP
-          </Typography>
-        </Grid>
         {/* <Grid item xs={12} md={4}>
           <Typography variant="subtitle1" gutterBottom>
             NIT

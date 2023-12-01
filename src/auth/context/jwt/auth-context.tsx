@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { AuthContextType } from 'src/auth/hooks/authInterfaces';
+import { AuthContextType } from 'src/interfaces/auth/authInterfaces';
 
 // ----------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { getCompanyResponse, getPDVResponse } from 'src/auth/interfaces/userInterfaces';
+import { getCompanyResponse, getPDVResponse } from 'src/interfaces/auth/userInterfaces';
 
 export interface stepByStepState {
   activeStep: number;

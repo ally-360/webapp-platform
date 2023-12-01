@@ -3,7 +3,6 @@ import React, { useEffect, useCallback, useState } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Button from '@mui/material/Button';
@@ -23,10 +22,12 @@ import { useSettingsContext } from 'src/components/settings';
 //
 import { getProductById } from 'src/redux/inventory/productsSlice';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { defaultSettingsInterface } from 'src/components/settings/context/settings-provider';
 import { ProductDetailsSkeleton } from '../product-skeleton';
 import ProductDetailsSummary from '../product-details-summary';
 import ProductDetailsToolbar from '../product-details-toolbar';
 import ProductDetailsCarousel from '../product-details-carousel';
+import ProductDetailsInventory from '../product-details-view/product-details-inventory';
 import ProductDetailsDescription from '../product-details-description';
 
 // ----------------------------------------------------------------------
@@ -50,7 +51,9 @@ const SUMMARY = [
 ];
 
 // ----------------------------------------------------------------------
-
+interface SettingsInterface {
+  themeStretch: boolean;
+}
 export default function ProductDetailsView({ id }: { id: string }) {
   // const { product, productsLoading, error } = useGetProduct(id);
 
@@ -62,23 +65,11 @@ export default function ProductDetailsView({ id }: { id: string }) {
 
   const { product, productsLoading, error } = useAppSelector((state) => state.products);
 
-  const settings = useSettingsContext();
+  const settings: defaultSettingsInterface = useSettingsContext() as defaultSettingsInterface;
 
-  const [currentTab, setCurrentTab] = useState('description');
+  const [currentTab, setCurrentTab] = useState<string>('description');
 
-  const [publish, setPublish] = useState('');
-
-  useEffect(() => {
-    if (product) {
-      setPublish(product?.publish);
-    }
-  }, [product]);
-
-  const handleChangePublish = useCallback((newValue) => {
-    setPublish(newValue);
-  }, []);
-
-  const handleChangeTab = useCallback((event, newValue) => {
+  const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
     setCurrentTab(newValue);
   }, []);
 
@@ -95,7 +86,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
           startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
           sx={{ mt: 3 }}
         >
-          Back to List
+          Volver
         </Button>
       }
       sx={{ py: 10 }}
@@ -105,11 +96,10 @@ export default function ProductDetailsView({ id }: { id: string }) {
   const renderProduct = product && (
     <>
       <ProductDetailsToolbar
+        id={product.id}
         backLink={paths.dashboard.product.root}
         editLink={paths.dashboard.product.edit(`${product?.id}`)}
         liveLink={paths.product.details(`${product?.id}`)}
-        publish={publish || ''}
-        onChangePublish={handleChangePublish}
         publishOptions={PRODUCT_PUBLISH_OPTIONS}
         stateProduct={product.state}
       />
@@ -120,7 +110,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
           </Grid>
 
           <Grid xs={12} md={8} lg={8}>
-            <ProductDetailsSummary disabledActions product={product} />
+            <ProductDetailsSummary product={product} />
           </Grid>
         </Grid>
       </Card>
@@ -129,50 +119,18 @@ export default function ProductDetailsView({ id }: { id: string }) {
         <Typography mb={1} variant="h5">
           Inventario
         </Typography>
+        <ProductDetailsInventory product={product} />
       </Card>
+      {product.description && (
+        <Card sx={{ p: 3, mt: 2 }}>
+          <Typography mb={1} variant="h5">
+            Descripción
+          </Typography>
+          <ProductDetailsDescription description={product?.description} />
+        </Card>
+      )}
 
-      <Card sx={{ p: 3, mt: 2 }}>
-        <Typography mb={1} variant="h5">
-          Facturas
-        </Typography>
-      </Card>
-
-      <Card sx={{ p: 3, mt: 2 }}>
-        <Typography mb={1} variant="h5">
-          Historial
-        </Typography>
-      </Card>
-
-      <Card sx={{ p: 3, mt: 2 }}>
-        <Typography mb={1} variant="h5">
-          Contabilidad
-        </Typography>
-      </Card>
-      <Box
-        gap={5}
-        display="grid"
-        gridTemplateColumns={{
-          xs: 'repeat(1, 1fr)',
-          md: 'repeat(3, 1fr)'
-        }}
-        sx={{ my: 10 }}
-      >
-        {SUMMARY.map((item) => (
-          <Box key={item.title} sx={{ textAlign: 'center', px: 5 }}>
-            <Iconify icon={item.icon} width={32} sx={{ color: 'primary.main' }} />
-
-            <Typography variant="subtitle1" sx={{ mb: 1, mt: 2 }}>
-              {item.title}
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {item.description}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
-
-      <Card>
+      <Card sx={{ mt: 3 }}>
         <Tabs
           value={currentTab}
           onChange={handleChangeTab}
@@ -203,16 +161,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
           ))}
         </Tabs>
 
-        {currentTab === 'description' && <ProductDetailsDescription description={product?.description} />}
-
-        {/* {currentTab === 'reviews' && (
-          <ProductDetailsReview
-            ratings={product.ratings}
-            reviews={product.reviews}
-            totalRatings={product.totalRatings}
-            totalReviews={product.totalReviews}
-          />
-        )} */}
+        {currentTab === 'description' && <></>}
       </Card>
     </>
   );

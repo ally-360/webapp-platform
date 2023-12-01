@@ -1,13 +1,19 @@
-import PropTypes from 'prop-types';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-
+import React from 'react';
 // ----------------------------------------------------------------------
-
-export default function EmptyContent({ title, imgUrl, action, filled, description, sx, ...other }) {
+interface EmptyContentProps {
+  title: string;
+  imgUrl?: string;
+  action: any;
+  filled: boolean;
+  description?: string;
+  sx: object;
+}
+export default function EmptyContent({ title, imgUrl, action, filled, description, sx, ...other }: EmptyContentProps) {
   return (
     <Stack
       flexGrow={1}
@@ -19,9 +25,9 @@ export default function EmptyContent({ title, imgUrl, action, filled, descriptio
         ...(filled && {
           borderRadius: 2,
           bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
-          border: (theme) => `dashed 1px ${alpha(theme.palette.grey[500], 0.08)}`,
+          border: (theme) => `dashed 1px ${alpha(theme.palette.grey[500], 0.08)}`
         }),
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -33,11 +39,7 @@ export default function EmptyContent({ title, imgUrl, action, filled, descriptio
       />
 
       {title && (
-        <Typography
-          variant="h6"
-          component="span"
-          sx={{ mt: 1, color: 'text.disabled', textAlign: 'center' }}
-        >
+        <Typography variant="h6" component="span" sx={{ mt: 1, color: 'text.disabled', textAlign: 'center' }}>
           {title}
         </Typography>
       )}
@@ -52,12 +54,3 @@ export default function EmptyContent({ title, imgUrl, action, filled, descriptio
     </Stack>
   );
 }
-
-EmptyContent.propTypes = {
-  action: PropTypes.node,
-  description: PropTypes.string,
-  filled: PropTypes.bool,
-  imgUrl: PropTypes.string,
-  sx: PropTypes.object,
-  title: PropTypes.string,
-};

@@ -1,13 +1,28 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { createSlice } from '@reduxjs/toolkit';
+import { getProductResponse } from 'src/interfaces/inventory/productsInterface';
+import { Dispatch } from 'redux';
 import RequestService from '../../axios/services/service';
+import { RootState } from '../store';
+
+interface ProductsState {
+  products: getProductResponse[];
+  productsLoading: boolean;
+  error: any;
+  success: boolean;
+  productsEmpty: boolean;
+  popupAssignInventory: boolean;
+
+  // Product detail
+  product: getProductResponse | null;
+}
 
 // constantes
-const initialState = {
+const initialState: ProductsState = {
   products: [],
   productsLoading: false,
-  error: null,
-  success: null,
+  error: false,
+  success: false,
   productsEmpty: false,
   popupAssignInventory: false,
 
@@ -75,7 +90,7 @@ export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInvento
 
 // Actions
 
-export const getAllProducts = () => async (dispatch, getState) => {
+export const getAllProducts = () => async (dispatch: Dispatch, getState: RootState) => {
   try {
     dispatch(productSlice.actions.startLoading());
     const resp = await RequestService.getProducts();
@@ -86,7 +101,7 @@ export const getAllProducts = () => async (dispatch, getState) => {
   }
 };
 
-export const getProductById = (id: string) => async (dispatch, getState) => {
+export const getProductById = (id: string) => async (dispatch: Dispatch) => {
   try {
     // quitar el producto anterior
     dispatch(productSlice.actions.getProductByIdSuccess(null));
@@ -99,7 +114,7 @@ export const getProductById = (id: string) => async (dispatch, getState) => {
   }
 };
 
-export const deleteProduct = (id) => async (dispatch, getState) => {
+export const deleteProduct = (id: string) => async (dispatch: Dispatch) => {
   try {
     dispatch(productSlice.actions.startLoading());
     await RequestService.deleteProduct(id);

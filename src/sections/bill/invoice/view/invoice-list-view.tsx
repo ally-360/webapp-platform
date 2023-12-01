@@ -201,7 +201,7 @@ export default function InvoiceListView() {
               href: paths.dashboard.root
             },
             {
-              name: 'Facturas de venta',
+              name: 'Facturas de compra',
               href: paths.dashboard.bill.root
             },
             {
@@ -211,7 +211,7 @@ export default function InvoiceListView() {
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.sales.newSale}
+              href={paths.dashboard.bill.newBill}
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}

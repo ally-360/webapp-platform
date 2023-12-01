@@ -16,8 +16,8 @@ export const NewProductSchema = Yup.object().shape({
   brand: Yup.string().required('La marca es requerida'),
 
   typeProduct: Yup.number(),
-  state: Yup.boolean(),
-  sellInNegative: Yup.boolean(),
+  state: Yup.boolean().required(),
+  sellInNegative: Yup.boolean().required(),
 
   // not required
   taxesOption: Yup.number()

@@ -7,8 +7,8 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
 import { useTranslation } from 'react-i18next';
+import React from 'react';
 import InvoiceNewEditForm from '../invoice-new-edit-form';
-
 // ----------------------------------------------------------------------
 
 export default function InvoiceCreateView() {
@@ -20,7 +20,7 @@ export default function InvoiceCreateView() {
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
         icon="solar:bill-list-bold-duotone"
-        heading={t('Crear factura')}
+        heading={t('Crear factura de compra')}
         links={[
           {
             name: 'Dashboard',

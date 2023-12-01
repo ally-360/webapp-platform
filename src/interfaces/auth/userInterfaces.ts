@@ -48,14 +48,14 @@ export interface getCompanyResponse {
 }
 
 export interface updateProfile {
-  id: string;
-  email: string;
-  name: string;
-  lastname: string;
-  dni: string;
-  personalPhoneNumber: string;
-  photo: string;
-  company: {
+  id?: string;
+  email?: string;
+  name?: string;
+  lastname?: string;
+  dni?: string;
+  personalPhoneNumber?: string;
+  photo?: string;
+  company?: {
     id: string;
   };
 }

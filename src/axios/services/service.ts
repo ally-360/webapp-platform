@@ -6,7 +6,7 @@ import {
   RegisterUser,
   getUserResponse,
   updateProfile
-} from 'src/auth/interfaces/userInterfaces';
+} from 'src/interfaces/auth/userInterfaces';
 import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
 import apiClient from '../axios';
 

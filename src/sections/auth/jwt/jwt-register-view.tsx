@@ -24,7 +24,7 @@ import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { enqueueSnackbar } from 'notistack';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { RegisterSchema } from 'src/auth/interfaces/yupSchemas';
+import { RegisterSchema } from 'src/interfaces/auth/yupSchemas';
 // ----------------------------------------------------------------------
 
 export default function JwtRegisterView() {

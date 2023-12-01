@@ -23,8 +23,8 @@ import { useAuthContext } from 'src/auth/hooks';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { Box } from '@mui/material';
-import { AuthCredentials } from 'src/auth/interfaces/userInterfaces';
-import { LoginSchema } from 'src/auth/interfaces/yupSchemas';
+import { AuthCredentials } from 'src/interfaces/auth/userInterfaces';
+import { LoginSchema } from 'src/interfaces/auth/yupSchemas';
 
 // ----------------------------------------------------------------------
 
