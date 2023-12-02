@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import isEqual from 'lodash/isEqual';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -36,9 +36,9 @@ import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
-import { useDispatch, useSelector } from 'react-redux';
 import { deleteProduct, getAllProducts } from 'src/redux/inventory/productsSlice';
-import { getViewCategoryById } from 'src/redux/inventory/categoriesSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useMediaQuery } from '@mui/material';
 import ProductTableRow from '../product-table-row';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
@@ -74,19 +74,18 @@ export default function ProductListView({ categoryView }) {
 
   // Ref component to print
   const componentRef = useRef();
-
-  const table = useTable();
-
+  const table = useTable(true);
   const settings = useSettingsContext();
-
   const [tableData, setTableData] = useState([]);
+
+  const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  const { products, productsLoading, productsEmpty } = useSelector((state) => state.products);
-  const { viewCategoryById } = useSelector((state) => state.categories);
+  const { products, productsLoading, productsEmpty } = useAppSelector((state) => state.products);
+  const { viewCategoryById } = useAppSelector((state) => state.categories);
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
 
   useEffect(() => {
     if (products.length && !viewCategoryById) {
@@ -163,7 +162,7 @@ export default function ProductListView({ categoryView }) {
 
   // nueva logica
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const handleDeleteRow = useCallback(
     (id) => {
@@ -185,6 +184,7 @@ export default function ProductListView({ categoryView }) {
           <CustomBreadcrumbs
             heading="Productos"
             icon="icon-park-outline:ad-product"
+            activeLast
             links={[
               { name: 'Dashboard', href: paths.dashboard.root },
               {
@@ -201,6 +201,7 @@ export default function ProductListView({ categoryView }) {
                   variant="contained"
                   color="primary"
                   style={{ marginRight: 10 }}
+                  sx={isMobile && { flex: 1 }}
                   startIcon={<Iconify width={24} icon="mdi:box-variant-closed-add" />}
                 >
                   Abastecer
@@ -209,6 +210,7 @@ export default function ProductListView({ categoryView }) {
                   component={RouterLink}
                   href={paths.dashboard.product.new}
                   variant="contained"
+                  sx={isMobile && { flex: 1 }}
                   color="primary"
                   startIcon={<Iconify icon="mingcute:add-line" />}
                 >

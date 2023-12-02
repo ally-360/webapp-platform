@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -8,21 +7,22 @@ import Breadcrumbs from '@mui/material/Breadcrumbs';
 //
 import { Icon } from '@iconify/react';
 import React from 'react';
+import { Paper, useMediaQuery } from '@mui/material';
 import LinkItem from './link-item';
 
 // ----------------------------------------------------------------------
 
-type CustomBreadcrumbsProps = {
+interface CustomBreadcrumbsProps {
   icon: string;
   links: Array<{ href?: string; name?: string }>;
   action: React.ReactNode;
   heading: string;
-  moreLink: string[];
-  activeLast: boolean;
+  moreLink?: string[];
+  activeLast?: boolean;
   sx?: object;
 
   [x: string]: unknown;
-};
+}
 
 export default function CustomBreadcrumbs({
   icon,
@@ -35,10 +35,11 @@ export default function CustomBreadcrumbs({
   ...other
 }: CustomBreadcrumbsProps) {
   const lastLink = links[links.length - 1].name;
+  const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   return (
     <Box sx={{ ...sx }}>
-      <Stack direction="row" alignItems="center">
+      <Stack direction={isMobile ? 'column' : 'row'} alignItems={isMobile ? 'normal' : 'center'} gap={isMobile && 2}>
         <Box sx={{ flexGrow: 1 }}>
           {/* HEADING */}
           {heading && icon !== '' && (
@@ -53,14 +54,35 @@ export default function CustomBreadcrumbs({
           {/* BREADCRUMBS */}
           {!!links.length && (
             <Breadcrumbs separator={<Separator />} {...other}>
-              {links.map((link: { href?: string; name?: string }) => (
+              {links.map((link) => (
                 <LinkItem key={link.name || ''} link={link} activeLast={activeLast} disabled={link.name === lastLink} />
               ))}
             </Breadcrumbs>
           )}
-        </Box>
 
-        {action && <Box sx={{ flexShrink: 0 }}> {action} </Box>}
+          {/* Agregarle box shadow del tema */}
+        </Box>
+        {isMobile && action ? (
+          <Paper
+            sx={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 99,
+              padding: '18px 10px ',
+              borderRadius: '14px 14px 0px 0px',
+              overflow: 'hidden',
+              bgcolor: 'background.paper',
+              boxShadow: '0px -10px 50px rgba(80,80,80,0.2)'
+            }}
+            elevation={24}
+          >
+            {action && <Box sx={{ flexShrink: 0, display: 'flex' }}> {action} </Box>}
+          </Paper>
+        ) : (
+          <Box sx={{ flexShrink: 0, display: 'flex' }}> {action} </Box>
+        )}
       </Stack>
 
       {/* MORE LINK */}
@@ -77,19 +99,6 @@ export default function CustomBreadcrumbs({
   );
 }
 
-CustomBreadcrumbs.propTypes = {
-  sx: PropTypes.object,
-  action: PropTypes.node,
-  links: PropTypes.array,
-  heading: PropTypes.string,
-  moreLink: PropTypes.array,
-  activeLast: PropTypes.bool,
-  icon: PropTypes.string
-};
-
-CustomBreadcrumbs.defaultProps = {
-  icon: ''
-};
 // ----------------------------------------------------------------------
 
 function Separator() {

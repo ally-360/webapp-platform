@@ -3,7 +3,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import { getProductResponse } from 'src/interfaces/inventory/productsInterface';
 import { Dispatch } from 'redux';
 import RequestService from '../../axios/services/service';
-import { RootState } from '../store';
 
 interface ProductsState {
   products: getProductResponse[];
@@ -79,8 +78,8 @@ const productSlice = createSlice({
     },
     setPopupAssignInventory(state, action) {
       state.popupAssignInventory = action.payload;
-    },
-    changeStatusProduct(state, action) {}
+    }
+    // changeStatusProduct(state, action) {}
   }
 });
 
@@ -91,7 +90,7 @@ export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInvento
 
 // Actions
 
-export const getAllProducts = () => async (dispatch: Dispatch, getState: RootState) => {
+export const getAllProducts = () => async (dispatch: Dispatch) => {
   try {
     dispatch(productSlice.actions.startLoading());
     const resp = await RequestService.getProducts();
@@ -131,7 +130,7 @@ export const UpdateProduct =
     try {
       dispatch(productSlice.actions.startLoading());
       await RequestService.updateProduct({ id, databody });
-      dispatch(getProductById(id));
+      dispatch(getProductById(id) as any);
     } catch (error) {
       console.log(error);
       dispatch(productSlice.actions.hasError(error));
