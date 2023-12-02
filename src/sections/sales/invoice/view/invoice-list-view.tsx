@@ -1,5 +1,5 @@
 import sumBy from 'lodash/sumBy';
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -43,6 +43,7 @@ import {
 } from 'src/components/table';
 //
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@mui/material';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -81,7 +82,9 @@ export default function InvoiceListView() {
 
   const table = useTable({ defaultOrderBy: 'createDate' });
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
+
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [tableData, setTableData] = useState(_invoices);
 
@@ -212,6 +215,7 @@ export default function InvoiceListView() {
             <Button
               component={RouterLink}
               href={paths.dashboard.sales.newSale}
+              sx={isMobile && { width: '100%' }}
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}

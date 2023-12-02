@@ -33,7 +33,6 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { useSelector } from 'react-redux';
 import { deletePDV, getAllPDVSWhitoutLoading, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
 import { useMediaQuery } from '@mui/material';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
@@ -178,7 +177,7 @@ export default function PdvsListView() {
 
   // Popup create punto de venta
 
-  const { openPopup } = useSelector((state) => state.pdvs);
+  const { openPopup } = useAppSelector((state) => state.pdvs);
 
 
   return (
@@ -197,9 +196,10 @@ export default function PdvsListView() {
           ]}
           action={
             <Button
-              onClick={() => dispatch(switchPopup())}
+              onClick={() => dispatch(switchPopup(false))}
               variant="contained"
               color="primary"
+              sx={isMobile && { width: '100%' }}
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
               Crear Punto De Venta

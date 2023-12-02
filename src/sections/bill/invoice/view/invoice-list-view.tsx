@@ -43,6 +43,7 @@ import {
 } from 'src/components/table';
 //
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@mui/material';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -80,6 +81,8 @@ export default function InvoiceListView() {
   const router = useRouter();
 
   const table = useTable({ defaultOrderBy: 'createDate' });
+
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const confirm = useBoolean(0);
 
@@ -215,6 +218,7 @@ export default function InvoiceListView() {
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
+              sx={isMobile && { width: '100%' }}
             >
               {t('Nueva factura')}
             </Button>

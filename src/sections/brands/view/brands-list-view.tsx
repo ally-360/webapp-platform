@@ -28,8 +28,6 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { useSettingsContext } from 'src/components/settings';
 import { paths } from 'src/routes/paths';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Draggable from 'react-draggable';
-import Paper from '@mui/material/Paper';
 import { enqueueSnackbar } from 'notistack';
 import { ProductListView } from 'src/sections/product/view';
 import { deleteBrand, getBrands, switchPopupState } from 'src/redux/inventory/brandsSlice';
@@ -38,14 +36,6 @@ import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 // utils
 
 // hooks
-
-function PaperComponent(props) {
-  return (
-    <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
-      <Paper {...props} />
-    </Draggable>
-  );
-}
 
 export default function InventoryBrandsList() {
   const settings = useSettingsContext();
@@ -66,7 +56,7 @@ export default function InventoryBrandsList() {
   const [expandedCategories, setExpandedCategories] = useState([]);
 
   // states for menu options in categories
-  const [viewBrand, setViewBrand] = useState(false);
+  const [viewBrand, setViewBrand] = useState(0);
 
   const menuRef = useRef(null);
 
