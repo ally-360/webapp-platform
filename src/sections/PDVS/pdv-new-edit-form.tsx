@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import PropTypes, { number } from 'prop-types';
+import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import React, { useMemo, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -29,38 +29,37 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import match from 'autosuggest-highlight/match';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { getAllPDVS, getPDVById, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
 
 import Iconify from 'src/components/iconify';
 import { useAuthContext } from 'src/auth/hooks';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
-
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 export default function FormPDVS() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const { editId, seePDV } = useSelector((state) => state.pdvs);
-  const { locations } = useSelector((state) => state.locations);
+  const { editId, seePDV } = useAppSelector((state) => state.pdvs);
+  const { locations } = useAppSelector((state) => state.locations);
 
   const [editDisabled, setEditDisabled] = useState(false);
 
   const [pdvEdit, setPdvEdit] = useState(null);
 
   // const { open, handleClose } = useSelector((state) => state.pdvs);
-  const open = useSelector((state) => state.pdvs.openPopup);
+  const open = useAppSelector((state) => state.pdvs.openPopup);
   const handleClose = () => {
-    dispatch(switchPopup());
+    dispatch(switchPopup(false));
   };
   const getPdvInfo = React.useCallback(async () => {
     const resp = await dispatch(getPDVById(editId));
@@ -92,7 +91,7 @@ export default function FormPDVS() {
     departamento: Yup.object().required('Departamento es requerido'),
     municipio: Yup.object().required('Municipio es requerido'),
     address: Yup.string().required('Dirección es requerida'),
-    phoneNumber: Yup.string().required('Teléfono es requerido'),
+    phoneNumber: Yup.string().required('Teléfono es requerido').min(13, 'Teléfono inválido'),
     main: Yup.boolean().optional()
   });
 
@@ -104,7 +103,7 @@ export default function FormPDVS() {
     () => ({
       name: pdvEdit?.name || '',
       description: pdvEdit?.description || '',
-      departamento: pdvEdit?.departamento || '',
+      departamento: pdvEdit?.departamento || null,
       municipio: pdvEdit?.municipio || '',
       address: pdvEdit?.address || '',
       phoneNumber: pdvEdit?.phoneNumber || '',
@@ -127,6 +126,10 @@ export default function FormPDVS() {
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
+
+  useEffect(() => {
+    console.log(isSubmitting);
+  }, [isSubmitting]);
 
   // useEffect(() => {
   //   if (company) {
@@ -176,11 +179,9 @@ export default function FormPDVS() {
       );
       dispatch(handleClose());
     } catch (error) {
-      if (error.response.status === 400) {
-        enqueueSnackbar(t('No se ha podido crear el punto de venta, verifica los datos nuevamente'), {
-          variant: 'error'
-        });
-      }
+      enqueueSnackbar(t('No se ha podido crear el punto de venta, verifica los datos nuevamente'), {
+        variant: 'error'
+      });
       console.log(error);
     }
   });
@@ -387,14 +388,22 @@ export default function FormPDVS() {
                 <RHFPhoneNumber
                   fullWidth
                   disabled={editDisabled}
-                  type="string"
                   variant="outlined"
                   placeholder="Ej: 300 123 4567"
                   name="phoneNumber"
+                  label="Teléfono"
+                  type="string"
                   defaultCountry="co"
-                  label="teléfono"
-                  countryCodeEditable={false}
                   onlyCountries={['co']}
+                  countryCodeEditable={false}
+                />
+                <RHFTextField
+                  visible={false}
+                  sx={{ display: 'none' }}
+                  disabled={editDisabled}
+                  name="phoneNumber"
+                  label="Teléfono"
+                  placeholder="Ej: 300 123 4567"
                 />
               </Stack>
             </Grid>

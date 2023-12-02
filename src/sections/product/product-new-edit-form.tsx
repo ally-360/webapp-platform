@@ -50,6 +50,7 @@ import PopupAssingInventory from 'src/sections/product/PopupAssignInventory';
 import { NewProductSchema } from 'src/interfaces/inventory/productsSchemas';
 import { NewProductInterface, PDVproduct } from 'src/interfaces/inventory/productsInterface';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { fNumber } from 'src/utils/format-number';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
 import RequestService from '../../axios/services/service';
 
@@ -268,15 +269,16 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     }
     if (priceBase && tax) {
       // si es 0 no se le agrega impuesto
-      console.log('tax', tax);
+      console.log('priceBase', priceBase);
 
-      const priceBaseNumber = priceBase;
+      console.log('tax', tax);
+      const priceBaseNumber = Number(priceBase.replace(/[^0-9.-]+/g, ''));
       const taxAmount = priceBaseNumber * (tax / 100);
       console.log('taxAmount', taxAmount);
       const priceSale = priceBaseNumber + taxAmount;
       console.log('priceBaseNumber', priceBaseNumber);
       console.log('priceSale', priceSale);
-      setValue('priceSale', priceSale.toFixed(0));
+      setValue('priceSale', fNumber(priceSale));
     }
   }, [priceBase, tax, setValue]);
   // Assign inventory
@@ -585,6 +587,9 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
             <RHFTextField
               name="priceBase"
               label="Precio de venta"
+              onChange={(event) => {
+                setValue('priceBase', fNumber(event.target.value));
+              }}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}

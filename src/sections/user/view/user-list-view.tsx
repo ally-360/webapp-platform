@@ -364,7 +364,7 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (Object.entries(municipio).length !== 0) {
     console.log(municipio);
-    inputData = inputData.filter((user) => user.municipio.id === municipio.id);
+    inputData = inputData.filter((user) => user.town.id === municipio.id);
   }
 
   return inputData;

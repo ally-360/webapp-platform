@@ -15,7 +15,7 @@ import LinkItem from './link-item';
 interface CustomBreadcrumbsProps {
   icon: string;
   links: Array<{ href?: string; name?: string }>;
-  action: React.ReactNode;
+  action?: React.ReactNode;
   heading: string;
   moreLink?: string[];
   activeLast?: boolean;
