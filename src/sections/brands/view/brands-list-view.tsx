@@ -13,24 +13,20 @@ import {
   CardContent,
   Divider,
   ListItem,
-  IconButton,
   useTheme,
   Alert,
-  AlertTitle
+  AlertTitle,
+  useMediaQuery
 } from '@mui/material';
 
 // redux
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import Collapse from '@mui/material/Collapse';
 
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { useTranslation } from 'react-i18next';
 import { useSettingsContext } from 'src/components/settings';
 import { paths } from 'src/routes/paths';
-import Label from 'src/components/label';
-import { useDispatch, useSelector } from 'react-redux';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import Draggable from 'react-draggable';
 import Paper from '@mui/material/Paper';
@@ -38,7 +34,7 @@ import { enqueueSnackbar } from 'notistack';
 import { ProductListView } from 'src/sections/product/view';
 import { deleteBrand, getBrands, switchPopupState } from 'src/redux/inventory/brandsSlice';
 import MenuBrands from 'src/sections/brands/MenuBrands';
-import PopupCreateBrand from '../PopupCreateBrand';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 // utils
 
 // hooks
@@ -55,21 +51,22 @@ export default function InventoryBrandsList() {
   const settings = useSettingsContext();
   const componentRef = useRef();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // const theme = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   // Get categories and get products in brand from API
   useEffect(() => {
     dispatch(getBrands());
   }, [dispatch]);
 
-  const { brands, openPopup, isLoading, brandsEmpty } = useSelector((state) => state.brands);
+  const { brands, openPopup, isLoading, brandsEmpty } = useAppSelector((state) => state.brands);
 
   const [expandedCategories, setExpandedCategories] = useState([]);
 
   // states for menu options in categories
-  const [viewBrand, setViewBrand] = useState(0);
+  const [viewBrand, setViewBrand] = useState(false);
 
   const menuRef = useRef(null);
 
@@ -92,7 +89,7 @@ export default function InventoryBrandsList() {
   };
 
   const handleClickPopup = () => {
-    dispatch(switchPopupState());
+    dispatch(switchPopupState(false));
   };
 
   return (
@@ -104,7 +101,7 @@ export default function InventoryBrandsList() {
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Inventario',
-            href: paths.dashboard.inventory
+            href: paths.dashboard.inventory.list
           },
           { name: 'Categorias' }
         ]}
@@ -113,6 +110,7 @@ export default function InventoryBrandsList() {
           <Button
             color="primary"
             variant="contained"
+            sx={isMobile && { width: '100%' }}
             onClick={handleClickPopup}
             startIcon={<Icon icon="mingcute:add-line" />}
           >

@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { menuItemClasses } from '@mui/material/MenuItem';
 import Popover from '@mui/material/Popover';
 //
+import React from 'react';
 import { getPosition } from './utils';
 import { StyledArrow } from './styles';
-
 // ----------------------------------------------------------------------
 
 export default function CustomPopover({
@@ -15,7 +15,7 @@ export default function CustomPopover({
   hiddenArrow,
   sx,
   ...other
-}) {
+}: CustomPopoverProps) {
   const { style, anchorOrigin, transformOrigin } = getPosition(arrow);
 
   return (
@@ -33,12 +33,12 @@ export default function CustomPopover({
             [`& .${menuItemClasses.root}`]: {
               '& svg': {
                 mr: 2,
-                flexShrink: 0,
-              },
+                flexShrink: 0
+              }
             },
-            ...sx,
-          },
-        },
+            ...sx
+          }
+        }
       }}
       {...other}
     >
@@ -67,6 +67,6 @@ CustomPopover.propTypes = {
     'left-bottom',
     'right-top',
     'right-center',
-    'right-bottom',
-  ]),
+    'right-bottom'
+  ])
 };
