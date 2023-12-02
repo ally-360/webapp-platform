@@ -150,9 +150,17 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   }, [currentProduct?.taxesOption, includeTaxes, setValue]);
 
   const onSubmit = handleSubmit(async (data) => {
+    const lastProductsPdvs = data.productsPdvs;
+    const priceBase = data.priceBase.replace(/[^0-9.-]+/g, '');
+    const priceSale = data.priceSale.replace(/[^0-9.-]+/g, '');
+
     try {
       setValue('quantityStock', data.productsPdvs.reduce((acc: number, pdv: PDVproduct) => acc + pdv.quantity, 0) || 0);
       // Cambiar en todos los pdvs el pdv por el id del pdv y dejar el minQuantity y quantity
+      // remover las comas del precio
+
+      data.priceBase = priceBase;
+      data.priceSale = priceSale;
       data.productsPdvs = data.productsPdvs.map((pdv: PDVproduct) => ({
         pdv: pdv.id,
         minQuantity: pdv.minQuantity,
@@ -173,6 +181,8 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
       console.info('DATA', data);
     } catch (error) {
       console.error(error);
+      enqueueSnackbar('Error al crear el producto', { variant: 'error' });
+      data.productsPdvs = lastProductsPdvs;
     }
   });
 
