@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -21,7 +21,6 @@ import { useNavigate } from 'react-router';
 import InvoiceNewEditDetails from './invoice-new-edit-details';
 import InvoiceNewEditAddress from './invoice-new-edit-address';
 import InvoiceNewEditStatusDate from './invoice-new-edit-status-date';
-
 // ----------------------------------------------------------------------
 
 export default function InvoiceNewEditForm({ currentInvoice }) {
@@ -33,13 +32,7 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
   const NewInvoiceSchema = Yup.object().shape({
     invoiceProvider: Yup.mixed().nullable().required('El proveedor es requerido'),
     createDate: Yup.mixed().nullable().required('Fecha de creación es requerida '),
-    dueDate: Yup.mixed()
-      .required('La fecha de vencimiento es requerida')
-      .test(
-        'date-min',
-        'Due date must be later than create date',
-        (value, { parent }) => value.getTime() > parent.createDate.getTime()
-      ),
+    dueDate: Yup.mixed().required('La fecha de vencimiento es requerida'),
     // not required
     totalTaxes: Yup.number(),
     status: Yup.string(),
@@ -47,7 +40,19 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
     shipping: Yup.number(),
     invoiceFrom: Yup.mixed(),
     totalAmount: Yup.number(),
-    invoiceNumber: Yup.string()
+    invoiceNumber: Yup.string(),
+
+    paymentTerm: Yup.string().optional(),
+    items: Yup.array().of(
+      Yup.object().shape({
+        title: Yup.string().required('El título es requerido'),
+        description: Yup.string().required('La descripción es requerida'),
+        quantity: Yup.number().required('La cantidad es requerida'),
+        price: Yup.number().required('El precio es requerido'),
+        total: Yup.number().required('El total es requerido'),
+        tax: Yup.number().required('El impuesto es requerido')
+      })
+    )
   });
 
   const defaultValues = useMemo(
@@ -61,7 +66,7 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
       method: currentInvoice?.method || 'Contado',
       paymentTerm: currentInvoice?.paymentTerm || '',
       invoiceFrom: currentInvoice?.invoiceFrom || _addressBooks[0],
-      invoiceTo: currentInvoice?.invoiceTo || null,
+      invoiceProvider: currentInvoice?.invoiceTo || null,
       items: currentInvoice?.items || [{ title: '', description: '', service: '', quantity: 1, price: 0, total: 0 }],
       totalAmount: currentInvoice?.totalAmount || 0
     }),
@@ -111,7 +116,7 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
   });
 
   return (
-    <FormProvider methods={methods}>
+    <FormProvider methods={methods} onSubmit={handleCreateAndSend}>
       <Card>
         <InvoiceNewEditAddress />
 
@@ -141,13 +146,7 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
           Guardar cotización
         </LoadingButton>
 
-        <LoadingButton
-          size="large"
-          color="primary"
-          variant="contained"
-          loading={loadingSend.value && isSubmitting}
-          onClick={handleCreateAndSend}
-        >
+        <LoadingButton size="large" color="primary" variant="contained" loading={loadingSend.value && isSubmitting}>
           {currentInvoice ? 'Guardar' : 'Crear factura'}
         </LoadingButton>
       </Stack>

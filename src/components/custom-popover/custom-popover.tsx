@@ -7,6 +7,14 @@ import React from 'react';
 import { getPosition } from './utils';
 import { StyledArrow } from './styles';
 // ----------------------------------------------------------------------
+interface CustomPopoverProps {
+  sx?: object;
+  open?: any;
+  children?: any;
+  hiddenArrow?: boolean;
+  disabledArrow?: boolean;
+  arrow?: string;
+}
 
 export default function CustomPopover({
   open,

@@ -8,7 +8,7 @@ import React from 'react';
 interface EmptyContentProps {
   title: string;
   imgUrl?: string;
-  action: any;
+  action?: any;
   filled: boolean;
   description?: string;
   sx: object;

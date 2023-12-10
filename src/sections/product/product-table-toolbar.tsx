@@ -1,5 +1,4 @@
-import PropTypes from 'prop-types';
-import { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
@@ -17,9 +16,22 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import * as XLSX from 'xlsx';
 import { headerTable } from 'src/sections/product/constantsTableExportData';
 import ReactToPrint from 'react-to-print';
+import { SliderThumb } from '@mui/material';
+import { useAppSelector } from 'src/hooks/store';
+
 // ----------------------------------------------------------------------
 
 const EXPORT_NAME = 'productos';
+
+interface ProductTableToolbarProps {
+  categoryView: boolean;
+  filters: any;
+  onFilters: any;
+  dataFiltered: any;
+  stockOptions: any;
+  publishOptions: any;
+  componentRef: any;
+}
 
 export default function ProductTableToolbar({
   categoryView,
@@ -30,7 +42,7 @@ export default function ProductTableToolbar({
   stockOptions,
   publishOptions,
   componentRef
-}) {
+}: ProductTableToolbarProps) {
   const popover = usePopover();
   const handleFilterName = useCallback(
     (event) => {
@@ -38,6 +50,15 @@ export default function ProductTableToolbar({
     },
     [onFilters]
   );
+
+  const { products } = useAppSelector((state) => state.products);
+  console.log(products);
+
+  // Price options
+
+  const [priceOptions, setPriceOptions] = useState({ minPrice: 0, maxPrice: 0 });
+
+  console.log(priceOptions);
 
   const handleFilterStock = useCallback(
     (event) => {
@@ -82,6 +103,7 @@ export default function ProductTableToolbar({
           category: product.category
         };
         XLSX.utils.sheet_add_json(worksheet, [rowData], { skipHeader: true, origin: `A${rowIndex}` });
+        // eslint-disable-next-line no-plusplus
         rowIndex++;
       });
     });
@@ -147,30 +169,26 @@ export default function ProductTableToolbar({
               </Select>
             </FormControl>
 
-            <FormControl
+            {/* <FormControl
               sx={{
                 flexShrink: 0,
                 width: { xs: 1, md: 200 }
               }}
             >
-              <InputLabel>Precio</InputLabel>
-
-              <Select
-                multiple
-                value={filters.publish}
-                onChange={handleFilterPublish}
-                input={<OutlinedInput label="Publish" />}
-                renderValue={(selected) => selected.map((value) => value).join(', ')}
-                sx={{ textTransform: 'capitalize' }}
-              >
-                {publishOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    <Checkbox disableRipple size="small" checked={filters.publish.includes(option.value)} />
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              <Typography gutterBottom>Rango de precios</Typography>
+              <Slider
+                color="primary"
+                size="medium"
+                valueLabelDisplay="auto"
+                marks
+                aria-label="pretto slider"
+                min={priceOptions.minPrice}
+                max={priceOptions.maxPrice}
+                slots={{ thumb: AirbnbThumbComponent }}
+                getAriaLabel={(index) => (index === 0 ? 'Minimum price' : 'Maximum price')}
+                defaultValue={[20, 40]}
+              />
+            </FormControl> */}
           </>
         ) : (
           <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
@@ -211,7 +229,7 @@ export default function ProductTableToolbar({
           }}
         >
           <Iconify icon="solar:import-bold" />
-          Import
+          Importar
         </MenuItem>
 
         <MenuItem
@@ -227,11 +245,14 @@ export default function ProductTableToolbar({
   );
 }
 
-ProductTableToolbar.propTypes = {
-  filters: PropTypes.object,
-  onFilters: PropTypes.func,
-  publishOptions: PropTypes.array,
-  stockOptions: PropTypes.array,
-  dataFiltered: PropTypes.array,
-  componentRef: PropTypes.any
-};
+function AirbnbThumbComponent(props) {
+  const { children, ...other } = props;
+  return (
+    <SliderThumb {...other}>
+      {children}
+      <span className="airbnb-bar" />
+      <span className="airbnb-bar" />
+      <span className="airbnb-bar" />
+    </SliderThumb>
+  );
+}

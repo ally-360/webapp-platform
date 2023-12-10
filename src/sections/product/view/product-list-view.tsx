@@ -77,6 +77,7 @@ export default function ProductListView({ categoryView }) {
   const table = useTable(true);
   const settings = useSettingsContext();
   const [tableData, setTableData] = useState([]);
+  const dispatch = useAppDispatch();
 
   const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
@@ -133,14 +134,19 @@ export default function ProductListView({ categoryView }) {
 
   const handleDeleteRows = useCallback(() => {
     const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+    const selectedRows = tableData.filter((row) => table.selected.includes(row.id));
     setTableData(deleteRows);
+
+    selectedRows.forEach((row) => {
+      dispatch(deleteProduct(row.id));
+    });
 
     table.onUpdatePageDeleteRows({
       totalRows: tableData.length,
       totalRowsInPage: dataInPage.length,
       totalRowsFiltered: dataFiltered.length
     });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  }, [dataFiltered.length, dataInPage.length, dispatch, table, tableData]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -161,8 +167,6 @@ export default function ProductListView({ categoryView }) {
   }, []);
 
   // nueva logica
-
-  const dispatch = useAppDispatch();
 
   const handleDeleteRow = useCallback(
     (id) => {
@@ -440,7 +444,7 @@ export default function ProductListView({ categoryView }) {
               confirm.onFalse();
             }}
           >
-            Delete
+            Eliminar
           </Button>
         }
       />

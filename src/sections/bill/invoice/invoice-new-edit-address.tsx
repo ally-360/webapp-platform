@@ -13,9 +13,9 @@ import { _addressBooks } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 //
-import { useSelector } from 'react-redux';
 import { useAuthContext } from 'src/auth/hooks';
 import { AddressListDialog } from 'src/sections/address';
+import React from 'react';
 import logoPlaceholder from '../../../../public/assets/logo-placeholder-1.png';
 // ----------------------------------------------------------------------
 
@@ -32,9 +32,9 @@ export default function InvoiceNewEditAddress() {
 
   const { invoiceFrom, invoiceTo } = values;
 
-  const from = useBoolean();
+  const from = useBoolean(false);
 
-  const to = useBoolean();
+  const to = useBoolean(false);
 
   const { company } = useAuthContext();
 
@@ -60,13 +60,12 @@ export default function InvoiceNewEditAddress() {
             <Typography variant="body2">Identificación: {company.nit}</Typography>
             <Typography variant="body2">Teléfono: {company.phoneNumber}</Typography>
           </Stack>
-          {console.log('company', company)}
         </Stack>
         <Divider flexItem orientation={upMd ? 'vertical' : 'horizontal'} sx={{ borderStyle: 'dashed' }} />
         <Stack sx={{ width: 1 }}>
           <Stack direction="row" alignItems="center" sx={{ mb: 1 }}>
             <Typography variant="h6" sx={{ color: 'text.disabled', flexGrow: 1 }}>
-              Cliente:
+              Proveedor:
             </Typography>
 
             <IconButton onClick={to.onTrue}>

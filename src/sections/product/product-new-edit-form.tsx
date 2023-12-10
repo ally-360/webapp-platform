@@ -48,7 +48,7 @@ import MenuCategories from 'src/sections/categories/MenuCategories';
 import { setPopupAssignInventory } from 'src/redux/inventory/productsSlice';
 import PopupAssingInventory from 'src/sections/product/PopupAssignInventory';
 import { NewProductSchema } from 'src/interfaces/inventory/productsSchemas';
-import { NewProductInterface, PDVproduct } from 'src/interfaces/inventory/productsInterface';
+import { NewProductInterface, PDVproduct, getProductResponse } from 'src/interfaces/inventory/productsInterface';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { fNumber } from 'src/utils/format-number';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
@@ -56,9 +56,8 @@ import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
-export default function ProductNewEditForm({ currentProduct }: { currentProduct: NewProductInterface }) {
+export default function ProductNewEditForm({ currentProduct }: { currentProduct: getProductResponse }) {
   const router = useRouter();
-  console.log('currentProduct', currentProduct);
   const mdUp = useResponsive('up', 'md', true);
 
   const dispatch = useAppDispatch();
@@ -149,7 +148,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     }
   }, [currentProduct?.taxesOption, includeTaxes, setValue]);
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: NewProductInterface) => {
     const lastProductsPdvs = data.productsPdvs;
     const priceBase = data.priceBase.replace(/[^0-9.-]+/g, '');
     const priceSale = data.priceSale.replace(/[^0-9.-]+/g, '');

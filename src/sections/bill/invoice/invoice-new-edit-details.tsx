@@ -14,7 +14,6 @@ import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 // _mock
-import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 
 // components
 import Iconify from 'src/components/iconify';
@@ -79,23 +78,6 @@ export default function InvoiceNewEditDetails() {
     remove(index);
   };
 
-  const handleClearService = useCallback(
-    (index) => {
-      resetField(`items[${index}].quantity`);
-      resetField(`items[${index}].price`);
-      resetField(`items[${index}].total`);
-    },
-    [resetField]
-  );
-
-  const handleSelectService = useCallback(
-    (index, option) => {
-      setValue(`items[${index}].price`, INVOICE_SERVICE_OPTIONS.find((service) => service.name === option)?.price);
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
-    },
-    [setValue, values.items]
-  );
-
   const handleClearProduct = useCallback(
     (index) => {
       setValue(`items[${index}].quantity`, 1);
@@ -117,25 +99,6 @@ export default function InvoiceNewEditDetails() {
       if (values.items[index].title.id === undefined) {
         enqueueSnackbar('Debes seleccionar un producto primero', { variant: 'warning' });
         return;
-      } else if (PDV === 0) {
-        if (
-          values.items[index].pdv === undefined ||
-          values.items[index].pdv === null ||
-          values.items[index].pdv === ''
-        ) {
-          enqueueSnackbar('Debes seleccionar un punto de venta primero', { variant: 'warning' });
-        }
-        console.log('todos los productos', products);
-        const product = products.find((item) => item.id === values.items[index].title.id);
-        const stock = product.productPdv.find((item) => item.pdv.id === values.items[index].pdv);
-        console.log('stock', stock);
-        if (event.target.value > stock.quantity) {
-          enqueueSnackbar('No hay suficiente stock', { variant: 'warning' });
-          return;
-        }
-      } else if (event.target.value > values.items[index].title.quantityStock) {
-        enqueueSnackbar('No hay suficiente stock', { variant: 'warning' });
-        return;
       }
       setValue(`items[${index}].quantity`, Number(event.target.value));
       setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
@@ -146,7 +109,7 @@ export default function InvoiceNewEditDetails() {
       );
       setValue('totalTaxes', sum(values.items.map((item) => item.taxes)));
     },
-    [setValue, values.items, PDV, products]
+    [setValue, values.items]
   );
 
   const handleChangePrice = useCallback(
@@ -272,7 +235,7 @@ export default function InvoiceNewEditDetails() {
               </MenuItem>
             ))}
           </RHFSelect>
-          <Tooltip title="Selecciona el punto de venta del cual se extraeran los productos">
+          <Tooltip title="Selecciona el punto de venta al cual se agregaran los productos">
             <IconButton size="small" sx={{ width: '38px', height: '38px' }}>
               <Iconify icon="mdi:help-circle-outline" />
             </IconButton>
@@ -332,28 +295,13 @@ export default function InvoiceNewEditDetails() {
                     maxWidth: { md: '250px' }
                   }}
                 >
-                  {/* {pdvs.map((option) => (
+                  {pdvs.map((option) => (
                     <MenuItem key={option.id} value={option.id}>
                       {option.name}
                     </MenuItem>
-                  ))} */}
-                  {/* Buscar los pdvs que tenga el producto */}
-
-                  {values.items[index].title.id !== undefined &&
-                    values.items[index].title.productPdv.map((pdvObject) => (
-                      <MenuItem key={pdvObject.pdv.id} value={pdvObject.pdv.id}>
-                        {pdvObject.pdv.name}
-                      </MenuItem>
-                    ))}
+                  ))}
                 </RHFSelect>
               )}
-
-              <RHFTextField
-                size="small"
-                name={`items[${index}].description`}
-                label="Description"
-                InputLabelProps={{ shrink: true }}
-              />
 
               <RHFTextField
                 size="small"
