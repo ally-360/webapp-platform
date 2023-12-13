@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import React from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
@@ -7,8 +7,13 @@ import Stack from '@mui/material/Stack';
 import { bgGradient } from 'src/theme/css';
 
 // ----------------------------------------------------------------------
-
-export default function AppWelcome({ title, description, action, img, ...other }) {
+interface AppWelcomeProps {
+  title: string;
+  description: string;
+  action: React.ReactNode;
+  img: React.ReactNode;
+}
+export default function AppWelcome({ title, description, action, img, ...other }: AppWelcomeProps) {
   const theme = useTheme();
 
   return (
@@ -18,13 +23,13 @@ export default function AppWelcome({ title, description, action, img, ...other }
         ...bgGradient({
           direction: '135deg',
           startColor: alpha(theme.palette.primary.light, 0.2),
-          endColor: alpha(theme.palette.primary.main, 0.2),
+          endColor: alpha(theme.palette.primary.main, 0.2)
         }),
         height: { md: 1 },
         borderRadius: 2,
         position: 'relative',
         color: 'primary.darker',
-        backgroundColor: 'common.white',
+        backgroundColor: 'common.white'
       }}
       {...other}
     >
@@ -35,9 +40,9 @@ export default function AppWelcome({ title, description, action, img, ...other }
         sx={{
           p: {
             xs: theme.spacing(5, 3, 0, 3),
-            md: theme.spacing(5),
+            md: theme.spacing(5)
           },
-          textAlign: { xs: 'center', md: 'left' },
+          textAlign: { xs: 'center', md: 'left' }
         }}
       >
         <Typography paragraph variant="h4" sx={{ whiteSpace: 'pre-line' }}>
@@ -49,7 +54,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
           sx={{
             opacity: 0.8,
             maxWidth: 360,
-            mb: { xs: 3, xl: 5 },
+            mb: { xs: 3, xl: 5 }
           }}
         >
           {description}
@@ -65,7 +70,7 @@ export default function AppWelcome({ title, description, action, img, ...other }
           sx={{
             p: { xs: 5, md: 3 },
             maxWidth: 360,
-            mx: 'auto',
+            mx: 'auto'
           }}
         >
           {img}
@@ -74,10 +79,3 @@ export default function AppWelcome({ title, description, action, img, ...other }
     </Stack>
   );
 }
-
-AppWelcome.propTypes = {
-  action: PropTypes.node,
-  description: PropTypes.string,
-  img: PropTypes.node,
-  title: PropTypes.string,
-};

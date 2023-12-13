@@ -146,6 +146,12 @@ export function useNavData() {
               }
             ]
           },
+          {
+            title: t('orden de compra'),
+            path: paths.dashboard.order.root,
+            icon: ICONS.order,
+            children: [{ title: t('Ordenes'), path: paths.dashboard.order.root }]
+          },
           // USER
           {
             title: t('Contactos'),
@@ -190,16 +196,7 @@ export function useNavData() {
           //   ]
           // },
 
-          // // ORDER
-          // {
-          //   title: t('order'),
-          //   path: paths.dashboard.order.root,
-          //   icon: ICONS.order,
-          //   children: [
-          //     { title: t('list'), path: paths.dashboard.order.root },
-          //     { title: t('details'), path: paths.dashboard.order.demo.details }
-          //   ]
-          // },
+          // ORDER
 
           // // INVOICE
           // {

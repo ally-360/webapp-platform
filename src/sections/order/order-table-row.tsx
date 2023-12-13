@@ -22,17 +22,15 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { useEffect } from 'react';
-import { useSettingsContext } from 'src/components/settings';
 
 // ----------------------------------------------------------------------
 
 export default function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteRow }) {
   const { items, status, orderNumber, createdAt, customer, totalQuantity, subTotal } = row;
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
 
-  const collapse = useBoolean();
+  const collapse = useBoolean(false);
 
   const popover = usePopover();
 

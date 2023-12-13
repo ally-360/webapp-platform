@@ -1,10 +1,10 @@
-import { AuthCredentials, RegisterUser, getCompanyResponse, getPDVResponse } from './userInterfaces';
+import { AuthCredentials, RegisterUser, getCompanyResponse, getPDVResponse, getUserResponse } from './userInterfaces';
 
 export interface AuthContextType {
   /**
    * Datos del usuario autenticado.
    */
-  user: object; // TODO: agregar interfaz de usuario
+  user: getUserResponse; // TODO: agregar interfaz de usuario
 
   /**
    * Retorna true si la aplicación está cargando el estado de autenticación.
