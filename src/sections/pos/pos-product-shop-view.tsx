@@ -1,10 +1,9 @@
 import orderBy from 'lodash/orderBy';
 import isEqual from 'lodash/isEqual';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useDebounce } from 'src/hooks/use-debounce';
@@ -24,16 +23,14 @@ import { useGetProducts, useSearchProducts } from 'src/api/product';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 //
-import CartIcon from 'src/sections/product/common/cart-icon';
 import { useCheckoutContext } from 'src/sections/checkout/context';
 import PosProductList from 'src/sections/pos/pos-product-list';
 import PosProductSort from 'src/sections/pos/pos-product-sort';
 import PosProductSearch from 'src/sections/pos/pos-product-search';
 import PosProductFilters from 'src/sections/pos/pos-product-filters';
 import PosProductFiltersResult from 'src/sections/pos/pos-product-filters-result';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
-
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -51,7 +48,7 @@ export default function PosProductShopView() {
 
   const checkout = useCheckoutContext();
 
-  const openFilters = useBoolean();
+  const openFilters = useBoolean(false);
 
   const [sortBy, setSortBy] = useState('featured');
 
@@ -63,13 +60,13 @@ export default function PosProductShopView() {
 
   const { productsLoading, productsEmpty } = useGetProducts();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(getAllProducts());
   }, [dispatch]);
 
-  const { products } = useSelector((state) => state.products);
+  const { products } = useAppSelector((state) => state.products);
 
   const { searchResults, searchLoading } = useSearchProducts(debouncedQuery);
 
@@ -156,7 +153,7 @@ export default function PosProductShopView() {
 
   return (
     <Container
-      maxWidth={settings.themeStretch ? false : 'lg'}
+      maxWidth={false}
       sx={{
         mb: 15,
         p: '0 !important'

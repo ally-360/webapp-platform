@@ -10,7 +10,8 @@ import {
   Typography,
   useMediaQuery
 } from '@mui/material';
-import { Stack, useTheme } from '@mui/system';
+import { Stack } from '@mui/system';
+import { useTheme } from '@mui/material/styles';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import React, { useCallback, useState } from 'react';
 import { paths } from 'src/routes/paths';
@@ -21,7 +22,7 @@ import { ORDER_STATUS_OPTIONS, _orders } from 'src/_mock';
 import PosProductShopView from '../pos-product-shop-view';
 import PosCartIcon from '../pos-cart-icon';
 
-export default function PosWindowView({ hiddenDrawer, openDrawer }) {
+export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
   const clientes = [
     { name: 'Cliente 1', id: 1, cc: '123456789', phone: '123456789', email: 'prueba@gmail.com', address: 'Calle 123' },
     { name: 'Cliente 2', id: 2, cc: '123456789', phone: '123456789', email: 'prueba2@gmail.com', address: 'Calle 123' },
@@ -47,7 +48,7 @@ export default function PosWindowView({ hiddenDrawer, openDrawer }) {
   return (
     <>
       <Grid
-        xs={12}
+        item
         md={12}
         sx={{
           width:
@@ -64,6 +65,7 @@ export default function PosWindowView({ hiddenDrawer, openDrawer }) {
           })
         }}
       >
+        {sale.id}
         <Card sx={{ p: 2, mb: 2 }}>
           <OrderDetailsToolbar
             backLink={paths.dashboard.order.root}
@@ -109,6 +111,7 @@ export default function PosWindowView({ hiddenDrawer, openDrawer }) {
       <Drawer
         sx={{
           width: drawerWidthLg,
+          zIndex: 99999999,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: isLargeScreen ? drawerWidthLg : drawerWidth,

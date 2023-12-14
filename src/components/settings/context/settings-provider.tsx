@@ -10,12 +10,12 @@ export interface defaultSettingsInterface {
   themeMode: 'light' | 'dark';
   themeDirection: 'rtl' | 'ltr';
   themeContrast: 'default' | 'bold';
-  themeLayout: 'vertical' | 'horizontal' | 'mini';
+  themeLayout: 'vertical' | 'horizontal' | 'mini' | 'hidden';
   themeColorPresets: 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red';
   themeStretch: boolean;
 }
 
-interface SettingProps {
+export interface SettingProps {
   children: React.ReactNode;
   defaultSettings: defaultSettingsInterface;
 }
@@ -64,4 +64,36 @@ export function SettingsProvider({ children, defaultSettings }: SettingProps) {
   );
 
   return <SettingsContext.Provider value={memoizedValue}>{children}</SettingsContext.Provider>;
+}
+
+export interface settingProviderInterface extends defaultSettingsInterface {
+  /**
+   * Actualiza el valor de una configuración
+   */
+  onUpdate: (
+    name: 'themeMode' | 'themeDirection' | 'themeContrast' | 'themeLayout' | 'themeColorPresets' | 'themeStretch',
+    value:
+      | 'light'
+      | 'dark'
+      | 'rtl'
+      | 'ltr'
+      | 'default'
+      | 'bold'
+      | 'vertical'
+      | 'horizontal'
+      | 'hidden'
+      | 'mini'
+      | 'cyan'
+      | 'purple'
+      | 'blue'
+      | 'orange'
+      | 'red'
+      | boolean
+  ) => void;
+  canReset: boolean;
+
+  onReset: () => void;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
 }

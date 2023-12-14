@@ -7,13 +7,12 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
-import { useDispatch } from 'react-redux';
 import React, { useEffect } from 'react';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
 import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';
 import FormPDVS from 'src/sections/PDVS/pdv-new-edit-form';
-import { useLocation } from 'react-router';
+import { useAppDispatch } from 'src/hooks/store';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -25,7 +24,9 @@ import NavHorizontal from './nav-horizontal';
 export default function DashboardLayout({ children }) {
   const settings = useSettingsContext();
 
-  const dispatch = useDispatch();
+  console.log(settings);
+
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(getAllPDVS());
@@ -33,34 +34,19 @@ export default function DashboardLayout({ children }) {
 
   const lgUp = useResponsive('up', 'lg');
 
-  const nav = useBoolean();
+  const nav = useBoolean(false);
 
   const isHorizontal = settings.themeLayout === 'horizontal';
 
   const isMini = settings.themeLayout === 'mini';
+
+  const hiddenNav = settings.themeLayout === 'hidden';
 
   const renderNavMini = <NavMini />;
 
   const renderHorizontal = <NavHorizontal />;
 
   const renderNavVertical = <NavVertical openNav={nav.value} onCloseNav={nav.onFalse} />;
-
-  const location = useLocation(); // Obtiene la ubicación actual desde React Router
-
-  useEffect(() => {
-    if (
-      location.pathname === '/dashboard/pos' &&
-      settings.themeStretch === false &&
-      settings.themeLayout === 'horizontal'
-    ) {
-      settings.onUpdate('themeStretch', true);
-      settings.onUpdate('themeLayout', 'mini');
-    }
-    if (location.pathname !== '/dashboard/pos' && settings.themeStretch === true && settings.themeLayout === 'mini') {
-      settings.onUpdate('themeStretch', false);
-      settings.onUpdate('themeLayout', 'horizontal');
-    }
-  }, [location, settings]);
 
   if (isHorizontal) {
     return (
@@ -89,9 +75,16 @@ export default function DashboardLayout({ children }) {
           {lgUp ? renderNavMini : renderNavVertical}
 
           <Main>{children}</Main>
+          <PopupCreateCategory />
+          <PopupCreateBrand />
+          <FormPDVS />
         </Box>
       </>
     );
+  }
+
+  if (hiddenNav) {
+    return <>{children}</>;
   }
 
   return (

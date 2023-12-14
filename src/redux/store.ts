@@ -7,6 +7,7 @@ import brandsReducer from './inventory/brandsSlice';
 import userReducer from './inventory/user';
 import contactsReducer from './inventory/contactsSlice';
 import stepByStepReducer from './inventory/stepByStepSlice';
+import posReducer from './pos/posIndex';
 
 export const store = configureStore({
   reducer: {
@@ -17,7 +18,8 @@ export const store = configureStore({
     brands: brandsReducer,
     user: userReducer,
     contacts: contactsReducer,
-    stepByStep: stepByStepReducer
+    stepByStep: stepByStepReducer,
+    pos: posReducer
   }
 });
 export type RootState = ReturnType<typeof store.getState>;

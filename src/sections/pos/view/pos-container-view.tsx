@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // @mui
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -11,14 +11,56 @@ import { useTheme } from '@mui/material/styles';
 
 import { Icon } from '@iconify/react';
 import { Stack } from '@mui/system';
+import Iconify from 'src/components/iconify';
+import { RouterLink } from 'src/routes/components';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { addSaleWindow, initializeSalesFromStorage } from 'src/redux/pos/posIndex';
 import PosWindowView from './pos-window-view';
 //
+const saveToLocalStorage = (state) => {
+  try {
+    const serializedState = JSON.stringify(state);
+    localStorage.setItem('sales', serializedState);
+  } catch (e) {
+    // manejar errores
+  }
+};
 
+const loadFromLocalStorage = () => {
+  try {
+    const serializedState = localStorage.getItem('sales');
+    if (serializedState === null) return undefined;
+    const { salesWindows } = JSON.parse(serializedState);
+    return salesWindows;
+  } catch (e) {
+    // manejar errores
+    return undefined;
+  }
+};
 // ----------------------------------------------------------------------
 
 export default function PosContainerView() {
   const settings = useSettingsContext();
+  const dispatch = useAppDispatch();
+  const sales = useAppSelector((state) => state.pos.salesWindows);
+  const [addingNewSale, setAddingNewSale] = useState(false);
+  useEffect(() => {
+    if (addingNewSale && sales.length > 0) {
+      setOpenTab(sales[sales.length - 1].id);
+      setAddingNewSale(false); // Restablecer el indicador
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addingNewSale]);
+  useEffect(() => {
+    const savedSalesWindows = loadFromLocalStorage();
+    if (savedSalesWindows) {
+      dispatch(initializeSalesFromStorage(savedSalesWindows));
+    }
+  }, [dispatch]);
 
+  useEffect(() => {
+    saveToLocalStorage({ salesWindows: sales });
+  }, [sales]);
   const drawerWidthLg = '30vw';
   const drawerWidth = '500px';
 
@@ -32,49 +74,19 @@ export default function PosContainerView() {
     setOpenDrawer(!openDrawer);
   };
 
-  const [openTab, setOpenTab] = useState(0);
-
-  const [optionsTabs, setOptionsTabs] = useState([
-    {
-      title: 'Venta 1',
-      id: 0,
-      icon: <Icon icon="mdi:cart" />,
-      component: <PosWindowView hiddenDrawer={hiddenDrawer} openDrawer={openDrawer} />
-    }
-  ]);
+  const [openTab, setOpenTab] = useState(sales.length > 0 ? sales[sales.length - 1].id : 0);
 
   const handleChangeTab = (newValue) => {
     setOpenTab(newValue);
   };
 
   const handleAddTab = () => {
-    setOptionsTabs([
-      ...optionsTabs,
-      {
-        title: `Venta ${optionsTabs.length + 1}`,
-        id: optionsTabs.length,
-        icon: <Icon icon="mdi:cart" />,
-        component: <PosWindowView hiddenDrawer={hiddenDrawer} openDrawer={openDrawer} />
-      }
-    ]);
-    handleChangeTab(optionsTabs.length);
-  };
-
-  const changeNameTab = (newValue) => {
-    const newOptionsTabs = optionsTabs.map((tab) => {
-      if (tab.id === openTab) {
-        return {
-          ...tab,
-          title: newValue
-        };
-      }
-      return tab;
-    });
-    setOptionsTabs(newOptionsTabs);
+    dispatch(addSaleWindow());
+    setAddingNewSale(true);
   };
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+    <Container maxWidth={false} sx={{ pt: 12 }}>
       {/* Header Bar */}
       <AppBar
         position="fixed"
@@ -85,6 +97,7 @@ export default function PosContainerView() {
             // eslint-disable-next-line no-nested-ternary
             openDrawer ? (isLargeScreen ? `calc(100% - ${drawerWidthLg})` : `calc(100% - ${drawerWidth})`) : '100%',
           // eslint-disable-next-line no-nested-ternary
+          boxShadow: theme.shadows,
           zIndex: 99999,
           transition: theme.transitions.create('width ', {
             easing: theme.transitions.easing.easeOut,
@@ -93,7 +106,15 @@ export default function PosContainerView() {
         }}
       >
         <CardHeader
-          avatar={<img src="/logo/faviconBackgroundTransparent.svg" alt="logo" width="30" />}
+          avatar={
+            <>
+              <IconButton component={RouterLink} href="/">
+                {/* back icon */}
+                <Iconify icon="eva:arrow-ios-back-fill" />
+              </IconButton>
+              <img src="/logo/faviconBackgroundTransparent.svg" alt="logo" width="30" />
+            </>
+          }
           title={
             <Typography sx={{ color: theme.palette.text.primary }} variant="h6">
               Venta POS
@@ -111,18 +132,13 @@ export default function PosContainerView() {
         />
       </AppBar>
       <Grid container spacing={3}>
-        {optionsTabs.map(
-          (tab) => openTab === tab.id && <PosWindowView hiddenDrawer={hiddenDrawer} openDrawer={openDrawer} />
+        {sales.map(
+          (sale) =>
+            openTab === sale.id && (
+              <PosWindowView key={sale.id} openDrawer={openDrawer} hiddenDrawer={hiddenDrawer} sale={sale} />
+            )
         )}
 
-        <Grid xs={12} md={4}>
-          {/* <OrderDetailsInfo
-            customer={currentOrder.customer}
-            delivery={currentOrder.delivery}
-            payment={currentOrder.payment}
-            shippingAddress={currentOrder.shippingAddress}
-          /> */}
-        </Grid>
         {/* Bottom container */}
         <AppBar
           position="fixed"
@@ -131,10 +147,10 @@ export default function PosContainerView() {
             left: 0,
             bottom: 0,
             top: 'auto',
+            boxShadow: theme.shadows,
             width:
               // eslint-disable-next-line no-nested-ternary
               openDrawer ? (isLargeScreen ? `calc(100% - ${drawerWidthLg})` : `calc(100% - ${drawerWidth})`) : '100%',
-            // eslint-disable-next-line no-nested-ternary
             zIndex: 99999,
             transition: theme.transitions.create('width ', {
               easing: theme.transitions.easing.easeOut,
@@ -145,14 +161,14 @@ export default function PosContainerView() {
           <CardHeader
             title={
               <Stack flexDirection="row" alignItems="center" p={0} gap={2}>
-                {optionsTabs.map((tab) => (
+                {sales.map((tab) => (
                   <Button
                     key={tab.id}
                     variant={openTab === tab.id ? 'contained' : 'outlined'}
-                    startIcon={tab.icon}
+                    startIcon={<Icon icon="mdi:cart" />}
                     onClick={() => handleChangeTab(tab.id)}
                   >
-                    {tab.title}
+                    {tab.name}
                   </Button>
                 ))}
                 <IconButton onClick={handleAddTab}>

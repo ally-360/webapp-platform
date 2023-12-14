@@ -15,7 +15,6 @@ import { fCurrency } from 'src/utils/format-number';
 import Label from 'src/components/label';
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
-import { ColorPreview } from 'src/components/color-utils';
 //
 import { Typography } from '@mui/material';
 import { useCheckoutContext } from '../checkout/context';
@@ -27,8 +26,6 @@ export default function PosProductItem({ product }) {
 
   // const { id, name, images[0], price, colors, available, sizes, priceSale, newLabel, saleLabel } = product;
   const { id, name, images, priceSale, sku, quantityStock } = product;
-
-  console.log(product);
 
   const colors = ['red', 'blue'];
   const available = true;

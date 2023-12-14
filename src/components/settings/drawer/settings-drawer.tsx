@@ -10,6 +10,7 @@ import Drawer, { drawerClasses } from '@mui/material/Drawer';
 // theme
 import { paper } from 'src/theme/css';
 //
+import React from 'react';
 import Iconify from '../../iconify';
 import Scrollbar from '../../scrollbar';
 //

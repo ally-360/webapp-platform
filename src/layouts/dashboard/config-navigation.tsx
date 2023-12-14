@@ -121,6 +121,21 @@ export function useNavData() {
             ]
           },
           {
+            title: t('POS'),
+            path: paths.dashboard.pos,
+            icon: ICONS.inventory,
+            children: [
+              {
+                title: t('Punto de venta'),
+                path: paths.dashboard.pos
+              },
+              {
+                title: t('Caja'),
+                path: paths.dashboard.pos
+              }
+            ]
+          },
+          {
             title: t('Ventas'),
             path: paths.dashboard.sales.root,
             icon: ICONS.ventas,

@@ -1,8 +1,15 @@
 import { useCallback, useState } from 'react';
 
 // ----------------------------------------------------------------------
+interface useBooleanInterface {
+  value: boolean;
+  onTrue: () => void;
+  onFalse: () => void;
+  onToggle: () => void;
+  setValue: (value: boolean) => void;
+}
 
-export function useBoolean(defaultValue) {
+export function useBoolean(defaultValue: boolean): useBooleanInterface {
   const [value, setValue] = useState(!!defaultValue);
 
   const onTrue = useCallback(() => {
@@ -22,6 +29,6 @@ export function useBoolean(defaultValue) {
     onTrue,
     onFalse,
     onToggle,
-    setValue,
+    setValue
   };
 }

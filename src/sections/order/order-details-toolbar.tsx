@@ -13,7 +13,7 @@ import { fDateTime } from 'src/utils/format-time';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-
+import React from 'react';
 // ----------------------------------------------------------------------
 
 export default function OrderDetailsToolbar({
@@ -22,7 +22,7 @@ export default function OrderDetailsToolbar({
   createdAt,
   orderNumber,
   statusOptions,
-  onChangeStatus,
+  onChangeStatus
 }) {
   const popover = usePopover();
 
@@ -32,7 +32,7 @@ export default function OrderDetailsToolbar({
         spacing={3}
         direction={{ xs: 'column', md: 'row' }}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         <Stack spacing={1} direction="row" alignItems="flex-start">
@@ -62,13 +62,7 @@ export default function OrderDetailsToolbar({
           </Stack>
         </Stack>
 
-        <Stack
-          flexGrow={1}
-          spacing={1.5}
-          direction="row"
-          alignItems="center"
-          justifyContent="flex-end"
-        >
+        <Stack flexGrow={1} spacing={1.5} direction="row" alignItems="center" justifyContent="flex-end">
           <Button
             color="inherit"
             variant="outlined"
@@ -79,11 +73,7 @@ export default function OrderDetailsToolbar({
             {status}
           </Button>
 
-          <Button
-            color="inherit"
-            variant="outlined"
-            startIcon={<Iconify icon="solar:printer-minimalistic-bold" />}
-          >
+          <Button color="inherit" variant="outlined" startIcon={<Iconify icon="solar:printer-minimalistic-bold" />}>
             Print
           </Button>
 
@@ -93,12 +83,7 @@ export default function OrderDetailsToolbar({
         </Stack>
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="top-right"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="top-right" sx={{ width: 140 }}>
         {statusOptions.map((option) => (
           <MenuItem
             key={option.value}
@@ -122,5 +107,5 @@ OrderDetailsToolbar.propTypes = {
   onChangeStatus: PropTypes.func,
   orderNumber: PropTypes.string,
   status: PropTypes.string,
-  statusOptions: PropTypes.array,
+  statusOptions: PropTypes.array
 };

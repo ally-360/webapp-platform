@@ -29,8 +29,6 @@ import AppWelcomeStep from '../app-welcome-step';
 export default function OverviewAppView() {
   const { user } = useAuthContext();
 
-  console.log(user);
-
   const theme = useTheme();
 
   const settings = useSettingsContext();

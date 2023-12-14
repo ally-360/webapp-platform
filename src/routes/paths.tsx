@@ -116,7 +116,7 @@ export const paths = {
       details: (id: string) => `${ROOTS.DASHBOARD}/sales/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/sales/${id}/edit`
     },
-    pos: `${ROOTS.DASHBOARD}/pos`,
+    pos: `/pos`,
     bill: {
       root: `${ROOTS.DASHBOARD}/bill`,
       newBill: `${ROOTS.DASHBOARD}/bill/new-bill`,

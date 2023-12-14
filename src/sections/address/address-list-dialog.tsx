@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -12,7 +12,8 @@ import ListItemButton, { listItemButtonClasses } from '@mui/material/ListItemBut
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import SearchNotFound from 'src/components/search-not-found';
-
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { getAllContacts } from 'src/redux/inventory/contactsSlice';
 // ----------------------------------------------------------------------
 
 export default function AddressListDialog({
@@ -24,13 +25,21 @@ export default function AddressListDialog({
   onClose,
   //
   selected,
-  onSelect,
+  onSelect
 }) {
   const [searchAddress, setSearchAddress] = useState('');
 
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(getAllContacts());
+  }, [dispatch]);
+
+  const { contacts } = useAppSelector((state) => state.contacts);
+
   const dataFiltered = applyFilter({
-    inputData: list,
-    query: searchAddress,
+    inputData: contacts,
+    query: searchAddress
   });
 
   const notFound = !dataFiltered.length && !!searchAddress;
@@ -40,8 +49,8 @@ export default function AddressListDialog({
   }, []);
 
   const handleSelectAddress = useCallback(
-    (address) => {
-      onSelect(address);
+    (contact) => {
+      onSelect(contact);
       setSearchAddress('');
       onClose();
     },
@@ -54,16 +63,16 @@ export default function AddressListDialog({
       sx={{
         p: 0.5,
         maxHeight: 80 * 8,
-        overflowX: 'hidden',
+        overflowX: 'hidden'
       }}
     >
-      {dataFiltered.map((address) => (
+      {dataFiltered.map((contact) => (
         <Stack
-          key={address.id}
+          key={contact.id}
           spacing={0.5}
           component={ListItemButton}
-          selected={selected(`${address.id}`)}
-          onClick={() => handleSelectAddress(address)}
+          selected={selected(`${contact.id}`)}
+          onClick={() => handleSelectAddress(contact)}
           sx={{
             py: 1,
             px: 1.5,
@@ -73,28 +82,26 @@ export default function AddressListDialog({
             [`&.${listItemButtonClasses.selected}`]: {
               bgcolor: 'action.selected',
               '&:hover': {
-                bgcolor: 'action.selected',
-              },
-            },
+                bgcolor: 'action.selected'
+              }
+            }
           }}
         >
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="subtitle2">{address.name}</Typography>
+            <Typography variant="subtitle2">{contact.name}</Typography>
 
-            {address.primary && <Label color="info">Default</Label>}
+            {contact.type === 2 && <Label color="info">Proveedor</Label>}
           </Stack>
 
-          {address.company && (
-            <Box sx={{ color: 'primary.main', typography: 'caption' }}>{address.company}</Box>
-          )}
+          {contact.email && <Box sx={{ color: 'primary.main', typography: 'caption' }}>{contact.email}</Box>}
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {address.fullAddress}
+            {contact.address}
           </Typography>
 
-          {address.phoneNumber && (
+          {contact.phoneNumber && (
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {address.phoneNumber}
+              {contact.phoneNumber}
             </Typography>
           )}
         </Stack>
@@ -104,12 +111,7 @@ export default function AddressListDialog({
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ p: 3, pr: 1.5 }}
-      >
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 3, pr: 1.5 }}>
         <Typography variant="h6"> {title} </Typography>
 
         {action && action}
@@ -125,16 +127,12 @@ export default function AddressListDialog({
               <InputAdornment position="start">
                 <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
               </InputAdornment>
-            ),
+            )
           }}
         />
       </Stack>
 
-      {notFound ? (
-        <SearchNotFound query={searchAddress} sx={{ px: 3, pt: 5, pb: 10 }} />
-      ) : (
-        renderList
-      )}
+      {notFound ? <SearchNotFound query={searchAddress} sx={{ px: 3, pt: 5, pb: 10 }} /> : renderList}
     </Dialog>
   );
 }
@@ -146,7 +144,7 @@ AddressListDialog.propTypes = {
   onSelect: PropTypes.func,
   open: PropTypes.bool,
   selected: PropTypes.func,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -154,10 +152,10 @@ AddressListDialog.propTypes = {
 function applyFilter({ inputData, query }) {
   if (query) {
     return inputData.filter(
-      (address) =>
-        address.name.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
-        address.fullAddress.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
-        `${address.company}`.toLowerCase().indexOf(query.toLowerCase()) !== -1
+      (contact) =>
+        contact.name.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
+        contact.address.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
+        `${contact.email}`.toLowerCase().indexOf(query.toLowerCase()) !== -1
     );
   }
 

@@ -6,13 +6,19 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
+import React from 'react';
 import { HEADER, NAV } from '../config-layout';
 
 // ----------------------------------------------------------------------
 
 const SPACING = 8;
 
-export default function Main({ children, sx, ...other }) {
+interface MainProps {
+  children: React.ReactNode;
+  sx?: any;
+}
+
+export default function Main({ children, sx, ...other }: MainProps) {
   const settings = useSettingsContext();
 
   const lgUp = useResponsive('up', 'lg');
@@ -33,8 +39,8 @@ export default function Main({ children, sx, ...other }) {
           pb: 10,
           ...(lgUp && {
             pt: `${HEADER.H_MOBILE * 2 + 40}px`,
-            pb: 15,
-          }),
+            pb: 15
+          })
         }}
       >
         {children}
@@ -56,10 +62,10 @@ export default function Main({ children, sx, ...other }) {
           py: `${HEADER.H_DESKTOP + SPACING}px`,
           width: `calc(100% - ${NAV.W_VERTICAL}px)`,
           ...(isNavMini && {
-            width: `calc(100% - ${NAV.W_MINI}px)`,
-          }),
+            width: `calc(100% - ${NAV.W_MINI}px)`
+          })
         }),
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -70,5 +76,5 @@ export default function Main({ children, sx, ...other }) {
 
 Main.propTypes = {
   children: PropTypes.node,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

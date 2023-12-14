@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import React from 'react';
 // @mui
 import { alpha, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -16,7 +17,7 @@ export default function LayoutOptions({ options, value, onChange }) {
     const baseStyles = {
       flexShrink: 0,
       borderRadius: 0.5,
-      bgcolor: 'grey.500',
+      bgcolor: 'grey.500'
     };
 
     const circle = (
@@ -25,7 +26,7 @@ export default function LayoutOptions({ options, value, onChange }) {
           ...baseStyles,
           width: 8,
           height: 8,
-          ...(selected && { background }),
+          ...(selected && { background })
         }}
       />
     );
@@ -38,9 +39,9 @@ export default function LayoutOptions({ options, value, onChange }) {
           height: 3,
           opacity: 0.48,
           ...(option === 'horizontal' && {
-            width: 12,
+            width: 12
           }),
-          ...(selected && { background }),
+          ...(selected && { background })
         }}
       />
     );
@@ -54,9 +55,9 @@ export default function LayoutOptions({ options, value, onChange }) {
           maxWidth: 12,
           opacity: 0.24,
           ...(option === 'horizontal' && {
-            width: 8,
+            width: 8
           }),
-          ...(selected && { background }),
+          ...(selected && { background })
         }}
       />
     );
@@ -72,15 +73,15 @@ export default function LayoutOptions({ options, value, onChange }) {
           height: 1,
           borderRight: `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
           ...(option === 'mini' && {
-            width: 16,
+            width: 162
           }),
           ...(option === 'horizontal' && {
             width: 1,
             height: 16,
             alignItems: 'center',
             borderRight: 'unset',
-            borderBottom: `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
-          }),
+            borderBottom: `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`
+          })
         }}
       >
         {circle}
@@ -101,8 +102,8 @@ export default function LayoutOptions({ options, value, onChange }) {
           bgcolor: 'grey.500',
           ...(selected && {
             opacity: 0.24,
-            background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
-          }),
+            background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
+          })
         }}
       />
     </Box>
@@ -126,15 +127,13 @@ export default function LayoutOptions({ options, value, onChange }) {
               ...(selected && {
                 bgcolor: 'background.paper',
                 boxShadow: `-24px 8px 24px -4px ${alpha(
-                  theme.palette.mode === 'light'
-                    ? theme.palette.grey[500]
-                    : theme.palette.common.black,
+                  theme.palette.mode === 'light' ? theme.palette.grey[500] : theme.palette.common.black,
                   0.08
-                )}`,
+                )}`
               }),
               ...(option === 'horizontal' && {
-                flexDirection: 'column',
-              }),
+                flexDirection: 'column'
+              })
             }}
           >
             {renderNav(option, selected)}
@@ -149,5 +148,5 @@ export default function LayoutOptions({ options, value, onChange }) {
 LayoutOptions.propTypes = {
   onChange: PropTypes.func,
   options: PropTypes.array,
-  value: PropTypes.string,
+  value: PropTypes.string
 };
