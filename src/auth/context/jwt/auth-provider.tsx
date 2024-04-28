@@ -4,6 +4,7 @@ import { useEffect, useReducer, useCallback, useMemo } from 'react';
 //
 // eslint-disable-next-line import/no-extraneous-dependencies
 import jwtDecode from 'jwt-decode';
+
 import {
   AuthCredentials,
   RegisterCompany,
@@ -150,9 +151,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setUserInformation = useCallback(async (accessToken: string): Promise<getUserResponse> => {
     // Desencripta el token y obtiene el usuario por el id
+    console.log(accessToken, 'accessToken');
+    console.log(jwtDecode);
     const token: tokenSchema = jwtDecode(accessToken);
+    console.log(token, 'token');
     const user = (await RequestService.fetchGetUserById(token.id)).data;
-
+    console.log(user, 'user');
     if (user.profile?.company?.id) {
       const Setcompany = (await RequestService.getCompanyById(user.profile?.company?.id, true)).data;
 
@@ -200,9 +204,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password
       });
-      setSession(response.data);
+      console.log(response.data.accessToken);
+      setSession(response.data.accessToken);
       // Set user to redux
-      const user = await setUserInformation(response.data);
+      const user = await setUserInformation(response.data.accessToken);
       dispatch({
         type: 'LOGIN',
         payload: {
@@ -252,8 +257,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token: tokenSchema = jwtDecode(accessToken as string);
       const response = await RequestService.createCompany(databody);
       const dataCompany: getCompanyResponse = response.data;
-      await RequestService.updateProfile({
-        id: state.user.profile?.id,
+      await RequestService.updateUser({
+        id: state.user.id,
         databody: { company: { id: response?.data?.id } }
       });
       const user = (await RequestService.fetchGetUserById(token.id)).data;
