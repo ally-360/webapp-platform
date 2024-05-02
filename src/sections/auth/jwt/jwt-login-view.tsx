@@ -42,8 +42,8 @@ export default function JwtLoginView() {
   const viewPassword = useBoolean(false); // Pass a default value of false to useBoolean
 
   const defaultValues: AuthCredentials = {
-    email: 'example@example.com',
-    password: 'myPassword123'
+    email: 'example@gmail.com',
+    password: 'Example123.'
   };
 
   const methods = useForm({

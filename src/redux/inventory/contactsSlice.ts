@@ -9,7 +9,8 @@ const initialState = {
   error: null,
   success: null,
   contactsEmpty: false,
-  popupAssignInventory: false,
+
+  contacsPopup: false,
 
   // Contact detail
   contact: null,
@@ -96,6 +97,9 @@ const contactsSlice = createSlice({
       state.contactLoading = false;
       state.contactError = null;
       state.contactSuccess = null;
+    },
+    togglePopup(state) {
+      state.contacsPopup = !state.contacsPopup;
     }
   }
 });
@@ -115,7 +119,8 @@ export const {
   updateContactSuccess,
   updateContactError,
   createContactSuccess,
-  resetContact
+  resetContact,
+  togglePopup
 } = contactsSlice.actions;
 
 // actions

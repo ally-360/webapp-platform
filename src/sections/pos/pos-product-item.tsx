@@ -32,7 +32,7 @@ export default function PosProductItem({ product }) {
   const sizes = ['S', 'M', 'L'];
   const saleLabel = { enabled: true, content: 'Sale' };
 
-  const linkTo = paths.product.details(id);
+  const linkTo = paths.dashboard.product.details(id);
 
   const handleAddCart = async () => {
     const newProduct = {

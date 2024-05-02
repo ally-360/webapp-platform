@@ -13,6 +13,7 @@ import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
 import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';
 import FormPDVS from 'src/sections/PDVS/pdv-new-edit-form';
 import { useAppDispatch } from 'src/hooks/store';
+import { UserPopupCreateView } from 'src/sections/user/view';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -78,6 +79,7 @@ export default function DashboardLayout({ children }) {
           <PopupCreateCategory />
           <PopupCreateBrand />
           <FormPDVS />
+          <UserPopupCreateView />
         </Box>
       </>
     );
@@ -103,6 +105,7 @@ export default function DashboardLayout({ children }) {
         <Main>{children}</Main>
         <PopupCreateCategory />
         <PopupCreateBrand />
+        <UserPopupCreateView />
         <FormPDVS />
       </Box>
     </>

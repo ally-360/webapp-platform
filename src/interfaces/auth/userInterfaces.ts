@@ -1,16 +1,11 @@
-// export interface LoginUser {
-//   email: string;
-//   password: string;
-// }
-
-import * as Yup from 'yup';
+import { InferType } from 'yup';
 import { LoginSchema, RegisterCompanySchema, RegisterSchema } from './yupSchemas';
 
-export type AuthCredentials = Yup.InferType<typeof LoginSchema>;
+export type AuthCredentials = InferType<typeof LoginSchema>;
 
-export type RegisterUser = Yup.InferType<typeof RegisterSchema>;
+export type RegisterUser = InferType<typeof RegisterSchema>;
 
-export type RegisterCompany = Yup.InferType<typeof RegisterCompanySchema>;
+export type RegisterCompany = InferType<typeof RegisterCompanySchema>;
 
 export interface responseCompany extends RegisterCompany {
   id: string;
