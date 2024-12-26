@@ -1,5 +1,6 @@
 import { alpha } from '@mui/material/styles';
 import { alertClasses } from '@mui/material/Alert';
+import React from 'react';
 // components
 import Iconify from 'src/components/iconify';
 
@@ -26,13 +27,13 @@ export default function Alert(theme) {
           color: theme.palette[color][isLight ? 'darker' : 'lighter'],
           backgroundColor: theme.palette[color][isLight ? 'lighter' : 'darker'],
           [`& .${alertClasses.icon}`]: {
-            color: theme.palette[color][isLight ? 'main' : 'light'],
-          },
+            color: theme.palette[color][isLight ? 'main' : 'light']
+          }
         }),
         // FILLED
         ...(filledVariant && {
           color: theme.palette[color].contrastText,
-          backgroundColor: theme.palette[color].main,
+          backgroundColor: theme.palette[color].main
         }),
         // OUTLINED
         ...(outlinedVariant && {
@@ -40,10 +41,10 @@ export default function Alert(theme) {
           color: theme.palette[color][isLight ? 'dark' : 'light'],
           border: `solid 1px ${alpha(theme.palette[color].main, 0.16)}`,
           [`& .${alertClasses.icon}`]: {
-            color: theme.palette[color].main,
-          },
-        }),
-      }),
+            color: theme.palette[color].main
+          }
+        })
+      })
     }));
 
     return [...colorStyle];
@@ -56,24 +57,24 @@ export default function Alert(theme) {
           error: <Iconify icon="solar:danger-bold" width={24} />,
           info: <Iconify icon="eva:info-fill" width={24} />,
           success: <Iconify icon="eva:checkmark-circle-2-fill" width={24} />,
-          warning: <Iconify icon="eva:alert-triangle-fill" width={24} />,
-        },
+          warning: <Iconify icon="eva:alert-triangle-fill" width={24} />
+        }
       },
 
       styleOverrides: {
         root: ({ ownerState }) => rootStyles(ownerState),
         icon: {
-          opacity: 1,
-        },
-      },
+          opacity: 1
+        }
+      }
     },
     MuiAlertTitle: {
       styleOverrides: {
         root: {
           marginBottom: theme.spacing(0.5),
-          fontWeight: theme.typography.fontWeightSemiBold,
-        },
-      },
-    },
+          fontWeight: theme.typography.fontWeightSemiBold
+        }
+      }
+    }
   };
 }
