@@ -156,8 +156,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token: tokenSchema = jwtDecode(accessToken);
     console.log(token, 'token');
     const user = (await RequestService.fetchGetUserById(token.id)).data;
+    let pdvForCompany = null;
 
-    const pdvForCompany = (await RequestService.getCompanyById(user?.company[0]?.id, accessToken)).data;
+    if (user?.company[0].id) {
+      pdvForCompany = (await RequestService.getCompanyById(user?.company[0]?.id, accessToken)).data;
+    }
 
     console.log(user, 'user');
     if (user?.company[0].id) {
