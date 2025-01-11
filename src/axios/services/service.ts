@@ -30,6 +30,10 @@ class RequestService {
   updateProfile = async ({ id, databody }: { id: string; databody: updateProfile }) =>
     apiClient(configPatchWithToken(`/profile/${id}`, databody));
 
+  // update company to user
+  updateCompanyToUser = async ({ companyId, userId }) =>
+    apiClient(configPostWithToken(`/company/${companyId}/user/${userId}`, {}));
+
   // Products
 
   getProducts = async () => apiClient(configGetWithToken('/product'));

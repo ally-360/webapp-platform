@@ -156,19 +156,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const token: tokenSchema = jwtDecode(accessToken);
     console.log(token, 'token');
     const user = (await RequestService.fetchGetUserById(token.id)).data;
-    console.log(user, 'user');
-    if (user.profile?.company?.id) {
-      const Setcompany = (await RequestService.getCompanyById(user.profile?.company?.id, true)).data;
 
+    const pdvForCompany = (await RequestService.getCompanyById(user.company[0].id, accessToken)).data;
+
+    console.log(user, 'user');
+    if (user?.company[0].id) {
       dispatch({
         type: 'UPDATE_COMPANY',
         payload: {
-          company: Setcompany
+          company: user?.company[0]
         }
       });
 
-      if (Setcompany.pdvs?.length > 0) {
-        const { pdvs } = Setcompany;
+      console.log(pdvForCompany, 'pdvForCompany');
+
+      if (pdvForCompany?.pdvs) {
+        console.log(pdvForCompany?.pdvs, 'pdvForCompany?.pdvs');
+        const { pdvs } = pdvForCompany;
         dispatch({
           type: 'UPDATE_PDV',
           payload: {
@@ -257,10 +261,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token: tokenSchema = jwtDecode(accessToken as string);
       const response = await RequestService.createCompany(databody);
       const dataCompany: getCompanyResponse = response.data;
-      await RequestService.updateUser({
-        id: state.user.id,
-        databody: { company: { id: response?.data?.id } }
-      });
+      await RequestService.updateCompanyToUser({ companyId: response?.data?.id, userId: state.user.id });
+
       const user = (await RequestService.fetchGetUserById(token.id)).data;
       state.user = user;
 
