@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log(token, 'token');
     const user = (await RequestService.fetchGetUserById(token.id)).data;
 
-    const pdvForCompany = (await RequestService.getCompanyById(user.company[0].id, accessToken)).data;
+    const pdvForCompany = (await RequestService.getCompanyById(user?.company[0]?.id, accessToken)).data;
 
     console.log(user, 'user');
     if (user?.company[0].id) {
