@@ -158,12 +158,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const user = (await RequestService.fetchGetUserById(token.id)).data;
     let pdvForCompany = null;
 
-    if (user?.company !== null) {
+    if (user?.company.length > 0) {
       pdvForCompany = (await RequestService.getCompanyById(user?.company[0]?.id, accessToken)).data;
-    }
-
-    console.log(user, 'user');
-    if (user?.company[0].id) {
       dispatch({
         type: 'UPDATE_COMPANY',
         payload: {
