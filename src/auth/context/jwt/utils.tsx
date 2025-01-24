@@ -63,7 +63,7 @@ export const tokenExpired = (exp: number) => {
 
 // ----------------------------------------------------------------------
 
-export const setSession = (accessToken: string) => {
+export const setSession = (accessToken: string | null) => {
   if (accessToken) {
     localStorage.setItem('accessToken', accessToken);
 

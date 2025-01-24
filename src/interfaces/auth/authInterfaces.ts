@@ -1,10 +1,10 @@
-import { AuthCredentials, RegisterUser, getCompanyResponse, getPDVResponse, getUserResponse } from './userInterfaces';
+import { AuthCredentials, RegisterUser, GetCompanyResponse, GetPDVResponse, GetUserResponse } from './userInterfaces';
 
 export interface AuthContextType {
   /**
    * Datos del usuario autenticado.
    */
-  user: getUserResponse; // TODO: agregar interfaz de usuario
+  user: GetUserResponse | null;
 
   /**
    * Retorna true si la aplicación está cargando el estado de autenticación.
@@ -23,12 +23,12 @@ export interface AuthContextType {
   /**
    * Datos de la empresa a la que pertenece el usuario.
    */
-  company: getCompanyResponse; // TODO: agregar interfaz de company
+  company: GetCompanyResponse | null;
   /**
    * Datos de los puntos de venta de la empresa a la que pertenece el usuario.
    */
-  pdvCompany: getPDVResponse; // TODO: agregar interfaz de pdvCompany
-  method: 'jwt';
+  pdvCompany: GetPDVResponse; // TODO: agregar interfaz de pdvCompany
+  method: string;
 
   /**
    * Inicia sesión en la aplicación.
@@ -45,7 +45,7 @@ export interface AuthContextType {
   /**
    * Cierra la sesión del usuario actual y limpia la sesión.
    */
-  logout: () => Promise<void>;
+  logout: () => void;
 
   // TODO: agregar interfaz de todos los de aqui abajo
 
@@ -54,10 +54,10 @@ export interface AuthContextType {
    */
   updateCompany: (data: object) => Promise<void>;
 
-  /**
-   * Actualiza los datos de los puntos de venta de la empresa a la que pertenece el usuario.
-   */
-  updatePdvCompany: (data: object) => Promise<void>;
+  // /**
+  //  * Actualiza los datos de los puntos de venta de la empresa a la que pertenece el usuario.
+  //  */
+  // updatePdvCompany: (data: object) => Promise<void>;
 
   /**
    * Crea una nueva empresa.
@@ -72,10 +72,10 @@ export interface AuthContextType {
   /**
    * Actualiza los datos del usuario actual.
    */
-  updateProfile: (data: object) => Promise<void>;
+  updateProfile: (id: string, data: object) => Promise<void>;
 
   /**
    * Actualiza los datos del perfil actual.
    */
-  updateProfileInfo: (data: object) => Promise<void>;
+  updateProfileInfo: (id: string, data: object) => Promise<void>;
 }
