@@ -8,7 +8,6 @@ import SvgColor from 'src/components/svg-color';
 import { useDispatch } from 'react-redux';
 import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
-import { switchPopup } from 'src/redux/inventory/pdvsSlice';
 import { useNavigate } from 'react-router';
 
 // ----------------------------------------------------------------------
@@ -105,19 +104,18 @@ export function useNavData() {
                 openPopup() {
                   dispatch(switchPopupStateBrands(true));
                 }
-              },
-
-              {
-                title: t('Puntos de venta'),
-                path: paths.dashboard.inventory.pdvs,
-                openPopup() {
-                  dispatch(switchPopup(true));
-                }
-              },
-              {
-                title: t('Ajuste de inventario'),
-                path: paths.dashboard.inventory.pdvs
               }
+              // {
+              //   title: t('Puntos de venta'),
+              //   path: paths.dashboard.inventory.pdvs,
+              //   openPopup() {
+              //     dispatch(switchPopup(true));
+              //   }
+              // },
+              // {
+              //   title: t('Ajuste de inventario'),
+              //   path: paths.dashboard.inventory.pdvs
+              // }
             ]
           },
           {

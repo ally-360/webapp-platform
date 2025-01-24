@@ -17,14 +17,7 @@ import { useSettingsContext } from 'src/components/settings';
 //
 import React from 'react';
 import { HEADER, NAV } from '../config-layout';
-import {
-  Searchbar,
-  AccountPopover,
-  SettingsButton,
-  LanguagePopover,
-  ContactsPopover,
-  NotificationsPopover
-} from '../_common';
+import { Searchbar, AccountPopover, SettingsButton, ContactsPopover } from '../_common';
 // ----------------------------------------------------------------------
 
 export default function Header({ onOpenNav }) {
@@ -55,9 +48,11 @@ export default function Header({ onOpenNav }) {
       <Searchbar />
 
       <Stack flexGrow={1} direction="row" alignItems="center" justifyContent="flex-end" spacing={{ xs: 0.5, sm: 1 }}>
-        <LanguagePopover />
+        {/* Comentado switch idioma */}
+        {/* <LanguagePopover /> */}
 
-        <NotificationsPopover />
+        {/* Comantado las notificaciones */}
+        {/* <NotificationsPopover /> */}
 
         <ContactsPopover />
 

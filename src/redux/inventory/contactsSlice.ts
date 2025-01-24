@@ -1,9 +1,26 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { ContactInterface } from '../../interfaces/auth/userInterfaces';
 import RequestService from '../../axios/services/service';
 
 // constantes
 
-const initialState = {
+interface ContactsState {
+  contacts: ContactInterface[];
+  contactsLoading: boolean;
+  error: any;
+  success: any;
+  contactsEmpty: boolean;
+
+  contacsPopup: boolean;
+
+  // Contact detail
+  contact: ContactInterface | null;
+  contactLoading: boolean;
+  contactError: any;
+  contactSuccess: any;
+}
+
+const initialState: ContactsState = {
   contacts: [],
   contactsLoading: false,
   error: null,

@@ -72,3 +72,35 @@ export interface Location {
   id: number;
   name?: string;
 }
+
+export interface Identity {
+  id: number;
+  typeDocument: number;
+  typePerson: number;
+  number: number;
+  dv: number;
+}
+
+export interface Town {
+  id: number;
+  name: string;
+}
+
+export interface ContactInterface {
+  id: number;
+  name: string;
+  lastname: string;
+  email: string;
+  address: string;
+  phoneNumber: string;
+  phoneNumber2: string;
+  type: number;
+  identityId: number;
+  companyId: string;
+  townId: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  identity: Identity;
+  town: Town;
+}
