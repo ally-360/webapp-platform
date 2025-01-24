@@ -75,6 +75,13 @@ export const setSession = (accessToken: string) => {
   }
 };
 
+/**
+ * Set session for company id in localStorage and axios headers for company-id
+ * @param companyId
+ * @returns
+ * @example
+ * setSessionCompanyId('company-id');
+ */
 export const setSessionCompanyId = (companyId: string) => {
   if (companyId) {
     localStorage.setItem('companyId', companyId);

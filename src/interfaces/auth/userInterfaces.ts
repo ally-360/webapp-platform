@@ -7,20 +7,20 @@ export type RegisterUser = InferType<typeof RegisterSchema>;
 
 export type RegisterCompany = InferType<typeof RegisterCompanySchema>;
 
-export interface responseCompany extends RegisterCompany {
+export interface ResponseCompany extends RegisterCompany {
   id: string;
 }
 
-export interface getUserResponse {
+export interface GetUserResponse {
   id: string;
   verified: boolean;
   verifyToken: unknown;
   resetPasswordToken: unknown;
   firstLogin: boolean;
-  profile: getProfileResponse;
+  profile: GetProfileResponse;
 }
 
-export interface getProfileResponse {
+export interface GetProfileResponse {
   id: string;
   email: string;
   name: string;
@@ -28,10 +28,10 @@ export interface getProfileResponse {
   dni: string;
   personalPhoneNumber: string;
   photo: string;
-  company: getCompanyResponse;
+  company: GetCompanyResponse;
 }
 
-export interface getCompanyResponse {
+export interface GetCompanyResponse {
   id: string;
   name: string;
   nit: string;
@@ -42,7 +42,7 @@ export interface getCompanyResponse {
   economicActivity: string;
 }
 
-export interface updateProfile {
+export interface UpdateProfile {
   id?: string;
   email?: string;
   name?: string;
@@ -56,7 +56,7 @@ export interface updateProfile {
 }
 
 // TODO: retornar en location el departamento y la ciudad
-export interface getPDVResponse {
+export interface GetPDVResponse {
   id: string;
   name: string;
   description: string;

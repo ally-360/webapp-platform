@@ -61,7 +61,8 @@ export default function StepByStep() {
   }, [company, dispatch]);
 
   useEffect(() => {
-    if (pdvCompany) {
+    if (pdvCompany && pdvCompany.id) {
+      console.log(pdvCompany);
       dispatch(setStep(2));
       dispatch(setPrevValuesPDV(pdvCompany));
     }

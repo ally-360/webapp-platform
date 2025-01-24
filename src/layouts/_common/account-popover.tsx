@@ -12,13 +12,14 @@ import Typography from '@mui/material/Typography';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
 // auth
 import { useAuthContext } from 'src/auth/hooks';
 // components
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+
+import React from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -42,8 +43,7 @@ const OPTIONS = [
 export default function AccountPopover() {
   const router = useRouter();
 
-  const { user } = useMockedUser();
-
+  const { user } = useAuthContext();
   const { logout } = useAuthContext();
 
   const { enqueueSnackbar } = useSnackbar();
@@ -78,10 +78,12 @@ export default function AccountPopover() {
           width: 40,
           height: 40,
           background: (theme) => alpha(theme.palette.grey[500], 0.08),
-          ...(popover.open && {
-            background: (theme) =>
-              `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
-          })
+          ...(popover.open
+            ? {
+                background: (theme) =>
+                  `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
+              }
+            : {})
         }}
       >
         <Avatar

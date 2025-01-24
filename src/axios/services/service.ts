@@ -4,8 +4,8 @@ import {
   AuthCredentials,
   RegisterCompany,
   RegisterUser,
-  getUserResponse,
-  updateProfile
+  GetUserResponse,
+  UpdateProfile
 } from 'src/interfaces/auth/userInterfaces';
 import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
 import apiClient from '../axios';
@@ -22,10 +22,10 @@ class RequestService {
 
   fetchGetUserById = async (id: string) => apiClient.get(`/user/${id}`);
 
-  updateUser = async ({ id, databody }: { id: string; databody: getUserResponse }) =>
+  updateUser = async ({ id, databody }: { id: string; databody: GetUserResponse }) =>
     apiClient(configPatchWithToken(`/user/${id}`, databody));
 
-  updateProfile = async ({ id, databody }: { id: string; databody: updateProfile }) =>
+  updateProfile = async ({ id, databody }: { id: string; databody: UpdateProfile }) =>
     apiClient(configPatchWithToken(`/profile/${id}`, databody));
 
   // update company to user
