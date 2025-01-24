@@ -129,7 +129,7 @@ export const getAllContacts = () => async (dispatch) => {
   try {
     dispatch(startLoading());
     const response = await RequestService.getContacts();
-    dispatch(getAllContactsSuccess(response.data));
+    dispatch(getAllContactsSuccess(response.data.data));
   } catch (error) {
     dispatch(hasError(error));
   }

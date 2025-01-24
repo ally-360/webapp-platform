@@ -110,7 +110,7 @@ export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
         }}
       >
         <Card sx={{ p: 2, mb: 2 }}>
-          <OrderDetailsToolbar backLink={paths.dashboard.order.root} orderNumber={sale.id} createdAt={sale.date} />
+          <OrderDetailsToolbar backLink={paths.dashboard.order.root} orderNumber="1" createdAt="12/12/2021" />
           <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
             <TextField size="small" fullWidth label="Tipo de venta" name="saleType" />
             <TextField size="small" fullWidth label="IVA" name="iva" />

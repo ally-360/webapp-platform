@@ -16,7 +16,7 @@ import {
 import { setPrevValuesCompany } from 'src/redux/inventory/stepByStepSlice';
 import { tokenSchema } from 'src/interfaces/auth/tokenInterface';
 import { AuthContext } from './auth-context';
-import { setSession } from './utils';
+import { setSession, setSessionCompanyId } from './utils';
 import RequestService from '../../../axios/services/service';
 
 // ----------------------------------------------------------------------
@@ -150,12 +150,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [initialize]);
 
   const setUserInformation = useCallback(async (accessToken: string): Promise<getUserResponse> => {
-    // Desencripta el token y obtiene el usuario por el id
-    console.log(accessToken, 'accessToken');
-    console.log(jwtDecode);
     const token: tokenSchema = jwtDecode(accessToken);
     console.log(token, 'token');
-    const user = (await RequestService.fetchGetUserById(token.id)).data;
+    const { data: user } = await RequestService.fetchGetUserById(token.id);
+
+    setSessionCompanyId(user?.company[0]?.id);
+
     let pdvForCompany = null;
 
     if (user?.company.length > 0) {
@@ -203,14 +203,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // LOGIN
   const login = useCallback(
     async ({ email, password }: AuthCredentials): Promise<void> => {
-      const response = await RequestService.fetchLoginUser({
-        email,
-        password
-      });
-      console.log(response.data.accessToken);
+      const response = (
+        await RequestService.fetchLoginUser({
+          email,
+          password
+        })
+      ).data;
       setSession(response.data.accessToken);
-      // Set user to redux
       const user = await setUserInformation(response.data.accessToken);
+
+      // TODO: establecer company id en el local storage y pasarlo en el fetchwithtoken
+
       dispatch({
         type: 'LOGIN',
         payload: {

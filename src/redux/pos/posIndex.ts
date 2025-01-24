@@ -22,7 +22,7 @@ const initialState = {
         }
       ],
       customer: 'Cliente 1',
-      date: new Date(),
+      date: '',
       seller: 'Vendedor 1'
     }
   ] // Agregando esto para manejar las ventanas de venta
@@ -41,14 +41,14 @@ const posSlice = createSlice({
       state.error = action.payload;
     },
     addSaleWindow(state) {
-      state.salesWindows.push({
-        id: Date.now(),
-        products: [],
-        customer: '',
-        date: new Date(),
-        seller: '',
-        name: `venta ${state.salesWindows.length}`
-      });
+      // state.salesWindows.push({
+      //   id: state.salesWindows.length + 1,
+      //   products: [],
+      //   customer: '',
+      //   date: '',
+      //   seller: '',
+      //   name: `venta ${state.salesWindows.length}`
+      // });
     },
     updateSaleWindow(state, action) {
       const index = state.salesWindows.findIndex((window) => window.id === action.payload.id);

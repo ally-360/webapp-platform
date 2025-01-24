@@ -23,7 +23,7 @@ export default function CustomPopover({
   hiddenArrow,
   sx,
   ...other
-}: CustomPopoverProps) {
+}: Readonly<CustomPopoverProps>) {
   const { style, anchorOrigin, transformOrigin } = getPosition(arrow);
 
   return (

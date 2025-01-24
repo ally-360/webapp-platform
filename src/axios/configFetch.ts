@@ -46,6 +46,7 @@ export const configPatchWithToken = (url: string, databody: object | string) => 
 
 export const configPostWithToken = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
+  // TODO: establecer company id en el local storage y pasarlo en el fetchwithtoken
   return {
     method: 'post',
     url,

@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import {
   AuthCredentials,
   RegisterCompany,
@@ -14,15 +14,13 @@ class RequestService {
   /**
    *
    */
-  fetchLoginUser = async (databody: AuthCredentials): Promise<AxiosResponse> =>
-    apiClient(configPostWithToken('/auth/login', databody));
+  fetchLoginUser = async (databody: AuthCredentials) => apiClient.post('/auth/login', databody);
 
-  fetchRegisterUser = async (databody: RegisterUser): Promise<AxiosResponse> =>
-    apiClient(configPostWithToken('/auth/register', databody));
+  fetchRegisterUser = async (databody: RegisterUser) => apiClient.post('/auth/register', databody);
 
   // Users
 
-  fetchGetUserById = async (id: string): Promise<AxiosResponse> => apiClient(configGetWithToken(`/user/${id}`));
+  fetchGetUserById = async (id: string) => apiClient.get(`/user/${id}`);
 
   updateUser = async ({ id, databody }: { id: string; databody: getUserResponse }) =>
     apiClient(configPatchWithToken(`/user/${id}`, databody));

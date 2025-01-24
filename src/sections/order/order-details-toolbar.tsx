@@ -4,7 +4,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // routes
 // utils
-import { fDateTime } from 'src/utils/format-time';
 // components
 import { usePopover } from 'src/components/custom-popover';
 import React from 'react';
@@ -28,7 +27,7 @@ export default function OrderDetailsToolbar({ backLink, createdAt, orderNumber }
           </Stack>
 
           <Typography variant="body2" sx={{ color: 'text.disabled' }}>
-            {fDateTime(createdAt)}
+            {/* {fDateTime(createdAt)} */}
           </Typography>
         </Stack>
       </Stack>
@@ -48,7 +47,7 @@ export default function OrderDetailsToolbar({ backLink, createdAt, orderNumber }
 
 OrderDetailsToolbar.propTypes = {
   backLink: PropTypes.string,
-  createdAt: PropTypes.instanceOf(Date),
+  // createdAt: PropTypes.instanceOf(Date),
   onChangeStatus: PropTypes.func,
   orderNumber: PropTypes.string,
   status: PropTypes.string,
