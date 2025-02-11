@@ -18,6 +18,7 @@ import { useAuthContext } from 'src/auth/hooks';
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { t } from 'i18next';
 
 import React from 'react';
 
@@ -52,12 +53,12 @@ export default function AccountPopover() {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      logout();
       popover.onClose();
       router.replace('/auth/jwt/login?returnTo=%2F');
     } catch (error) {
       console.error(error);
-      enqueueSnackbar('Unable to logout!', { variant: 'error' });
+      enqueueSnackbar('No pudimos cerrar sesión!', { variant: 'error' });
     }
   };
 
@@ -87,8 +88,8 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={user?.photo}
-          alt={user?.name}
+          src={user?.profile?.photo}
+          alt={user?.profile?.name}
           sx={{
             width: 36,
             height: 36,
@@ -100,11 +101,11 @@ export default function AccountPopover() {
       <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 200, p: 0 }}>
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {user?.profile?.name}
+            {`${user?.profile?.name} ${user?.profile?.lastname}`}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {user?.profile?.company?.name}
+            {user?.company[0]?.name}
           </Typography>
         </Box>
 
@@ -113,7 +114,7 @@ export default function AccountPopover() {
         <Stack sx={{ p: 1 }}>
           {OPTIONS.map((option) => (
             <MenuItem key={option.label} onClick={() => handleClickItem(option.linkTo)}>
-              {option.label}
+              {t(option.label)}
             </MenuItem>
           ))}
         </Stack>
@@ -121,7 +122,7 @@ export default function AccountPopover() {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <MenuItem onClick={handleLogout} sx={{ m: 1, fontWeight: 'fontWeightBold', color: 'error.main' }}>
-          Logout
+          {t('Logout')}
         </MenuItem>
       </CustomPopover>
     </>

@@ -19,10 +19,10 @@ interface TablePaginationCustomProps {
 export default function TablePaginationCustom({
   dense,
   onChangeDense,
-  rowsPerPageOptions = [10, 25, 50, 100],
+  rowsPerPageOptions = [10, 25],
   sx,
   ...other
-}: TablePaginationCustomProps) {
+}: Readonly<TablePaginationCustomProps>) {
   return (
     <Box sx={{ position: 'relative', ...sx }}>
       <TablePagination

@@ -69,7 +69,32 @@
   "phoneNumber2 must be a valid phone number": "Número de teléfono debe ser un número válido",
   "password must be longer than or equal to 6 characters": "La contraseña debe ser mayor o igual a 6 caracteres",
   "Something went wrong": "Algo salió mal",
-
+  "Home": "Inicio",
+  "Settings": "Configuración",
+  "Logout": "Cerrar sesión",
+  "Email Address": "Correo electrónico",
+  "Password": "Contraseña",
+  "Forgot Password?": "¿Olvidaste tu contraseña?",
+  "Login": "Iniciar sesión",
+  "Don't have an account?": "¿No tienes una cuenta?",
+  "Sign Up": "Regístrate",
+  "Sign In": "Iniciar sesión",
+  "Create Account": "Crear cuenta",
+  "Forgot your password?": "¿Olvidaste tu contraseña?",
+  "Enter your email to reset your password": "Ingresa tu correo para restablecer tu contraseña",
+  "Email": "Correo",
+  "Reset Password": "Restablecer contraseña",
+  "Old Password": "Contraseña actual",
+  "New Password": "Nueva contraseña",
+  "Confirm New Password": "Confirmar contraseña",
+  "Save Change": "Guardar cambios",
+  "Password must be minimum 6+": "La contraseña debe tener un mínimo de 6+",
+  "Old Password is required": "La contraseña actual es requerida",
+  "New Password is required": "La nueva contraseña es requerida",
+  "Confirm New Password is required": "Confirmar nueva contraseña es requerida",
+  "Password does not match": "La contraseña no coincide",
+  "Passwords must match": "Las contraseñas deben coincidir",
+  
   "demo": {
   "title": "Inglés"
   }

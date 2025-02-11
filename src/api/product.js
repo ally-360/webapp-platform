@@ -2,6 +2,7 @@ import useSWR from 'swr';
 import { useMemo } from 'react';
 // utils
 import { fetcher, endpoints } from 'src/utils/axios';
+import { useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
@@ -47,21 +48,25 @@ export function useGetProduct(productId) {
 // ----------------------------------------------------------------------
 
 export function useSearchProducts(query) {
-  const URL = query ? [endpoints.product.search, { params: { query } }] : null;
+  const { products, productsLoading, error } = useAppSelector((state) => state.products);
 
-  const { data, isLoading, error, isValidating } = useSWR(URL, fetcher, {
-    keepPreviousData: true
-  });
+  const filteredProducts = useMemo(() => {
+    if (!query) return products;
+
+    return products.filter(
+      (product) => product.name.toLowerCase().includes(query.toLowerCase()) // Se asume que cada producto tiene un 'name'
+    );
+  }, [products, query]);
 
   const memoizedValue = useMemo(
     () => ({
-      searchResults: data?.results || [],
-      searchLoading: isLoading,
+      searchResults: filteredProducts,
+      searchLoading: productsLoading,
       searchError: error,
-      searchValidating: isValidating,
-      searchEmpty: !isLoading && !data?.results.length
+      searchValidating: false, // No hay validación porque no estamos haciendo una petición
+      searchEmpty: !productsLoading && filteredProducts.length === 0
     }),
-    [data?.results, error, isLoading, isValidating]
+    [filteredProducts, error, productsLoading]
   );
 
   return memoizedValue;

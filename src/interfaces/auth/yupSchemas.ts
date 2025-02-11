@@ -1,4 +1,5 @@
-import { string, object, boolean } from 'yup';
+import { string, object, boolean, ref } from 'yup';
+import { t } from 'i18next';
 
 export const LoginSchema = object().shape({
   email: string()
@@ -54,4 +55,13 @@ export const RegisterPDVSchema = object().shape({
   phoneNumber: string().required('Teléfono requerido'),
   main: boolean().optional(),
   company: object().optional()
+});
+
+export const ChangePassWordSchema = object().shape({
+  oldPassword: string().required(t('Old Password is required')),
+  newPassword: string()
+    .required(t('New Password is required'))
+    .min(6, t('Password must be at least 6 characters'))
+    .test('no-match', t('New password must be different'), (value, { parent }) => value !== parent.oldPassword),
+  confirmNewPassword: string().oneOf([ref('newPassword')], t('Passwords must match'))
 });

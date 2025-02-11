@@ -30,12 +30,6 @@ import PosProductShopView from '../pos-product-shop-view';
 import PosCartIcon from '../pos-cart-icon';
 
 export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
-  const clientes = [
-    { name: 'Cliente 1', id: 1, cc: '123456789', phone: '123456789', email: 'prueba@gmail.com', address: 'Calle 123' },
-    { name: 'Cliente 2', id: 2, cc: '123456789', phone: '123456789', email: 'prueba2@gmail.com', address: 'Calle 123' },
-    { name: 'Cliente 3', id: 3, cc: '123456789', phone: '123456789', email: 'prueba3@gmail.com', address: 'Calle 123' }
-  ];
-
   const id = 'e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1';
 
   const currentOrder = _orders.filter((order) => order.id === id)[0];
@@ -238,7 +232,7 @@ export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
           <Divider />
           <Stack spacing={3} direction={{ xs: 'column-reverse', md: 'column' }}>
             <OrderDetailsItems
-              items={currentOrder.items}
+              items={currentOrder.items} // TODO: agregar items de sales.
               taxes={currentOrder.taxes}
               shipping={currentOrder.shipping}
               discount={currentOrder.discount}

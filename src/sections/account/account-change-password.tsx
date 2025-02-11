@@ -1,4 +1,3 @@
-import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -13,50 +12,40 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { t } from 'i18next';
+import React from 'react';
+import { ChangePassWordSchema } from 'src/interfaces/auth/yupSchemas';
+import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
 export default function AccountChangePassword() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const password = useBoolean();
-
-  const ChangePassWordSchema = Yup.object().shape({
-    oldPassword: Yup.string().required('Old Password is required'),
-    newPassword: Yup.string()
-      .required('New Password is required')
-      .min(6, 'Password must be at least 6 characters')
-      .test(
-        'no-match',
-        'New password must be different than old password',
-        (value, { parent }) => value !== parent.oldPassword
-      ),
-    confirmNewPassword: Yup.string().oneOf([Yup.ref('newPassword')], 'Passwords must match'),
-  });
+  const password = useBoolean(true);
 
   const defaultValues = {
     oldPassword: '',
     newPassword: '',
-    confirmNewPassword: '',
+    confirmNewPassword: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(ChangePassWordSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await RequestService.changePassword(data);
       reset();
       enqueueSnackbar('Update success!');
-      console.info('DATA', data);
     } catch (error) {
       console.error(error);
     }
@@ -68,7 +57,7 @@ export default function AccountChangePassword() {
         <RHFTextField
           name="oldPassword"
           type={password.value ? 'text' : 'password'}
-          label="Old Password"
+          label={t('Old Password')}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -76,13 +65,13 @@ export default function AccountChangePassword() {
                   <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
                 </IconButton>
               </InputAdornment>
-            ),
+            )
           }}
         />
 
         <RHFTextField
           name="newPassword"
-          label="New Password"
+          label={t('New Password')}
           type={password.value ? 'text' : 'password'}
           InputProps={{
             endAdornment: (
@@ -91,12 +80,11 @@ export default function AccountChangePassword() {
                   <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
                 </IconButton>
               </InputAdornment>
-            ),
+            )
           }}
           helperText={
             <Stack component="span" direction="row" alignItems="center">
-              <Iconify icon="eva:info-fill" width={16} sx={{ mr: 0.5 }} /> Password must be minimum
-              6+
+              <Iconify icon="eva:info-fill" width={16} sx={{ mr: 0.5 }} /> {t('Password must be minimum 6+')}
             </Stack>
           }
         />
@@ -104,7 +92,7 @@ export default function AccountChangePassword() {
         <RHFTextField
           name="confirmNewPassword"
           type={password.value ? 'text' : 'password'}
-          label="Confirm New Password"
+          label={t('Confirm New Password')}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -112,12 +100,12 @@ export default function AccountChangePassword() {
                   <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
                 </IconButton>
               </InputAdornment>
-            ),
+            )
           }}
         />
 
         <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ ml: 'auto' }}>
-          Save Changes
+          {t('Save Change')}
         </LoadingButton>
       </Stack>
     </FormProvider>

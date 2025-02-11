@@ -5,7 +5,8 @@ import {
   RegisterCompany,
   RegisterUser,
   GetUserResponse,
-  UpdateProfile
+  UpdateProfile,
+  changePassword
 } from 'src/interfaces/auth/userInterfaces';
 import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
 import apiClient from '../axios';
@@ -18,6 +19,8 @@ class RequestService {
 
   fetchRegisterUser = async (databody: RegisterUser) => apiClient.post('/auth/register', databody);
 
+  changePassword = async (databody: changePassword) =>
+    apiClient(configPatchWithToken('/auth/change-password', databody));
   // Users
 
   fetchGetUserById = async (id: string) => apiClient.get(`/user/${id}`);
@@ -34,7 +37,8 @@ class RequestService {
 
   // Products
 
-  getProducts = async () => apiClient(configGetWithToken('/product'));
+  getProducts = async (page = 0, pageSize = 25) =>
+    apiClient(configGetWithToken(`/product?page=${page}&pageSize=${pageSize}`));
 
   updateProduct = async ({ id, databody }: { id: string; databody: object }) =>
     apiClient(configPatchWithToken(`/product/${id}`, databody));

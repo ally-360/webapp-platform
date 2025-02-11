@@ -1,11 +1,13 @@
 import { InferType } from 'yup';
-import { LoginSchema, RegisterCompanySchema, RegisterSchema } from './yupSchemas';
+import { LoginSchema, RegisterCompanySchema, RegisterSchema, ChangePassWordSchema } from './yupSchemas';
 
 export type AuthCredentials = InferType<typeof LoginSchema>;
 
 export type RegisterUser = InferType<typeof RegisterSchema>;
 
 export type RegisterCompany = InferType<typeof RegisterCompanySchema>;
+
+export type changePassword = InferType<typeof ChangePassWordSchema>;
 
 export interface ResponseCompany extends RegisterCompany {
   id: string;
@@ -14,21 +16,21 @@ export interface ResponseCompany extends RegisterCompany {
 export interface GetUserResponse {
   id: string;
   verified: boolean;
+  email: string;
   verifyToken: unknown;
   resetPasswordToken: unknown;
   firstLogin: boolean;
   profile: GetProfileResponse;
+  company: GetCompanyResponse;
 }
 
 export interface GetProfileResponse {
   id: string;
-  email: string;
   name: string;
   lastname: string;
   dni: string;
   personalPhoneNumber: string;
   photo: string;
-  company: GetCompanyResponse;
 }
 
 export interface GetCompanyResponse {
