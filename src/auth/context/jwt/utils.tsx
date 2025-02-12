@@ -23,6 +23,11 @@ function jwtDecode(token: string) {
   return JSON.parse(jsonPayload);
 }
 
+/**
+ * Get access token from local storage
+ * @returns access token
+ */
+
 export const getAccessToken = () => {
   const accessToken = window.localStorage.getItem('accessToken');
   return accessToken;
