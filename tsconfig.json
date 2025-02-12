@@ -112,7 +112,7 @@
     "target": "esnext",
     "module": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "react",
+    "jsx": "react-jsx",
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -122,7 +122,6 @@
     "isolatedModules": true,
     "noEmit": true,
     "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
-
       "baseUrl": ".",
       "paths": {
         "src/*": ["src/*"]
