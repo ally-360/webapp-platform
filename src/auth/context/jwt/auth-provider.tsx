@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import PropTypes from 'prop-types';
 import React, { useEffect, useReducer, useCallback, useMemo } from 'react';
 import jwtDecode from 'jwt-decode';
@@ -11,6 +10,7 @@ import {
   UpdateProfile
 } from 'src/interfaces/auth/userInterfaces';
 import { tokenSchema } from 'src/interfaces/auth/tokenInterface';
+import { useSnackbar } from 'notistack';
 import { AuthContext } from './auth-context';
 import { setSession, setSessionCompanyId } from './utils';
 import RequestService from '../../../axios/services/service';
@@ -60,6 +60,7 @@ const STORAGE_KEY = 'accessToken';
 
 export function AuthProvider({ children }: { readonly children: React.ReactNode }): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { enqueueSnackbar } = useSnackbar();
 
   /**
    * Set user information in context and validate if user has company and set company in context and pdv
@@ -91,27 +92,32 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
    * Initialize the context with the user information and validate if the user has a company
    */
   const initialize = useCallback(async () => {
-    const accessToken = window.localStorage.getItem(STORAGE_KEY);
-
-    if (accessToken) {
-      try {
+    try {
+      const accessToken = window.localStorage.getItem('accessToken');
+      if (accessToken) {
         setSession(accessToken);
         const user = await setUserInformation(accessToken);
         dispatch({
           type: 'INITIAL',
           payload: { user, isAuthenticated: true, isFirstLogin: user.firstLogin }
         });
-      } catch (error) {
-        console.error('Initialization error:', error);
-        dispatch({
-          type: 'INITIAL',
-          payload: { isAuthenticated: false }
-        });
+      } else {
+        throw new Error('No hay token disponible');
       }
-    } else {
-      dispatch({ type: 'INITIAL', payload: { isAuthenticated: false } });
+    } catch (error) {
+      enqueueSnackbar('No hay token disponible', {
+        variant: 'error'
+      });
+      dispatch({
+        type: 'INITIAL',
+        payload: {
+          user: null,
+          isAuthenticated: false,
+          isFirstLogin: false
+        }
+      });
     }
-  }, [setUserInformation]);
+  }, [setUserInformation, enqueueSnackbar]);
 
   useEffect(() => {
     initialize();
@@ -129,12 +135,13 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       const { data } = (await RequestService.fetchLoginUser({ email, password })).data;
       setSession(data.accessToken);
       const user = await setUserInformation(data.accessToken);
+      enqueueSnackbar('Bienvenido', { variant: 'success' });
       dispatch({
         type: 'LOGIN',
         payload: { user, isFirstLogin: user.firstLogin }
       });
     },
-    [setUserInformation]
+    [setUserInformation, enqueueSnackbar]
   );
 
   /**
@@ -162,12 +169,13 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     [state.company]
   );
 
-  const updatePDV = useCallback((pdvCompany: any) => {
-    dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany } });
+  const updatePDV = useCallback(async (id: string, databody: any) => {
+    await RequestService.editPDV({ id, databody });
+    dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: databody } });
   }, []);
 
   /**
-   * Create company and set company in context state and set company to user
+   * Crea un nuevo punto de venta y lo asocia a la empresa en el estado del contexto.
    * @param databody
    */
   const createCompany = useCallback(

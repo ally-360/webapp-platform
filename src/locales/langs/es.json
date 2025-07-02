@@ -51,18 +51,18 @@
   "Inventario": "Inventario",
   "Product Sold": "Producto vendido",
   "Productos": "Productos",
-  "Producto" : "Producto",
+  "Producto": "Producto",
   "Ventas": "Ventas",
-  "Activo" : "Activo",
-  "Inactivo" : "Inactivo",
-  "Código" : "Código",
-  "Paid" : "Pagadas",
-  "Pending" : "Pendientes",
-  "Overdue" : "Vencidas",
-  "Draft" : "Borrador",
-  "Start date" : "Creada",
-  "End date" : "Vencimiento",
-  "Search customer or invoice number..." : "Buscar cliente o número de factura...",
+  "Activo": "Activo",
+  "Inactivo": "Inactivo",
+  "Código": "Código",
+  "Paid": "Pagadas",
+  "Pending": "Pendientes",
+  "Overdue": "Vencidas",
+  "Draft": "Borrador",
+  "Start date": "Creada",
+  "End date": "Vencimiento",
+  "Search customer or invoice number...": "Buscar cliente o número de factura...",
   "property municipio should not exist": "La propiedad municipio no debería existir",
   "property sendEmail should not exist": "La propiedad sendEmail no debería existir",
   "The address format is invalid": "El formato de dirección es inválido",
@@ -94,8 +94,14 @@
   "Confirm New Password is required": "Confirmar nueva contraseña es requerida",
   "Password does not match": "La contraseña no coincide",
   "Passwords must match": "Las contraseñas deben coincidir",
-  
+  "Email address": "Correo electrónico",
   "demo": {
-  "title": "Inglés"
+    "title": "Inglés"
+  },
+  "errorsCode": {
+    "1": "Correo o contraseña incorrectos",
+    "2": "Tu sesión ha expirado, por favor inicia sesión de nuevo",
+    "3": "Ocurrió un error de red. Por favor, inténtalo de nuevo",
+    "4": "Ocurrió un error desconoicido. Por favor, inténtalo de nuevo"
   }
-  }
+}

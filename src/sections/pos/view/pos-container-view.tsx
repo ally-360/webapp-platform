@@ -48,7 +48,7 @@ export default function PosContainerView() {
   useEffect(() => {
     if (addingNewSale && sales.length > 0) {
       setOpenTab(sales[sales.length - 1].id);
-      setAddingNewSale(false); // Restablecer el indicador
+      setAddingNewSale(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addingNewSale]);

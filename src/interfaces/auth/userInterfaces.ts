@@ -66,8 +66,8 @@ export interface GetPDVResponse {
   phoneNumber: string;
   main: boolean;
   location?: Location;
-  departamento?: string;
-  municipio?: string;
+  departamento?: string | null;
+  municipio?: string | null;
 }
 
 export interface Location {

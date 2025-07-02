@@ -53,7 +53,10 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{address}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{town.name}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {/* TODO: remplazar */}
+          {/* {town.name} */}
+        </TableCell>
 
         <TableCell>
           <Label

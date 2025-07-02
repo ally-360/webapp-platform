@@ -1,4 +1,5 @@
-import { string, object, boolean, ref } from 'yup';
+import { string, object, ref } from 'yup';
+import * as yup from 'yup';
 import { t } from 'i18next';
 
 export const LoginSchema = object().shape({
@@ -47,14 +48,14 @@ export const RegisterCompanySchema = object().shape({
 });
 
 export const RegisterPDVSchema = object().shape({
-  name: string().required('Nombre requerido'),
-  description: string().required('Descripción requerida'),
-  departamento: object().required('Departamento requerido'),
-  municipio: object().required('Ciudad requerida'),
-  address: string().required('Dirección requerida'),
-  phoneNumber: string().required('Teléfono requerido'),
-  main: boolean().optional(),
-  company: object().optional()
+  name: yup.string().required('Nombre requerido'),
+  description: yup.string().required('Descripción requerida'),
+  departamento: yup.object().nullable().default(null).required('Departamento requerido'),
+  municipio: yup.object().nullable().default(null).required('Ciudad requerida'),
+  address: yup.string().required('Dirección requerida'),
+  phoneNumber: yup.string().required('Teléfono requerido'),
+  main: yup.boolean().default(true),
+  company: yup.string().nullable().required('La empresa es requerida')
 });
 
 export const ChangePassWordSchema = object().shape({

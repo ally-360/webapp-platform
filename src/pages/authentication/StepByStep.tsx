@@ -1,32 +1,37 @@
-import React, { useState, useEffect } from 'react';
-
-// material
-import Box from '@mui/material/Box';
-import Stepper from '@mui/material/Stepper';
-import Step, { StepProps } from '@mui/material/Step';
-import StepLabel, { StepLabelProps } from '@mui/material/StepLabel';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import { Stack, styled } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Box,
+  Stepper,
+  Step,
+  StepLabel,
+  Typography,
+  Button,
+  Stack,
+  Container,
+  styled,
+  StepProps,
+  StepLabelProps
+} from '@mui/material';
 
 import { useNavigate } from 'react-router';
 import { useSnackbar } from 'notistack';
-import Container from '@mui/material/Container';
 import { useAuthContext } from 'src/auth/hooks';
 import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyForm';
 import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
 import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
 
 const steps = ['Crear empresa', 'Puntos de venta', 'Resumen'];
 
+// Estilo contenedor principal
 const RootStyle = styled(Container)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     display: 'flex'
   }
 }));
 
+// Estilo del contenido interno
 const ContentStyle = styled('div')(({ theme }) => ({
   maxWidth: 900,
   margin: 'auto',
@@ -39,39 +44,37 @@ const ContentStyle = styled('div')(({ theme }) => ({
   gap: '2rem'
 }));
 
+/**
+ * Componente de registro paso a paso para crear una empresa, agregar PDV y ver resumen.
+ */
 export default function StepByStep() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const { logout, company, pdvCompany } = useAuthContext();
 
-  const { activeStep } = useSelector((state) => state.stepByStep);
+  const { activeStep } = useAppSelector((state) => state.stepByStep);
 
-  // Setp by step
-  const [skipped, setSkipped] = useState<Set<number>>(new Set());
-  const { company, pdvCompany } = useAuthContext();
+  const [skippedSteps, setSkippedSteps] = useState<Set<number>>(new Set());
 
-  // State steps
   const isStepOptional = (step: number) => step === 3;
-  const isStepSkipped = (step: number) => skipped.has(step);
+  const isStepSkipped = (step: number) => skippedSteps.has(step);
 
+  // Sincroniza el paso activo si ya existe una empresa registrada
   useEffect(() => {
-    console.log(company);
-    if (company && company.id) {
-      dispatch(setStep(1));
+    if (company?.id) {
       dispatch(setPrevValuesCompany(company));
+      dispatch(setStep(1));
     }
   }, [company, dispatch]);
 
+  // Sincroniza el paso activo si ya existe un PDV registrado
   useEffect(() => {
-    if (pdvCompany && pdvCompany.id) {
-      console.log(pdvCompany);
+    if (pdvCompany) {
+      dispatch(setPrevValuesPDV(pdvCompany[0]));
       dispatch(setStep(2));
-      dispatch(setPrevValuesPDV(pdvCompany));
     }
   }, [pdvCompany, dispatch]);
-
-  // Logout
-  const { logout } = useAuthContext();
-  const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
 
   const handleLogout = async () => {
     try {
@@ -79,9 +82,23 @@ export default function StepByStep() {
       navigate('/');
     } catch (error) {
       console.error(error);
-      enqueueSnackbar('Unable to logout', { variant: 'error' });
+      enqueueSnackbar('No se pudo cerrar sesión', { variant: 'error' });
     }
   };
+
+  // Mapeo de componentes por paso
+  const StepComponent = useMemo(() => {
+    switch (activeStep) {
+      case 0:
+        return <RegisterCompanyForm />;
+      case 1:
+        return <RegisterPDVForm />;
+      case 2:
+        return <RegisterSummary />;
+      default:
+        return <Typography>Paso desconocido</Typography>;
+    }
+  }, [activeStep]);
 
   return (
     <RootStyle>
@@ -90,14 +107,17 @@ export default function StepByStep() {
           <Box sx={{ width: '100%' }}>
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label, index) => {
-                const stepProps: StepProps = {};
-                const labelProps: StepLabelProps = {};
+                const stepProps: Partial<StepProps> = {};
+                const labelProps: Partial<StepLabelProps> = {};
+
                 if (isStepOptional(index)) {
                   labelProps.optional = <Typography variant="caption">Opcional</Typography>;
                 }
+
                 if (isStepSkipped(index)) {
                   stepProps.completed = false;
                 }
+
                 return (
                   <Step key={label} {...stepProps}>
                     <StepLabel {...labelProps}>{label}</StepLabel>
@@ -105,17 +125,15 @@ export default function StepByStep() {
                 );
               })}
             </Stepper>
+
             <Stack direction="row" spacing={2} sx={{ mt: 2 }} justifyContent="flex-end">
               <Button color="error" size="small" variant="outlined" onClick={handleLogout}>
                 Cerrar sesión
               </Button>
             </Stack>
           </Box>
-          {activeStep === 0 && <RegisterCompanyForm />}
 
-          {activeStep === 1 && <RegisterPDVForm />}
-
-          {activeStep === 2 && <RegisterSummary />}
+          {StepComponent}
         </ContentStyle>
       </Container>
     </RootStyle>

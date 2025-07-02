@@ -26,7 +26,7 @@ const visuallyHidden = {
 export default function TableHeadCustom({
   order,
   orderBy,
-  rowCount = 0,
+  rowCount = 100,
   headLabel,
   numSelected = 0,
   onSort,

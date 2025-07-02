@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { Alert, Stack, Typography } from '@mui/material';
@@ -13,10 +14,12 @@ import { Box, useTheme } from '@mui/system';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { getPDVResponse } from 'src/interfaces/auth/userInterfaces';
-import { setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
+import { GetPDVResponse } from 'src/interfaces/auth/userInterfaces';
+import { setStep, setPrevValuesPDV } from 'src/redux/inventory/stepByStepSlice';
 import { RegisterPDVSchema } from 'src/interfaces/auth/yupSchemas';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import type { InferType } from 'yup';
+import { useNavigate } from 'react-router';
 
 // ----------------------------------------------------------------------
 
@@ -25,27 +28,47 @@ interface Municipio {
   name: string;
 }
 
+interface Departamento {
+  id: string;
+  name: string;
+  towns: Array<Municipio>;
+}
+
+type RegisterPDVFormValues = InferType<typeof RegisterPDVSchema>;
+
 export default function RegisterPDVForm() {
   const { enqueueSnackbar } = useSnackbar();
-  const { createPDV } = useAuthContext();
-  const { activeStep, prevValuesCompany } = useAppSelector((state) => state.stepByStep);
+  const { createPDV, updatePDV } = useAuthContext();
+  const navigator = useNavigate();
+  const { prevValuesCompany } = useAppSelector((state) => state.stepByStep);
+
+  if (!prevValuesCompany) {
+    throw new Error('prevValuesCompany is required');
+    navigator('/404');
+  }
+
   const theme = useTheme();
 
-  const preValuesPDV: getPDVResponse | undefined = useAppSelector((state) => state.stepByStep.preValuesPDV);
+  const preValuesPDV: GetPDVResponse | undefined = useAppSelector((state) => state.stepByStep.preValuesPDV);
   const { locations } = useAppSelector((state) => state.locations);
 
-  const defaultValues = {
-    name: preValuesPDV?.name || '',
-    description: preValuesPDV?.description || '',
-    departamento: preValuesPDV?.departamento || {},
-    municipio: preValuesPDV?.location || {},
-    address: preValuesPDV?.address || '',
+  console.log('preValuesPDV', preValuesPDV);
+
+  const defaultValues: RegisterPDVFormValues = {
+    name: preValuesPDV?.name ?? '',
+    description: preValuesPDV?.description ?? '',
+    departamento:
+      typeof preValuesPDV?.departamento === 'object' && preValuesPDV?.departamento !== null
+        ? preValuesPDV.departamento
+        : {},
+    municipio: preValuesPDV?.location ?? {},
+    address: preValuesPDV?.address ?? '',
+    phoneNumber: preValuesPDV?.phoneNumber ?? '',
     main: true,
-    phoneNumber: preValuesPDV?.phoneNumber || '',
-    company: { id: prevValuesCompany?.id } || {}
+    company: prevValuesCompany?.id
   };
 
-  const methods = useForm({
+  const methods = useForm<RegisterPDVFormValues>({
     resolver: yupResolver(RegisterPDVSchema),
     defaultValues
   });
@@ -54,7 +77,7 @@ export default function RegisterPDVForm() {
     handleSubmit,
     setValue,
     watch,
-    formState: { isSubmitting }
+    formState: { isSubmitting, isValidating, isValid, errors }
   } = methods;
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -67,7 +90,7 @@ export default function RegisterPDVForm() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const databody: getPDVResponse = {
+      const databody: GetPDVResponse = {
         ...data,
         location: { id: data.municipio.id }
       };
@@ -75,14 +98,16 @@ export default function RegisterPDVForm() {
       delete databody.municipio;
       delete databody.departamento;
 
-      await createPDV(databody);
-      // TODO: faltan municipios en el endpoint (cali por ejemplo)
+      if (preValuesPDV?.id) {
+        // TODO: validar que funcione el update
+        await updatePDV(preValuesPDV.id, databody);
+      } else {
+        await createPDV(databody);
+      }
 
       enqueueSnackbar('Registro del punto de venta completado', {
         variant: 'success'
       });
-
-      // TODO: si tengo prevValues, entonces hago un update, sino hago un create
 
       dispatch(setPrevValuesPDV(databody));
       dispatch(setStep(2));
@@ -107,10 +132,10 @@ export default function RegisterPDVForm() {
   //   // setMunicipios(municipiosOfDepartment);
   // }, [values.departamento, department]);
 
-  const departmentValue: object = watch('departamento');
+  const departmentValue: Partial<Departamento> = watch('departamento');
   const [searchQueryMunicipio, setSearchQueryMunicipio] = React.useState('');
   const [searchQueryDepartamento, setSearchQueryDepartamento] = React.useState('');
-  const isOptionEqualToValue = (option, value = '') => {
+  const isOptionEqualToValue = (option: any, value: any = '') => {
     if (option && value) {
       return option.id === value.id && option.name === value.name;
     }
@@ -119,18 +144,20 @@ export default function RegisterPDVForm() {
 
   useEffect(() => {
     if (departmentValue && Object.entries(departmentValue).length !== 0) {
-      setMunicipios(departmentValue.towns);
-      const selectedMunicipio = watch('municipio');
+      setMunicipios(departmentValue.towns ?? []);
+      const selectedMunicipio = watch('municipio') as Partial<Municipio>;
       if (selectedMunicipio) {
-        const municipioExist = departmentValue.towns.filter((municipio) => municipio.name === selectedMunicipio.name);
+        const municipioExist = (departmentValue.towns ?? []).filter(
+          (municipio) => municipio.name === selectedMunicipio.name
+        );
         if (municipioExist.length === 0) {
-          setValue('municipio', '');
+          setValue('municipio', {});
           setSearchQueryMunicipio('');
         }
       }
     } else {
       setMunicipios([]);
-      setValue('municipio', null);
+      setValue('municipio', {});
       setSearchQueryMunicipio('');
     }
   }, [departmentValue, locations, setValue, watch]);

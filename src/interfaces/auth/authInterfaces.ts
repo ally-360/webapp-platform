@@ -70,6 +70,11 @@ export interface AuthContextType {
   createPDV: (data: object) => Promise<void>;
 
   /**
+   * Actualiza los datos de un punto de venta.
+   */
+  updatePDV: (id: string, data: object) => Promise<void>;
+
+  /**
    * Actualiza los datos del usuario actual.
    */
   updateProfile: (id: string, data: object) => Promise<void>;
