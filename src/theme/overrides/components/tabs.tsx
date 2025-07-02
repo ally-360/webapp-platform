@@ -8,22 +8,22 @@ export default function Tabs(theme) {
       defaultProps: {
         textColor: 'inherit',
         variant: 'scrollable',
-        allowScrollButtonsMobile: true,
+        allowScrollButtonsMobile: true
       },
       styleOverrides: {
         indicator: {
-          backgroundColor: theme.palette.text.primary,
+          backgroundColor: theme.palette.text.primary
         },
         scrollButtons: {
           width: 48,
-          borderRadius: '50%',
-        },
-      },
+          borderRadius: '50%'
+        }
+      }
     },
     MuiTab: {
       defaultProps: {
         disableRipple: true,
-        iconPosition: 'start',
+        iconPosition: 'start'
       },
       styleOverrides: {
         root: {
@@ -35,14 +35,14 @@ export default function Tabs(theme) {
           '&:not(:last-of-type)': {
             marginRight: theme.spacing(3),
             [theme.breakpoints.up('sm')]: {
-              marginRight: theme.spacing(5),
-            },
+              marginRight: theme.spacing(5)
+            }
           },
           [`&:not(.${tabClasses.selected})`]: {
-            color: theme.palette.text.secondary,
-          },
-        },
-      },
-    },
+            color: theme.palette.text.secondary
+          }
+        }
+      }
+    }
   };
 }

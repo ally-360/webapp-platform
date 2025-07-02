@@ -20,8 +20,8 @@ export default function ProductReviewList({ reviews }) {
           [`& .${paginationClasses.ul}`]: {
             my: 5,
             mx: 'auto',
-            justifyContent: 'center',
-          },
+            justifyContent: 'center'
+          }
         }}
       />
     </>
@@ -29,5 +29,5 @@ export default function ProductReviewList({ reviews }) {
 }
 
 ProductReviewList.propTypes = {
-  reviews: PropTypes.array,
+  reviews: PropTypes.array
 };

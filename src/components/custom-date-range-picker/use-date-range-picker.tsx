@@ -60,6 +60,6 @@ export default function useDateRangePicker(start, end) {
     shortLabel: shortDateLabel(startDate, endDate),
     //
     setStartDate,
-    setEndDate,
+    setEndDate
   };
 }

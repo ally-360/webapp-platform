@@ -32,7 +32,7 @@ export default function AppTopAuthors({ title, subheader, list, ...other }) {
 AppTopAuthors.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -51,7 +51,7 @@ function AuthorItem({ author, index }) {
             mt: 0.5,
             display: 'flex',
             alignItems: 'center',
-            color: 'text.secondary',
+            color: 'text.secondary'
           }}
         >
           <Iconify icon="solar:heart-bold" width={14} sx={{ mr: 0.5 }} />
@@ -70,12 +70,12 @@ function AuthorItem({ author, index }) {
           bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
           ...(index === 1 && {
             color: 'info.main',
-            bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
+            bgcolor: (theme) => alpha(theme.palette.info.main, 0.08)
           }),
           ...(index === 2 && {
             color: 'error.main',
-            bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
-          }),
+            bgcolor: (theme) => alpha(theme.palette.error.main, 0.08)
+          })
         }}
       />
     </Stack>
@@ -84,5 +84,5 @@ function AuthorItem({ author, index }) {
 
 AuthorItem.propTypes = {
   author: PropTypes.object,
-  index: PropTypes.number,
+  index: PropTypes.number
 };

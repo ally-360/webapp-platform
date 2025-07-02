@@ -23,24 +23,16 @@ export default function HomeAdvertisement() {
       sx={{
         textAlign: {
           xs: 'center',
-          md: 'left',
-        },
+          md: 'left'
+        }
       }}
     >
-      <Box
-        component={m.div}
-        variants={varFade().inDown}
-        sx={{ color: 'common.white', mb: 5, typography: 'h2' }}
-      >
+      <Box component={m.div} variants={varFade().inDown} sx={{ color: 'common.white', mb: 5, typography: 'h2' }}>
         Get started with
         <br /> Minimal kit today
       </Box>
 
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        justifyContent={{ xs: 'center', md: 'flex-start' }}
-        spacing={2}
-      >
+      <Stack direction={{ xs: 'column', md: 'row' }} justifyContent={{ xs: 'center', md: 'flex-start' }} spacing={2}>
         <m.div variants={varFade().inRight}>
           <Button
             color="inherit"
@@ -51,7 +43,7 @@ export default function HomeAdvertisement() {
             href={paths.minimalUI}
             sx={{
               color: 'grey.800',
-              bgcolor: 'common.white',
+              bgcolor: 'common.white'
             }}
           >
             Purchase Now
@@ -81,7 +73,7 @@ export default function HomeAdvertisement() {
       <Box
         component={m.img}
         animate={{
-          y: [-20, 0, -20],
+          y: [-20, 0, -20]
         }}
         transition={{ duration: 4, repeat: Infinity }}
         alt="rocket"
@@ -100,10 +92,10 @@ export default function HomeAdvertisement() {
           ...bgGradient({
             direction: '135deg',
             startColor: theme.palette.primary.main,
-            endColor: theme.palette.primary.dark,
+            endColor: theme.palette.primary.dark
           }),
           borderRadius: 2,
-          pb: { xs: 5, md: 0 },
+          pb: { xs: 5, md: 0 }
         }}
       >
         {renderImg}

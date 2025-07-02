@@ -25,7 +25,7 @@ export default function BankingInviteFriends({ img, price, title, description, s
           width: 140,
           position: 'relative',
           filter: 'drop-shadow(0 12px 24px rgba(0,0,0,0.24))',
-          ...sx,
+          ...sx
         }}
       />
 
@@ -38,8 +38,8 @@ export default function BankingInviteFriends({ img, price, title, description, s
           ...bgGradient({
             direction: '135deg',
             startColor: theme.palette.primary.main,
-            endColor: theme.palette.primary.dark,
-          }),
+            endColor: theme.palette.primary.dark
+          })
         }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -61,7 +61,7 @@ export default function BankingInviteFriends({ img, price, title, description, s
             pl: 1.5,
             height: 40,
             borderRadius: 1,
-            bgcolor: 'common.white',
+            bgcolor: 'common.white'
           }}
         />
       </Box>
@@ -74,5 +74,5 @@ BankingInviteFriends.propTypes = {
   img: PropTypes.string,
   price: PropTypes.string,
   sx: PropTypes.object,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

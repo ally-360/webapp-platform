@@ -32,18 +32,18 @@ const TABS = [
   {
     value: 'all',
     label: 'All',
-    count: 22,
+    count: 22
   },
   {
     value: 'unread',
     label: 'Unread',
-    count: 12,
+    count: 12
   },
   {
     value: 'archived',
     label: 'Archived',
-    count: 10,
-  },
+    count: 10
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -67,7 +67,7 @@ export default function NotificationsPopover() {
     setNotifications(
       notifications.map((notification) => ({
         ...notification,
-        isUnRead: false,
+        isUnRead: false
       }))
     );
   };
@@ -105,19 +105,15 @@ export default function NotificationsPopover() {
           icon={
             <Label
               variant={((tab.value === 'all' || tab.value === currentTab) && 'filled') || 'soft'}
-              color={
-                (tab.value === 'unread' && 'info') ||
-                (tab.value === 'archived' && 'success') ||
-                'default'
-              }
+              color={(tab.value === 'unread' && 'info') || (tab.value === 'archived' && 'success') || 'default'}
             >
               {tab.count}
             </Label>
           }
           sx={{
             '&:not(:last-of-type)': {
-              mr: 3,
-            },
+              mr: 3
+            }
           }}
         />
       ))}
@@ -154,22 +150,17 @@ export default function NotificationsPopover() {
         onClose={drawer.onFalse}
         anchor="right"
         slotProps={{
-          backdrop: { invisible: true },
+          backdrop: { invisible: true }
         }}
         PaperProps={{
-          sx: { width: 1, maxWidth: 420 },
+          sx: { width: 1, maxWidth: 420 }
         }}
       >
         {renderHead}
 
         <Divider />
 
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ pl: 2.5, pr: 1 }}
-        >
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ pl: 2.5, pr: 1 }}>
           {renderTabs}
           <IconButton onClick={handleMarkAllAsRead}>
             <Iconify icon="solar:settings-bold-duotone" />

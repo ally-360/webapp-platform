@@ -10,35 +10,35 @@ import { LeftIcon, RightIcon } from './arrow-icons';
 // ----------------------------------------------------------------------
 
 const StyledIconButton = styled(IconButton, {
-  shouldForwardProp: (prop) => prop !== 'filled' && prop !== 'hasChild' && prop !== 'shape',
+  shouldForwardProp: (prop) => prop !== 'filled' && prop !== 'hasChild' && prop !== 'shape'
 })(({ filled, shape, hasChild, theme }) => ({
   color: 'inherit',
   transition: theme.transitions.create('all', {
-    duration: theme.transitions.duration.shorter,
+    duration: theme.transitions.duration.shorter
   }),
   ...(shape === 'rounded' && {
-    borderRadius: theme.shape.borderRadius * 1.5,
+    borderRadius: theme.shape.borderRadius * 1.5
   }),
   ...(!filled && {
     opacity: 0.48,
     '&:hover': {
-      opacity: 1,
-    },
+      opacity: 1
+    }
   }),
   ...(filled && {
     color: alpha(theme.palette.common.white, 0.8),
     backgroundColor: alpha(theme.palette.grey[900], 0.48),
     '&:hover': {
       color: theme.palette.common.white,
-      backgroundColor: theme.palette.grey[900],
-    },
+      backgroundColor: theme.palette.grey[900]
+    }
   }),
   ...(hasChild && {
     zIndex: 9,
     top: '50%',
     position: 'absolute',
-    marginTop: theme.spacing(-2.5),
-  }),
+    marginTop: theme.spacing(-2.5)
+  })
 }));
 
 // ----------------------------------------------------------------------
@@ -73,7 +73,7 @@ export default function CarouselArrows({
             {...leftButtonProps}
             sx={{
               left: 16,
-              ...leftButtonProps?.sx,
+              ...leftButtonProps?.sx
             }}
           >
             <LeftIcon icon={icon} isRTL={isRTL} />
@@ -91,7 +91,7 @@ export default function CarouselArrows({
             {...rightButtonProps}
             sx={{
               right: 16,
-              ...rightButtonProps?.sx,
+              ...rightButtonProps?.sx
             }}
           >
             <RightIcon icon={icon} isRTL={isRTL} />
@@ -123,5 +123,5 @@ CarouselArrows.propTypes = {
   onPrev: PropTypes.func,
   rightButtonProps: PropTypes.object,
   shape: PropTypes.oneOf(['circular', 'rounded']),
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

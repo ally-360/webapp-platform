@@ -48,7 +48,7 @@ export default function ChatNavAccount() {
           sx={{
             py: 2,
             pr: 1,
-            pl: 2.5,
+            pl: 2.5
           }}
         >
           <ListItemText
@@ -76,8 +76,8 @@ export default function ChatNavAccount() {
                   m: 0.75,
                   width: 12,
                   height: 12,
-                  flexShrink: 0,
-                },
+                  flexShrink: 0
+                }
               }}
             />
 
@@ -88,7 +88,7 @@ export default function ChatNavAccount() {
               onChange={handleChangeStatus}
               input={<InputBase sx={{ pl: 2 }} />}
               inputProps={{
-                sx: { textTransform: 'capitalize' },
+                sx: { textTransform: 'capitalize' }
               }}
             >
               {['online', 'alway', 'busy', 'offline'].map((option) => (

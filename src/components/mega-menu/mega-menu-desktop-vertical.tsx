@@ -34,7 +34,7 @@ export default function MegaMenuDesktopVertical({ data, ...other }) {
 }
 
 MegaMenuDesktopVertical.propTypes = {
-  data: PropTypes.array,
+  data: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -55,14 +55,7 @@ function MegaMenuItem({ parent }) {
   if (children) {
     return (
       <>
-        <ParentItem
-          onMouseEnter={handleOpen}
-          onMouseLeave={handleClose}
-          path={path}
-          title={title}
-          open={open}
-          hasSub
-        />
+        <ParentItem onMouseEnter={handleOpen} onMouseLeave={handleClose} path={path} title={title} open={open} hasSub />
 
         {open && (
           <Paper
@@ -75,7 +68,7 @@ function MegaMenuItem({ parent }) {
               position: 'absolute',
               left: 260,
               width: MENU_PAPER_WIDTH,
-              boxShadow: (theme) => theme.customShadows.z20,
+              boxShadow: (theme) => theme.customShadows.z20
             }}
           >
             <Masonry columns={3} spacing={2}>
@@ -97,7 +90,7 @@ function MegaMenuItem({ parent }) {
                         color: 'text.primary',
                         fontSize: 13,
                         transition: (theme) => theme.transitions.create('all'),
-                        '&:hover': { color: 'primary.main' },
+                        '&:hover': { color: 'primary.main' }
                       }}
                     >
                       {link.title}
@@ -136,7 +129,7 @@ function MegaMenuItem({ parent }) {
 }
 
 MegaMenuItem.propTypes = {
-  parent: PropTypes.object,
+  parent: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -144,7 +137,7 @@ MegaMenuItem.propTypes = {
 function ParentItem({ path = '', title, open, hasSub, ...other }) {
   const activeStyle = {
     color: 'primary.main',
-    bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.hoverOpacity),
+    bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.hoverOpacity)
   };
 
   return (
@@ -161,7 +154,7 @@ function ParentItem({ path = '', title, open, hasSub, ...other }) {
           justifyContent: 'space-between',
           transition: (theme) => theme.transitions.create('all'),
           '&:hover': activeStyle,
-          ...(open && activeStyle),
+          ...(open && activeStyle)
         }}
         {...other}
       >
@@ -177,5 +170,5 @@ ParentItem.propTypes = {
   hasSub: PropTypes.bool,
   open: PropTypes.bool,
   path: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

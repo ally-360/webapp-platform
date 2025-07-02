@@ -26,17 +26,17 @@ export default function AboutTeam() {
     responsive: [
       {
         breakpoint: 1279,
-        settings: { slidesToShow: 3 },
+        settings: { slidesToShow: 3 }
       },
       {
         breakpoint: 959,
-        settings: { slidesToShow: 2 },
+        settings: { slidesToShow: 2 }
       },
       {
         breakpoint: 600,
-        settings: { slidesToShow: 1 },
-      },
-    ],
+        settings: { slidesToShow: 1 }
+      }
+    ]
   });
 
   return (
@@ -58,11 +58,11 @@ export default function AboutTeam() {
           sx={{
             mx: 'auto',
             maxWidth: 640,
-            color: 'text.secondary',
+            color: 'text.secondary'
           }}
         >
-          Minimal will provide you support if you have any problems, our support team will reply
-          within a day and we also have detailed documentation.
+          Minimal will provide you support if you have any problems, our support team will reply within a day and we
+          also have detailed documentation.
         </Typography>
       </m.div>
 
@@ -75,14 +75,14 @@ export default function AboutTeam() {
           leftButtonProps={{
             sx: {
               left: 24,
-              ...(_carouselsMembers.length < 5 && { display: 'none' }),
-            },
+              ...(_carouselsMembers.length < 5 && { display: 'none' })
+            }
           }}
           rightButtonProps={{
             sx: {
               right: 24,
-              ...(_carouselsMembers.length < 5 && { display: 'none' }),
-            },
+              ...(_carouselsMembers.length < 5 && { display: 'none' })
+            }
           }}
         >
           <Carousel ref={carousel.carouselRef} {...carousel.carouselSettings}>
@@ -93,7 +93,7 @@ export default function AboutTeam() {
                 variants={varFade().in}
                 sx={{
                   px: 1.5,
-                  py: { xs: 8, md: 10 },
+                  py: { xs: 8, md: 10 }
                 }}
               >
                 <MemberCard member={member} />
@@ -141,8 +141,8 @@ function MemberCard({ member }) {
             sx={{
               color: social.color,
               '&:hover': {
-                bgcolor: alpha(social.color, 0.08),
-              },
+                bgcolor: alpha(social.color, 0.08)
+              }
             }}
           >
             <Iconify icon={social.icon} />
@@ -154,5 +154,5 @@ function MemberCard({ member }) {
 }
 
 MemberCard.propTypes = {
-  member: PropTypes.object,
+  member: PropTypes.object
 };

@@ -19,7 +19,7 @@ import Carousel, { CarouselArrows, useCarousel } from 'src/components/carousel';
 
 export default function BookingCustomerReviews({ title, subheader, list, ...other }) {
   const carousel = useCarousel({
-    adaptiveHeight: true,
+    adaptiveHeight: true
   });
 
   const customerInfo = list.find((_, index) => index === carousel.currentIndex);
@@ -41,21 +41,11 @@ export default function BookingCustomerReviews({ title, subheader, list, ...othe
       <Divider sx={{ borderStyle: 'dashed' }} />
 
       <Stack spacing={2} direction="row" alignItems="center" sx={{ p: 3 }}>
-        <Button
-          fullWidth
-          color="error"
-          variant="soft"
-          onClick={() => console.info('ACCEPT', customerInfo?.id)}
-        >
+        <Button fullWidth color="error" variant="soft" onClick={() => console.info('ACCEPT', customerInfo?.id)}>
           Reject
         </Button>
 
-        <Button
-          fullWidth
-          color="inherit"
-          variant="contained"
-          onClick={() => console.info('REJECT', customerInfo?.id)}
-        >
+        <Button fullWidth color="inherit" variant="contained" onClick={() => console.info('REJECT', customerInfo?.id)}>
           Accept
         </Button>
       </Stack>
@@ -66,7 +56,7 @@ export default function BookingCustomerReviews({ title, subheader, list, ...othe
 BookingCustomerReviews.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -79,7 +69,7 @@ function ReviewItem({ item }) {
       spacing={2}
       sx={{
         p: 3,
-        position: 'relative',
+        position: 'relative'
       }}
     >
       <Stack direction="row" alignItems="center" spacing={2}>
@@ -92,7 +82,7 @@ function ReviewItem({ item }) {
             component: 'span',
             typography: 'caption',
             mt: 0.5,
-            color: 'text.disabled',
+            color: 'text.disabled'
           }}
         />
       </Stack>
@@ -111,5 +101,5 @@ function ReviewItem({ item }) {
 }
 
 ReviewItem.propTypes = {
-  item: PropTypes.object,
+  item: PropTypes.object
 };

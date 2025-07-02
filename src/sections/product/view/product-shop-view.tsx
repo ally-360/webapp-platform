@@ -16,7 +16,7 @@ import {
   PRODUCT_COLOR_OPTIONS,
   PRODUCT_GENDER_OPTIONS,
   PRODUCT_RATING_OPTIONS,
-  PRODUCT_CATEGORY_OPTIONS,
+  PRODUCT_CATEGORY_OPTIONS
 } from 'src/_mock';
 // api
 import { useGetProducts, useSearchProducts } from 'src/api/product';
@@ -39,7 +39,7 @@ const defaultFilters = {
   colors: [],
   rating: '',
   category: 'all',
-  priceRange: [0, 200],
+  priceRange: [0, 200]
 };
 
 // ----------------------------------------------------------------------
@@ -66,14 +66,14 @@ export default function ProductShopView() {
   const handleFilters = useCallback((name, value) => {
     setFilters((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: value
     }));
   }, []);
 
   const dataFiltered = applyFilter({
     inputData: products,
     filters,
-    sortBy,
+    sortBy
   });
 
   const canReset = !isEqual(defaultFilters, filters);
@@ -148,7 +148,7 @@ export default function ProductShopView() {
     <Container
       maxWidth={settings.themeStretch ? false : 'lg'}
       sx={{
-        mb: 15,
+        mb: 15
       }}
     >
       <CartIcon totalItems={checkout.totalItems} />
@@ -156,7 +156,7 @@ export default function ProductShopView() {
       <Typography
         variant="h4"
         sx={{
-          my: { xs: 3, md: 5 },
+          my: { xs: 3, md: 5 }
         }}
       >
         Shop
@@ -165,7 +165,7 @@ export default function ProductShopView() {
       <Stack
         spacing={2.5}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         {renderFilters}
@@ -216,9 +216,7 @@ function applyFilter({ inputData, filters, sortBy }) {
   }
 
   if (colors.length) {
-    inputData = inputData.filter((product) =>
-      product.colors.some((color) => colors.includes(color))
-    );
+    inputData = inputData.filter((product) => product.colors.some((color) => colors.includes(color)));
   }
 
   if (min !== 0 || max !== 200) {

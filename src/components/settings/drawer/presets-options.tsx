@@ -11,7 +11,7 @@ import { primaryPresets } from 'src/theme/options/presets';
 export default function PresetsOptions({ value, onChange }) {
   const options = primaryPresets.map((color) => ({
     name: color.name,
-    value: color.main,
+    value: color.main
   }));
 
   return (
@@ -29,8 +29,8 @@ export default function PresetsOptions({ value, onChange }) {
               border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
               ...(selected && {
                 borderColor: 'transparent',
-                bgcolor: alpha(option.value, 0.08),
-              }),
+                bgcolor: alpha(option.value, 0.08)
+              })
             }}
           >
             <Box
@@ -41,11 +41,11 @@ export default function PresetsOptions({ value, onChange }) {
                 bgcolor: option.value,
                 transition: (theme) =>
                   theme.transitions.create(['transform'], {
-                    duration: theme.transitions.duration.shorter,
+                    duration: theme.transitions.duration.shorter
                   }),
                 ...(selected && {
-                  transform: 'scale(2)',
-                }),
+                  transform: 'scale(2)'
+                })
               }}
             />
           </ButtonBase>
@@ -57,5 +57,5 @@ export default function PresetsOptions({ value, onChange }) {
 
 PresetsOptions.propTypes = {
   onChange: PropTypes.func,
-  value: PropTypes.string,
+  value: PropTypes.string
 };

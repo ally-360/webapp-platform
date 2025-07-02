@@ -26,8 +26,8 @@ export default function StretchOptions({ value, onChange }) {
             `-24px 8px 24px -4px ${alpha(
               theme.palette.mode === 'light' ? theme.palette.grey[500] : theme.palette.common.black,
               0.08
-            )}`,
-        }),
+            )}`
+        })
       }}
     >
       <Stack
@@ -38,15 +38,15 @@ export default function StretchOptions({ value, onChange }) {
           width: 0.24,
           transition: (theme) => theme.transitions.create(['width']),
           ...(value && {
-            width: 0.5,
-          }),
+            width: 0.5
+          })
         }}
       >
         <Iconify
           icon={value ? 'eva:arrow-ios-back-fill' : 'eva:arrow-ios-forward-fill'}
           sx={{
             color: (theme) =>
-              `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+              `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
           }}
         />
 
@@ -56,7 +56,7 @@ export default function StretchOptions({ value, onChange }) {
           icon={value ? 'eva:arrow-ios-forward-fill' : 'eva:arrow-ios-back-fill'}
           sx={{
             color: (theme) =>
-              `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+              `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
           }}
         />
       </Stack>
@@ -66,5 +66,5 @@ export default function StretchOptions({ value, onChange }) {
 
 StretchOptions.propTypes = {
   onChange: PropTypes.func,
-  value: PropTypes.bool,
+  value: PropTypes.bool
 };

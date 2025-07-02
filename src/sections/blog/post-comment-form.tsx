@@ -15,24 +15,24 @@ export default function PostCommentForm() {
   const CommentSchema = Yup.object().shape({
     comment: Yup.string().required('Comment is required'),
     name: Yup.string().required('Name is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    email: Yup.string().required('Email is required').email('Email must be a valid email address')
   });
 
   const defaultValues = {
     comment: '',
     name: '',
-    email: '',
+    email: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(CommentSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -48,12 +48,7 @@ export default function PostCommentForm() {
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Stack spacing={3}>
-        <RHFTextField
-          name="comment"
-          placeholder="Write some of your comments..."
-          multiline
-          rows={4}
-        />
+        <RHFTextField name="comment" placeholder="Write some of your comments..." multiline rows={4} />
 
         <Stack direction="row" alignItems="center">
           <Stack direction="row" alignItems="center" flexGrow={1}>

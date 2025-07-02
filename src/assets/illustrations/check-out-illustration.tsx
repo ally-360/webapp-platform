@@ -17,14 +17,7 @@ function CheckoutIllustration({ ...other }) {
   const PRIMARY_DARKER = theme.palette.primary.darker;
 
   return (
-    <Box
-      component="svg"
-      width="100%"
-      height="100%"
-      viewBox="0 0 200 200"
-      xmlns="http://www.w3.org/2000/svg"
-      {...other}
-    >
+    <Box component="svg" width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" {...other}>
       <path
         fill="url(#a)"
         d="M85.6 134.7c-3.7-5.5-33-10.5-35.3-12 0 0-5.4-2-7.8 3.4-2.4 5.4-16.6 49.8-16.6 49.8s27.8 14.9 36 16.5c3.3.4 6.9-1.1 9.7-2.9l15.8-47.2c-.1 0 2.1-5.2-1.8-7.6z"
@@ -50,14 +43,7 @@ function CheckoutIllustration({ ...other }) {
         d="M154.9 181.2l6.2-.4-.2 5.8h-6v-5.4zM99 177.3l5.2 3.3 4.6-5.5-5.8-4.1-4 6.3zM80.7 92.9l.9-1.6-5.2 6.4c-10 9.6 11.4 15.2 7.6 2.1l3.8-4-7.1-2.9zm95.5 4.9c-1-2.3-6.9-7.5-8.4-9.7l1.4 2.2-6.9 3.1 4 3.9c-3.5 9.4 12.5 10.2 9.9.5zm-52.9-80.6l-.7 2h-.7c0 3.9 1.9 7.5 3.1 10.3 5-.6 8.7-5.2 8.4-10.3h-10l-.1-2z"
       />
       <defs>
-        <linearGradient
-          id="a"
-          x1="25.9"
-          x2="25.9"
-          y1="122.338"
-          y2="192.465"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="a" x1="25.9" x2="25.9" y1="122.338" y2="192.465" gradientUnits="userSpaceOnUse">
           <stop stopColor={PRIMARY_LIGHT} />
           <stop offset="1" stopColor={PRIMARY_DARK} />
         </linearGradient>

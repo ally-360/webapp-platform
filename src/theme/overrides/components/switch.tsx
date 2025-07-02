@@ -13,7 +13,7 @@ export default function Switch(theme) {
     ...(ownerState.size === 'small' && {
       padding: '4px 8px 4px 7px',
       width: 40,
-      height: 24,
+      height: 24
     }),
     [`& .${switchClasses.thumb}`]: {
       width: 14,
@@ -22,45 +22,45 @@ export default function Switch(theme) {
       color: theme.palette.common.white,
       ...(ownerState.size === 'small' && {
         width: 10,
-        height: 10,
-      }),
+        height: 10
+      })
     },
     [`& .${switchClasses.track}`]: {
       opacity: 1,
       borderRadius: 14,
-      backgroundColor: alpha(theme.palette.grey[500], 0.48),
+      backgroundColor: alpha(theme.palette.grey[500], 0.48)
     },
     [`& .${switchClasses.switchBase}`]: {
       left: 3,
       padding: 12,
       ...(ownerState.size === 'small' && {
-        padding: 7,
+        padding: 7
       }),
       [`&.${switchClasses.checked}`]: {
         transform: 'translateX(13px)',
         [`&+.${switchClasses.track}`]: {
-          opacity: 1,
+          opacity: 1
         },
         ...(ownerState.size === 'small' && {
-          transform: 'translateX(9px)',
-        }),
+          transform: 'translateX(9px)'
+        })
       },
       [`&.${switchClasses.disabled}`]: {
         [`& .${switchClasses.thumb}`]: {
-          opacity: isLight ? 1 : 0.48,
+          opacity: isLight ? 1 : 0.48
         },
         [`&+.${switchClasses.track}`]: {
-          opacity: 0.48,
-        },
-      },
-    },
+          opacity: 0.48
+        }
+      }
+    }
   });
 
   return {
     MuiSwitch: {
       styleOverrides: {
-        root: ({ ownerState }) => rootStyles(ownerState),
-      },
-    },
+        root: ({ ownerState }) => rootStyles(ownerState)
+      }
+    }
   };
 }

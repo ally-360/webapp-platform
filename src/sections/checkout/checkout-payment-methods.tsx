@@ -65,7 +65,7 @@ export default function CheckoutPaymentMethods({ options, cardOptions, ...other 
 
 CheckoutPaymentMethods.propTypes = {
   cardOptions: PropTypes.array,
-  options: PropTypes.array,
+  options: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -82,8 +82,8 @@ function OptionItem({ option, cardOptions, selected, isCredit, onOpen, ...other 
         mt: 2.5,
         cursor: 'pointer',
         ...(selected && {
-          boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`,
-        }),
+          boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`
+        })
       }}
       {...other}
     >
@@ -115,7 +115,7 @@ function OptionItem({ option, cardOptions, selected, isCredit, onOpen, ...other 
           spacing={2.5}
           alignItems="flex-end"
           sx={{
-            pt: 2.5,
+            pt: 2.5
           }}
         >
           <TextField select fullWidth label="Cards" SelectProps={{ native: true }}>
@@ -126,12 +126,7 @@ function OptionItem({ option, cardOptions, selected, isCredit, onOpen, ...other 
             ))}
           </TextField>
 
-          <Button
-            size="small"
-            color="primary"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={onOpen}
-          >
+          <Button size="small" color="primary" startIcon={<Iconify icon="mingcute:add-line" />} onClick={onOpen}>
             Add New Card
           </Button>
         </Stack>
@@ -145,5 +140,5 @@ OptionItem.propTypes = {
   isCredit: PropTypes.bool,
   onOpen: PropTypes.func,
   option: PropTypes.object,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

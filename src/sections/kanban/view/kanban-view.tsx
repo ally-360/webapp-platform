@@ -59,8 +59,8 @@ export default function KanbanView() {
             ...board?.columns,
             [sourceColumn.id]: {
               ...sourceColumn,
-              taskIds: newTaskIds,
-            },
+              taskIds: newTaskIds
+            }
           });
 
           console.info('Moving to same list!');
@@ -83,12 +83,12 @@ export default function KanbanView() {
           ...board?.columns,
           [sourceColumn.id]: {
             ...sourceColumn,
-            taskIds: sourceTaskIds,
+            taskIds: sourceTaskIds
           },
           [destinationColumn.id]: {
             ...destinationColumn,
-            taskIds: destinationTaskIds,
-          },
+            taskIds: destinationTaskIds
+          }
         });
 
         console.info('Moving to different list!');
@@ -111,13 +111,13 @@ export default function KanbanView() {
     <Container
       maxWidth={false}
       sx={{
-        height: 1,
+        height: 1
       }}
     >
       <Typography
         variant="h4"
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         Kanban
@@ -131,7 +131,7 @@ export default function KanbanView() {
           title="No Data"
           sx={{
             py: 10,
-            maxHeight: { md: 480 },
+            maxHeight: { md: 480 }
           }}
         />
       )}
@@ -150,16 +150,11 @@ export default function KanbanView() {
                   p: 0.25,
                   height: 1,
                   overflowY: 'hidden',
-                  ...hideScroll.x,
+                  ...hideScroll.x
                 }}
               >
                 {board?.ordered.map((columnId, index) => (
-                  <KanbanColumn
-                    index={index}
-                    key={columnId}
-                    column={board?.columns[columnId]}
-                    tasks={board?.tasks}
-                  />
+                  <KanbanColumn index={index} key={columnId} column={board?.columns[columnId]} tasks={board?.tasks} />
                 ))}
 
                 {provided.placeholder}

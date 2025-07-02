@@ -24,18 +24,7 @@ import { shortDateLabel } from 'src/components/custom-date-range-picker';
 export default function TourItem({ tour, onView, onEdit, onDelete }) {
   const popover = usePopover();
 
-  const {
-    id,
-    name,
-    price,
-    images,
-    bookers,
-    createdAt,
-    available,
-    priceSale,
-    destination,
-    ratingNumber,
-  } = tour;
+  const { id, name, price, images, bookers, createdAt, available, priceSale, destination, ratingNumber } = tour;
 
   const shortLabel = shortDateLabel(available.startDate, available.endDate);
 
@@ -51,7 +40,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
         position: 'absolute',
         p: '2px 6px 2px 4px',
         typography: 'subtitle2',
-        bgcolor: 'warning.lighter',
+        bgcolor: 'warning.lighter'
       }}
     >
       <Iconify icon="eva:star-fill" sx={{ color: 'warning.main', mr: 0.25 }} /> {ratingNumber}
@@ -71,7 +60,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
         position: 'absolute',
         p: '2px 6px 2px 4px',
         color: 'common.white',
-        typography: 'subtitle2',
+        typography: 'subtitle2'
       }}
     >
       {!!priceSale && (
@@ -88,7 +77,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
       spacing={0.5}
       direction="row"
       sx={{
-        p: (theme) => theme.spacing(1, 1, 0, 1),
+        p: (theme) => theme.spacing(1, 1, 0, 1)
       }}
     >
       <Stack flexGrow={1} sx={{ position: 'relative' }}>
@@ -106,7 +95,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
   const renderTexts = (
     <ListItemText
       sx={{
-        p: (theme) => theme.spacing(2.5, 2.5, 2, 2.5),
+        p: (theme) => theme.spacing(2.5, 2.5, 2, 2.5)
       }}
       primary={`Posted date: ${fDateTime(createdAt)}`}
       secondary={
@@ -116,14 +105,14 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
       }
       primaryTypographyProps={{
         typography: 'caption',
-        color: 'text.disabled',
+        color: 'text.disabled'
       }}
       secondaryTypographyProps={{
         mt: 1,
         noWrap: true,
         component: 'span',
         color: 'text.primary',
-        typography: 'subtitle1',
+        typography: 'subtitle1'
       }}
     />
   );
@@ -133,7 +122,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
       spacing={1.5}
       sx={{
         position: 'relative',
-        p: (theme) => theme.spacing(0, 2.5, 2.5, 2.5),
+        p: (theme) => theme.spacing(0, 2.5, 2.5, 2.5)
       }}
     >
       <IconButton onClick={popover.onOpen} sx={{ position: 'absolute', bottom: 20, right: 8 }}>
@@ -143,24 +132,18 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
       {[
         {
           label: destination,
-          icon: <Iconify icon="mingcute:location-fill" sx={{ color: 'error.main' }} />,
+          icon: <Iconify icon="mingcute:location-fill" sx={{ color: 'error.main' }} />
         },
         {
           label: shortLabel,
-          icon: <Iconify icon="solar:clock-circle-bold" sx={{ color: 'info.main' }} />,
+          icon: <Iconify icon="solar:clock-circle-bold" sx={{ color: 'info.main' }} />
         },
         {
           label: `${bookers.length} Booked`,
-          icon: <Iconify icon="solar:users-group-rounded-bold" sx={{ color: 'primary.main' }} />,
-        },
+          icon: <Iconify icon="solar:users-group-rounded-bold" sx={{ color: 'primary.main' }} />
+        }
       ].map((item) => (
-        <Stack
-          key={item.label}
-          spacing={1}
-          direction="row"
-          alignItems="center"
-          sx={{ typography: 'body2' }}
-        >
+        <Stack key={item.label} spacing={1} direction="row" alignItems="center" sx={{ typography: 'body2' }}>
           {item.icon}
           {item.label}
         </Stack>
@@ -178,12 +161,7 @@ export default function TourItem({ tour, onView, onEdit, onDelete }) {
         {renderInfo}
       </Card>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -223,5 +201,5 @@ TourItem.propTypes = {
   onDelete: PropTypes.func,
   onEdit: PropTypes.func,
   onView: PropTypes.func,
-  tour: PropTypes.object,
+  tour: PropTypes.object
 };

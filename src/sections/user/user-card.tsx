@@ -36,7 +36,7 @@ export default function UserCard({ user }) {
             zIndex: 10,
             mx: 'auto',
             bottom: -26,
-            position: 'absolute',
+            position: 'absolute'
           }}
         />
 
@@ -51,16 +51,11 @@ export default function UserCard({ user }) {
             right: 0,
             bottom: -32,
             mx: 'auto',
-            position: 'absolute',
+            position: 'absolute'
           }}
         />
 
-        <Image
-          src={coverUrl}
-          alt={coverUrl}
-          ratio="16/9"
-          overlay={alpha(theme.palette.grey[900], 0.48)}
-        />
+        <Image src={coverUrl} alt={coverUrl} ratio="16/9" overlay={alpha(theme.palette.grey[900], 0.48)} />
       </Box>
 
       <ListItemText
@@ -78,8 +73,8 @@ export default function UserCard({ user }) {
             sx={{
               color: social.color,
               '&:hover': {
-                bgcolor: alpha(social.color, 0.08),
-              },
+                bgcolor: alpha(social.color, 0.08)
+              }
             }}
           >
             <Iconify icon={social.icon} />
@@ -89,11 +84,7 @@ export default function UserCard({ user }) {
 
       <Divider sx={{ borderStyle: 'dashed' }} />
 
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(3, 1fr)"
-        sx={{ py: 3, typography: 'subtitle1' }}
-      >
+      <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" sx={{ py: 3, typography: 'subtitle1' }}>
         <div>
           <Typography variant="caption" component="div" sx={{ mb: 0.5, color: 'text.secondary' }}>
             Follower
@@ -121,5 +112,5 @@ export default function UserCard({ user }) {
 }
 
 UserCard.propTypes = {
-  user: PropTypes.object,
+  user: PropTypes.object
 };

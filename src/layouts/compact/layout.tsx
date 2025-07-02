@@ -20,7 +20,7 @@ export default function CompactLayout({ children }) {
             maxWidth: 400,
             minHeight: '100vh',
             textAlign: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}
         >
           {children}
@@ -31,5 +31,5 @@ export default function CompactLayout({ children }) {
 }
 
 CompactLayout.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

@@ -20,16 +20,16 @@ export default function TourCreateView() {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Tour',
-            href: paths.dashboard.tour.root,
+            href: paths.dashboard.tour.root
           },
-          { name: 'New tour' },
+          { name: 'New tour' }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 

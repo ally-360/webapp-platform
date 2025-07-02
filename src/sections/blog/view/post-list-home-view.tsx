@@ -36,7 +36,7 @@ export default function PostListHomeView() {
 
   const dataFiltered = applyFilter({
     inputData: posts,
-    sortBy,
+    sortBy
   });
 
   const handleSortBy = useCallback((newValue) => {
@@ -52,7 +52,7 @@ export default function PostListHomeView() {
       <Typography
         variant="h4"
         sx={{
-          my: { xs: 3, md: 5 },
+          my: { xs: 3, md: 5 }
         }}
       >
         Blog

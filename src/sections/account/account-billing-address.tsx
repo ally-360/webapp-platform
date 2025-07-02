@@ -77,7 +77,7 @@ export default function AccountBillingAddress({ addressBook }) {
               }
               sx={{
                 p: 2.5,
-                borderRadius: 1,
+                borderRadius: 1
               }}
             />
           ))}
@@ -117,15 +117,11 @@ export default function AccountBillingAddress({ addressBook }) {
         </MenuItem>
       </CustomPopover>
 
-      <AddressNewForm
-        open={addressForm.value}
-        onClose={addressForm.onFalse}
-        onCreate={handleAddNewAddress}
-      />
+      <AddressNewForm open={addressForm.value} onClose={addressForm.onFalse} onCreate={handleAddNewAddress} />
     </>
   );
 }
 
 AccountBillingAddress.propTypes = {
-  addressBook: PropTypes.array,
+  addressBook: PropTypes.array
 };

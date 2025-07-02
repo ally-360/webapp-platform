@@ -42,23 +42,23 @@ export default function FirebaseLoginView() {
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    password: Yup.string().required('Password is required')
   });
 
   const defaultValues = {
     email: '',
-    password: '',
+    password: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(LoginSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -128,7 +128,7 @@ export default function FirebaseLoginView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
@@ -143,14 +143,7 @@ export default function FirebaseLoginView() {
         Forgot password?
       </Link>
 
-      <LoadingButton
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
+      <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
         Login
       </LoadingButton>
     </Stack>
@@ -164,8 +157,8 @@ export default function FirebaseLoginView() {
           typography: 'overline',
           color: 'text.disabled',
           '&::before, ::after': {
-            borderTopStyle: 'dashed',
-          },
+            borderTopStyle: 'dashed'
+          }
         }}
       >
         OR

@@ -81,7 +81,7 @@ export default function HomePricing() {
           <Box
             sx={{
               borderRadius: 2,
-              border: (theme) => `dashed 1px ${theme.palette.divider}`,
+              border: (theme) => `dashed 1px ${theme.palette.divider}`
             }}
           >
             {_homePlans.map(
@@ -104,8 +104,8 @@ export default function HomePricing() {
             textAlign: 'center',
             mt: {
               xs: 5,
-              md: 10,
-            },
+              md: 10
+            }
           }}
         >
           <m.div variants={varFade().inDown}>
@@ -137,7 +137,7 @@ export default function HomePricing() {
     <Box
       sx={{
         py: { xs: 10, md: 15 },
-        bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
+        bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04)
       }}
     >
       <Container component={MotionViewport}>
@@ -167,8 +167,8 @@ function PlanCard({ plan, sx, ...other }) {
         ...(plus && {
           borderLeft: (theme) => `dashed 1px ${theme.palette.divider}`,
           borderRight: (theme) => `dashed 1px ${theme.palette.divider}`,
-          ...sx,
-        }),
+          ...sx
+        })
       }}
       {...other}
     >
@@ -189,7 +189,7 @@ function PlanCard({ plan, sx, ...other }) {
               bgcolor: 'error.main',
               position: 'absolute',
               ...(standard && { bgcolor: 'primary.main' }),
-              ...(plus && { bgcolor: 'warning.main' }),
+              ...(plus && { bgcolor: 'warning.main' })
             }}
           />
         </Box>
@@ -228,7 +228,7 @@ function PlanCard({ plan, sx, ...other }) {
               direction="row"
               alignItems="center"
               sx={{
-                ...(disabled && { color: 'text.disabled' }),
+                ...(disabled && { color: 'text.disabled' })
               }}
               key={option}
             >
@@ -257,5 +257,5 @@ function PlanCard({ plan, sx, ...other }) {
 
 PlanCard.propTypes = {
   plan: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

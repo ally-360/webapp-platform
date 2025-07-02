@@ -28,7 +28,7 @@ export default function FileManagerInvitedItem({ person }) {
       <ListItem
         sx={{
           px: 0,
-          py: 1,
+          py: 1
         }}
       >
         <Avatar alt={person.name} src={person.avatarUrl} sx={{ mr: 2 }} />
@@ -59,8 +59,8 @@ export default function FileManagerInvitedItem({ person }) {
           sx={{
             flexShrink: 0,
             ...(popover.open && {
-              bgcolor: 'action.selected',
-            }),
+              bgcolor: 'action.selected'
+            })
           }}
         >
           Can {permission}
@@ -109,5 +109,5 @@ export default function FileManagerInvitedItem({ person }) {
 }
 
 FileManagerInvitedItem.propTypes = {
-  person: PropTypes.object,
+  person: PropTypes.object
 };

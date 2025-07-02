@@ -16,12 +16,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { countries } from 'src/assets/data';
 // components
 import Iconify from 'src/components/iconify';
-import FormProvider, {
-  RHFCheckbox,
-  RHFTextField,
-  RHFRadioGroup,
-  RHFAutocomplete,
-} from 'src/components/hook-form';
+import FormProvider, { RHFCheckbox, RHFTextField, RHFRadioGroup, RHFAutocomplete } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
 
@@ -36,7 +31,7 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
     zipCode: Yup.string().required('Zip code is required'),
     // not required
     addressType: Yup.string(),
-    primary: Yup.boolean(),
+    primary: Yup.boolean()
   });
 
   const defaultValues = {
@@ -48,17 +43,17 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
     primary: true,
     phoneNumber: '',
     addressType: 'Home',
-    country: '',
+    country: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(NewAddressSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -68,7 +63,7 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
         phoneNumber: data.phoneNumber,
         fullAddress: `${data.address}, ${data.city}, ${data.state}, ${data.country}, ${data.zipCode}`,
         addressType: data.addressType,
-        primary: data.primary,
+        primary: data.primary
       });
       onClose();
     } catch (error) {
@@ -88,7 +83,7 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
               name="addressType"
               options={[
                 { label: 'Home', value: 'Home' },
-                { label: 'Office', value: 'Office' },
+                { label: 'Office', value: 'Office' }
               ]}
             />
 
@@ -98,7 +93,7 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
               display="grid"
               gridTemplateColumns={{
                 xs: 'repeat(1, 1fr)',
-                sm: 'repeat(2, 1fr)',
+                sm: 'repeat(2, 1fr)'
               }}
             >
               <RHFTextField name="name" label="Full Name" />
@@ -114,7 +109,7 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
               display="grid"
               gridTemplateColumns={{
                 xs: 'repeat(1, 1fr)',
-                sm: 'repeat(3, 1fr)',
+                sm: 'repeat(3, 1fr)'
               }}
             >
               <RHFTextField name="city" label="Town / City" />
@@ -130,9 +125,7 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
               options={countries.map((country) => country.label)}
               getOptionLabel={(option) => option}
               renderOption={(props, option) => {
-                const { code, label, phone } = countries.filter(
-                  (country) => country.label === option
-                )[0];
+                const { code, label, phone } = countries.filter((country) => country.label === option)[0];
 
                 if (!label) {
                   return null;
@@ -140,12 +133,7 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
 
                 return (
                   <li {...props} key={label}>
-                    <Iconify
-                      key={label}
-                      icon={`circle-flags:${code.toLowerCase()}`}
-                      width={28}
-                      sx={{ mr: 1 }}
-                    />
+                    <Iconify key={label} icon={`circle-flags:${code.toLowerCase()}`} width={28} sx={{ mr: 1 }} />
                     {label} ({code}) +{phone}
                   </li>
                 );
@@ -173,5 +161,5 @@ export default function AddressNewForm({ open, onClose, onCreate }) {
 AddressNewForm.propTypes = {
   onClose: PropTypes.func,
   onCreate: PropTypes.func,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };

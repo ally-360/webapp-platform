@@ -42,20 +42,20 @@ export default function Header() {
         sx={{
           height: {
             xs: HEADER.H_MOBILE,
-            md: HEADER.H_DESKTOP,
+            md: HEADER.H_DESKTOP
           },
           transition: theme.transitions.create(['height'], {
             easing: theme.transitions.easing.easeInOut,
-            duration: theme.transitions.duration.shorter,
+            duration: theme.transitions.duration.shorter
           }),
           ...(offsetTop && {
             ...bgBlur({
-              color: theme.palette.background.default,
+              color: theme.palette.background.default
             }),
             height: {
-              md: HEADER.H_DESKTOP_OFFSET,
-            },
-          }),
+              md: HEADER.H_DESKTOP_OFFSET
+            }
+          })
         }}
       >
         <Container sx={{ height: 1, display: 'flex', alignItems: 'center' }}>
@@ -63,17 +63,11 @@ export default function Header() {
             sx={{
               [`& .${badgeClasses.badge}`]: {
                 top: 8,
-                right: -16,
-              },
+                right: -16
+              }
             }}
             badgeContent={
-              <Link
-                href={paths.changelog}
-                target="_blank"
-                rel="noopener"
-                underline="none"
-                sx={{ ml: 1 }}
-              >
+              <Link href={paths.changelog} target="_blank" rel="noopener" underline="none" sx={{ ml: 1 }}>
                 <Label color="info" sx={{ textTransform: 'unset', height: 22, px: 0.5 }}>
                   v5.2.0
                 </Label>
@@ -97,7 +91,7 @@ export default function Header() {
             <SettingsButton
               sx={{
                 ml: { xs: 1, md: 0 },
-                mr: { md: 2 },
+                mr: { md: 2 }
               }}
             />
 

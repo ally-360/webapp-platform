@@ -42,7 +42,7 @@ export default function AnalyticsNews({ title, subheader, list, ...other }) {
 AnalyticsNews.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -59,37 +59,30 @@ function NewsItem({ news }) {
         py: 2,
         px: 3,
         minWidth: 640,
-        borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`,
+        borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`
       }}
     >
-      <Avatar
-        variant="rounded"
-        alt={title}
-        src={coverUrl}
-        sx={{ width: 48, height: 48, flexShrink: 0 }}
-      />
+      <Avatar variant="rounded" alt={title} src={coverUrl} sx={{ width: 48, height: 48, flexShrink: 0 }} />
 
       <ListItemText
         primary={title}
         secondary={description}
         primaryTypographyProps={{
           noWrap: true,
-          typography: 'subtitle2',
+          typography: 'subtitle2'
         }}
         secondaryTypographyProps={{
           mt: 0.5,
           noWrap: true,
-          component: 'span',
+          component: 'span'
         }}
       />
 
-      <Box sx={{ flexShrink: 0, color: 'text.disabled', typography: 'caption' }}>
-        {fToNow(postedAt)}
-      </Box>
+      <Box sx={{ flexShrink: 0, color: 'text.disabled', typography: 'caption' }}>{fToNow(postedAt)}</Box>
     </Stack>
   );
 }
 
 NewsItem.propTypes = {
-  news: PropTypes.object,
+  news: PropTypes.object
 };

@@ -16,11 +16,7 @@ import Chart, { useChart } from 'src/components/chart';
 export default function EcommerceWidgetSummary({ title, percent, total, chart, sx, ...other }) {
   const theme = useTheme();
 
-  const {
-    colors = [theme.palette.primary.light, theme.palette.primary.main],
-    series,
-    options,
-  } = chart;
+  const { colors = [theme.palette.primary.light, theme.palette.primary.main], series, options } = chart;
 
   const chartOptions = useChart({
     colors: [colors[1]],
@@ -29,33 +25,33 @@ export default function EcommerceWidgetSummary({ title, percent, total, chart, s
       gradient: {
         colorStops: [
           { offset: 0, color: colors[0] },
-          { offset: 100, color: colors[1] },
-        ],
-      },
+          { offset: 100, color: colors[1] }
+        ]
+      }
     },
     chart: {
       animations: {
-        enabled: true,
+        enabled: true
       },
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     tooltip: {
       x: {
-        show: false,
+        show: false
       },
       y: {
         formatter: (value) => fNumber(value),
         title: {
-          formatter: () => '',
-        },
+          formatter: () => ''
+        }
       },
       marker: {
-        show: false,
-      },
+        show: false
+      }
     },
-    ...options,
+    ...options
   });
 
   const renderTrending = (
@@ -72,8 +68,8 @@ export default function EcommerceWidgetSummary({ title, percent, total, chart, s
           bgcolor: alpha(theme.palette.success.main, 0.16),
           ...(percent < 0 && {
             color: 'error.main',
-            bgcolor: alpha(theme.palette.error.main, 0.16),
-          }),
+            bgcolor: alpha(theme.palette.error.main, 0.16)
+          })
         }}
       />
 
@@ -103,13 +99,7 @@ export default function EcommerceWidgetSummary({ title, percent, total, chart, s
         {renderTrending}
       </Box>
 
-      <Chart
-        type="line"
-        series={[{ data: series }]}
-        options={chartOptions}
-        width={96}
-        height={64}
-      />
+      <Chart type="line" series={[{ data: series }]} options={chartOptions} width={96} height={64} />
     </Card>
   );
 }
@@ -119,5 +109,5 @@ EcommerceWidgetSummary.propTypes = {
   percent: PropTypes.number,
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

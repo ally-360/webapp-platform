@@ -29,16 +29,14 @@ export default function RoleBasedGuard({ hasContent, roles, children, sx }) {
         </m.div>
 
         <m.div variants={varBounce().in}>
-          <Typography sx={{ color: 'text.secondary' }}>
-            You do not have permission to access this page
-          </Typography>
+          <Typography sx={{ color: 'text.secondary' }}>You do not have permission to access this page</Typography>
         </m.div>
 
         <m.div variants={varBounce().in}>
           <ForbiddenIllustration
             sx={{
               height: 260,
-              my: { xs: 5, sm: 10 },
+              my: { xs: 5, sm: 10 }
             }}
           />
         </m.div>
@@ -53,5 +51,5 @@ RoleBasedGuard.propTypes = {
   children: PropTypes.node,
   hasContent: PropTypes.bool,
   roles: PropTypes.arrayOf(PropTypes.string),
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

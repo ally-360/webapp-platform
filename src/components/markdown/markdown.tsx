@@ -30,7 +30,7 @@ export default function Markdown({ sx, ...other }) {
 }
 
 Markdown.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -47,5 +47,5 @@ const components = {
         {props.children}
       </Link>
     );
-  },
+  }
 };

@@ -46,8 +46,8 @@ const Image = forwardRef(
         height: 1,
         zIndex: 1,
         position: 'absolute',
-        background: overlay || alpha(theme.palette.grey[900], 0.48),
-      },
+        background: overlay || alpha(theme.palette.grey[900], 0.48)
+      }
     };
 
     const content = (
@@ -78,8 +78,8 @@ const Image = forwardRef(
           ...(!!ratio && {
             top: 0,
             left: 0,
-            position: 'absolute',
-          }),
+            position: 'absolute'
+          })
         }}
       />
     );
@@ -95,7 +95,7 @@ const Image = forwardRef(
           verticalAlign: 'bottom',
           display: 'inline-block',
           ...(!!ratio && {
-            width: 1,
+            width: 1
           }),
           '& span.component-image-wrapper': {
             width: 1,
@@ -103,11 +103,11 @@ const Image = forwardRef(
             verticalAlign: 'bottom',
             backgroundSize: 'cover !important',
             ...(!!ratio && {
-              pt: getRatio(ratio),
-            }),
+              pt: getRatio(ratio)
+            })
           },
           ...overlayStyles,
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -135,7 +135,7 @@ Image.propTypes = {
   visibleByDefault: PropTypes.bool,
   wrapperClassName: PropTypes.string,
   wrapperProps: PropTypes.object,
-  placeholder: PropTypes.element,
+  placeholder: PropTypes.element
 };
 
 export default Image;

@@ -29,5 +29,5 @@ export default function RHFSwitch({ name, helperText, ...other }) {
 
 RHFSwitch.propTypes = {
   helperText: PropTypes.string,
-  name: PropTypes.string,
+  name: PropTypes.string
 };

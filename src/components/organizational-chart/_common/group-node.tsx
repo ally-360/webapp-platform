@@ -19,7 +19,7 @@ export default function GroupNode({ node, depth, length, sx }) {
   const styles = (color) => ({
     bgcolor: alpha(theme.palette[color].main, 0.08),
     border: `solid 1px ${alpha(theme.palette[color].main, 0.24)}`,
-    color: isLight ? theme.palette[color].darker : theme.palette[color].lighter,
+    color: isLight ? theme.palette[color].darker : theme.palette[color].lighter
   });
 
   const isLabel = depth === 1;
@@ -44,7 +44,7 @@ export default function GroupNode({ node, depth, length, sx }) {
             width: 56,
             height: 56,
             position: 'absolute',
-            border: `solid 4px ${theme.palette.background.paper}`,
+            border: `solid 4px ${theme.palette.background.paper}`
           }}
         />
       )}
@@ -60,7 +60,7 @@ export default function GroupNode({ node, depth, length, sx }) {
           ...(isLabel && isGrProduct && styles('primary')),
           ...(isLabel && isGrDevelopment && styles('info')),
           ...(isLabel && isGrMarketing && styles('warning')),
-          ...sx,
+          ...sx
         }}
       >
         {depth !== 1 && !isGrRoot && (
@@ -73,14 +73,14 @@ export default function GroupNode({ node, depth, length, sx }) {
               position: 'absolute',
               borderRadius: 1.5,
               ...(isGrProduct && {
-                bgcolor: 'primary.light',
+                bgcolor: 'primary.light'
               }),
               ...(isGrDevelopment && {
-                bgcolor: 'info.light',
+                bgcolor: 'info.light'
               }),
               ...(isGrMarketing && {
-                bgcolor: 'warning.light',
-              }),
+                bgcolor: 'warning.light'
+              })
             }}
           />
         )}
@@ -88,10 +88,7 @@ export default function GroupNode({ node, depth, length, sx }) {
         <Typography variant={isLabel ? 'subtitle1' : 'subtitle2'} noWrap>
           {node.name}
           {isLabel && (
-            <Label
-              color={(isGrDevelopment && 'info') || (isGrMarketing && 'warning') || 'primary'}
-              sx={{ ml: 1 }}
-            >
+            <Label color={(isGrDevelopment && 'info') || (isGrMarketing && 'warning') || 'primary'} sx={{ ml: 1 }}>
               {length}
             </Label>
           )}
@@ -111,5 +108,5 @@ GroupNode.propTypes = {
   depth: PropTypes.number,
   length: PropTypes.number,
   node: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

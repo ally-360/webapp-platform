@@ -17,7 +17,7 @@ import {
   TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
-  TablePaginationCustom,
+  TablePaginationCustom
 } from 'src/components/table';
 //
 import FileManagerTableRow from './file-manager-table-row';
@@ -30,19 +30,12 @@ const TABLE_HEAD = [
   { id: 'type', label: 'Type', width: 120 },
   { id: 'modifiedAt', label: 'Modified', width: 140 },
   { id: 'shared', label: 'Shared', align: 'right', width: 140 },
-  { id: '', width: 88 },
+  { id: '', width: 88 }
 ];
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerTable({
-  table,
-  tableData,
-  notFound,
-  onDeleteRow,
-  dataFiltered,
-  onOpenConfirm,
-}) {
+export default function FileManagerTable({ table, tableData, notFound, onDeleteRow, dataFiltered, onOpenConfirm }) {
   const theme = useTheme();
 
   const {
@@ -59,7 +52,7 @@ export default function FileManagerTable({
     onSort,
     onChangeDense,
     onChangePage,
-    onChangeRowsPerPage,
+    onChangeRowsPerPage
   } = table;
 
   const denseHeight = dense ? 58 : 78;
@@ -69,7 +62,7 @@ export default function FileManagerTable({
       <Box
         sx={{
           position: 'relative',
-          m: theme.spacing(-2, -3, -3, -3),
+          m: theme.spacing(-2, -3, -3, -3)
         }}
       >
         <TableSelectedAction
@@ -104,13 +97,13 @@ export default function FileManagerTable({
             left: 24,
             right: 24,
             width: 'auto',
-            borderRadius: 1.5,
+            borderRadius: 1.5
           }}
         />
 
         <TableContainer
           sx={{
-            p: theme.spacing(0, 3, 3, 3),
+            p: theme.spacing(0, 3, 3, 3)
           }}
         >
           <Table
@@ -118,7 +111,7 @@ export default function FileManagerTable({
             sx={{
               minWidth: 960,
               borderCollapse: 'separate',
-              borderSpacing: '0 16px',
+              borderSpacing: '0 16px'
             }}
           >
             <TableHeadCustom
@@ -138,40 +131,35 @@ export default function FileManagerTable({
                 [`& .${tableCellClasses.head}`]: {
                   '&:first-of-type': {
                     borderTopLeftRadius: 12,
-                    borderBottomLeftRadius: 12,
+                    borderBottomLeftRadius: 12
                   },
                   '&:last-of-type': {
                     borderTopRightRadius: 12,
-                    borderBottomRightRadius: 12,
-                  },
-                },
+                    borderBottomRightRadius: 12
+                  }
+                }
               }}
             />
 
             <TableBody>
-              {dataFiltered
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => (
-                  <FileManagerTableRow
-                    key={row.id}
-                    row={row}
-                    selected={selected.includes(row.id)}
-                    onSelectRow={() => onSelectRow(row.id)}
-                    onDeleteRow={() => onDeleteRow(row.id)}
-                  />
-                ))}
+              {dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                <FileManagerTableRow
+                  key={row.id}
+                  row={row}
+                  selected={selected.includes(row.id)}
+                  onSelectRow={() => onSelectRow(row.id)}
+                  onDeleteRow={() => onDeleteRow(row.id)}
+                />
+              ))}
 
-              <TableEmptyRows
-                height={denseHeight}
-                emptyRows={emptyRows(page, rowsPerPage, tableData.length)}
-              />
+              <TableEmptyRows height={denseHeight} emptyRows={emptyRows(page, rowsPerPage, tableData.length)} />
 
               <TableNoData
                 notFound={notFound}
                 sx={{
                   m: -2,
                   borderRadius: 1.5,
-                  border: `dashed 1px ${theme.palette.divider}`,
+                  border: `dashed 1px ${theme.palette.divider}`
                 }}
               />
             </TableBody>
@@ -190,8 +178,8 @@ export default function FileManagerTable({
         onChangeDense={onChangeDense}
         sx={{
           [`& .${tablePaginationClasses.toolbar}`]: {
-            borderTopColor: 'transparent',
-          },
+            borderTopColor: 'transparent'
+          }
         }}
       />
     </>
@@ -204,5 +192,5 @@ FileManagerTable.propTypes = {
   onDeleteRow: PropTypes.func,
   onOpenConfirm: PropTypes.func,
   table: PropTypes.object,
-  tableData: PropTypes.array,
+  tableData: PropTypes.array
 };

@@ -16,7 +16,7 @@ function AvatarShape({ sx, ...other }) {
       xmlns="http://www.w3.org/2000/svg"
       sx={{
         color: 'background.paper',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -30,7 +30,7 @@ function AvatarShape({ sx, ...other }) {
 }
 
 AvatarShape.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 export default memo(AvatarShape);

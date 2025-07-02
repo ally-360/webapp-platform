@@ -53,10 +53,7 @@ export default function PricingCard({ card, sx, ...other }) {
 
       <Typography variant="h2">{price}</Typography>
 
-      <Typography
-        component="span"
-        sx={{ alignSelf: 'center', color: 'text.disabled', ml: 1, typography: 'body2' }}
-      >
+      <Typography component="span" sx={{ alignSelf: 'center', color: 'text.disabled', ml: 1, typography: 'body2' }}>
         / mo
       </Typography>
     </Stack>
@@ -80,7 +77,7 @@ export default function PricingCard({ card, sx, ...other }) {
           direction="row"
           alignItems="center"
           sx={{
-            typography: 'body2',
+            typography: 'body2'
           }}
         >
           <Iconify icon="eva:checkmark-fill" width={16} sx={{ mr: 1 }} />
@@ -98,11 +95,11 @@ export default function PricingCard({ card, sx, ...other }) {
         borderRadius: 2,
         boxShadow: (theme) => ({
           xs: theme.customShadows.card,
-          md: 'none',
+          md: 'none'
         }),
         ...(starter && {
           borderTopRightRadius: { md: 0 },
-          borderBottomRightRadius: { md: 0 },
+          borderBottomRightRadius: { md: 0 }
         }),
         ...((starter || premium) && {
           boxShadow: (theme) => ({
@@ -110,10 +107,10 @@ export default function PricingCard({ card, sx, ...other }) {
             md: `-40px 40px 80px 0px ${alpha(
               theme.palette.mode === 'light' ? theme.palette.grey[500] : theme.palette.common.black,
               0.16
-            )}`,
-          }),
+            )}`
+          })
         }),
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -127,13 +124,7 @@ export default function PricingCard({ card, sx, ...other }) {
 
       {renderList}
 
-      <Button
-        fullWidth
-        size="large"
-        variant="contained"
-        disabled={basic}
-        color={starter ? 'primary' : 'inherit'}
-      >
+      <Button fullWidth size="large" variant="contained" disabled={basic} color={starter ? 'primary' : 'inherit'}>
         {labelAction}
       </Button>
     </Stack>
@@ -142,5 +133,5 @@ export default function PricingCard({ card, sx, ...other }) {
 
 PricingCard.propTypes = {
   card: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

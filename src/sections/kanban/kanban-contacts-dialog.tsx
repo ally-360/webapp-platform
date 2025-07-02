@@ -33,7 +33,7 @@ export default function KanbanContactsDialog({ assignee = [], open, onClose }) {
 
   const dataFiltered = applyFilter({
     inputData: _contacts,
-    query: searchContact,
+    query: searchContact
   });
 
   const notFound = !dataFiltered.length && !!searchContact;
@@ -55,7 +55,7 @@ export default function KanbanContactsDialog({ assignee = [], open, onClose }) {
               <InputAdornment position="start">
                 <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
               </InputAdornment>
-            ),
+            )
           }}
         />
       </Box>
@@ -67,7 +67,7 @@ export default function KanbanContactsDialog({ assignee = [], open, onClose }) {
           <Scrollbar
             sx={{
               px: 2.5,
-              height: ITEM_HEIGHT * 6,
+              height: ITEM_HEIGHT * 6
             }}
           >
             {dataFiltered.map((contact) => {
@@ -117,7 +117,7 @@ export default function KanbanContactsDialog({ assignee = [], open, onClose }) {
 KanbanContactsDialog.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
-  assignee: PropTypes.array,
+  assignee: PropTypes.array
 };
 
 // ----------------------------------------------------------------------

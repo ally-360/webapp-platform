@@ -21,15 +21,14 @@ export default function ResultItem({ title, path, groupLabel, onClickItem }) {
         '&:hover': {
           borderRadius: 1,
           borderColor: (theme) => theme.palette.primary.main,
-          backgroundColor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.hoverOpacity),
-        },
+          backgroundColor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.hoverOpacity)
+        }
       }}
     >
       <ListItemText
         primaryTypographyProps={{
           typography: 'subtitle2',
-          sx: { textTransform: 'capitalize' },
+          sx: { textTransform: 'capitalize' }
         }}
         secondaryTypographyProps={{ typography: 'caption' }}
         primary={title.map((part, index) => (
@@ -37,7 +36,7 @@ export default function ResultItem({ title, path, groupLabel, onClickItem }) {
             key={index}
             component="span"
             sx={{
-              color: part.highlight ? 'primary.main' : 'text.primary',
+              color: part.highlight ? 'primary.main' : 'text.primary'
             }}
           >
             {part.text}
@@ -48,7 +47,7 @@ export default function ResultItem({ title, path, groupLabel, onClickItem }) {
             key={index}
             component="span"
             sx={{
-              color: part.highlight ? 'primary.main' : 'text.secondary',
+              color: part.highlight ? 'primary.main' : 'text.secondary'
             }}
           >
             {part.text}
@@ -65,5 +64,5 @@ ResultItem.propTypes = {
   groupLabel: PropTypes.string,
   onClickItem: PropTypes.func,
   path: PropTypes.array,
-  title: PropTypes.array,
+  title: PropTypes.array
 };

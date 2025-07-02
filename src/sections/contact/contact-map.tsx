@@ -20,8 +20,8 @@ const StyledRoot = styled('div')(({ theme }) => ({
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
   '& .mapboxgl-ctrl-logo, .mapboxgl-ctrl-bottom-right': {
-    display: 'none',
-  },
+    display: 'none'
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -40,7 +40,7 @@ export default function ContactMap({ contacts }) {
           initialViewState={{
             latitude: 12,
             longitude: 42,
-            zoom: 2,
+            zoom: 2
           }}
           mapStyle={`mapbox://styles/mapbox/${isLight ? 'light' : 'dark'}-v10`}
           mapboxAccessToken={MAPBOX_API}
@@ -67,7 +67,7 @@ export default function ContactMap({ contacts }) {
               sx={{
                 '& .mapboxgl-popup-content': { bgcolor: 'common.white' },
                 '&.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip': { borderTopColor: '#FFF' },
-                '&.mapboxgl-popup-anchor-top .mapboxgl-popup-tip': { borderBottomColor: '#FFF' },
+                '&.mapboxgl-popup-anchor-top .mapboxgl-popup-tip': { borderBottomColor: '#FFF' }
               }}
             >
               <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
@@ -78,11 +78,7 @@ export default function ContactMap({ contacts }) {
                 {popupInfo.address}
               </Typography>
 
-              <Typography
-                component="div"
-                variant="caption"
-                sx={{ mt: 1, display: 'flex', alignItems: 'center' }}
-              >
+              <Typography component="div" variant="caption" sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
                 <Iconify icon="solar:phone-bold" width={14} sx={{ mr: 0.5 }} />
                 {popupInfo.phoneNumber}
               </Typography>
@@ -95,5 +91,5 @@ export default function ContactMap({ contacts }) {
 }
 
 ContactMap.propTypes = {
-  contacts: PropTypes.array,
+  contacts: PropTypes.array
 };

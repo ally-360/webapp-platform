@@ -29,7 +29,7 @@ export default function NotificationItem({ notification }) {
             width: 40,
             height: 40,
             borderRadius: '50%',
-            bgcolor: 'background.neutral',
+            bgcolor: 'background.neutral'
           }}
         >
           <Box
@@ -56,11 +56,7 @@ export default function NotificationItem({ notification }) {
           direction="row"
           alignItems="center"
           sx={{ typography: 'caption', color: 'text.disabled' }}
-          divider={
-            <Box
-              sx={{ width: 2, height: 2, bgcolor: 'currentColor', mx: 0.5, borderRadius: '50%' }}
-            />
-          }
+          divider={<Box sx={{ width: 2, height: 2, bgcolor: 'currentColor', mx: 0.5, borderRadius: '50%' }} />}
         >
           {fToNow(notification.createdAt)}
           {notification.category}
@@ -78,7 +74,7 @@ export default function NotificationItem({ notification }) {
         right: 20,
         borderRadius: '50%',
         bgcolor: 'info.main',
-        position: 'absolute',
+        position: 'absolute'
       }}
     />
   );
@@ -102,7 +98,7 @@ export default function NotificationItem({ notification }) {
           my: 1.5,
           borderRadius: 1.5,
           color: 'text.secondary',
-          bgcolor: 'background.neutral',
+          bgcolor: 'background.neutral'
         }}
       >
         {reader(
@@ -125,13 +121,10 @@ export default function NotificationItem({ notification }) {
         p: 1.5,
         mt: 1.5,
         borderRadius: 1.5,
-        bgcolor: 'background.neutral',
+        bgcolor: 'background.neutral'
       }}
     >
-      <FileThumbnail
-        file="http://localhost:8080/httpsdesign-suriname-2015.mp3"
-        sx={{ width: 40, height: 40 }}
-      />
+      <FileThumbnail file="http://localhost:8080/httpsdesign-suriname-2015.mp3" sx={{ width: 40, height: 40 }} />
 
       <Stack spacing={1} direction={{ xs: 'column', sm: 'row' }} flexGrow={1} sx={{ minWidth: 0 }}>
         <ListItemText
@@ -153,7 +146,7 @@ export default function NotificationItem({ notification }) {
                     width: 2,
                     height: 2,
                     borderRadius: '50%',
-                    bgcolor: 'currentColor',
+                    bgcolor: 'currentColor'
                   }}
                 />
               }
@@ -200,7 +193,7 @@ export default function NotificationItem({ notification }) {
       sx={{
         p: 2.5,
         alignItems: 'flex-start',
-        borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`,
+        borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`
       }}
     >
       {renderUnReadBadge}
@@ -220,7 +213,7 @@ export default function NotificationItem({ notification }) {
 }
 
 NotificationItem.propTypes = {
-  notification: PropTypes.object,
+  notification: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -233,7 +226,7 @@ function reader(data) {
         mb: 0.5,
         '& p': { typography: 'body2', m: 0 },
         '& a': { color: 'inherit', textDecoration: 'none' },
-        '& strong': { typography: 'subtitle2' },
+        '& strong': { typography: 'subtitle2' }
       }}
     />
   );

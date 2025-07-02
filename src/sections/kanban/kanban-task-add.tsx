@@ -28,8 +28,8 @@ export default function KanbanTaskAdd({ status, onAddTask, onCloseAddTask }) {
       reporter: {
         id: _mock.id(16),
         name: _mock.fullName(16),
-        avatarUrl: _mock.image.avatar(16),
-      },
+        avatarUrl: _mock.image.avatar(16)
+      }
     }),
     [name, status]
   );
@@ -63,7 +63,7 @@ export default function KanbanTaskAdd({ status, onAddTask, onCloseAddTask }) {
         sx={{
           borderRadius: 1.5,
           bgcolor: 'background.default',
-          boxShadow: (theme) => theme.customShadows.z1,
+          boxShadow: (theme) => theme.customShadows.z1
         }}
       >
         <InputBase
@@ -78,8 +78,8 @@ export default function KanbanTaskAdd({ status, onAddTask, onCloseAddTask }) {
             px: 2,
             height: 56,
             [`& .${inputBaseClasses.input}`]: {
-              typography: 'subtitle2',
-            },
+              typography: 'subtitle2'
+            }
           }}
         />
       </Paper>
@@ -90,5 +90,5 @@ export default function KanbanTaskAdd({ status, onAddTask, onCloseAddTask }) {
 KanbanTaskAdd.propTypes = {
   onAddTask: PropTypes.func,
   onCloseAddTask: PropTypes.func,
-  status: PropTypes.string,
+  status: PropTypes.string
 };

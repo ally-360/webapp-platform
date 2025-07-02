@@ -19,7 +19,7 @@ export default function HeaderShadow({ sx, ...other }) {
         position: 'absolute',
         width: `calc(100% - 48px)`,
         boxShadow: (theme) => theme.customShadows.z8,
-        ...sx,
+        ...sx
       }}
       {...other}
     />
@@ -27,5 +27,5 @@ export default function HeaderShadow({ sx, ...other }) {
 }
 
 HeaderShadow.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

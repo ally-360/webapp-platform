@@ -17,13 +17,13 @@ const LEGEND_HEIGHT = 72;
 const StyledChart = styled(Chart)(({ theme }) => ({
   height: CHART_HEIGHT,
   '& .apexcharts-canvas, .apexcharts-inner, svg, foreignObject': {
-    height: `100% !important`,
+    height: `100% !important`
   },
   '& .apexcharts-legend': {
     height: LEGEND_HEIGHT,
     borderTop: `dashed 1px ${theme.palette.divider}`,
-    top: `calc(${CHART_HEIGHT - LEGEND_HEIGHT}px) !important`,
-  },
+    top: `calc(${CHART_HEIGHT - LEGEND_HEIGHT}px) !important`
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -38,44 +38,44 @@ export default function AnalyticsCurrentVisits({ title, subheader, chart, ...oth
   const chartOptions = useChart({
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     colors,
     labels: series.map((i) => i.label),
     stroke: {
-      colors: [theme.palette.background.paper],
+      colors: [theme.palette.background.paper]
     },
     legend: {
       floating: true,
       position: 'bottom',
-      horizontalAlign: 'center',
+      horizontalAlign: 'center'
     },
     dataLabels: {
       enabled: true,
       dropShadow: {
-        enabled: false,
-      },
+        enabled: false
+      }
     },
     tooltip: {
       fillSeriesColor: false,
       y: {
         formatter: (value) => fNumber(value),
         title: {
-          formatter: (seriesName) => `${seriesName}`,
-        },
-      },
+          formatter: (seriesName) => `${seriesName}`
+        }
+      }
     },
     plotOptions: {
       pie: {
         donut: {
           labels: {
-            show: false,
-          },
-        },
-      },
+            show: false
+          }
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -90,5 +90,5 @@ export default function AnalyticsCurrentVisits({ title, subheader, chart, ...oth
 AnalyticsCurrentVisits.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

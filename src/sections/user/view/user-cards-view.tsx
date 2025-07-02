@@ -25,7 +25,7 @@ export default function UserCardsView() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'User', href: paths.dashboard.user.root },
-          { name: 'Cards' },
+          { name: 'Cards' }
         ]}
         action={
           <Button

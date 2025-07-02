@@ -18,13 +18,13 @@ export default function KanbanInputName({ sx, ...other }) {
           transition: (theme) => theme.transitions.create(['padding-left', 'border-color']),
           [`&.${inputBaseClasses.focused}`]: {
             pl: 1.5,
-            borderColor: 'text.primary',
-          },
+            borderColor: 'text.primary'
+          }
         },
         [`& .${inputBaseClasses.input}`]: {
-          typography: 'h6',
+          typography: 'h6'
         },
-        ...sx,
+        ...sx
       }}
       {...other}
     />
@@ -32,5 +32,5 @@ export default function KanbanInputName({ sx, ...other }) {
 }
 
 KanbanInputName.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

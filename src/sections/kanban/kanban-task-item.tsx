@@ -36,14 +36,14 @@ export default function KanbanTaskItem({ task, index, onDeleteTask, onUpdateTask
         top: 4,
         right: 4,
         ...(task.priority === 'low' && {
-          color: 'info.main',
+          color: 'info.main'
         }),
         ...(task.priority === 'medium' && {
-          color: 'warning.main',
+          color: 'warning.main'
         }),
         ...(task.priority === 'hight' && {
-          color: 'error.main',
-        }),
+          color: 'error.main'
+        })
       }}
     />
   );
@@ -51,7 +51,7 @@ export default function KanbanTaskItem({ task, index, onDeleteTask, onUpdateTask
   const renderImg = (
     <Box
       sx={{
-        p: theme.spacing(1, 1, 0, 1),
+        p: theme.spacing(1, 1, 0, 1)
       }}
     >
       <Box
@@ -61,8 +61,8 @@ export default function KanbanTaskItem({ task, index, onDeleteTask, onUpdateTask
         sx={{
           borderRadius: 1.5,
           ...(openDetails.value && {
-            opacity: 0.8,
-          }),
+            opacity: 0.8
+          })
         }}
       />
     </Box>
@@ -76,7 +76,7 @@ export default function KanbanTaskItem({ task, index, onDeleteTask, onUpdateTask
         alignItems="center"
         sx={{
           typography: 'caption',
-          color: 'text.disabled',
+          color: 'text.disabled'
         }}
       >
         <Iconify width={16} icon="solar:chat-round-dots-bold" sx={{ mr: 0.25 }} />
@@ -92,8 +92,8 @@ export default function KanbanTaskItem({ task, index, onDeleteTask, onUpdateTask
         sx={{
           [`& .${avatarGroupClasses.avatar}`]: {
             width: 24,
-            height: 24,
-          },
+            height: 24
+          }
         }}
       >
         {task.assignee.map((user) => (
@@ -120,19 +120,19 @@ export default function KanbanTaskItem({ task, index, onDeleteTask, onUpdateTask
               bgcolor: 'background.default',
               boxShadow: theme.customShadows.z1,
               '&:hover': {
-                boxShadow: theme.customShadows.z20,
+                boxShadow: theme.customShadows.z20
               },
               ...(openDetails.value && {
-                boxShadow: theme.customShadows.z20,
+                boxShadow: theme.customShadows.z20
               }),
               ...(snapshot.isDragging && {
                 boxShadow: theme.customShadows.z20,
                 ...bgBlur({
                   opacity: 0.48,
-                  color: theme.palette.background.default,
-                }),
+                  color: theme.palette.background.default
+                })
               }),
-              ...sx,
+              ...sx
             }}
             {...other}
           >
@@ -165,5 +165,5 @@ KanbanTaskItem.propTypes = {
   onDeleteTask: PropTypes.func,
   onUpdateTask: PropTypes.func,
   sx: PropTypes.object,
-  task: PropTypes.object,
+  task: PropTypes.object
 };

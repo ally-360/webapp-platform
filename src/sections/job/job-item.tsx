@@ -25,8 +25,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 export default function JobItem({ job, onView, onEdit, onDelete }) {
   const popover = usePopover();
 
-  const { id, title, company, createdAt, candidates, experience, employmentTypes, salary, role } =
-    job;
+  const { id, title, company, createdAt, candidates, experience, employmentTypes, salary, role } = job;
 
   return (
     <>
@@ -36,12 +35,7 @@ export default function JobItem({ job, onView, onEdit, onDelete }) {
         </IconButton>
 
         <Stack sx={{ p: 3, pb: 2 }}>
-          <Avatar
-            alt={company.name}
-            src={company.logo}
-            variant="rounded"
-            sx={{ width: 48, height: 48, mb: 2 }}
-          />
+          <Avatar alt={company.name} src={company.logo} variant="rounded" sx={{ width: 48, height: 48, mb: 2 }} />
 
           <ListItemText
             sx={{ mb: 1 }}
@@ -52,13 +46,13 @@ export default function JobItem({ job, onView, onEdit, onDelete }) {
             }
             secondary={`Posted date: ${fDate(createdAt)}`}
             primaryTypographyProps={{
-              typography: 'subtitle1',
+              typography: 'subtitle1'
             }}
             secondaryTypographyProps={{
               mt: 1,
               component: 'span',
               typography: 'caption',
-              color: 'text.disabled',
+              color: 'text.disabled'
             }}
           />
 
@@ -79,20 +73,20 @@ export default function JobItem({ job, onView, onEdit, onDelete }) {
           {[
             {
               label: experience,
-              icon: <Iconify width={16} icon="carbon:skill-level-basic" sx={{ flexShrink: 0 }} />,
+              icon: <Iconify width={16} icon="carbon:skill-level-basic" sx={{ flexShrink: 0 }} />
             },
             {
               label: employmentTypes.join(', '),
-              icon: <Iconify width={16} icon="solar:clock-circle-bold" sx={{ flexShrink: 0 }} />,
+              icon: <Iconify width={16} icon="solar:clock-circle-bold" sx={{ flexShrink: 0 }} />
             },
             {
               label: salary.negotiable ? 'Negotiable' : fCurrency(salary.price),
-              icon: <Iconify width={16} icon="solar:wad-of-money-bold" sx={{ flexShrink: 0 }} />,
+              icon: <Iconify width={16} icon="solar:wad-of-money-bold" sx={{ flexShrink: 0 }} />
             },
             {
               label: role,
-              icon: <Iconify width={16} icon="solar:user-rounded-bold" sx={{ flexShrink: 0 }} />,
-            },
+              icon: <Iconify width={16} icon="solar:user-rounded-bold" sx={{ flexShrink: 0 }} />
+            }
           ].map((item) => (
             <Stack
               key={item.label}
@@ -111,12 +105,7 @@ export default function JobItem({ job, onView, onEdit, onDelete }) {
         </Box>
       </Card>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -156,5 +145,5 @@ JobItem.propTypes = {
   job: PropTypes.object,
   onDelete: PropTypes.func,
   onEdit: PropTypes.func,
-  onView: PropTypes.func,
+  onView: PropTypes.func
 };

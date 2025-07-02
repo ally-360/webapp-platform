@@ -49,5 +49,5 @@ export default function AnalyticsTrafficBySite({ title, subheader, list, ...othe
 AnalyticsTrafficBySite.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

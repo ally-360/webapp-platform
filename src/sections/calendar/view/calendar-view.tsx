@@ -40,7 +40,7 @@ import CalendarFiltersResult from '../calendar-filters-result';
 const defaultFilters = {
   colors: [],
   startDate: null,
-  endDate: null,
+  endDate: null
 };
 
 // ----------------------------------------------------------------------
@@ -59,9 +59,7 @@ export default function CalendarView() {
   const { events, eventsLoading } = useGetEvents();
 
   const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
+    filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
   const {
     calendarRef,
@@ -86,7 +84,7 @@ export default function CalendarView() {
     selectEventId,
     selectedRange,
     //
-    onClickEventInFilters,
+    onClickEventInFilters
   } = useCalendar();
 
   const currentEvent = useEvent(events, selectEventId, selectedRange, openForm);
@@ -98,7 +96,7 @@ export default function CalendarView() {
   const handleFilters = useCallback((name, value) => {
     setFilters((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: value
     }));
   }, []);
 
@@ -111,7 +109,7 @@ export default function CalendarView() {
   const dataFiltered = applyFilter({
     inputData: events,
     filters,
-    dateError,
+    dateError
   });
 
   const renderResults = (
@@ -135,15 +133,11 @@ export default function CalendarView() {
           alignItems="center"
           justifyContent="space-between"
           sx={{
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 3, md: 5 }
           }}
         >
           <Typography variant="h4">Calendar</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={onOpenForm}
-          >
+          <Button variant="contained" startIcon={<Iconify icon="mingcute:add-line" />} onClick={onOpenForm}>
             New Event
           </Button>
         </Stack>
@@ -187,13 +181,7 @@ export default function CalendarView() {
               eventResize={(arg) => {
                 onResizeEvent(arg, updateEvent);
               }}
-              plugins={[
-                listPlugin,
-                dayGridPlugin,
-                timelinePlugin,
-                timeGridPlugin,
-                interactionPlugin,
-              ]}
+              plugins={[listPlugin, dayGridPlugin, timelinePlugin, timeGridPlugin, interactionPlugin]}
             />
           </StyledCalendar>
         </Card>
@@ -206,18 +194,14 @@ export default function CalendarView() {
         onClose={onCloseForm}
         transitionDuration={{
           enter: theme.transitions.duration.shortest,
-          exit: theme.transitions.duration.shortest - 80,
+          exit: theme.transitions.duration.shortest - 80
         }}
       >
         <DialogTitle sx={{ minHeight: 76 }}>
           {openForm && <> {currentEvent?.id ? 'Edit Event' : 'Add Event'}</>}
         </DialogTitle>
 
-        <CalendarForm
-          currentEvent={currentEvent}
-          colorOptions={CALENDAR_COLOR_OPTIONS}
-          onClose={onCloseForm}
-        />
+        <CalendarForm currentEvent={currentEvent} colorOptions={CALENDAR_COLOR_OPTIONS} onClose={onCloseForm} />
       </Dialog>
 
       <CalendarFilters
@@ -256,9 +240,7 @@ function applyFilter({ inputData, filters, dateError }) {
   if (!dateError) {
     if (startDate && endDate) {
       inputData = inputData.filter(
-        (event) =>
-          fTimestamp(event.start) >= fTimestamp(startDate) &&
-          fTimestamp(event.end) <= fTimestamp(endDate)
+        (event) => fTimestamp(event.start) >= fTimestamp(startDate) && fTimestamp(event.end) <= fTimestamp(endDate)
       );
     }
   }

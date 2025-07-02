@@ -32,8 +32,8 @@ export default function Auth0LoginView() {
     try {
       await loginWithPopup?.({
         authorizationParams: {
-          screen_hint: 'signup',
-        },
+          screen_hint: 'signup'
+        }
       });
     } catch (error) {
       console.error(error);
@@ -44,8 +44,8 @@ export default function Auth0LoginView() {
     try {
       await loginWithRedirect?.({
         appState: {
-          returnTo: returnTo || PATH_AFTER_LOGIN,
-        },
+          returnTo: returnTo || PATH_AFTER_LOGIN
+        }
       });
     } catch (error) {
       console.error(error);
@@ -56,11 +56,11 @@ export default function Auth0LoginView() {
     try {
       await loginWithRedirect?.({
         appState: {
-          returnTo: returnTo || PATH_AFTER_LOGIN,
+          returnTo: returnTo || PATH_AFTER_LOGIN
         },
         authorizationParams: {
-          screen_hint: 'signup',
-        },
+          screen_hint: 'signup'
+        }
       });
     } catch (error) {
       console.error(error);
@@ -74,45 +74,21 @@ export default function Auth0LoginView() {
       </Typography>
 
       <Stack spacing={2}>
-        <Button
-          fullWidth
-          color="primary"
-          size="large"
-          variant="contained"
-          onClick={handleLoginWithRedirect}
-        >
+        <Button fullWidth color="primary" size="large" variant="contained" onClick={handleLoginWithRedirect}>
           Login with Redirect
         </Button>
 
-        <Button
-          fullWidth
-          color="primary"
-          size="large"
-          variant="soft"
-          onClick={handleRegisterWithRedirect}
-        >
+        <Button fullWidth color="primary" size="large" variant="soft" onClick={handleRegisterWithRedirect}>
           Register with Redirect
         </Button>
 
         <Divider />
 
-        <Button
-          fullWidth
-          color="inherit"
-          size="large"
-          variant="contained"
-          onClick={handleLoginWithPopup}
-        >
+        <Button fullWidth color="inherit" size="large" variant="contained" onClick={handleLoginWithPopup}>
           Login With Popup
         </Button>
 
-        <Button
-          fullWidth
-          color="inherit"
-          size="large"
-          variant="soft"
-          onClick={handleRegisterWithPopup}
-        >
+        <Button fullWidth color="inherit" size="large" variant="soft" onClick={handleRegisterWithPopup}>
           Register With Popup
         </Button>
       </Stack>

@@ -27,55 +27,55 @@ export default function Chip(theme) {
         color: 'currentColor',
         '&:hover': {
           opacity: 1,
-          color: 'currentColor',
-        },
+          color: 'currentColor'
+        }
       },
 
       ...(defaultColor && {
         [`& .${chipClasses.avatar}`]: {
-          color: theme.palette.text.primary,
+          color: theme.palette.text.primary
         },
         // FILLED
         ...(filledVariant && {
           color: isLight ? theme.palette.common.white : theme.palette.grey[800],
           backgroundColor: theme.palette.text.primary,
           '&:hover': {
-            backgroundColor: isLight ? theme.palette.grey[700] : theme.palette.grey[100],
+            backgroundColor: isLight ? theme.palette.grey[700] : theme.palette.grey[100]
           },
           [`& .${chipClasses.icon}`]: {
-            color: isLight ? theme.palette.common.white : theme.palette.grey[800],
-          },
+            color: isLight ? theme.palette.common.white : theme.palette.grey[800]
+          }
         }),
         // OUTLINED
         ...(outlinedVariant && {
-          border: `solid 1px ${alpha(theme.palette.grey[500], 0.32)}`,
+          border: `solid 1px ${alpha(theme.palette.grey[500], 0.32)}`
         }),
         // SOFT
         ...(softVariant && {
           color: theme.palette.text.primary,
           backgroundColor: alpha(theme.palette.grey[500], 0.16),
           '&:hover': {
-            backgroundColor: alpha(theme.palette.grey[500], 0.32),
-          },
-        }),
-      }),
+            backgroundColor: alpha(theme.palette.grey[500], 0.32)
+          }
+        })
+      })
     };
 
     const colorStyle = COLORS.map((color) => ({
       ...(ownerState.color === color && {
         [`& .${chipClasses.avatar}`]: {
           color: theme.palette[color].lighter,
-          backgroundColor: theme.palette[color].dark,
+          backgroundColor: theme.palette[color].dark
         },
         // SOFT
         ...(softVariant && {
           color: theme.palette[color][isLight ? 'dark' : 'light'],
           backgroundColor: alpha(theme.palette[color].main, 0.16),
           '&:hover': {
-            backgroundColor: alpha(theme.palette[color].main, 0.32),
-          },
-        }),
-      }),
+            backgroundColor: alpha(theme.palette[color].main, 0.32)
+          }
+        })
+      })
     }));
 
     const disabledState = {
@@ -83,25 +83,25 @@ export default function Chip(theme) {
         opacity: 1,
         color: theme.palette.action.disabled,
         [`& .${chipClasses.icon}`]: {
-          color: theme.palette.action.disabled,
+          color: theme.palette.action.disabled
         },
         [`& .${chipClasses.avatar}`]: {
           color: theme.palette.action.disabled,
-          backgroundColor: theme.palette.action.disabledBackground,
+          backgroundColor: theme.palette.action.disabledBackground
         },
         // FILLED
         ...(filledVariant && {
-          backgroundColor: theme.palette.action.disabledBackground,
+          backgroundColor: theme.palette.action.disabledBackground
         }),
         // OUTLINED
         ...(outlinedVariant && {
-          borderColor: theme.palette.action.disabledBackground,
+          borderColor: theme.palette.action.disabledBackground
         }),
         // SOFT
         ...(softVariant && {
-          backgroundColor: theme.palette.action.disabledBackground,
-        }),
-      },
+          backgroundColor: theme.palette.action.disabledBackground
+        })
+      }
     };
 
     return [
@@ -110,20 +110,20 @@ export default function Chip(theme) {
       disabledState,
       {
         fontWeight: 500,
-        borderRadius: theme.shape.borderRadius,
-      },
+        borderRadius: theme.shape.borderRadius
+      }
     ];
   };
 
   return {
     MuiChip: {
       defaultProps: {
-        deleteIcon: <Iconify icon="solar:close-circle-bold" />,
+        deleteIcon: <Iconify icon="solar:close-circle-bold" />
       },
 
       styleOverrides: {
-        root: ({ ownerState }) => rootStyles(ownerState),
-      },
-    },
+        root: ({ ownerState }) => rootStyles(ownerState)
+      }
+    }
   };
 }

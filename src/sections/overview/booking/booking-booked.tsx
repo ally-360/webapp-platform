@@ -19,12 +19,7 @@ export default function BookingBooked({ title, subheader, data, ...other }) {
       <Stack spacing={3} sx={{ p: 3 }}>
         {data.map((progress) => (
           <Stack key={progress.status}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{ mb: 1 }}
-            >
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
               <Box sx={{ typography: 'overline' }}>{progress.status}</Box>
               <Box sx={{ typography: 'subtitle1' }}>{fShortenNumber(progress.value)}</Box>
             </Stack>
@@ -33,9 +28,7 @@ export default function BookingBooked({ title, subheader, data, ...other }) {
               variant="determinate"
               value={progress.value}
               color={
-                (progress.status === 'Pending' && 'warning') ||
-                (progress.status === 'Canceled' && 'error') ||
-                'success'
+                (progress.status === 'Pending' && 'warning') || (progress.status === 'Canceled' && 'error') || 'success'
               }
               sx={{ height: 8, bgcolor: (theme) => alpha(theme.palette.grey[500], 0.16) }}
             />
@@ -49,5 +42,5 @@ export default function BookingBooked({ title, subheader, data, ...other }) {
 BookingBooked.propTypes = {
   data: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

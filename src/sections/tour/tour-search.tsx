@@ -47,16 +47,16 @@ export default function TourSearch({ query, results, onSearch, hrefItem }) {
         popper: {
           placement: 'bottom-start',
           sx: {
-            minWidth: 320,
-          },
+            minWidth: 320
+          }
         },
         paper: {
           sx: {
             [` .${autocompleteClasses.option}`]: {
-              pl: 0.75,
-            },
-          },
-        },
+              pl: 0.75
+            }
+          }
+        }
       }}
       renderInput={(params) => (
         <TextField
@@ -69,7 +69,7 @@ export default function TourSearch({ query, results, onSearch, hrefItem }) {
               <InputAdornment position="start">
                 <Iconify icon="eva:search-fill" sx={{ ml: 1, color: 'text.disabled' }} />
               </InputAdornment>
-            ),
+            )
           }}
         />
       )}
@@ -95,7 +95,7 @@ export default function TourSearch({ query, results, onSearch, hrefItem }) {
                   color={part.highlight ? 'primary' : 'textPrimary'}
                   sx={{
                     typography: 'body2',
-                    fontWeight: part.highlight ? 'fontWeightSemiBold' : 'fontWeightMedium',
+                    fontWeight: part.highlight ? 'fontWeightSemiBold' : 'fontWeightMedium'
                   }}
                 >
                   {part.text}
@@ -113,5 +113,5 @@ TourSearch.propTypes = {
   hrefItem: PropTypes.func,
   onSearch: PropTypes.func,
   query: PropTypes.string,
-  results: PropTypes.array,
+  results: PropTypes.array
 };

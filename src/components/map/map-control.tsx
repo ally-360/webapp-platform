@@ -9,15 +9,13 @@ export default function MapControl({
   hideScaleControl,
   hideGeolocateControl,
   hideFullscreenControl,
-  hideNavigationnControl,
+  hideNavigationnControl
 }) {
   return (
     <>
       <StyledMapControls />
 
-      {!hideGeolocateControl && (
-        <GeolocateControl position="top-left" positionOptions={{ enableHighAccuracy: true }} />
-      )}
+      {!hideGeolocateControl && <GeolocateControl position="top-left" positionOptions={{ enableHighAccuracy: true }} />}
 
       {!hideFullscreenControl && <FullscreenControl position="top-left" />}
 
@@ -32,5 +30,5 @@ MapControl.propTypes = {
   hideFullscreenControl: PropTypes.bool,
   hideGeolocateControl: PropTypes.bool,
   hideNavigationnControl: PropTypes.bool,
-  hideScaleControl: PropTypes.bool,
+  hideScaleControl: PropTypes.bool
 };

@@ -15,36 +15,36 @@ export default function Rating(theme) {
     MuiRating: {
       defaultProps: {
         emptyIcon: <Icon />,
-        icon: <Icon />,
+        icon: <Icon />
       },
       styleOverrides: {
         root: {
           [`&.${ratingClasses.disabled}`]: {
-            opacity: 0.48,
-          },
+            opacity: 0.48
+          }
         },
         iconEmpty: {
-          color: alpha(theme.palette.grey[500], 0.48),
+          color: alpha(theme.palette.grey[500], 0.48)
         },
         sizeSmall: {
           [`& .${svgIconClasses.root}`]: {
             width: 20,
-            height: 20,
-          },
+            height: 20
+          }
         },
         sizeMedium: {
           [`& .${svgIconClasses.root}`]: {
             width: 24,
-            height: 24,
-          },
+            height: 24
+          }
         },
         sizeLarge: {
           [`& .${svgIconClasses.root}`]: {
             width: 28,
-            height: 28,
-          },
-        },
-      },
-    },
+            height: 28
+          }
+        }
+      }
+    }
   };
 }

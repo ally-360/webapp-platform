@@ -14,48 +14,38 @@ import { ListItem } from './styles';
 
 // ----------------------------------------------------------------------
 
-export const NavItem = forwardRef(
-  ({ item, open, offsetTop, active, subItem, externalLink, ...other }, ref) => {
-    const { title, path, children } = item;
+export const NavItem = forwardRef(({ item, open, offsetTop, active, subItem, externalLink, ...other }, ref) => {
+  const { title, path, children } = item;
 
-    const renderContent = (
-      <ListItem
-        ref={ref}
-        disableRipple
-        offsetTop={offsetTop}
-        subItem={subItem}
-        active={active}
-        open={open}
-        {...other}
-      >
-        {title}
+  const renderContent = (
+    <ListItem ref={ref} disableRipple offsetTop={offsetTop} subItem={subItem} active={active} open={open} {...other}>
+      {title}
 
-        {!!children && <Iconify width={16} icon="eva:arrow-ios-downward-fill" sx={{ ml: 1 }} />}
-      </ListItem>
-    );
+      {!!children && <Iconify width={16} icon="eva:arrow-ios-downward-fill" sx={{ ml: 1 }} />}
+    </ListItem>
+  );
 
-    // External link
-    if (externalLink) {
-      return (
-        <Link href={path} target="_blank" rel="noopener" underline="none">
-          {renderContent}
-        </Link>
-      );
-    }
-
-    // Has child
-    if (children) {
-      return renderContent;
-    }
-
-    // Default
+  // External link
+  if (externalLink) {
     return (
-      <Link component={RouterLink} href={path} underline="none">
+      <Link href={path} target="_blank" rel="noopener" underline="none">
         {renderContent}
       </Link>
     );
   }
-);
+
+  // Has child
+  if (children) {
+    return renderContent;
+  }
+
+  // Default
+  return (
+    <Link component={RouterLink} href={path} underline="none">
+      {renderContent}
+    </Link>
+  );
+});
 
 NavItem.propTypes = {
   active: PropTypes.bool,
@@ -63,7 +53,7 @@ NavItem.propTypes = {
   item: PropTypes.object,
   offsetTop: PropTypes.bool,
   open: PropTypes.bool,
-  subItem: PropTypes.bool,
+  subItem: PropTypes.bool
 };
 
 // ----------------------------------------------------------------------
@@ -80,7 +70,7 @@ export function NavItemDashboard({ item, sx, ...other }) {
           color: 'text.disabled',
           bgcolor: 'background.neutral',
 
-          ...sx,
+          ...sx
         }}
       >
         <m.div
@@ -88,14 +78,10 @@ export function NavItemDashboard({ item, sx, ...other }) {
           whileHover="hover"
           variants={{
             hover: { scale: 1.02 },
-            tap: { scale: 0.98 },
+            tap: { scale: 0.98 }
           }}
         >
-          <Box
-            component="img"
-            alt="illustration_dashboard"
-            src="/assets/illustrations/illustration_dashboard.png"
-          />
+          <Box component="img" alt="illustration_dashboard" src="/assets/illustrations/illustration_dashboard.png" />
         </m.div>
       </CardActionArea>
     </Link>
@@ -104,5 +90,5 @@ export function NavItemDashboard({ item, sx, ...other }) {
 
 NavItemDashboard.propTypes = {
   item: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

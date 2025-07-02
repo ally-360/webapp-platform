@@ -20,7 +20,7 @@ const VIEW_OPTIONS = [
   { value: 'dayGridMonth', label: 'Month', icon: 'mingcute:calendar-month-line' },
   { value: 'timeGridWeek', label: 'Week', icon: 'mingcute:calendar-week-line' },
   { value: 'timeGridDay', label: 'Day', icon: 'mingcute:calendar-day-line' },
-  { value: 'listWeek', label: 'Agenda', icon: 'fluent:calendar-agenda-24-regular' },
+  { value: 'listWeek', label: 'Agenda', icon: 'fluent:calendar-agenda-24-regular' }
 ];
 
 // ----------------------------------------------------------------------
@@ -33,7 +33,7 @@ export default function CalendarToolbar({
   onNextDate,
   onPrevDate,
   onChangeView,
-  onOpenFilters,
+  onOpenFilters
 }) {
   const smUp = useResponsive('up', 'sm');
 
@@ -84,19 +84,11 @@ export default function CalendarToolbar({
         </Stack>
 
         {loading && (
-          <LinearProgress
-            color="inherit"
-            sx={{ height: 2, width: 1, position: 'absolute', bottom: 0, left: 0 }}
-          />
+          <LinearProgress color="inherit" sx={{ height: 2, width: 1, position: 'absolute', bottom: 0, left: 0 }} />
         )}
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="top-left"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="top-left" sx={{ width: 160 }}>
         {VIEW_OPTIONS.map((viewOption) => (
           <MenuItem
             key={viewOption.value}
@@ -123,5 +115,5 @@ CalendarToolbar.propTypes = {
   onOpenFilters: PropTypes.func,
   onPrevDate: PropTypes.func,
   onToday: PropTypes.func,
-  view: PropTypes.oneOf(['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek']),
+  view: PropTypes.oneOf(['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'])
 };

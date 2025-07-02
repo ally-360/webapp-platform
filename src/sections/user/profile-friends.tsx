@@ -23,19 +23,14 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 export default function ProfileFriends({ friends, searchFriends, onSearchFriends }) {
   const dataFiltered = applyFilter({
     inputData: friends,
-    query: searchFriends,
+    query: searchFriends
   });
 
   const notFound = !dataFiltered.length && !!searchFriends;
 
   return (
     <>
-      <Stack
-        spacing={2}
-        justifyContent="space-between"
-        direction={{ xs: 'column', sm: 'row' }}
-        sx={{ my: 5 }}
-      >
+      <Stack spacing={2} justifyContent="space-between" direction={{ xs: 'column', sm: 'row' }} sx={{ my: 5 }}>
         <Typography variant="h4">Friends</Typography>
 
         <TextField
@@ -47,7 +42,7 @@ export default function ProfileFriends({ friends, searchFriends, onSearchFriends
               <InputAdornment position="start">
                 <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
               </InputAdornment>
-            ),
+            )
           }}
           sx={{ width: { xs: 1, sm: 260 } }}
         />
@@ -62,7 +57,7 @@ export default function ProfileFriends({ friends, searchFriends, onSearchFriends
           gridTemplateColumns={{
             xs: 'repeat(1, 1fr)',
             sm: 'repeat(2, 1fr)',
-            md: 'repeat(3, 1fr)',
+            md: 'repeat(3, 1fr)'
           }}
         >
           {dataFiltered.map((friend) => (
@@ -77,7 +72,7 @@ export default function ProfileFriends({ friends, searchFriends, onSearchFriends
 ProfileFriends.propTypes = {
   friends: PropTypes.array,
   onSearchFriends: PropTypes.func,
-  searchFriends: PropTypes.string,
+  searchFriends: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -105,7 +100,7 @@ function FriendCard({ friend }) {
           display: 'flex',
           position: 'relative',
           alignItems: 'center',
-          flexDirection: 'column',
+          flexDirection: 'column'
         }}
       >
         <Avatar alt={name} src={avatarUrl} sx={{ width: 64, height: 64, mb: 3 }} />
@@ -125,8 +120,8 @@ function FriendCard({ friend }) {
               sx={{
                 color: social.color,
                 '&:hover': {
-                  bgcolor: alpha(social.color, 0.08),
-                },
+                  bgcolor: alpha(social.color, 0.08)
+                }
               }}
             >
               <Iconify icon={social.icon} />
@@ -143,12 +138,7 @@ function FriendCard({ friend }) {
         </IconButton>
       </Card>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
         <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-trash-bold" />
           Delete
@@ -164,16 +154,14 @@ function FriendCard({ friend }) {
 }
 
 FriendCard.propTypes = {
-  friend: PropTypes.object,
+  friend: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
 
 function applyFilter({ inputData, query }) {
   if (query) {
-    return inputData.filter(
-      (friend) => friend.name.toLowerCase().indexOf(query.toLowerCase()) !== -1
-    );
+    return inputData.filter((friend) => friend.name.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
 
   return inputData;

@@ -5,11 +5,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 // _mock
 import { _bookings, _bookingNew, _bookingsOverview, _bookingReview } from 'src/_mock';
 // assets
-import {
-  BookingIllustration,
-  CheckInIllustration,
-  CheckoutIllustration,
-} from 'src/assets/illustrations';
+import { BookingIllustration, CheckInIllustration, CheckoutIllustration } from 'src/assets/illustrations';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
@@ -36,11 +32,7 @@ export default function OverviewBookingView() {
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Grid container spacing={SPACING} disableEqualOverflow>
         <Grid xs={12} md={4}>
-          <BookingWidgetSummary
-            title="Total Booking"
-            total={714000}
-            icon={<BookingIllustration />}
-          />
+          <BookingWidgetSummary title="Total Booking" total={714000} icon={<BookingIllustration />} />
         </Grid>
 
         <Grid xs={12} md={4}>
@@ -67,8 +59,8 @@ export default function OverviewBookingView() {
                     { x: 2020, y: 74 },
                     { x: 2021, y: 54 },
                     { x: 2022, y: 57 },
-                    { x: 2023, y: 84 },
-                  ],
+                    { x: 2023, y: 84 }
+                  ]
                 }}
               />
             </Grid>
@@ -82,8 +74,8 @@ export default function OverviewBookingView() {
                 chart={{
                   series: [
                     { label: 'Sold', percent: 72, total: 38566 },
-                    { label: 'Pending for payment', percent: 64, total: 18472 },
-                  ],
+                    { label: 'Pending for payment', percent: 64, total: 18472 }
+                  ]
                 }}
               />
             </Grid>
@@ -100,24 +92,24 @@ export default function OverviewBookingView() {
                       type: 'Week',
                       data: [
                         { name: 'Sold', data: [10, 41, 35, 151, 49, 62, 69, 91, 48] },
-                        { name: 'Canceled', data: [10, 34, 13, 56, 77, 88, 99, 77, 45] },
-                      ],
+                        { name: 'Canceled', data: [10, 34, 13, 56, 77, 88, 99, 77, 45] }
+                      ]
                     },
                     {
                       type: 'Month',
                       data: [
                         { name: 'Sold', data: [148, 91, 69, 62, 49, 51, 35, 41, 10] },
-                        { name: 'Canceled', data: [45, 77, 99, 88, 77, 56, 13, 34, 10] },
-                      ],
+                        { name: 'Canceled', data: [45, 77, 99, 88, 77, 56, 13, 34, 10] }
+                      ]
                     },
                     {
                       type: 'Year',
                       data: [
                         { name: 'Sold', data: [76, 42, 29, 41, 27, 138, 117, 86, 63] },
-                        { name: 'Canceled', data: [80, 55, 34, 114, 80, 130, 15, 28, 55] },
-                      ],
-                    },
-                  ],
+                        { name: 'Canceled', data: [80, 55, 34, 114, 80, 130, 15, 28, 55] }
+                      ]
+                    }
+                  ]
                 }}
               />
             </Grid>
@@ -129,8 +121,8 @@ export default function OverviewBookingView() {
               chart={{
                 series: [
                   { label: 'Sold out', value: 120 },
-                  { label: 'Available', value: 66 },
-                ],
+                  { label: 'Available', value: 66 }
+                ]
               }}
             />
 
@@ -157,7 +149,7 @@ export default function OverviewBookingView() {
               { id: 'checkIn', label: 'Check In' },
               { id: 'checkOut', label: 'Check Out' },
               { id: 'status', label: 'Status' },
-              { id: '' },
+              { id: '' }
             ]}
           />
         </Grid>

@@ -52,7 +52,7 @@ export default function JobSearch({ query, results, onSearch, hrefItem }) {
               <InputAdornment position="start">
                 <Iconify icon="eva:search-fill" sx={{ ml: 1, color: 'text.disabled' }} />
               </InputAdornment>
-            ),
+            )
           }}
         />
       )}
@@ -70,7 +70,7 @@ export default function JobSearch({ query, results, onSearch, hrefItem }) {
                   color={part.highlight ? 'primary' : 'textPrimary'}
                   sx={{
                     typography: 'body2',
-                    fontWeight: part.highlight ? 'fontWeightSemiBold' : 'fontWeightMedium',
+                    fontWeight: part.highlight ? 'fontWeightSemiBold' : 'fontWeightMedium'
                   }}
                 >
                   {part.text}
@@ -88,5 +88,5 @@ JobSearch.propTypes = {
   hrefItem: PropTypes.func,
   onSearch: PropTypes.func,
   query: PropTypes.string,
-  results: PropTypes.array,
+  results: PropTypes.array
 };

@@ -21,7 +21,7 @@ import { MotionViewport, varFade } from 'src/components/animate';
 
 export const SKILLS = [...Array(3)].map((_, index) => ({
   label: ['Development', 'Design', 'Marketing'][index],
-  value: [20, 40, 60][index],
+  value: [20, 40, 60][index]
 }));
 
 // ----------------------------------------------------------------------
@@ -33,17 +33,14 @@ export default function AboutWhat() {
 
   const isLight = theme.palette.mode === 'light';
 
-  const shadow = `-40px 40px 80px ${alpha(
-    isLight ? theme.palette.grey[500] : theme.palette.common.black,
-    0.24
-  )}`;
+  const shadow = `-40px 40px 80px ${alpha(isLight ? theme.palette.grey[500] : theme.palette.common.black, 0.24)}`;
 
   return (
     <Container
       component={MotionViewport}
       sx={{
         py: { xs: 10, md: 15 },
-        textAlign: { xs: 'center', md: 'unset' },
+        textAlign: { xs: 'center', md: 'unset' }
       }}
     >
       <Grid container columnSpacing={{ md: 3 }} alignItems="flex-start">
@@ -83,13 +80,13 @@ export default function AboutWhat() {
           <m.div variants={varFade().inRight}>
             <Typography
               sx={{
-                color: theme.palette.mode === 'light' ? 'text.secondary' : 'common.white',
+                color: theme.palette.mode === 'light' ? 'text.secondary' : 'common.white'
               }}
             >
-              Our theme is the most advanced and user-friendly theme you will find on the market, we
-              have documentation and video to help set your site really easily, pre-installed demos
-              you can import in one click and everything from the theme options to page content can
-              be edited from the front-end. This is the theme you are looking for.
+              Our theme is the most advanced and user-friendly theme you will find on the market, we have documentation
+              and video to help set your site really easily, pre-installed demos you can import in one click and
+              everything from the theme options to page content can be edited from the front-end. This is the theme you
+              are looking for.
             </Typography>
           </m.div>
 

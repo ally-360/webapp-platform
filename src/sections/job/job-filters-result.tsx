@@ -57,12 +57,7 @@ export default function JobFiltersResult({
         {!!filters.employmentTypes.length && (
           <Block label="Employment Types:">
             {filters.employmentTypes.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveEmploymentTypes(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveEmploymentTypes(item)} />
             ))}
           </Block>
         )}
@@ -84,12 +79,7 @@ export default function JobFiltersResult({
         {!!filters.locations.length && (
           <Block label="Locations:">
             {filters.locations.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveLocations(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveLocations(item)} />
             ))}
           </Block>
         )}
@@ -97,22 +87,13 @@ export default function JobFiltersResult({
         {!!filters.benefits.length && (
           <Block label="Benefits:">
             {filters.benefits.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveBenefits(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveBenefits(item)} />
             ))}
           </Block>
         )}
 
         {canReset && (
-          <Button
-            color="error"
-            onClick={onResetFilters}
-            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-          >
+          <Button color="error" onClick={onResetFilters} startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
             Clear
           </Button>
         )}
@@ -126,7 +107,7 @@ JobFiltersResult.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
-  results: PropTypes.number,
+  results: PropTypes.number
 };
 
 // ----------------------------------------------------------------------
@@ -143,7 +124,7 @@ function Block({ label, children, sx, ...other }) {
         borderRadius: 1,
         overflow: 'hidden',
         borderStyle: 'dashed',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -161,5 +142,5 @@ function Block({ label, children, sx, ...other }) {
 Block.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

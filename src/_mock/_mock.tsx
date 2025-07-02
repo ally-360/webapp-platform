@@ -26,7 +26,7 @@ import {
   _companyNames,
   _productNames,
   _descriptions,
-  _phoneNumbers,
+  _phoneNumbers
 } from './assets';
 
 // ----------------------------------------------------------------------
@@ -61,7 +61,7 @@ export const _mock = {
     price: (index) => _prices[index],
     nativeS: (index) => _nativeS[index],
     nativeM: (index) => _nativeM[index],
-    nativeL: (index) => _nativeL[index],
+    nativeL: (index) => _nativeL[index]
   },
   // Image
   image: {
@@ -70,6 +70,6 @@ export const _mock = {
     travel: (index) => `${ASSETS_API}/assets/images/travel/travel_${index + 1}.jpg`,
     company: (index) => `${ASSETS_API}/assets/images/company/company_${index + 1}.png`,
     product: (index) => `${ASSETS_API}/assets/images/m_product/product_${index + 1}.jpg`,
-    portrait: (index) => `${ASSETS_API}/assets/images/portrait/portrait_${index + 1}.jpg`,
-  },
+    portrait: (index) => `${ASSETS_API}/assets/images/portrait/portrait_${index + 1}.jpg`
+  }
 };

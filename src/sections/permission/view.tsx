@@ -35,24 +35,18 @@ export default function PermissionDeniedView() {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
-            name: 'Permission Denied',
-          },
+            name: 'Permission Denied'
+          }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
-      <ToggleButtonGroup
-        exclusive
-        value={role}
-        size="small"
-        onChange={handleChangeRole}
-        sx={{ mb: 5 }}
-      >
+      <ToggleButtonGroup exclusive value={role} size="small" onChange={handleChangeRole} sx={{ mb: 5 }}>
         <ToggleButton value="admin" aria-label="admin role">
           isAdmin
         </ToggleButton>
@@ -69,9 +63,8 @@ export default function PermissionDeniedView() {
               <CardHeader title={`Card ${index + 1}`} subheader="Proin viverra ligula" />
 
               <Typography variant="body2" sx={{ px: 3, py: 2, color: 'text.secondary' }}>
-                Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. In enim justo,
-                rhoncus ut, imperdiet a, venenatis vitae, justo. Vestibulum fringilla pede sit amet
-                augue.
+                Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. In enim justo, rhoncus ut, imperdiet a,
+                venenatis vitae, justo. Vestibulum fringilla pede sit amet augue.
               </Typography>
             </Card>
           ))}

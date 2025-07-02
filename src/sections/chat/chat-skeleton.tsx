@@ -14,7 +14,7 @@ export function ChatNavItemSkeleton({ sx, ...other }) {
       sx={{
         px: 2.5,
         py: 1.5,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -29,5 +29,5 @@ export function ChatNavItemSkeleton({ sx, ...other }) {
 }
 
 ChatNavItemSkeleton.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

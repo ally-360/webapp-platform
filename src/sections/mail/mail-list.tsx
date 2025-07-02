@@ -25,7 +25,7 @@ export default function MailList({
   onClickMail,
   //
   selectedLabelId,
-  selectedMailId,
+  selectedMailId
 }) {
   const mdUp = useResponsive('up', 'md');
 
@@ -63,7 +63,7 @@ export default function MailList({
                 <InputAdornment position="start">
                   <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
                 </InputAdornment>
-              ),
+              )
             }}
           />
         ) : (
@@ -87,7 +87,7 @@ export default function MailList({
         width: 320,
         flexShrink: 0,
         borderRadius: 1.5,
-        bgcolor: 'background.default',
+        bgcolor: 'background.default'
       }}
     >
       {renderContent}
@@ -97,12 +97,12 @@ export default function MailList({
       open={openMail}
       onClose={onCloseMail}
       slotProps={{
-        backdrop: { invisible: true },
+        backdrop: { invisible: true }
       }}
       PaperProps={{
         sx: {
-          width: 320,
-        },
+          width: 320
+        }
       }}
     >
       {renderContent}
@@ -117,5 +117,5 @@ MailList.propTypes = {
   onCloseMail: PropTypes.func,
   openMail: PropTypes.bool,
   selectedLabelId: PropTypes.string,
-  selectedMailId: PropTypes.string,
+  selectedMailId: PropTypes.string
 };

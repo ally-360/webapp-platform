@@ -13,7 +13,7 @@ export function ProductItemSkeleton({ sx, ...other }) {
       variant="outlined"
       sx={{
         borderRadius: 2,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -37,7 +37,7 @@ export function ProductItemSkeleton({ sx, ...other }) {
 }
 
 ProductItemSkeleton.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -62,13 +62,7 @@ export function ProductDetailsSkeleton({ ...other }) {
       <Grid xs={12}>
         <Stack direction="row" alignItems="center">
           {[...Array(3)].map((_, index) => (
-            <Stack
-              key={index}
-              spacing={2}
-              alignItems="center"
-              justifyContent="center"
-              sx={{ width: 1 }}
-            >
+            <Stack key={index} spacing={2} alignItems="center" justifyContent="center" sx={{ width: 1 }}>
               <Skeleton variant="circular" sx={{ width: 80, height: 80 }} />
               <Skeleton sx={{ height: 16, width: 160 }} />
               <Skeleton sx={{ height: 16, width: 80 }} />

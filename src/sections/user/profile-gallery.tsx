@@ -19,7 +19,7 @@ export default function ProfileGallery({ gallery }) {
   const theme = useTheme();
 
   const slides = gallery.map((slide) => ({
-    src: slide.imageUrl,
+    src: slide.imageUrl
   }));
 
   const lightbox = useLightBox(slides);
@@ -36,7 +36,7 @@ export default function ProfileGallery({ gallery }) {
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
           sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
       >
         {gallery.map((image) => (
@@ -52,20 +52,20 @@ export default function ProfileGallery({ gallery }) {
                 width: 1,
                 bottom: 0,
                 zIndex: 9,
-                position: 'absolute',
+                position: 'absolute'
               }}
               primary={image.title}
               secondary={fDate(image.postedAt)}
               primaryTypographyProps={{
                 noWrap: true,
-                typography: 'subtitle1',
+                typography: 'subtitle1'
               }}
               secondaryTypographyProps={{
                 mt: 0.5,
                 color: 'inherit',
                 component: 'span',
                 typography: 'body2',
-                sx: { opacity: 0.48 },
+                sx: { opacity: 0.48 }
               }}
             />
 
@@ -82,16 +82,11 @@ export default function ProfileGallery({ gallery }) {
         ))}
       </Box>
 
-      <Lightbox
-        index={lightbox.selected}
-        slides={slides}
-        open={lightbox.open}
-        close={lightbox.onClose}
-      />
+      <Lightbox index={lightbox.selected} slides={slides} open={lightbox.open} close={lightbox.onClose} />
     </>
   );
 }
 
 ProfileGallery.propTypes = {
-  gallery: PropTypes.array,
+  gallery: PropTypes.array
 };

@@ -24,12 +24,12 @@ export default function FaqsHero() {
       sx={{
         ...bgGradient({
           color: alpha(theme.palette.grey[900], 0.8),
-          imgUrl: '/assets/images/faqs/hero.jpg',
+          imgUrl: '/assets/images/faqs/hero.jpg'
         }),
         height: { md: 560 },
         py: { xs: 10, md: 0 },
         overflow: 'hidden',
-        position: 'relative',
+        position: 'relative'
       }}
     >
       <Container component={MotionContainer}>
@@ -37,7 +37,7 @@ export default function FaqsHero() {
           sx={{
             bottom: { md: 80 },
             position: { md: 'absolute' },
-            textAlign: { xs: 'center', md: 'unset' },
+            textAlign: { xs: 'center', md: 'unset' }
           }}
         >
           <div>
@@ -61,17 +61,17 @@ export default function FaqsHero() {
                   <InputAdornment position="start">
                     <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
                   </InputAdornment>
-                ),
+                )
               }}
               sx={{
                 mt: 5,
                 maxWidth: 360,
                 [`& .${outlinedInputClasses.root}`]: {
-                  bgcolor: 'common.white',
+                  bgcolor: 'common.white'
                 },
                 [`& .${outlinedInputClasses.input}`]: {
-                  typography: 'subtitle1',
-                },
+                  typography: 'subtitle1'
+                }
               }}
             />
           </m.div>
@@ -91,7 +91,7 @@ function TextAnimate({ text, variants, sx, ...other }) {
         typography: 'h1',
         overflow: 'hidden',
         display: 'inline-flex',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -107,5 +107,5 @@ function TextAnimate({ text, variants, sx, ...other }) {
 TextAnimate.propTypes = {
   sx: PropTypes.object,
   text: PropTypes.string,
-  variants: PropTypes.object,
+  variants: PropTypes.object
 };

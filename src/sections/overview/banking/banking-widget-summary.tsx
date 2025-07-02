@@ -14,16 +14,7 @@ import Chart, { useChart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
 
-export default function BankingWidgetSummary({
-  title,
-  total,
-  icon,
-  percent,
-  color = 'primary',
-  chart,
-  sx,
-  ...other
-}) {
+export default function BankingWidgetSummary({ title, total, icon, percent, color = 'primary', chart, sx, ...other }) {
   const theme = useTheme();
 
   const { series, options } = chart;
@@ -32,37 +23,37 @@ export default function BankingWidgetSummary({
     colors: [theme.palette[color].dark],
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     xaxis: {
       labels: {
-        show: false,
-      },
+        show: false
+      }
     },
     yaxis: {
       labels: {
-        show: false,
-      },
+        show: false
+      }
     },
     legend: {
-      show: false,
+      show: false
     },
     grid: {
-      show: false,
+      show: false
     },
     tooltip: {
       marker: {
-        show: false,
+        show: false
       },
       y: {
         formatter: (value) => fCurrency(value),
         title: {
-          formatter: () => '',
-        },
-      },
+          formatter: () => ''
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -71,7 +62,7 @@ export default function BankingWidgetSummary({
         ...bgGradient({
           direction: '135deg',
           startColor: alpha(theme.palette[color].light, 0.2),
-          endColor: alpha(theme.palette[color].main, 0.2),
+          endColor: alpha(theme.palette[color].main, 0.2)
         }),
         width: 1,
         borderRadius: 2,
@@ -79,7 +70,7 @@ export default function BankingWidgetSummary({
         position: 'relative',
         color: `${color}.darker`,
         backgroundColor: 'common.white',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -94,7 +85,7 @@ export default function BankingWidgetSummary({
           borderRadius: '50%',
           position: 'absolute',
           color: `${color}.lighter`,
-          bgcolor: `${color}.dark`,
+          bgcolor: `${color}.dark`
         }}
       />
 
@@ -103,13 +94,7 @@ export default function BankingWidgetSummary({
 
         <Typography variant="h3">{fCurrency(total)}</Typography>
 
-        <Stack
-          spacing={0.5}
-          direction="row"
-          flexWrap="wrap"
-          alignItems="center"
-          sx={{ typography: 'body2' }}
-        >
+        <Stack spacing={0.5} direction="row" flexWrap="wrap" alignItems="center" sx={{ typography: 'body2' }}>
           <Iconify icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
 
           <Box sx={{ typography: 'subtitle2' }}>
@@ -133,5 +118,5 @@ BankingWidgetSummary.propTypes = {
   percent: PropTypes.number,
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

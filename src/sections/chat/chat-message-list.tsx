@@ -34,17 +34,12 @@ export default function ChatMessageList({ messages = [], participants }) {
         </Box>
       </Scrollbar>
 
-      <Lightbox
-        index={lightbox.selected}
-        slides={slides}
-        open={lightbox.open}
-        close={lightbox.onClose}
-      />
+      <Lightbox index={lightbox.selected} slides={slides} open={lightbox.open} close={lightbox.onClose} />
     </>
   );
 }
 
 ChatMessageList.propTypes = {
   messages: PropTypes.array,
-  participants: PropTypes.array,
+  participants: PropTypes.array
 };

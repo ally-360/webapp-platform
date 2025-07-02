@@ -17,13 +17,13 @@ const LEGEND_HEIGHT = 72;
 const StyledChart = styled(Chart)(({ theme }) => ({
   height: CHART_HEIGHT,
   '& .apexcharts-canvas, .apexcharts-inner, svg, foreignObject': {
-    height: `100% !important`,
+    height: `100% !important`
   },
   '& .apexcharts-legend': {
     height: LEGEND_HEIGHT,
     borderTop: `dashed 1px ${theme.palette.divider}`,
-    top: `calc(${CHART_HEIGHT - LEGEND_HEIGHT}px) !important`,
-  },
+    top: `calc(${CHART_HEIGHT - LEGEND_HEIGHT}px) !important`
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -34,10 +34,10 @@ export default function EcommerceSaleByGender({ title, subheader, total, chart, 
   const {
     colors = [
       [theme.palette.primary.light, theme.palette.primary.main],
-      [theme.palette.warning.light, theme.palette.warning.main],
+      [theme.palette.warning.light, theme.palette.warning.main]
     ],
     series,
-    options,
+    options
   } = chart;
 
   const chartSeries = series.map((i) => i.value);
@@ -46,23 +46,23 @@ export default function EcommerceSaleByGender({ title, subheader, total, chart, 
     colors: colors.map((colr) => colr[1]),
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     labels: series.map((i) => i.label),
     legend: {
       floating: true,
       position: 'bottom',
-      horizontalAlign: 'center',
+      horizontalAlign: 'center'
     },
     fill: {
       type: 'gradient',
       gradient: {
         colorStops: colors.map((colr) => [
           { offset: 0, color: colr[0] },
-          { offset: 100, color: colr[1] },
-        ]),
-      },
+          { offset: 100, color: colr[1] }
+        ])
+      }
     },
     plotOptions: {
       radialBar: {
@@ -70,25 +70,19 @@ export default function EcommerceSaleByGender({ title, subheader, total, chart, 
         dataLabels: {
           value: { offsetY: 16 },
           total: {
-            formatter: () => fNumber(total),
-          },
-        },
-      },
+            formatter: () => fNumber(total)
+          }
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 5 }} />
 
-      <StyledChart
-        dir="ltr"
-        type="radialBar"
-        series={chartSeries}
-        options={chartOptions}
-        height={300}
-      />
+      <StyledChart dir="ltr" type="radialBar" series={chartSeries} options={chartOptions} height={300} />
     </Card>
   );
 }
@@ -97,5 +91,5 @@ EcommerceSaleByGender.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

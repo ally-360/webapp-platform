@@ -8,7 +8,7 @@ export function darkMode(mode) {
   const theme = {
     palette: palette(mode),
     shadows: shadows(mode),
-    customShadows: customShadows(mode),
+    customShadows: customShadows(mode)
   };
 
   return theme;

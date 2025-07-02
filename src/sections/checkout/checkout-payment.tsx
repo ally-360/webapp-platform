@@ -21,64 +21,64 @@ const DELIVERY_OPTIONS = [
   {
     value: 0,
     label: 'Free',
-    description: '5-7 Days delivery',
+    description: '5-7 Days delivery'
   },
   {
     value: 10,
     label: 'Standard',
-    description: '3-5 Days delivery',
+    description: '3-5 Days delivery'
   },
   {
     value: 20,
     label: 'Express',
-    description: '2-3 Days delivery',
-  },
+    description: '2-3 Days delivery'
+  }
 ];
 
 const PAYMENT_OPTIONS = [
   {
     value: 'paypal',
     label: 'Pay with Paypal',
-    description: 'You will be redirected to PayPal website to complete your purchase securely.',
+    description: 'You will be redirected to PayPal website to complete your purchase securely.'
   },
   {
     value: 'credit',
     label: 'Credit / Debit Card',
-    description: 'We support Mastercard, Visa, Discover and Stripe.',
+    description: 'We support Mastercard, Visa, Discover and Stripe.'
   },
   {
     value: 'cash',
     label: 'Cash',
-    description: 'Pay with cash when your order is delivered.',
-  },
+    description: 'Pay with cash when your order is delivered.'
+  }
 ];
 
 const CARDS_OPTIONS = [
   { value: 'ViSa1', label: '**** **** **** 1212 - Jimmy Holland' },
   { value: 'ViSa2', label: '**** **** **** 2424 - Shawn Stokes' },
-  { value: 'MasterCard', label: '**** **** **** 4545 - Cole Armstrong' },
+  { value: 'MasterCard', label: '**** **** **** 4545 - Cole Armstrong' }
 ];
 
 export default function CheckoutPayment() {
   const checkout = useCheckoutContext();
 
   const PaymentSchema = Yup.object().shape({
-    payment: Yup.string().required('Payment is required'),
+    payment: Yup.string().required('Payment is required')
   });
 
   const defaultValues = {
     delivery: checkout.shipping,
-    payment: '',
+    payment: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(PaymentSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -97,11 +97,7 @@ export default function CheckoutPayment() {
         <Grid xs={12} md={8}>
           <CheckoutDelivery onApplyShipping={checkout.onApplyShipping} options={DELIVERY_OPTIONS} />
 
-          <CheckoutPaymentMethods
-            cardOptions={CARDS_OPTIONS}
-            options={PAYMENT_OPTIONS}
-            sx={{ my: 3 }}
-          />
+          <CheckoutPaymentMethods cardOptions={CARDS_OPTIONS} options={PAYMENT_OPTIONS} sx={{ my: 3 }} />
 
           <Button
             size="small"
@@ -124,13 +120,7 @@ export default function CheckoutPayment() {
             onEdit={() => checkout.onGotoStep(0)}
           />
 
-          <LoadingButton
-            fullWidth
-            size="large"
-            type="submit"
-            variant="contained"
-            loading={isSubmitting}
-          >
+          <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
             Complete Order
           </LoadingButton>
         </Grid>

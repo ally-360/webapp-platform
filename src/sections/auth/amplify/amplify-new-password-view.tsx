@@ -42,31 +42,29 @@ export default function AmplifyNewPasswordView() {
   const VerifySchema = Yup.object().shape({
     code: Yup.string().min(6, 'Code must be at least 6 characters').required('Code is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string()
-      .min(6, 'Password must be at least 6 characters')
-      .required('Password is required'),
+    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
     confirmPassword: Yup.string()
       .required('Confirm password is required')
-      .oneOf([Yup.ref('password')], 'Passwords must match'),
+      .oneOf([Yup.ref('password')], 'Passwords must match')
   });
 
   const defaultValues = {
     code: '',
     email: email || '',
     password: '',
-    confirmPassword: '',
+    confirmPassword: ''
   };
 
   const methods = useForm({
     mode: 'onChange',
     resolver: yupResolver(VerifySchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     watch,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -92,12 +90,7 @@ export default function AmplifyNewPasswordView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
-      <RHFTextField
-        name="email"
-        label="Email"
-        placeholder="example@gmail.com"
-        InputLabelProps={{ shrink: true }}
-      />
+      <RHFTextField name="email" label="Email" placeholder="example@gmail.com" InputLabelProps={{ shrink: true }} />
 
       <RHFCode name="code" />
 
@@ -112,7 +105,7 @@ export default function AmplifyNewPasswordView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
@@ -127,17 +120,11 @@ export default function AmplifyNewPasswordView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
+      <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
         Update Password
       </LoadingButton>
 
@@ -150,8 +137,8 @@ export default function AmplifyNewPasswordView() {
             cursor: 'pointer',
             ...(counting && {
               color: 'text.disabled',
-              pointerEvents: 'none',
-            }),
+              pointerEvents: 'none'
+            })
           }}
         >
           Resend code {counting && `(${countdown}s)`}
@@ -165,7 +152,7 @@ export default function AmplifyNewPasswordView() {
         variant="subtitle2"
         sx={{
           alignItems: 'center',
-          display: 'inline-flex',
+          display: 'inline-flex'
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />

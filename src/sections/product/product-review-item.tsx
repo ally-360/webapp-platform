@@ -22,18 +22,18 @@ export default function ProductReviewItem({ review }) {
       alignItems="center"
       direction={{
         xs: 'row',
-        md: 'column',
+        md: 'column'
       }}
       sx={{
         width: { md: 240 },
-        textAlign: { md: 'center' },
+        textAlign: { md: 'center' }
       }}
     >
       <Avatar
         src={avatarUrl}
         sx={{
           width: { xs: 48, md: 64 },
-          height: { xs: 48, md: 64 },
+          height: { xs: 48, md: 64 }
         }}
       />
 
@@ -56,7 +56,7 @@ export default function ProductReviewItem({ review }) {
           alignItems="center"
           sx={{
             color: 'success.main',
-            typography: 'caption',
+            typography: 'caption'
           }}
         >
           <Iconify icon="ic:round-verified" width={16} sx={{ mr: 0.5 }} />
@@ -99,7 +99,7 @@ export default function ProductReviewItem({ review }) {
       spacing={2}
       direction={{
         xs: 'column',
-        md: 'row',
+        md: 'row'
       }}
       sx={{ mt: 5, px: { xs: 2.5, md: 0 } }}
     >
@@ -111,5 +111,5 @@ export default function ProductReviewItem({ review }) {
 }
 
 ProductReviewItem.propTypes = {
-  review: PropTypes.object,
+  review: PropTypes.object
 };

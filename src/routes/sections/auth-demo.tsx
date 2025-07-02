@@ -40,7 +40,7 @@ const authClassic = {
         <AuthClassicLayout>
           <LoginClassicPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       path: 'register',
@@ -48,7 +48,7 @@ const authClassic = {
         <AuthClassicLayout title="Manage the job more effectively with Minimal">
           <RegisterClassicPage />
         </AuthClassicLayout>
-      ),
+      )
     },
     {
       element: (
@@ -59,10 +59,10 @@ const authClassic = {
       children: [
         { path: 'forgot-password', element: <ForgotPasswordClassicPage /> },
         { path: 'new-password', element: <NewPasswordClassicPage /> },
-        { path: 'verify', element: <VerifyClassicPage /> },
-      ],
-    },
-  ],
+        { path: 'verify', element: <VerifyClassicPage /> }
+      ]
+    }
+  ]
 };
 
 const authModern = {
@@ -79,7 +79,7 @@ const authModern = {
         <AuthModernLayout>
           <LoginModernPage />
         </AuthModernLayout>
-      ),
+      )
     },
     {
       path: 'register',
@@ -87,7 +87,7 @@ const authModern = {
         <AuthModernLayout>
           <RegisterModernPage />
         </AuthModernLayout>
-      ),
+      )
     },
     {
       element: (
@@ -98,15 +98,15 @@ const authModern = {
       children: [
         { path: 'forgot-password', element: <ForgotPasswordModernPage /> },
         { path: 'new-password', element: <NewPasswordModernPage /> },
-        { path: 'verify', element: <VerifyModernPage /> },
-      ],
-    },
-  ],
+        { path: 'verify', element: <VerifyModernPage /> }
+      ]
+    }
+  ]
 };
 
 export const authDemoRoutes = [
   {
     path: 'auth-demo',
-    children: [authClassic, authModern],
-  },
+    children: [authClassic, authModern]
+  }
 ];

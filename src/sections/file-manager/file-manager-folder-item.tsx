@@ -30,14 +30,7 @@ import FileManagerNewFolderDialog from './file-manager-new-folder-dialog';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerFolderItem({
-  folder,
-  selected,
-  onSelect,
-  onDelete,
-  sx,
-  ...other
-}) {
+export default function FileManagerFolderItem({ folder, selected, onSelect, onDelete, sx, ...other }) {
   const { enqueueSnackbar } = useSnackbar();
 
   const { copy } = useCopyToClipboard();
@@ -80,7 +73,7 @@ export default function FileManagerFolderItem({
       sx={{
         top: 8,
         right: 8,
-        position: 'absolute',
+        position: 'absolute'
       }}
     >
       <Checkbox
@@ -118,16 +111,13 @@ export default function FileManagerFolderItem({
       secondary={
         <>
           {fData(folder.size)}
-          <Box
-            component="span"
-            sx={{ mx: 0.75, width: 2, height: 2, borderRadius: '50%', bgcolor: 'currentColor' }}
-          />
+          <Box component="span" sx={{ mx: 0.75, width: 2, height: 2, borderRadius: '50%', bgcolor: 'currentColor' }} />
           {folder.totalFiles} files
         </>
       }
       primaryTypographyProps={{
         noWrap: true,
-        typography: 'subtitle1',
+        typography: 'subtitle1'
       }}
       secondaryTypographyProps={{
         mt: 0.5,
@@ -135,7 +125,7 @@ export default function FileManagerFolderItem({
         alignItems: 'center',
         typography: 'caption',
         color: 'text.disabled',
-        display: 'inline-flex',
+        display: 'inline-flex'
       }}
     />
   );
@@ -148,9 +138,9 @@ export default function FileManagerFolderItem({
           width: 24,
           height: 24,
           '&:first-of-type': {
-            fontSize: 12,
-          },
-        },
+            fontSize: 12
+          }
+        }
       }}
     >
       {folder.shared?.map((person) => (
@@ -175,9 +165,9 @@ export default function FileManagerFolderItem({
           position: 'relative',
           ...((checkbox.value || selected) && {
             bgcolor: 'background.paper',
-            boxShadow: (theme) => theme.customShadows.z20,
+            boxShadow: (theme) => theme.customShadows.z20
           }),
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -192,12 +182,7 @@ export default function FileManagerFolderItem({
         {!!folder?.shared?.length && renderAvatar}
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -300,5 +285,5 @@ FileManagerFolderItem.propTypes = {
   onDelete: PropTypes.func,
   onSelect: PropTypes.func,
   selected: PropTypes.bool,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

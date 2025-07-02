@@ -29,7 +29,7 @@ export default function CheckoutDelivery({ options, onApplyShipping, ...other })
             display="grid"
             gridTemplateColumns={{
               xs: 'repeat(1, 1fr)',
-              sm: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)'
             }}
             sx={{ p: 3 }}
           >
@@ -53,7 +53,7 @@ export default function CheckoutDelivery({ options, onApplyShipping, ...other })
 
 CheckoutDelivery.propTypes = {
   onApplyShipping: PropTypes.func,
-  options: PropTypes.array,
+  options: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -70,8 +70,8 @@ function OptionItem({ option, selected, ...other }) {
         cursor: 'pointer',
         display: 'flex',
         ...(selected && {
-          boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`,
-        }),
+          boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`
+        })
       }}
       {...other}
     >
@@ -99,5 +99,5 @@ function OptionItem({ option, selected, ...other }) {
 
 OptionItem.propTypes = {
   option: PropTypes.object,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

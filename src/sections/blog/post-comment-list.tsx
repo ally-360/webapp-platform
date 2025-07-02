@@ -18,12 +18,7 @@ export default function PostCommentList({ comments }) {
 
           return (
             <Box key={id}>
-              <PostCommentItem
-                name={name}
-                message={message}
-                postedAt={postedAt}
-                avatarUrl={avatarUrl}
-              />
+              <PostCommentItem name={name} message={message} postedAt={postedAt} avatarUrl={avatarUrl} />
               {hasReply &&
                 replyComment.map((reply) => {
                   const userReply = users.find((user) => user.id === reply.userId);
@@ -51,5 +46,5 @@ export default function PostCommentList({ comments }) {
 }
 
 PostCommentList.propTypes = {
-  comments: PropTypes.array,
+  comments: PropTypes.array
 };

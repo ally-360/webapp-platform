@@ -30,11 +30,10 @@ export default function ChatNavItem({ selected, collapse, conversation, onCloseM
 
   const router = useRouter();
 
-  const { group, displayName, displayText, participants, lastActivity, hasOnlineInGroup } =
-    useGetNavItem({
-      conversation,
-      currentUserId: user.id,
-    });
+  const { group, displayName, displayText, participants, lastActivity, hasOnlineInGroup } = useGetNavItem({
+    conversation,
+    currentUserId: user.id
+  });
 
   const singleParticipant = participants[0];
 
@@ -81,15 +80,11 @@ export default function ChatNavItem({ selected, collapse, conversation, onCloseM
         py: 1.5,
         px: 2.5,
         ...(selected && {
-          bgcolor: 'action.selected',
-        }),
+          bgcolor: 'action.selected'
+        })
       }}
     >
-      <Badge
-        color="error"
-        overlap="circular"
-        badgeContent={collapse ? conversation.unreadCount : 0}
-      >
+      <Badge color="error" overlap="circular" badgeContent={collapse ? conversation.unreadCount : 0}>
         {group ? renderGroup : renderSingle}
       </Badge>
 
@@ -100,14 +95,14 @@ export default function ChatNavItem({ selected, collapse, conversation, onCloseM
             primary={displayName}
             primaryTypographyProps={{
               noWrap: true,
-              variant: 'subtitle2',
+              variant: 'subtitle2'
             }}
             secondary={displayText}
             secondaryTypographyProps={{
               noWrap: true,
               component: 'span',
               variant: conversation.unreadCount ? 'subtitle2' : 'body2',
-              color: conversation.unreadCount ? 'text.primary' : 'text.secondary',
+              color: conversation.unreadCount ? 'text.primary' : 'text.secondary'
             }}
           />
 
@@ -119,11 +114,11 @@ export default function ChatNavItem({ selected, collapse, conversation, onCloseM
               sx={{
                 mb: 1.5,
                 fontSize: 12,
-                color: 'text.disabled',
+                color: 'text.disabled'
               }}
             >
               {formatDistanceToNowStrict(new Date(lastActivity), {
-                addSuffix: false,
+                addSuffix: false
               })}
             </Typography>
 
@@ -141,5 +136,5 @@ ChatNavItem.propTypes = {
   collapse: PropTypes.bool,
   conversation: PropTypes.object,
   onCloseMobile: PropTypes.func,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

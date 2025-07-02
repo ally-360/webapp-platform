@@ -33,7 +33,7 @@ export default function MailHeader({ onOpenNav, onOpenMail, ...other }) {
             <InputAdornment position="start">
               <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
             </InputAdornment>
-          ),
+          )
         }}
       />
     </Stack>
@@ -42,5 +42,5 @@ export default function MailHeader({ onOpenNav, onOpenMail, ...other }) {
 
 MailHeader.propTypes = {
   onOpenMail: PropTypes.func,
-  onOpenNav: PropTypes.func,
+  onOpenNav: PropTypes.func
 };

@@ -20,7 +20,7 @@ export default function PaymentCardListDialog({ open, list, onClose, selected, o
 
   const dataFiltered = applyFilter({
     inputData: list,
-    query: searchCard,
+    query: searchCard
   });
 
   const notFound = !dataFiltered.length && !!searchCard;
@@ -48,8 +48,8 @@ export default function PaymentCardListDialog({ open, list, onClose, selected, o
           sx={{
             cursor: 'pointer',
             ...(selected(card.id) && {
-              boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`,
-            }),
+              boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`
+            })
           }}
         />
       ))}
@@ -58,19 +58,10 @@ export default function PaymentCardListDialog({ open, list, onClose, selected, o
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ p: 3, pr: 1.5 }}
-      >
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 3, pr: 1.5 }}>
         <Typography variant="h6"> Cards </Typography>
 
-        <Button
-          size="small"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          sx={{ alignSelf: 'flex-end' }}
-        >
+        <Button size="small" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ alignSelf: 'flex-end' }}>
           New
         </Button>
       </Stack>
@@ -85,7 +76,7 @@ export default function PaymentCardListDialog({ open, list, onClose, selected, o
               <InputAdornment position="start">
                 <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
               </InputAdornment>
-            ),
+            )
           }}
         />
       </Stack>
@@ -100,16 +91,14 @@ PaymentCardListDialog.propTypes = {
   onClose: PropTypes.func,
   onSelect: PropTypes.func,
   open: PropTypes.bool,
-  selected: PropTypes.func,
+  selected: PropTypes.func
 };
 
 // ----------------------------------------------------------------------
 
 function applyFilter({ inputData, query }) {
   if (query) {
-    return inputData.filter(
-      (card) => card.cardNumber.toLowerCase().indexOf(query.toLowerCase()) !== -1
-    );
+    return inputData.filter((card) => card.cardNumber.toLowerCase().indexOf(query.toLowerCase()) !== -1);
   }
 
   return inputData;

@@ -22,9 +22,9 @@ export default function AppFeatured({ list, ...other }) {
         top: 16,
         left: 16,
         position: 'absolute',
-        color: 'primary.light',
-      },
-    }),
+        color: 'primary.light'
+      }
+    })
   });
 
   return (
@@ -45,7 +45,7 @@ export default function AppFeatured({ list, ...other }) {
 }
 
 AppFeatured.propTypes = {
-  list: PropTypes.array,
+  list: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -59,15 +59,13 @@ function CarouselItem({ item, active }) {
     <Image
       alt={title}
       src={coverUrl}
-      overlay={`linear-gradient(to bottom, ${alpha(theme.palette.grey[900], 0)} 0%, ${
-        theme.palette.grey[900]
-      } 75%)`}
+      overlay={`linear-gradient(to bottom, ${alpha(theme.palette.grey[900], 0)} 0%, ${theme.palette.grey[900]} 75%)`}
       sx={{
         width: 1,
         height: {
           xs: 280,
-          xl: 320,
-        },
+          xl: 320
+        }
       }}
     />
   );
@@ -83,7 +81,7 @@ function CarouselItem({ item, active }) {
           zIndex: 9,
           textAlign: 'left',
           position: 'absolute',
-          color: 'common.white',
+          color: 'common.white'
         }}
       >
         <m.div variants={varFade().inRight}>
@@ -114,5 +112,5 @@ function CarouselItem({ item, active }) {
 
 CarouselItem.propTypes = {
   active: PropTypes.bool,
-  item: PropTypes.object,
+  item: PropTypes.object
 };

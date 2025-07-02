@@ -17,13 +17,13 @@ const LEGEND_HEIGHT = 72;
 const StyledChart = styled(Chart)(({ theme }) => ({
   height: CHART_HEIGHT,
   '& .apexcharts-canvas, .apexcharts-inner, svg, foreignObject': {
-    height: `100% !important`,
+    height: `100% !important`
   },
   '& .apexcharts-legend': {
     height: LEGEND_HEIGHT,
     borderTop: `dashed 1px ${theme.palette.divider}`,
-    top: `calc(${CHART_HEIGHT - LEGEND_HEIGHT}px) !important`,
-  },
+    top: `calc(${CHART_HEIGHT - LEGEND_HEIGHT}px) !important`
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -38,8 +38,8 @@ export default function AppCurrentDownload({ title, subheader, chart, ...other }
   const chartOptions = useChart({
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     colors,
     labels: series.map((i) => i.label),
@@ -48,16 +48,16 @@ export default function AppCurrentDownload({ title, subheader, chart, ...other }
       offsetY: 0,
       floating: true,
       position: 'bottom',
-      horizontalAlign: 'center',
+      horizontalAlign: 'center'
     },
     tooltip: {
       fillSeriesColor: false,
       y: {
         formatter: (value) => fNumber(value),
         title: {
-          formatter: (seriesName) => `${seriesName}`,
-        },
-      },
+          formatter: (seriesName) => `${seriesName}`
+        }
+      }
     },
     plotOptions: {
       pie: {
@@ -65,32 +65,26 @@ export default function AppCurrentDownload({ title, subheader, chart, ...other }
           size: '90%',
           labels: {
             value: {
-              formatter: (value) => fNumber(value),
+              formatter: (value) => fNumber(value)
             },
             total: {
               formatter: (w) => {
                 const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
                 return fNumber(sum);
-              },
-            },
-          },
-        },
-      },
+              }
+            }
+          }
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 5 }} />
 
-      <StyledChart
-        dir="ltr"
-        type="donut"
-        series={chartSeries}
-        options={chartOptions}
-        height={280}
-      />
+      <StyledChart dir="ltr" type="donut" series={chartSeries} options={chartOptions} height={280} />
     </Card>
   );
 }
@@ -98,5 +92,5 @@ export default function AppCurrentDownload({ title, subheader, chart, ...other }
 AppCurrentDownload.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

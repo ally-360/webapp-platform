@@ -20,14 +20,14 @@ const NOTIFICATIONS = [
     items: [
       {
         id: 'activity_comments',
-        label: 'Email me when someone comments onmy article',
+        label: 'Email me when someone comments onmy article'
       },
       {
         id: 'activity_answers',
-        label: 'Email me when someone answers on my form',
+        label: 'Email me when someone answers on my form'
       },
-      { id: 'activityFollows', label: 'Email me hen someone follows me' },
-    ],
+      { id: 'activityFollows', label: 'Email me hen someone follows me' }
+    ]
   },
   {
     subheader: 'Application',
@@ -35,9 +35,9 @@ const NOTIFICATIONS = [
     items: [
       { id: 'application_news', label: 'News and announcements' },
       { id: 'application_product', label: 'Weekly product updates' },
-      { id: 'application_blog', label: 'Weekly blog digest' },
-    ],
-  },
+      { id: 'application_blog', label: 'Weekly blog digest' }
+    ]
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -47,15 +47,15 @@ export default function AccountNotifications() {
 
   const methods = useForm({
     defaultValues: {
-      selected: ['activity_comments', 'application_product'],
-    },
+      selected: ['activity_comments', 'application_product']
+    }
   });
 
   const {
     watch,
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -71,9 +71,7 @@ export default function AccountNotifications() {
   });
 
   const getSelected = (selectedItems, item) =>
-    selectedItems.includes(item)
-      ? selectedItems.filter((value) => value !== item)
-      : [...selectedItems, item];
+    selectedItems.includes(item) ? selectedItems.filter((value) => value !== item) : [...selectedItems, item];
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>

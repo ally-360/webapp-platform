@@ -12,7 +12,7 @@ const dateList = [
   'DesktopDateTimePicker',
   //
   'MobileDatePicker',
-  'MobileDateTimePicker',
+  'MobileDateTimePicker'
 ];
 
 const timeList = ['TimePicker', 'MobileTimePicker', 'StaticTimePicker', 'DesktopTimePicker'];
@@ -34,9 +34,9 @@ const desktopTypes = dateList.reduce((result, currentValue) => {
         openPickerIcon: calendarIcon,
         leftArrowIcon: leftIcon,
         rightArrowIcon: rightIcon,
-        switchViewIcon: switchIcon,
-      },
-    },
+        switchViewIcon: switchIcon
+      }
+    }
   };
 
   return result;
@@ -48,9 +48,9 @@ const timeTypes = timeList.reduce((result, currentValue) => {
       slots: {
         openPickerIcon: clockIcon,
         rightArrowIcon: rightIcon,
-        switchViewIcon: switchIcon,
-      },
-    },
+        switchViewIcon: switchIcon
+      }
+    }
   };
 
   return result;
@@ -64,20 +64,17 @@ export default function DatePicker(theme) {
           '& .MuiPickersLayout-actionBar': {
             [`& .${buttonClasses.root}:last-of-type`]: {
               backgroundColor: theme.palette.text.primary,
-              color:
-                theme.palette.mode === 'light'
-                  ? theme.palette.common.white
-                  : theme.palette.grey[800],
-            },
-          },
-        },
-      },
+              color: theme.palette.mode === 'light' ? theme.palette.common.white : theme.palette.grey[800]
+            }
+          }
+        }
+      }
     },
 
     // Date
     ...desktopTypes,
 
     // Time
-    ...timeTypes,
+    ...timeTypes
   };
 }

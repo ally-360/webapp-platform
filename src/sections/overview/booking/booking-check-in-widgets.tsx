@@ -23,10 +23,10 @@ export default function BookingCheckInWidgets({ chart, ...other }) {
   const {
     colors = [
       [theme.palette.primary.light, theme.palette.primary.main],
-      [theme.palette.warning.light, theme.palette.warning.main],
+      [theme.palette.warning.light, theme.palette.warning.main]
     ],
     series,
-    options,
+    options
   } = chart;
 
   const chartOptionsCheckIn = useChart({
@@ -35,23 +35,23 @@ export default function BookingCheckInWidgets({ chart, ...other }) {
       gradient: {
         colorStops: [
           { offset: 0, color: colors[0][0] },
-          { offset: 100, color: colors[0][1] },
-        ],
-      },
+          { offset: 100, color: colors[0][1] }
+        ]
+      }
     },
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     grid: {
       padding: {
         top: -9,
-        bottom: -9,
-      },
+        bottom: -9
+      }
     },
     legend: {
-      show: false,
+      show: false
     },
     plotOptions: {
       radialBar: {
@@ -61,12 +61,12 @@ export default function BookingCheckInWidgets({ chart, ...other }) {
           name: { show: false },
           value: {
             offsetY: 6,
-            fontSize: theme.typography.subtitle2.fontSize,
-          },
-        },
-      },
+            fontSize: theme.typography.subtitle2.fontSize
+          }
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   const chartOptionsCheckout = {
@@ -76,23 +76,17 @@ export default function BookingCheckInWidgets({ chart, ...other }) {
       gradient: {
         colorStops: [
           { offset: 0, color: colors[1][0] },
-          { offset: 100, color: colors[1][1] },
-        ],
-      },
-    },
+          { offset: 100, color: colors[1][1] }
+        ]
+      }
+    }
   };
 
   return (
     <Card {...other}>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        divider={
-          <Divider
-            orientation={smUp ? 'vertical' : 'horizontal'}
-            flexItem
-            sx={{ borderStyle: 'dashed' }}
-          />
-        }
+        divider={<Divider orientation={smUp ? 'vertical' : 'horizontal'} flexItem sx={{ borderStyle: 'dashed' }} />}
       >
         {series.map((item, index) => (
           <Stack
@@ -127,5 +121,5 @@ export default function BookingCheckInWidgets({ chart, ...other }) {
 }
 
 BookingCheckInWidgets.propTypes = {
-  chart: PropTypes.object,
+  chart: PropTypes.object
 };

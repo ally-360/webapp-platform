@@ -14,7 +14,7 @@ export default function UserCardList({ users }) {
       gridTemplateColumns={{
         xs: 'repeat(1, 1fr)',
         sm: 'repeat(2, 1fr)',
-        md: 'repeat(3, 1fr)',
+        md: 'repeat(3, 1fr)'
       }}
     >
       {users.map((user) => (
@@ -25,5 +25,5 @@ export default function UserCardList({ users }) {
 }
 
 UserCardList.propTypes = {
-  users: PropTypes.array,
+  users: PropTypes.array
 };

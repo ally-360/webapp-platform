@@ -32,7 +32,7 @@ import FormProvider, {
   RHFUpload,
   RHFTextField,
   RHFAutocomplete,
-  RHFMultiCheckbox,
+  RHFMultiCheckbox
 } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -62,8 +62,8 @@ export default function TourNewEditForm({ currentTour }) {
           'date-min',
           'End date must be later than start date',
           (value, { parent }) => value.getTime() > parent.startDate.getTime()
-        ),
-    }),
+        )
+    })
   });
 
   const defaultValues = useMemo(
@@ -79,15 +79,15 @@ export default function TourNewEditForm({ currentTour }) {
       services: currentTour?.services || [],
       available: {
         startDate: currentTour?.available.startDate || null,
-        endDate: currentTour?.available.endDate || null,
-      },
+        endDate: currentTour?.available.endDate || null
+      }
     }),
     [currentTour]
   );
 
   const methods = useForm({
     resolver: yupResolver(NewTourSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
@@ -96,7 +96,7 @@ export default function TourNewEditForm({ currentTour }) {
     control,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -125,7 +125,7 @@ export default function TourNewEditForm({ currentTour }) {
 
       const newFiles = acceptedFiles.map((file) =>
         Object.assign(file, {
-          preview: URL.createObjectURL(file),
+          preview: URL.createObjectURL(file)
         })
       );
 
@@ -265,8 +265,8 @@ export default function TourNewEditForm({ currentTour }) {
                         textField: {
                           fullWidth: true,
                           error: !!error,
-                          helperText: error?.message,
-                        },
+                          helperText: error?.message
+                        }
                       }}
                     />
                   )}
@@ -282,8 +282,8 @@ export default function TourNewEditForm({ currentTour }) {
                         textField: {
                           fullWidth: true,
                           error: !!error,
-                          helperText: error?.message,
-                        },
+                          helperText: error?.message
+                        }
                       }}
                     />
                   )}
@@ -304,9 +304,7 @@ export default function TourNewEditForm({ currentTour }) {
                 options={countries.map((option) => option.label)}
                 getOptionLabel={(option) => option}
                 renderOption={(props, option) => {
-                  const { code, label, phone } = countries.filter(
-                    (country) => country.label === option
-                  )[0];
+                  const { code, label, phone } = countries.filter((country) => country.label === option)[0];
 
                   if (!label) {
                     return null;
@@ -314,12 +312,7 @@ export default function TourNewEditForm({ currentTour }) {
 
                   return (
                     <li {...props} key={label}>
-                      <Iconify
-                        key={label}
-                        icon={`circle-flags:${code.toLowerCase()}`}
-                        width={28}
-                        sx={{ mr: 1 }}
-                      />
+                      <Iconify key={label} icon={`circle-flags:${code.toLowerCase()}`} width={28} sx={{ mr: 1 }} />
                       {label} ({code}) +{phone}
                     </li>
                   );
@@ -334,7 +327,7 @@ export default function TourNewEditForm({ currentTour }) {
                 options={TOUR_SERVICE_OPTIONS}
                 sx={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gridTemplateColumns: 'repeat(2, 1fr)'
                 }}
               />
             </Stack>
@@ -377,19 +370,9 @@ export default function TourNewEditForm({ currentTour }) {
     <>
       {mdUp && <Grid md={4} />}
       <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
-        <FormControlLabel
-          control={<Switch defaultChecked />}
-          label="Publish"
-          sx={{ flexGrow: 1, pl: 3 }}
-        />
+        <FormControlLabel control={<Switch defaultChecked />} label="Publish" sx={{ flexGrow: 1, pl: 3 }} />
 
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          size="large"
-          loading={isSubmitting}
-          sx={{ ml: 2 }}
-        >
+        <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting} sx={{ ml: 2 }}>
           {!currentTour ? 'Create Tour' : 'Save Changes'}
         </LoadingButton>
       </Grid>
@@ -410,5 +393,5 @@ export default function TourNewEditForm({ currentTour }) {
 }
 
 TourNewEditForm.propTypes = {
-  currentTour: PropTypes.object,
+  currentTour: PropTypes.object
 };

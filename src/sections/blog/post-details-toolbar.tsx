@@ -34,7 +34,7 @@ export default function PostDetailsToolbar({
         direction="row"
         sx={{
           mb: { xs: 3, md: 5 },
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -75,12 +75,7 @@ export default function PostDetailsToolbar({
         </LoadingButton>
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="top-right"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="top-right" sx={{ width: 140 }}>
         {publishOptions.map((option) => (
           <MenuItem
             key={option.value}
@@ -107,5 +102,5 @@ PostDetailsToolbar.propTypes = {
   onChangePublish: PropTypes.func,
   publish: PropTypes.string,
   publishOptions: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

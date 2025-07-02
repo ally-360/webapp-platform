@@ -38,8 +38,8 @@ export default function HomeLookingFor() {
       sx={{
         textAlign: {
           xs: 'center',
-          md: 'left',
-        },
+          md: 'left'
+        }
       }}
     >
       <m.div variants={varFade().inDown}>
@@ -53,7 +53,7 @@ export default function HomeLookingFor() {
           variant="h2"
           sx={{
             mt: 3,
-            mb: { md: 5 },
+            mb: { md: 5 }
           }}
         >
           Landing Page Template?
@@ -68,7 +68,7 @@ export default function HomeLookingFor() {
     <Container
       component={MotionViewport}
       sx={{
-        py: { xs: 10, md: 15 },
+        py: { xs: 10, md: 15 }
       }}
     >
       <Grid container alignItems="center" justifyContent="space-between" spacing={{ xs: 5, md: 0 }}>

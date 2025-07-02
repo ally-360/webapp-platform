@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Badge from '@mui/material/Badge';
 // routes
-import { paths } from 'src/routes/paths';
 // components
 import Iconify from 'src/components/iconify';
-import { RouterLink } from 'src/routes/components';
 import { useTheme } from '@emotion/react';
 // ----------------------------------------------------------------------
 

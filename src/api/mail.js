@@ -17,7 +17,7 @@ export function useGetLabels() {
       labelsLoading: isLoading,
       labelsError: error,
       labelsValidating: isValidating,
-      labelsEmpty: !isLoading && !data?.labels.length,
+      labelsEmpty: !isLoading && !data?.labels.length
     }),
     [data?.labels, error, isLoading, isValidating]
   );
@@ -39,12 +39,12 @@ export function useGetMails(labelId) {
     return {
       mails: {
         byId,
-        allIds,
+        allIds
       },
       mailsLoading: isLoading,
       mailsError: error,
       mailsValidating: isValidating,
-      mailsEmpty: !isLoading && !allIds.length,
+      mailsEmpty: !isLoading && !allIds.length
     };
   }, [data?.mails, error, isLoading, isValidating]);
 
@@ -63,7 +63,7 @@ export function useGetMail(mailId) {
       mail: data?.mail,
       mailLoading: isLoading,
       mailError: error,
-      mailValidating: isValidating,
+      mailValidating: isValidating
     }),
     [data?.mail, error, isLoading, isValidating]
   );

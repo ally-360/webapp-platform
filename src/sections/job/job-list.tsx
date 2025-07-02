@@ -40,7 +40,7 @@ export default function JobList({ jobs }) {
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
           sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
       >
         {jobs.map((job) => (
@@ -60,8 +60,8 @@ export default function JobList({ jobs }) {
           sx={{
             mt: 8,
             [`& .${paginationClasses.ul}`]: {
-              justifyContent: 'center',
-            },
+              justifyContent: 'center'
+            }
           }}
         />
       )}
@@ -70,5 +70,5 @@ export default function JobList({ jobs }) {
 }
 
 JobList.propTypes = {
-  jobs: PropTypes.array,
+  jobs: PropTypes.array
 };

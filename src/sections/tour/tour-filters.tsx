@@ -37,7 +37,7 @@ export default function TourFilters({
   tourGuideOptions,
   serviceOptions,
   //
-  dateError,
+  dateError
 }) {
   const handleFilterServices = useCallback(
     (newValue) => {
@@ -78,12 +78,7 @@ export default function TourFilters({
   );
 
   const renderHead = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      sx={{ py: 2, pr: 1, pl: 2.5 }}
-    >
+    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 2, pr: 1, pl: 2.5 }}>
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
         Filters
       </Typography>
@@ -117,8 +112,8 @@ export default function TourFilters({
           slotProps={{
             textField: {
               error: dateError,
-              helperText: dateError && 'End date must be later than start date',
-            },
+              helperText: dateError && 'End date must be later than start date'
+            }
           }}
         />
       </Stack>
@@ -140,9 +135,7 @@ export default function TourFilters({
         onChange={(event, newValue) => handleFilterDestination(newValue)}
         renderInput={(params) => <TextField placeholder="Select Destination" {...params} />}
         renderOption={(props, option) => {
-          const { code, label, phone } = destinationOptions.filter(
-            (country) => country.label === option
-          )[0];
+          const { code, label, phone } = destinationOptions.filter((country) => country.label === option)[0];
 
           if (!label) {
             return null;
@@ -150,25 +143,14 @@ export default function TourFilters({
 
           return (
             <li {...props} key={label}>
-              <Iconify
-                key={label}
-                icon={`circle-flags:${code.toLowerCase()}`}
-                width={28}
-                sx={{ mr: 1 }}
-              />
+              <Iconify key={label} icon={`circle-flags:${code.toLowerCase()}`} width={28} sx={{ mr: 1 }} />
               {label} ({code}) +{phone}
             </li>
           );
         }}
         renderTags={(selected, getTagProps) =>
           selected.map((option, index) => (
-            <Chip
-              {...getTagProps({ index })}
-              key={option}
-              label={option}
-              size="small"
-              variant="soft"
-            />
+            <Chip {...getTagProps({ index })} key={option} label={option} size="small" variant="soft" />
           ))
         }
       />
@@ -226,10 +208,7 @@ export default function TourFilters({
         <FormControlLabel
           key={option}
           control={
-            <Checkbox
-              checked={filters.services.includes(option)}
-              onClick={() => handleFilterServices(option)}
-            />
+            <Checkbox checked={filters.services.includes(option)} onClick={() => handleFilterServices(option)} />
           }
           label={option}
         />
@@ -257,10 +236,10 @@ export default function TourFilters({
         open={open}
         onClose={onClose}
         slotProps={{
-          backdrop: { invisible: true },
+          backdrop: { invisible: true }
         }}
         PaperProps={{
-          sx: { width: 280 },
+          sx: { width: 280 }
         }}
       >
         {renderHead}
@@ -294,5 +273,5 @@ TourFilters.propTypes = {
   onResetFilters: PropTypes.func,
   open: PropTypes.bool,
   serviceOptions: PropTypes.array,
-  tourGuideOptions: PropTypes.array,
+  tourGuideOptions: PropTypes.array
 };

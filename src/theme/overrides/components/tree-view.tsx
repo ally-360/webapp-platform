@@ -26,18 +26,18 @@ export default function TreeView(theme) {
       defaultProps: {
         defaultCollapseIcon: <CollapseIcon />,
         defaultExpandIcon: <ExpandIcon />,
-        defaultEndIcon: <EndIcon />,
-      },
+        defaultEndIcon: <EndIcon />
+      }
     },
     MuiTreeItem: {
       styleOverrides: {
         label: {
-          ...theme.typography.body2,
+          ...theme.typography.body2
         },
         iconContainer: {
-          width: 'auto',
-        },
-      },
-    },
+          width: 'auto'
+        }
+      }
+    }
   };
 }

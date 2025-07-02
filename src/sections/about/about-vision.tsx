@@ -17,11 +17,7 @@ export default function AboutVision() {
   const theme = useTheme();
 
   const renderImg = (
-    <Image
-      src="/assets/images/about/vision.jpg"
-      alt="about-vision"
-      overlay={alpha(theme.palette.grey[900], 0.48)}
-    />
+    <Image src="/assets/images/about/vision.jpg" alt="about-vision" overlay={alpha(theme.palette.grey[900], 0.48)} />
   );
 
   const renderLogo = (
@@ -36,7 +32,7 @@ export default function AboutVision() {
         bottom: 0,
         opacity: 0.48,
         position: 'absolute',
-        py: { xs: 1.5, md: 2.5 },
+        py: { xs: 1.5, md: 2.5 }
       }}
     >
       {['ibm', 'lya', 'spotify', 'netflix', 'hbo', 'amazon'].map((logo) => (
@@ -48,7 +44,7 @@ export default function AboutVision() {
           src={`/assets/icons/brands/ic_brand_${logo}.svg`}
           sx={{
             m: { xs: 1.5, md: 2.5 },
-            height: { xs: 20, md: 32 },
+            height: { xs: 20, md: 32 }
           }}
         />
       ))}
@@ -68,8 +64,8 @@ export default function AboutVision() {
           content: "''",
           position: 'absolute',
           height: { xs: 80, md: 120 },
-          bgcolor: 'background.default',
-        },
+          bgcolor: 'background.default'
+        }
       }}
     >
       <Container component={MotionViewport}>
@@ -81,7 +77,7 @@ export default function AboutVision() {
             overflow: 'hidden',
             position: 'relative',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center'
           }}
         >
           {renderImg}
@@ -95,8 +91,7 @@ export default function AboutVision() {
 
         <m.div variants={varFade().inUp}>
           <Typography variant="h3" sx={{ textAlign: 'center', maxWidth: 800, mx: 'auto' }}>
-            Our vision offering the best product nulla vehicula tortor scelerisque ultrices
-            malesuada.
+            Our vision offering the best product nulla vehicula tortor scelerisque ultrices malesuada.
           </Typography>
         </m.div>
       </Container>

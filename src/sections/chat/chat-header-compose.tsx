@@ -55,7 +55,7 @@ export default function ChatHeaderCompose({ contacts, onAddRecipients }) {
                 height: 32,
                 overflow: 'hidden',
                 borderRadius: '50%',
-                position: 'relative',
+                position: 'relative'
               }}
             >
               <Avatar alt={recipient.name} src={recipient.avatarUrl} sx={{ width: 1, height: 1 }} />
@@ -73,12 +73,12 @@ export default function ChatHeaderCompose({ contacts, onAddRecipients }) {
                   transition: (theme) =>
                     theme.transitions.create(['opacity'], {
                       easing: theme.transitions.easing.easeInOut,
-                      duration: theme.transitions.duration.shorter,
+                      duration: theme.transitions.duration.shorter
                     }),
                   ...(selected && {
                     opacity: 1,
-                    color: 'primary.main',
-                  }),
+                    color: 'primary.main'
+                  })
                 }}
               >
                 <Iconify icon="eva:checkmark-fill" />
@@ -107,5 +107,5 @@ export default function ChatHeaderCompose({ contacts, onAddRecipients }) {
 
 ChatHeaderCompose.propTypes = {
   contacts: PropTypes.array,
-  onAddRecipients: PropTypes.func,
+  onAddRecipients: PropTypes.func
 };

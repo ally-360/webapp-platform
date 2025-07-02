@@ -92,12 +92,7 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
 
   const renderText = (
     <>
-      <TextMaxLine
-        persistent
-        variant="subtitle2"
-        onClick={details.onTrue}
-        sx={{ width: 1, mt: 2, mb: 0.5 }}
-      >
+      <TextMaxLine persistent variant="subtitle2" onClick={details.onTrue} sx={{ width: 1, mt: 2, mb: 0.5 }}>
         {file.name}
       </TextMaxLine>
 
@@ -108,7 +103,7 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
           maxWidth: 0.99,
           whiteSpace: 'nowrap',
           typography: 'caption',
-          color: 'text.disabled',
+          color: 'text.disabled'
         }}
       >
         {fData(file.size)}
@@ -121,7 +116,7 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
             height: 2,
             flexShrink: 0,
             borderRadius: '50%',
-            bgcolor: 'currentColor',
+            bgcolor: 'currentColor'
           }}
         />
         <Typography noWrap component="span" variant="caption">
@@ -140,9 +135,9 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
           width: 24,
           height: 24,
           '&:first-of-type': {
-            fontSize: 12,
-          },
-        },
+            fontSize: 12
+          }
+        }
       }}
     >
       {file.shared?.map((person) => (
@@ -165,9 +160,9 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
           position: 'relative',
           ...((checkbox.value || selected) && {
             bgcolor: 'background.paper',
-            boxShadow: (theme) => theme.customShadows.z20,
+            boxShadow: (theme) => theme.customShadows.z20
           }),
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -182,12 +177,7 @@ export default function FileManagerFileItem({ file, selected, onSelect, onDelete
         {renderAction}
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -267,5 +257,5 @@ FileManagerFileItem.propTypes = {
   onDelete: PropTypes.func,
   onSelect: PropTypes.func,
   selected: PropTypes.bool,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

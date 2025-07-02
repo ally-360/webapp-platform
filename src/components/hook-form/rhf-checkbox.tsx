@@ -32,7 +32,7 @@ export function RHFCheckbox({ name, helperText, ...other }) {
 
 RHFCheckbox.propTypes = {
   helperText: PropTypes.string,
-  name: PropTypes.string,
+  name: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -41,9 +41,7 @@ export function RHFMultiCheckbox({ row, name, label, options, spacing, helperTex
   const { control } = useFormContext();
 
   const getSelected = (selectedItems, item) =>
-    selectedItems.includes(item)
-      ? selectedItems.filter((value) => value !== item)
-      : [...selectedItems, item];
+    selectedItems.includes(item) ? selectedItems.filter((value) => value !== item) : [...selectedItems, item];
 
   return (
     <Controller
@@ -60,20 +58,20 @@ export function RHFMultiCheckbox({ row, name, label, options, spacing, helperTex
           <FormGroup
             sx={{
               ...(row && {
-                flexDirection: 'row',
+                flexDirection: 'row'
               }),
               [`& .${formControlLabelClasses.root}`]: {
                 '&:not(:last-of-type)': {
-                  mb: spacing || 0,
+                  mb: spacing || 0
                 },
                 ...(row && {
                   mr: 0,
                   '&:not(:last-of-type)': {
-                    mr: spacing || 2,
-                  },
-                }),
+                    mr: spacing || 2
+                  }
+                })
               },
-              ...sx,
+              ...sx
             }}
           >
             {options.map((option) => (
@@ -109,5 +107,5 @@ RHFMultiCheckbox.propTypes = {
   options: PropTypes.array,
   row: PropTypes.bool,
   spacing: PropTypes.number,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

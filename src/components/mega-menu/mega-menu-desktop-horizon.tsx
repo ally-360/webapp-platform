@@ -31,7 +31,7 @@ export default function MegaMenuDesktopHorizon({ data, ...other }) {
 }
 
 MegaMenuDesktopHorizon.propTypes = {
-  data: PropTypes.array,
+  data: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -74,7 +74,7 @@ function MegaMenuItem({ parent }) {
               top: PARENT_ITEM_HEIGHT,
               left: -ITEM_SPACING * 8,
               zIndex: (theme) => theme.zIndex.modal,
-              boxShadow: (theme) => theme.customShadows.z20,
+              boxShadow: (theme) => theme.customShadows.z20
             }}
           >
             <Masonry columns={4} spacing={2} defaultColumns={3} defaultSpacing={2}>
@@ -96,7 +96,7 @@ function MegaMenuItem({ parent }) {
                         color: 'text.primary',
                         fontSize: 13,
                         transition: (theme) => theme.transitions.create('all'),
-                        '&:hover': { color: 'primary.main' },
+                        '&:hover': { color: 'primary.main' }
                       }}
                     >
                       {link.title}
@@ -141,14 +141,14 @@ function MegaMenuItem({ parent }) {
 }
 
 MegaMenuItem.propTypes = {
-  parent: PropTypes.object,
+  parent: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
 
 function ParentItem({ title, path = '', icon, open, hasSub, ...other }) {
   const activeStyle = {
-    color: 'primary.main',
+    color: 'primary.main'
   };
 
   return (
@@ -167,7 +167,7 @@ function ParentItem({ title, path = '', icon, open, hasSub, ...other }) {
         lineHeight: `${PARENT_ITEM_HEIGHT}px`,
         transition: (theme) => theme.transitions.create('all'),
         '&:hover': activeStyle,
-        ...(open && activeStyle),
+        ...(open && activeStyle)
       }}
       {...other}
     >
@@ -185,5 +185,5 @@ ParentItem.propTypes = {
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   open: PropTypes.bool,
   path: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

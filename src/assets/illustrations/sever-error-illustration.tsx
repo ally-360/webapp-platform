@@ -21,14 +21,7 @@ function SeverErrorIllustration({ ...other }) {
   const PRIMARY_DARKER = theme.palette.primary.darker;
 
   return (
-    <Box
-      component="svg"
-      width="100%"
-      height="100%"
-      viewBox="0 0 480 360"
-      xmlns="http://www.w3.org/2000/svg"
-      {...other}
-    >
+    <Box component="svg" width="100%" height="100%" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" {...other}>
       <BackgroundShape />
 
       <image href="/assets/illustrations/characters/character_8.png" height="300" x="340" y="30" />
@@ -129,14 +122,7 @@ function SeverErrorIllustration({ ...other }) {
           <stop offset="1" stopColor={PRIMARY_DARK} />
         </linearGradient>
 
-        <linearGradient
-          id="paint1_linear_1_140"
-          x1="138"
-          x2="138"
-          y1="164"
-          y2="287.9"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="paint1_linear_1_140" x1="138" x2="138" y1="164" y2="287.9" gradientUnits="userSpaceOnUse">
           <stop stopColor={PRIMARY_LIGHT} />
           <stop offset="1" stopColor={PRIMARY_DARK} />
         </linearGradient>

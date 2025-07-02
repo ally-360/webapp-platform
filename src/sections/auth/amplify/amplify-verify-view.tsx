@@ -36,24 +36,24 @@ export default function AmplifyVerifyView() {
 
   const VerifySchemaSchema = Yup.object().shape({
     code: Yup.string().min(6, 'Code must be at least 6 characters').required('Code is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    email: Yup.string().required('Email is required').email('Email must be a valid email address')
   });
 
   const defaultValues = {
     code: '',
-    email: email || '',
+    email: email || ''
   };
 
   const methods = useForm({
     mode: 'onChange',
     resolver: yupResolver(VerifySchemaSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     watch,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -78,22 +78,11 @@ export default function AmplifyVerifyView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
-      <RHFTextField
-        name="email"
-        label="Email"
-        placeholder="example@gmail.com"
-        InputLabelProps={{ shrink: true }}
-      />
+      <RHFTextField name="email" label="Email" placeholder="example@gmail.com" InputLabelProps={{ shrink: true }} />
 
       <RHFCode name="code" />
 
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
+      <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
         Verify
       </LoadingButton>
 
@@ -106,8 +95,8 @@ export default function AmplifyVerifyView() {
             cursor: 'pointer',
             ...(counting && {
               color: 'text.disabled',
-              pointerEvents: 'none',
-            }),
+              pointerEvents: 'none'
+            })
           }}
         >
           Resend code {counting && `(${countdown}s)`}
@@ -121,7 +110,7 @@ export default function AmplifyVerifyView() {
         variant="subtitle2"
         sx={{
           alignItems: 'center',
-          display: 'inline-flex',
+          display: 'inline-flex'
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />
@@ -138,8 +127,8 @@ export default function AmplifyVerifyView() {
         <Typography variant="h3">Please check your email!</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          We have emailed a 6-digit confirmation code to acb@domain, please enter the code in below
-          box to verify your email.
+          We have emailed a 6-digit confirmation code to acb@domain, please enter the code in below box to verify your
+          email.
         </Typography>
       </Stack>
     </>

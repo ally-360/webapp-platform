@@ -20,27 +20,27 @@ import PaymentNewCardDialog from './payment-new-card-dialog';
 const PAYMENT_OPTIONS = [
   {
     value: 'paypal',
-    label: 'Paypal',
+    label: 'Paypal'
   },
   {
     value: 'credit',
-    label: 'Credit / Debit Card',
-  },
+    label: 'Credit / Debit Card'
+  }
 ];
 
 const CARD_OPTIONS = [
   {
     value: 'visa1',
-    label: '**** **** **** 1212 - Jimmy Holland',
+    label: '**** **** **** 1212 - Jimmy Holland'
   },
   {
     value: 'visa2',
-    label: '**** **** **** 2424 - Shawn Stokes',
+    label: '**** **** **** 2424 - Shawn Stokes'
   },
   {
     value: 'mastercard',
-    label: '**** **** **** 4545 - Cole Armstrong',
-  },
+    label: '**** **** **** 4545 - Cole Armstrong'
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -91,8 +91,8 @@ function OptionItem({ option, selected, isCredit, onOpen, ...other }) {
         p: 2.5,
         cursor: 'pointer',
         ...(selected && {
-          boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`,
-        }),
+          boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`
+        })
       }}
       {...other}
     >
@@ -129,7 +129,7 @@ function OptionItem({ option, selected, isCredit, onOpen, ...other }) {
           spacing={2.5}
           alignItems="flex-end"
           sx={{
-            pt: 2.5,
+            pt: 2.5
           }}
         >
           <TextField select fullWidth label="Cards" SelectProps={{ native: true }}>
@@ -140,12 +140,7 @@ function OptionItem({ option, selected, isCredit, onOpen, ...other }) {
             ))}
           </TextField>
 
-          <Button
-            size="small"
-            color="primary"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            onClick={onOpen}
-          >
+          <Button size="small" color="primary" startIcon={<Iconify icon="mingcute:add-line" />} onClick={onOpen}>
             Add New Card
           </Button>
         </Stack>
@@ -158,5 +153,5 @@ OptionItem.propTypes = {
   isCredit: PropTypes.bool,
   onOpen: PropTypes.func,
   option: PropTypes.object,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

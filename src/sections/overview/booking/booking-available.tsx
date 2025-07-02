@@ -16,11 +16,7 @@ import Chart, { useChart } from 'src/components/chart';
 export default function BookingAvailable({ title, subheader, chart, ...other }) {
   const theme = useTheme();
 
-  const {
-    colors = [theme.palette.primary.light, theme.palette.primary.main],
-    series,
-    options,
-  } = chart;
+  const { colors = [theme.palette.primary.light, theme.palette.primary.main], series, options } = chart;
 
   const total = sumBy(series, 'value');
 
@@ -28,19 +24,19 @@ export default function BookingAvailable({ title, subheader, chart, ...other }) 
 
   const chartOptions = useChart({
     legend: {
-      show: false,
+      show: false
     },
     grid: {
-      padding: { top: -32, bottom: -32 },
+      padding: { top: -32, bottom: -32 }
     },
     fill: {
       type: 'gradient',
       gradient: {
         colorStops: [
           { offset: 0, color: colors[0] },
-          { offset: 100, color: colors[1] },
-        ],
-      },
+          { offset: 100, color: colors[1] }
+        ]
+      }
     },
     plotOptions: {
       radialBar: {
@@ -50,12 +46,12 @@ export default function BookingAvailable({ title, subheader, chart, ...other }) 
           value: { offsetY: 8 },
           total: {
             label: 'Tours',
-            formatter: () => fNumber(total),
-          },
-        },
-      },
+            formatter: () => fNumber(total)
+          }
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -72,7 +68,7 @@ export default function BookingAvailable({ title, subheader, chart, ...other }) 
             direction="row"
             alignItems="center"
             sx={{
-              typography: 'subtitle2',
+              typography: 'subtitle2'
             }}
           >
             <Box
@@ -82,8 +78,8 @@ export default function BookingAvailable({ title, subheader, chart, ...other }) 
                 bgcolor: alpha(theme.palette.grey[500], 0.16),
                 borderRadius: 0.75,
                 ...(item.label === 'Sold out' && {
-                  bgcolor: colors[1],
-                }),
+                  bgcolor: colors[1]
+                })
               }}
             />
             <Box sx={{ color: 'text.secondary', flexGrow: 1 }}>{item.label}</Box>
@@ -98,5 +94,5 @@ export default function BookingAvailable({ title, subheader, chart, ...other }) 
 BookingAvailable.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

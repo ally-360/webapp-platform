@@ -26,22 +26,22 @@ export default function BookingNewest({ title, subheader, list, sx, ...other }) 
       {
         breakpoint: theme.breakpoints.values.lg,
         settings: {
-          slidesToShow: 3,
-        },
+          slidesToShow: 3
+        }
       },
       {
         breakpoint: theme.breakpoints.values.md,
         settings: {
-          slidesToShow: 2,
-        },
+          slidesToShow: 2
+        }
       },
       {
         breakpoint: theme.breakpoints.values.sm,
         settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
+          slidesToShow: 1
+        }
+      }
+    ]
   });
 
   return (
@@ -52,7 +52,7 @@ export default function BookingNewest({ title, subheader, list, sx, ...other }) 
         action={<CarouselArrows onNext={carousel.onNext} onPrev={carousel.onPrev} />}
         sx={{
           p: 0,
-          mb: 3,
+          mb: 3
         }}
       />
 
@@ -69,7 +69,7 @@ BookingNewest.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
   sx: PropTypes.object,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -83,7 +83,7 @@ function BookingItem({ item }) {
         mr: 3,
         borderRadius: 2,
         position: 'relative',
-        bgcolor: 'background.neutral',
+        bgcolor: 'background.neutral'
       }}
     >
       <Stack
@@ -91,7 +91,7 @@ function BookingItem({ item }) {
         sx={{
           px: 2,
           pb: 1,
-          pt: 2.5,
+          pt: 2.5
         }}
       >
         <Stack direction="row" alignItems="center" spacing={2}>
@@ -103,17 +103,12 @@ function BookingItem({ item }) {
               mt: 0.5,
               component: 'span',
               typography: 'caption',
-              color: 'text.disabled',
+              color: 'text.disabled'
             }}
           />
         </Stack>
 
-        <Stack
-          spacing={3}
-          direction="row"
-          alignItems="center"
-          sx={{ color: 'text.secondary', typography: 'caption' }}
-        >
+        <Stack spacing={3} direction="row" alignItems="center" sx={{ color: 'text.secondary', typography: 'caption' }}>
           <Stack direction="row" alignItems="center">
             <Iconify icon="solar:calendar-date-bold" width={16} sx={{ mr: 0.5 }} />
             {duration}
@@ -132,7 +127,7 @@ function BookingItem({ item }) {
           right: 16,
           zIndex: 9,
           bottom: 16,
-          position: 'absolute',
+          position: 'absolute'
         }}
       >
         {isHot && '🔥'} ${price}
@@ -146,5 +141,5 @@ function BookingItem({ item }) {
 }
 
 BookingItem.propTypes = {
-  item: PropTypes.object,
+  item: PropTypes.object
 };

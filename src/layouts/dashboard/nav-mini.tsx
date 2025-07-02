@@ -6,12 +6,11 @@ import { hideScroll } from 'src/theme/css';
 // hooks
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 // components
-import Logo from 'src/components/logo';
 import { NavSectionMini } from 'src/components/nav-section';
 //
-import { Avatar, Link } from '@mui/material';
+import { Link } from '@mui/material';
 import MyAvatar from 'src/layouts/dashboard/MyAvatar';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { paths } from 'src/routes/paths';
 import LogoMini from 'src/components/logo/logoMini';
 import { NAV } from '../config-layout';

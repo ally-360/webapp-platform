@@ -37,25 +37,25 @@ export default function AmplifyRegisterView() {
     firstName: Yup.string().required('First name required'),
     lastName: Yup.string().required('Last name required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    password: Yup.string().required('Password is required')
   });
 
   const defaultValues = {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
+    password: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(RegisterSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -89,10 +89,7 @@ export default function AmplifyRegisterView() {
   );
 
   const renderTerms = (
-    <Typography
-      component="div"
-      sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}
-    >
+    <Typography component="div" sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}>
       {'By signing up, I agree to '}
       <Link underline="always" color="text.primary">
         Terms of Service
@@ -127,18 +124,11 @@ export default function AmplifyRegisterView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
-      <LoadingButton
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
+      <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
         Create account
       </LoadingButton>
     </Stack>

@@ -26,8 +26,8 @@ export default function KanbanDetailsPriority({ priority, onChangePriority }) {
             fontWeight: 'fontWeightBold',
             boxShadow: (theme) => `inset 0 0 0 1px ${alpha(theme.palette.grey[500], 0.24)}`,
             ...(option === priority && {
-              boxShadow: (theme) => `inset 0 0 0 2px ${theme.palette.text.primary}`,
-            }),
+              boxShadow: (theme) => `inset 0 0 0 2px ${theme.palette.text.primary}`
+            })
           }}
         >
           <Iconify
@@ -39,14 +39,14 @@ export default function KanbanDetailsPriority({ priority, onChangePriority }) {
             sx={{
               mr: 0.5,
               ...(option === 'low' && {
-                color: 'info.main',
+                color: 'info.main'
               }),
               ...(option === 'medium' && {
-                color: 'warning.main',
+                color: 'warning.main'
               }),
               ...(option === 'hight' && {
-                color: 'error.main',
-              }),
+                color: 'error.main'
+              })
             }}
           />
 
@@ -58,5 +58,5 @@ export default function KanbanDetailsPriority({ priority, onChangePriority }) {
 }
 KanbanDetailsPriority.propTypes = {
   priority: PropTypes.string,
-  onChangePriority: PropTypes.func,
+  onChangePriority: PropTypes.func
 };

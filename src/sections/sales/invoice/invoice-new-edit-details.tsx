@@ -21,10 +21,8 @@ import Iconify from 'src/components/iconify';
 import { RHFAutocomplete, RHFSelect, RHFTextField } from 'src/components/hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
-import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
 import { enqueueSnackbar } from 'notistack';
-import { IconButton, Select, Tooltip } from '@mui/material';
-import { useAuthContext } from 'src/auth/hooks';
+import { IconButton, Tooltip } from '@mui/material';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 
 // ----------------------------------------------------------------------

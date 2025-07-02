@@ -33,7 +33,7 @@ export default function FileManagerActionSelected({
           p: (theme) => theme.spacing(1.5, 2, 1.5, 1),
           boxShadow: (theme) => theme.customShadows.z20,
           m: { xs: 2, md: 3 },
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -51,7 +51,7 @@ export default function FileManagerActionSelected({
             variant="subtitle2"
             sx={{
               mr: 2,
-              color: (theme) => (theme.palette.mode === 'light' ? 'common.white' : 'grey.800'),
+              color: (theme) => (theme.palette.mode === 'light' ? 'common.white' : 'grey.800')
             }}
           >
             {selected.length} Items selected
@@ -70,5 +70,5 @@ FileManagerActionSelected.propTypes = {
   onSelectAllItems: PropTypes.func,
   rowCount: PropTypes.number,
   selected: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

@@ -62,17 +62,10 @@ export default function FileManagerFileDetails({
 
   const renderTags = (
     <Stack spacing={1.5}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ typography: 'subtitle2' }}
-      >
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ typography: 'subtitle2' }}>
         Tags
         <IconButton size="small" onClick={toggleTags.onToggle}>
-          <Iconify
-            icon={toggleTags.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-          />
+          <Iconify icon={toggleTags.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'} />
         </IconButton>
       </Stack>
 
@@ -94,13 +87,7 @@ export default function FileManagerFileDetails({
           )}
           renderTags={(value, getTagProps) =>
             value.map((option, index) => (
-              <Chip
-                {...getTagProps({ index })}
-                size="small"
-                variant="soft"
-                label={option}
-                key={option}
-              />
+              <Chip {...getTagProps({ index })} size="small" variant="soft" label={option} key={option} />
             ))
           }
           renderInput={(params) => <TextField {...params} placeholder="#Add a tags" />}
@@ -111,17 +98,10 @@ export default function FileManagerFileDetails({
 
   const renderProperties = (
     <Stack spacing={1.5}>
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ typography: 'subtitle2' }}
-      >
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ typography: 'subtitle2' }}>
         Properties
         <IconButton size="small" onClick={properties.onToggle}>
-          <Iconify
-            icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-          />
+          <Iconify icon={properties.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'} />
         </IconButton>
       </Stack>
 
@@ -167,8 +147,8 @@ export default function FileManagerFileDetails({
             bgcolor: 'primary.main',
             color: 'primary.contrastText',
             '&:hover': {
-              bgcolor: 'primary.dark',
-            },
+              bgcolor: 'primary.dark'
+            }
           }}
         >
           <Iconify icon="mingcute:add-line" />
@@ -192,10 +172,10 @@ export default function FileManagerFileDetails({
         onClose={onClose}
         anchor="right"
         slotProps={{
-          backdrop: { invisible: true },
+          backdrop: { invisible: true }
         }}
         PaperProps={{
-          sx: { width: 320 },
+          sx: { width: 320 }
         }}
         {...other}
       >
@@ -217,7 +197,7 @@ export default function FileManagerFileDetails({
             justifyContent="center"
             sx={{
               p: 2.5,
-              bgcolor: 'background.neutral',
+              bgcolor: 'background.neutral'
             }}
           >
             <FileThumbnail
@@ -277,5 +257,5 @@ FileManagerFileDetails.propTypes = {
   onCopyLink: PropTypes.func,
   onDelete: PropTypes.func,
   onFavorite: PropTypes.func,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };

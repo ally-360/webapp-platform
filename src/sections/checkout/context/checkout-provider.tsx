@@ -23,7 +23,7 @@ const initialState = {
   discount: 0,
   shipping: 0,
   billing: null,
-  totalItems: 0,
+  totalItems: 0
 };
 
 export function CheckoutProvider({ children }) {
@@ -35,7 +35,7 @@ export function CheckoutProvider({ children }) {
     (name, value) => {
       setValues((prevState) => ({
         ...prevState,
-        [name]: value,
+        [name]: value
       }));
     },
     [setValues]
@@ -53,14 +53,7 @@ export function CheckoutProvider({ children }) {
     setValue('shipping', values.items.length ? values.shipping : 0);
     setValue('total', values.subTotal - values.discount + values.shipping);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    values.items,
-    values.activeStep,
-    values.billing,
-    values.discount,
-    values.shipping,
-    values.subTotal,
-  ]);
+  }, [values.items, values.activeStep, values.billing, values.discount, values.shipping, values.subTotal]);
 
   useEffect(() => {
     onGetCart();
@@ -73,7 +66,7 @@ export function CheckoutProvider({ children }) {
           return {
             ...item,
             colors: uniq([...item.colors, ...newItem.colors]),
-            quantity: item.quantity + 1,
+            quantity: item.quantity + 1
           };
         }
         return item;
@@ -118,7 +111,7 @@ export function CheckoutProvider({ children }) {
         if (item.id === itemId) {
           return {
             ...item,
-            quantity: item.quantity + 1,
+            quantity: item.quantity + 1
           };
         }
         return item;
@@ -135,7 +128,7 @@ export function CheckoutProvider({ children }) {
         if (item.id === itemId) {
           return {
             ...item,
-            quantity: item.quantity - 1,
+            quantity: item.quantity - 1
           };
         }
         return item;
@@ -198,7 +191,7 @@ export function CheckoutProvider({ children }) {
       onNextStep,
       onGotoStep,
       //
-      onReset,
+      onReset
     }),
     [
       completed,
@@ -213,7 +206,7 @@ export function CheckoutProvider({ children }) {
       onIncreaseQuantity,
       onNextStep,
       onReset,
-      values,
+      values
     ]
   );
 
@@ -221,5 +214,5 @@ export function CheckoutProvider({ children }) {
 }
 
 CheckoutProvider.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

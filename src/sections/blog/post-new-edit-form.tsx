@@ -24,12 +24,7 @@ import { useRouter } from 'src/routes/hook';
 import { _tags } from 'src/_mock';
 // components
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, {
-  RHFEditor,
-  RHFUpload,
-  RHFTextField,
-  RHFAutocomplete,
-} from 'src/components/hook-form';
+import FormProvider, { RHFEditor, RHFUpload, RHFTextField, RHFAutocomplete } from 'src/components/hook-form';
 //
 import PostDetailsPreview from './post-details-preview';
 
@@ -53,7 +48,7 @@ export default function PostNewEditForm({ currentPost }) {
     metaKeywords: Yup.array().min(1, 'Meta keywords is required'),
     // not required
     metaTitle: Yup.string(),
-    metaDescription: Yup.string(),
+    metaDescription: Yup.string()
   });
 
   const defaultValues = useMemo(
@@ -65,14 +60,14 @@ export default function PostNewEditForm({ currentPost }) {
       tags: currentPost?.tags || [],
       metaKeywords: currentPost?.metaKeywords || [],
       metaTitle: currentPost?.metaTitle || '',
-      metaDescription: currentPost?.metaDescription || '',
+      metaDescription: currentPost?.metaDescription || ''
     }),
     [currentPost]
   );
 
   const methods = useForm({
     resolver: yupResolver(NewBlogSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
@@ -80,7 +75,7 @@ export default function PostNewEditForm({ currentPost }) {
     watch,
     setValue,
     handleSubmit,
-    formState: { isSubmitting, isValid },
+    formState: { isSubmitting, isValid }
   } = methods;
 
   const values = watch();
@@ -109,7 +104,7 @@ export default function PostNewEditForm({ currentPost }) {
       const file = acceptedFiles[0];
 
       const newFile = Object.assign(file, {
-        preview: URL.createObjectURL(file),
+        preview: URL.createObjectURL(file)
       });
 
       if (file) {
@@ -152,12 +147,7 @@ export default function PostNewEditForm({ currentPost }) {
 
             <Stack spacing={1.5}>
               <Typography variant="subtitle2">Cover</Typography>
-              <RHFUpload
-                name="coverUrl"
-                maxSize={3145728}
-                onDrop={handleDrop}
-                onDelete={handleRemoveFile}
-              />
+              <RHFUpload name="coverUrl" maxSize={3145728} onDrop={handleDrop} onDelete={handleRemoveFile} />
             </Stack>
           </Stack>
         </Card>
@@ -212,13 +202,7 @@ export default function PostNewEditForm({ currentPost }) {
 
             <RHFTextField name="metaTitle" label="Meta title" />
 
-            <RHFTextField
-              name="metaDescription"
-              label="Meta description"
-              fullWidth
-              multiline
-              rows={3}
-            />
+            <RHFTextField name="metaDescription" label="Meta description" fullWidth multiline rows={3} />
 
             <RHFAutocomplete
               name="metaKeywords"
@@ -259,23 +243,13 @@ export default function PostNewEditForm({ currentPost }) {
     <>
       {mdUp && <Grid md={4} />}
       <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
-        <FormControlLabel
-          control={<Switch defaultChecked />}
-          label="Publish"
-          sx={{ flexGrow: 1, pl: 3 }}
-        />
+        <FormControlLabel control={<Switch defaultChecked />} label="Publish" sx={{ flexGrow: 1, pl: 3 }} />
 
         <Button color="inherit" variant="outlined" size="large" onClick={preview.onTrue}>
           Preview
         </Button>
 
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          size="large"
-          loading={isSubmitting}
-          sx={{ ml: 2 }}
-        >
+        <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting} sx={{ ml: 2 }}>
           {!currentPost ? 'Create Post' : 'Save Changes'}
         </LoadingButton>
       </Grid>
@@ -296,9 +270,7 @@ export default function PostNewEditForm({ currentPost }) {
         title={values.title}
         content={values.content}
         description={values.description}
-        coverUrl={
-          typeof values.coverUrl === 'string' ? values.coverUrl : `${values.coverUrl?.preview}`
-        }
+        coverUrl={typeof values.coverUrl === 'string' ? values.coverUrl : `${values.coverUrl?.preview}`}
         //
         open={preview.value}
         isValid={isValid}
@@ -311,5 +283,5 @@ export default function PostNewEditForm({ currentPost }) {
 }
 
 PostNewEditForm.propTypes = {
-  currentPost: PropTypes.object,
+  currentPost: PropTypes.object
 };

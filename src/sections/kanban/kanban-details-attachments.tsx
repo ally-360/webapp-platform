@@ -14,7 +14,7 @@ export default function KanbanDetailsAttachments({ attachments }) {
     (acceptedFiles) => {
       const newFiles = acceptedFiles.map((file) =>
         Object.assign(file, {
-          preview: URL.createObjectURL(file),
+          preview: URL.createObjectURL(file)
         })
       );
 
@@ -46,5 +46,5 @@ export default function KanbanDetailsAttachments({ attachments }) {
 }
 
 KanbanDetailsAttachments.propTypes = {
-  attachments: PropTypes.array,
+  attachments: PropTypes.array
 };

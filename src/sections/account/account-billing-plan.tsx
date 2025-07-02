@@ -67,11 +67,11 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
           cursor: 'pointer',
           ...(plan.primary && {
             opacity: 0.48,
-            cursor: 'default',
+            cursor: 'default'
           }),
           ...(plan.subscription === selectedPlan && {
-            boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`,
-          }),
+            boxShadow: (theme) => `0 0 0 2px ${theme.palette.text.primary}`
+          })
         }}
       >
         {plan.primary && (
@@ -90,9 +90,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
           {plan.subscription === 'premium' && <PlanPremiumIcon />}
         </Box>
 
-        <Box sx={{ typography: 'subtitle2', mt: 2, mb: 0.5, textTransform: 'capitalize' }}>
-          {plan.subscription}
-        </Box>
+        <Box sx={{ typography: 'subtitle2', mt: 2, mb: 0.5, textTransform: 'capitalize' }}>{plan.subscription}</Box>
 
         <Stack direction="row" alignItems="center" sx={{ typography: 'h4' }}>
           {plan.price || 'Free'}
@@ -198,11 +196,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
         selected={(selectedId) => selectedAddress?.id === selectedId}
         onSelect={handleSelectAddress}
         action={
-          <Button
-            size="small"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            sx={{ alignSelf: 'flex-end' }}
-          >
+          <Button size="small" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ alignSelf: 'flex-end' }}>
             New
           </Button>
         }
@@ -214,5 +208,5 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
 AccountBillingPlan.propTypes = {
   addressBook: PropTypes.array,
   cardList: PropTypes.array,
-  plans: PropTypes.array,
+  plans: PropTypes.array
 };

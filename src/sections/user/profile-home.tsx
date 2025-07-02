@@ -34,10 +34,7 @@ export default function ProfileHome({ info, posts }) {
 
   const renderFollows = (
     <Card sx={{ py: 3, textAlign: 'center', typography: 'h4' }}>
-      <Stack
-        direction="row"
-        divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
-      >
+      <Stack direction="row" divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}>
         <Stack width={1}>
           {fNumber(info.totalFollowers)}
           <Box component="span" sx={{ color: 'text.secondary', typography: 'body2' }}>
@@ -114,7 +111,7 @@ export default function ProfileHome({ info, posts }) {
           p: 2,
           mb: 3,
           borderRadius: 1,
-          border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
+          border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`
         }}
       />
 
@@ -144,18 +141,13 @@ export default function ProfileHome({ info, posts }) {
 
       <Stack spacing={2} sx={{ p: 3 }}>
         {_socials.map((link) => (
-          <Stack
-            key={link.name}
-            spacing={2}
-            direction="row"
-            sx={{ wordBreak: 'break-all', typography: 'body2' }}
-          >
+          <Stack key={link.name} spacing={2} direction="row" sx={{ wordBreak: 'break-all', typography: 'body2' }}>
             <Iconify
               icon={link.icon}
               width={24}
               sx={{
                 flexShrink: 0,
-                color: link.color,
+                color: link.color
               }}
             />
             <Link color="inherit">
@@ -197,5 +189,5 @@ export default function ProfileHome({ info, posts }) {
 
 ProfileHome.propTypes = {
   info: PropTypes.object,
-  posts: PropTypes.array,
+  posts: PropTypes.array
 };
