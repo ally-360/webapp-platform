@@ -30,7 +30,7 @@ export default function FaqsView() {
             my: { xs: 5, md: 10 }
           }}
         >
-          Frequently asked questions
+          Preguntas Frecuentes
         </Typography>
 
         <Box

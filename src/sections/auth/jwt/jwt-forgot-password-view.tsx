@@ -14,13 +14,24 @@ import { PasswordIcon } from 'src/assets/icons';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-
-// ----------------------------------------------------------------------
+import { useState } from 'react';
+import { useBoolean } from 'src/hooks/use-boolean';
+import SendCodeResetPassword from 'src/sections/auth/jwt/jwt-forgot-passwor-step2';
+import { ResetPasswordForm } from 'src/sections/auth/jwt/jwt-forgot-passwor-step3';
+// -------------------------------------------------------------------------
 
 export default function ModernForgotPasswordView() {
   const ForgotPasswordSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email must be a valid email address')
+    email: Yup.string()
+      .required('El correo es obligatorio')
+      .email('El correo debe ser una dirección de correo electrónico válida')
   });
+  const password = useBoolean(false);
+
+  const [step, setStep] = useState(1);
+
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
 
   const defaultValues = {
     email: ''
@@ -38,8 +49,11 @@ export default function ModernForgotPasswordView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // await RequestService.fetchSendCodeResetPassword(data.email);
       console.info('DATA', data);
+      setEmail(data.email);
+      setStep(2);
+      methods.reset();
     } catch (error) {
       console.error(error);
     }
@@ -47,7 +61,7 @@ export default function ModernForgotPasswordView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
-      <RHFTextField name="email" label="Correo" placeholder="example@gmail.com" />
+      <RHFTextField name="email" label="Correo electrónico" placeholder="example@gmail.com" />
 
       <LoadingButton
         fullWidth
@@ -86,7 +100,7 @@ export default function ModernForgotPasswordView() {
         <Typography variant="h3">¿Olvidaste tu contraseña?</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Ingrese la dirección de correo electrónico asociada con su cuenta y le enviaremos un enlace por correo
+          Ingrese la dirección de correo electrónico asociada con su cuenta y le enviaremos un código por correo
           electrónico para restablecer su contraseña.
         </Typography>
       </Stack>
@@ -94,10 +108,15 @@ export default function ModernForgotPasswordView() {
   );
 
   return (
-    <FormProvider methods={methods} onSubmit={onSubmit}>
-      {renderHead}
-
-      {renderForm}
-    </FormProvider>
+    <>
+      {step === 1 && (
+        <FormProvider methods={methods} onSubmit={onSubmit}>
+          {renderHead}
+          {renderForm}
+        </FormProvider>
+      )}
+      {step === 2 && <SendCodeResetPassword email={email} setCode={setCode} setStep={setStep} />}
+      {step === 3 && <ResetPasswordForm email={email} code={code} setStep={setStep} />}
+    </>
   );
 }

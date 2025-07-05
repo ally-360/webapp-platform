@@ -8,33 +8,34 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // routes
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
-// auth
-import { useAuthContext } from 'src/auth/hooks';
+// hooks
 // assets
-import { PasswordIcon } from 'src/assets/icons';
+import { SentIcon } from 'src/assets/icons';
 // components
 import Iconify from 'src/components/iconify';
-import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import FormProvider, { RHFCode } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
 
-export default function FirebaseForgotPasswordView() {
-  const { forgotPassword } = useAuthContext();
+interface SendCodeResetPasswordProps {
+  email: string;
+  setCode?: (code: string) => void;
+  setStep?: (step: number) => void;
+}
 
-  const router = useRouter();
-
-  const ForgotPasswordSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email must be a valid email address')
+export default function SendCodeResetPassword({ email, setCode, setStep }: SendCodeResetPasswordProps) {
+  const NewPasswordSchema = Yup.object().shape({
+    code: Yup.string().min(6, 'Code must be at least 6 characters').required('Code is required')
   });
 
   const defaultValues = {
-    email: ''
+    code: '',
+    email
   };
 
   const methods = useForm({
-    resolver: yupResolver(ForgotPasswordSchema),
+    resolver: yupResolver(NewPasswordSchema),
     defaultValues
   });
 
@@ -45,12 +46,14 @@ export default function FirebaseForgotPasswordView() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await forgotPassword?.(data.email);
-
-      const searchParams = new URLSearchParams({ email: data.email }).toString();
-
-      const href = `${paths.auth.firebase.verify}?${searchParams}`;
-      router.push(href);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (setCode) {
+        setCode(data.code);
+      }
+      if (setStep) {
+        setStep(3);
+      }
+      console.info('DATA', data);
     } catch (error) {
       console.error(error);
     }
@@ -58,15 +61,27 @@ export default function FirebaseForgotPasswordView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
-      <RHFTextField name="email" label="Email address" />
+      <RHFCode name="code" />
 
       <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
-        Send Request
+        Verificar codigo
       </LoadingButton>
+
+      <Typography variant="body2">
+        {`No has recibido el codigo? `}
+        <Link
+          variant="subtitle2"
+          sx={{
+            cursor: 'pointer'
+          }}
+        >
+          Volver a enviar codigo
+        </Link>
+      </Typography>
 
       <Link
         component={RouterLink}
-        href={paths.auth.firebase.login}
+        href={paths.auth.jwt.login}
         color="inherit"
         variant="subtitle2"
         sx={{
@@ -75,21 +90,20 @@ export default function FirebaseForgotPasswordView() {
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />
-        Return to sign in
+        Volver al inicio de sesión
       </Link>
     </Stack>
   );
 
   const renderHead = (
     <>
-      <PasswordIcon sx={{ height: 96 }} />
+      <SentIcon sx={{ height: 96 }} />
 
       <Stack spacing={1} sx={{ my: 5 }}>
-        <Typography variant="h3">Forgot your password?</Typography>
+        <Typography variant="h3">Validación de código</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Please enter the email address associated with your account and We will email you a link to reset your
-          password.
+          Ingresa el código de 6 dígitos que hemos enviado a tu correo electrónico.
         </Typography>
       </Stack>
     </>

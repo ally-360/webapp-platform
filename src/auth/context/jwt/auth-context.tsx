@@ -1,11 +1,44 @@
 import { createContext } from 'react';
 import { AuthContextType } from 'src/interfaces/auth/authInterfaces';
 
-const defaultAuthContext: AuthContextType = {
+export const defaultAuthContext: AuthContextType = {
   user: null,
-  isAuthenticated: false,
-  login: async () => {},
-  logout: async () => {}
+  loading: false,
+  authenticated: false,
+  unauthenticated: true,
+  isFirstLogin: false,
+  company: null,
+  pdvCompany: null as any,
+
+  method: 'jwt',
+
+  login: async () => {
+    throw new Error('login method not implemented');
+  },
+  register: async () => {
+    throw new Error('register method not implemented');
+  },
+  logout: () => {
+    throw new Error('logout method not implemented');
+  },
+  updateCompany: async () => {
+    throw new Error('updateCompany method not implemented');
+  },
+  updatePDV: async () => {
+    throw new Error('updatePDV method not implemented');
+  },
+  createCompany: async () => {
+    throw new Error('createCompany method not implemented');
+  },
+  createPDV: async () => {
+    throw new Error('createPDV method not implemented');
+  },
+  updateProfile: async () => {
+    throw new Error('updateProfile method not implemented');
+  },
+  updateProfileInfo: async () => {
+    throw new Error('updateProfileInfo method not implemented');
+  }
 };
 
 export const AuthContext = createContext<AuthContextType>(defaultAuthContext);

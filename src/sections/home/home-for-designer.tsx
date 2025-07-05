@@ -11,7 +11,6 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // theme
 import { textGradient, bgGradient } from 'src/theme/css';
 // routes
-import { paths } from 'src/routes/paths';
 // components
 import Iconify from 'src/components/iconify';
 import { MotionViewport, varFade } from 'src/components/animate';
@@ -52,7 +51,6 @@ export default function HomeForDesigner() {
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
           target="_blank"
           rel="noopener"
-          href={paths.figma}
         >
           Figma Workspace
         </Button>

@@ -14,7 +14,6 @@ import Stack from '@mui/material/Stack';
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
 // routes
-import { paths } from 'src/routes/paths';
 // _mock
 import { _homePlans } from 'src/_mock';
 // components
@@ -245,7 +244,6 @@ function PlanCard({ plan, sx, ...other }) {
           size="small"
           target="_blank"
           rel="noopener"
-          href={paths.minimalUI}
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
         >
           Learn more

@@ -73,10 +73,5 @@ export const navConfig = [
         items: [{ title: 'Dashboard', path: PATH_AFTER_LOGIN }]
       }
     ]
-  },
-  {
-    title: 'Docs',
-    icon: <Iconify icon="solar:notebook-bold-duotone" />,
-    path: paths.docs
   }
 ];

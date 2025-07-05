@@ -233,7 +233,6 @@ export default function HomeHero() {
               variant="caption"
               target="_blank"
               rel="noopener"
-              href={paths.freeUI}
               sx={{ textDecoration: 'underline', display: 'inline-flex', alignItems: 'center' }}
             >
               <Iconify icon="eva:external-link-fill" width={16} sx={{ mr: 0.5 }} />
@@ -248,7 +247,6 @@ export default function HomeHero() {
             startIcon={<Iconify icon="eva:external-link-fill" width={24} />}
             target="_blank"
             rel="noopener"
-            href={paths.figma}
             sx={{ borderColor: 'text.primary' }}
           >
             Design Preview

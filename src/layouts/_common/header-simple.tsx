@@ -54,7 +54,7 @@ export default function HeaderSimple() {
           <SettingsButton />
 
           <Link href={paths.faqs} component={RouterLink} color="inherit" sx={{ typography: 'subtitle2' }}>
-            Need help?
+            Ayuda
           </Link>
         </Stack>
       </Toolbar>

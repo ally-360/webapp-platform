@@ -13,6 +13,15 @@ export const configGetWithToken = (url: string): AxiosRequestConfig => {
   };
 };
 
+export const configPostWithoutToken = (url: string, databody: object | string): AxiosRequestConfig => ({
+  method: 'post',
+  url,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  data: databody
+});
+
 export const configGetWithTokenParametrized = (url: string, param: string): AxiosRequestConfig => ({
   method: 'get',
   url,

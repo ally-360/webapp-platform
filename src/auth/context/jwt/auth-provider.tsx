@@ -1,6 +1,9 @@
+/* eslint-disable no-nested-ternary */
 import PropTypes from 'prop-types';
 import React, { useEffect, useReducer, useCallback, useMemo } from 'react';
 import jwtDecode from 'jwt-decode';
+import { useSnackbar } from 'notistack';
+
 import {
   AuthCredentials,
   RegisterCompany,
@@ -10,7 +13,6 @@ import {
   UpdateProfile
 } from 'src/interfaces/auth/userInterfaces';
 import { tokenSchema } from 'src/interfaces/auth/tokenInterface';
-import { useSnackbar } from 'notistack';
 import { AuthContext } from './auth-context';
 import { setSession, setSessionCompanyId } from './utils';
 import RequestService from '../../../axios/services/service';
@@ -58,16 +60,14 @@ const reducer = (state: InitialState, action: ReducerAction): InitialState => {
 
 const STORAGE_KEY = 'accessToken';
 
+/**
+ * Proveedor de contexto de autenticación.
+ * Gestiona el estado global del usuario, la empresa, los PDVs y el control de sesión.
+ */
 export function AuthProvider({ children }: { readonly children: React.ReactNode }): JSX.Element {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { enqueueSnackbar } = useSnackbar();
 
-  /**
-   * Set user information in context and validate if user has company and set company in context and pdv
-   * @param accessToken
-   * @example
-   * setUserInformation('accessToken');
-   */
   const setUserInformation = useCallback(async (accessToken: string): Promise<GetUserResponse> => {
     const token: tokenSchema = jwtDecode(accessToken);
     const { data: user } = await RequestService.fetchGetUserById(token.id);
@@ -76,45 +76,26 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
     if (user?.company.length > 0) {
       const { data: pdvForCompany } = await RequestService.getCompanyById(user.company[0].id, true);
-      dispatch({
-        type: 'UPDATE_COMPANY',
-        payload: { company: user.company[0] }
-      });
-      dispatch({
-        type: 'UPDATE_PDV',
-        payload: { pdvCompany: pdvForCompany?.pdvs || null }
-      });
+      dispatch({ type: 'UPDATE_COMPANY', payload: { company: user.company[0] } });
+      dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: pdvForCompany?.pdvs || null } });
     }
 
     return user;
   }, []);
-  /**
-   * Initialize the context with the user information and validate if the user has a company
-   */
+
   const initialize = useCallback(async () => {
     try {
-      const accessToken = window.localStorage.getItem('accessToken');
-      if (accessToken) {
-        setSession(accessToken);
-        const user = await setUserInformation(accessToken);
-        dispatch({
-          type: 'INITIAL',
-          payload: { user, isAuthenticated: true, isFirstLogin: user.firstLogin }
-        });
-      } else {
-        throw new Error('No hay token disponible');
-      }
+      const accessToken = window.localStorage.getItem(STORAGE_KEY);
+      if (!accessToken) throw new Error('No hay token disponible');
+
+      setSession(accessToken);
+      const user = await setUserInformation(accessToken);
+      dispatch({ type: 'INITIAL', payload: { user, isAuthenticated: true, isFirstLogin: user.firstLogin } });
     } catch (error) {
-      enqueueSnackbar('No hay token disponible', {
-        variant: 'error'
-      });
+      enqueueSnackbar('No hay token disponible', { variant: 'error' });
       dispatch({
         type: 'INITIAL',
-        payload: {
-          user: null,
-          isAuthenticated: false,
-          isFirstLogin: false
-        }
+        payload: { user: null, isAuthenticated: false, isFirstLogin: false }
       });
     }
   }, [setUserInformation, enqueueSnackbar]);
@@ -123,48 +104,26 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     initialize();
   }, [initialize]);
 
-  /**
-   * Login user and set session in local storage and axios headers
-   * @param email
-   * @param password
-   * @example
-   * login({ email: 'email', password: 'password' });
-   */
   const login = useCallback(
     async ({ email, password }: AuthCredentials) => {
       const { data } = (await RequestService.fetchLoginUser({ email, password })).data;
       setSession(data.accessToken);
       const user = await setUserInformation(data.accessToken);
       enqueueSnackbar('Bienvenido', { variant: 'success' });
-      dispatch({
-        type: 'LOGIN',
-        payload: { user, isFirstLogin: user.firstLogin }
-      });
+      dispatch({ type: 'LOGIN', payload: { user, isFirstLogin: user.firstLogin } });
     },
     [setUserInformation, enqueueSnackbar]
   );
 
-  /**
-   * Register user and set session in local storage and axios headers
-   */
   const register = useCallback(async (data: RegisterUser) => {
     await RequestService.fetchRegisterUser(data);
     dispatch({ type: 'REGISTER' });
   }, []);
 
-  /**
-   * Update company and set company in context state
-   * @param databody
-   * @example
-   * updateCompany({ name: 'name' });
-   */
   const updateCompany = useCallback(
     async (databody: UpdateProfile) => {
       const { data } = await RequestService.updateCompany({ databody, id: state.company?.id });
-      dispatch({
-        type: 'UPDATE_COMPANY',
-        payload: { company: data }
-      });
+      dispatch({ type: 'UPDATE_COMPANY', payload: { company: data } });
     },
     [state.company]
   );
@@ -174,10 +133,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: databody } });
   }, []);
 
-  /**
-   * Crea un nuevo punto de venta y lo asocia a la empresa en el estado del contexto.
-   * @param databody
-   */
   const createCompany = useCallback(
     async (databody: RegisterCompany) => {
       const accessToken = window.localStorage.getItem(STORAGE_KEY);
@@ -186,60 +141,37 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       const token: tokenSchema = jwtDecode(accessToken);
       const { data } = await RequestService.createCompany(databody);
       await RequestService.updateCompanyToUser({ companyId: data.id, userId: token.id });
-
       await setUserInformation(accessToken);
       dispatch({ type: 'UPDATE_COMPANY', payload: { company: data } });
     },
     [setUserInformation]
   );
 
-  const updateProfile = useCallback(async (id, databody) => {
+  const updateProfile = useCallback(async (id: string, databody: any) => {
     await RequestService.updateUser({ id, databody });
     const user = (await RequestService.fetchGetUserById(id)).data;
-    dispatch({
-      type: 'LOGIN',
-      payload: {
-        isFirstLogin: user.firstLogin,
-        user
-      }
-    });
+    dispatch({ type: 'LOGIN', payload: { isFirstLogin: user.firstLogin, user } });
   }, []);
 
-  const updateProfileInfo = useCallback(async (id, databody) => {
+  const updateProfileInfo = useCallback(async (id: string, databody: any) => {
     await RequestService.updateProfile({ id, databody });
     const user = (await RequestService.fetchGetUserById(id)).data;
-    dispatch({
-      type: 'LOGIN',
-      payload: {
-        isFirstLogin: user.firstLogin,
-        user
-      }
-    });
+    dispatch({ type: 'LOGIN', payload: { isFirstLogin: user.firstLogin, user } });
   }, []);
 
-  const createPDV = useCallback(async (databody) => {
+  const createPDV = useCallback(async (databody: any) => {
     const response = await RequestService.createPDV(databody);
-    dispatch({
-      type: 'UPDATE_PDV',
-      payload: {
-        pdvCompany: response.data
-      }
-    });
+    dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: response.data } });
   }, []);
 
-  // LOGOUT
   const logout = useCallback(() => {
     setSession(null);
     dispatch({ type: 'LOGOUT' });
   }, []);
 
-  // ----------------------------------------------------------------------
+  const status = state.loading ? 'loading' : state.user ? 'authenticated' : 'unauthenticated';
 
-  const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';
-
-  const status = state.loading ? 'loading' : checkAuthenticated;
-
-  const memoizedValue = useMemo(
+  const value = useMemo(
     () => ({
       user: state.user,
       company: state.company,
@@ -265,23 +197,23 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       login,
       logout,
       register,
+      updateCompany,
+      updatePDV,
+      createCompany,
+      createPDV,
       updateProfile,
       updateProfileInfo,
       state.user,
-      status,
-      updateCompany,
       state.company,
       state.pdvCompany,
       state.isFirstLogin,
-      updatePDV,
-      createCompany,
-      createPDV
+      status
     ]
   );
 
-  return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 AuthProvider.propTypes = {
-  children: PropTypes.node
+  children: PropTypes.node.isRequired
 };

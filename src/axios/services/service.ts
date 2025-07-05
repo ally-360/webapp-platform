@@ -8,7 +8,13 @@ import {
   UpdateProfile,
   changePassword
 } from 'src/interfaces/auth/userInterfaces';
-import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
+import {
+  configGetWithToken,
+  configPostWithToken,
+  configPostWithoutToken,
+  configPatchWithToken,
+  configDeleteWithToken
+} from '../configFetch';
 import apiClient from '../axios';
 
 class RequestService {
@@ -21,6 +27,8 @@ class RequestService {
 
   changePassword = async (databody: changePassword) =>
     apiClient(configPatchWithToken('/auth/change-password', databody));
+
+  fetchSendCodeResetPassword = async (email: string) => configPostWithoutToken('/auth/reset-password', { email });
   // Users
 
   fetchGetUserById = async (id: string) => apiClient.get(`/user/${id}`);

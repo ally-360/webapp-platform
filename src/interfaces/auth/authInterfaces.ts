@@ -17,6 +17,11 @@ export interface AuthContextType {
   authenticated: boolean;
 
   /**
+   * Retorna true si el usuario no está autenticado.
+   */
+  unauthenticated: boolean;
+
+  /**
    * Retorna true si el usuario es nuevo y es su primera vez iniciando sesión.
    */
   isFirstLogin: boolean;
