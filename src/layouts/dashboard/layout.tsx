@@ -9,9 +9,6 @@ import { useSettingsContext } from 'src/components/settings';
 //
 import React, { useEffect } from 'react';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
-import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
-import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';
-import FormPDVS from 'src/sections/PDVS/pdv-new-edit-form';
 import { useAppDispatch } from 'src/hooks/store';
 import Main from './main';
 import Header from './header';
@@ -23,8 +20,6 @@ import GlobalModals from './global-modals';
 
 export default function DashboardLayout({ children }) {
   const settings = useSettingsContext();
-
-  console.log(settings);
 
   const dispatch = useAppDispatch();
 
@@ -56,10 +51,7 @@ export default function DashboardLayout({ children }) {
         {isMini && lgUp ? renderNavMini : renderNavVertical}
 
         <Main>{children}</Main>
-        <PopupCreateCategory />
-        <PopupCreateBrand />
         <GlobalModals />
-        <FormPDVS />
       </Box>
     </>
   );
