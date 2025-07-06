@@ -18,7 +18,6 @@ export default function GlobalModals() {
       {categoryOpen && <PopupCreateCategory />}
       {brandOpen && <PopupCreateBrand />}
       {pdvOpen && <FormPDVS />}
-      {/* Aquí puedes agregar otros modales con condicionales similares */}
     </>
   );
 }
