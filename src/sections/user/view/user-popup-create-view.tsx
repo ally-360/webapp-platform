@@ -63,7 +63,7 @@ export default function UserPopupCreateView() {
 
 function UserNewEditFormPopup({ currentUser }) {
   const router = useRouter();
-  const { contacsPopup: open } = useAppSelector((state) => state.contacts);
+  const { contactsPopup: open } = useAppSelector((state) => state.contacts);
   const { enqueueSnackbar } = useSnackbar();
   const { t } = useTranslation();
 

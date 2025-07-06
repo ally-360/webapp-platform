@@ -11,7 +11,7 @@ interface ContactsState {
   success: any;
   contactsEmpty: boolean;
 
-  contacsPopup: boolean;
+  contactsPopup: boolean;
 
   // Contact detail
   contact: ContactInterface | null;
@@ -27,7 +27,7 @@ const initialState: ContactsState = {
   success: null,
   contactsEmpty: false,
 
-  contacsPopup: false,
+  contactsPopup: false,
 
   // Contact detail
   contact: null,
@@ -116,7 +116,7 @@ const contactsSlice = createSlice({
       state.contactSuccess = null;
     },
     togglePopup(state) {
-      state.contacsPopup = !state.contacsPopup;
+      state.contactsPopup = !state.contactsPopup;
     }
   }
 });

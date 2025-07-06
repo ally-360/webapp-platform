@@ -122,10 +122,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
-      "baseUrl": ".",
-      "paths": {
-        "src/*": ["src/*"]
-      },
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    },
     
     
   },

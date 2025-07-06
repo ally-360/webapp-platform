@@ -1,13 +1,12 @@
 // @mui
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
-import Badge, { badgeClasses } from '@mui/material/Badge';
+import { Link as Navigate } from 'react-router-dom';
 // hooks
 import { useOffSetTop } from 'src/hooks/use-off-set-top';
 import { useResponsive } from 'src/hooks/use-responsive';
@@ -16,8 +15,8 @@ import { bgBlur } from 'src/theme/css';
 // routes
 // components
 import Logo from 'src/components/logo';
-import Label from 'src/components/label';
 //
+import { paths } from 'src/routes/paths';
 import { HEADER } from '../config-layout';
 import { navConfig } from './config-navigation';
 import NavMobile from './nav/mobile';
@@ -32,7 +31,7 @@ export default function Header() {
 
   const mdUp = useResponsive('up', 'md');
 
-  const offsetTop = useOffSetTop(HEADER.H_DESKTOP);
+  const offsetTop = useOffSetTop(HEADER.H_DESKTOP, undefined);
 
   return (
     <AppBar>
@@ -58,32 +57,18 @@ export default function Header() {
         }}
       >
         <Container sx={{ height: 1, display: 'flex', alignItems: 'center' }}>
-          <Badge
-            sx={{
-              [`& .${badgeClasses.badge}`]: {
-                top: 8,
-                right: -16
-              }
-            }}
-            badgeContent={
-              <Link target="_blank" rel="noopener" underline="none" sx={{ ml: 1 }}>
-                <Label color="info" sx={{ textTransform: 'unset', height: 22, px: 0.5 }}>
-                  v5.2.0
-                </Label>
-              </Link>
-            }
-          >
-            <Logo />
-          </Badge>
+          <Logo />
 
           <Box sx={{ flexGrow: 1 }} />
 
           {mdUp && <NavDesktop offsetTop={offsetTop} data={navConfig} />}
 
           <Stack alignItems="center" direction={{ xs: 'row', md: 'row-reverse' }}>
-            <Button variant="contained" target="_blank" rel="noopener">
-              Registrarse
-            </Button>
+            <Navigate to={paths.auth.jwt.register}>
+              <Button variant="contained" rel="noopener">
+                Registrarse
+              </Button>
+            </Navigate>
 
             {mdUp && <LoginButton />}
 
@@ -99,7 +84,7 @@ export default function Header() {
         </Container>
       </Toolbar>
 
-      {offsetTop && <HeaderShadow />}
+      {offsetTop && <HeaderShadow sx={{}} />}
     </AppBar>
   );
 }

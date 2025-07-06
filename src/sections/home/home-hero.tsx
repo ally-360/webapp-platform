@@ -3,9 +3,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 // @mui
 import { styled, alpha, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
-import Rating from '@mui/material/Rating';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -51,7 +49,7 @@ const StyledWrapper = styled('div')(({ theme }) => ({
 
 const StyledTextGradient = styled(m.h1)(({ theme }) => ({
   ...textGradient(
-    `300deg, ${theme.palette.primary.main} 0%, ${theme.palette.warning.main} 25%, ${theme.palette.primary.main} 50%, ${theme.palette.warning.main} 75%, ${theme.palette.primary.main} 100%`
+    `300deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 25%, ${theme.palette.primary.main} 50%, ${theme.palette.primary.lighter} 75%, ${theme.palette.primary.main} 100%`
   ),
   padding: 0,
   marginTop: 8,
@@ -172,12 +170,18 @@ export default function HomeHero() {
       <m.div variants={varFade().in}>
         <Typography
           variant="h2"
+          fontFamily={"'Inter', sans-serif"}
+          fontWeight={700}
+          color={theme.palette.text.primary}
+          fontSize={{ xs: 32, md: 38 }}
+          lineHeight={{ xs: 1.2, md: 1.2 }}
           sx={{
             textAlign: 'center'
           }}
         >
-          Start a <br />
-          New Project with
+          Tu empresa a la mano:
+          <br />
+          gestiona todo sin complicaciones
         </Typography>
       </m.div>
 
@@ -191,31 +195,18 @@ export default function HomeHero() {
             repeat: Infinity
           }}
         >
-          Minimal
+          Ally 360
         </StyledTextGradient>
       </m.div>
 
       <m.div variants={varFade().in}>
         <Typography variant="body2" sx={{ textAlign: 'center' }}>
-          The starting point for your next project is based on MUI.Easy customization Helps you build apps faster and
-          better.
+          Ally360, el ERP en la nube creado para PYMES: simple, completo y compatible con la DIAN
         </Typography>
       </m.div>
 
       <m.div variants={varFade().in}>
-        <Stack spacing={0.75} direction="row" alignItems="center" justifyContent="center" sx={{ my: 3 }}>
-          <Rating readOnly value={4.95} precision={0.1} max={5} />
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            <Box component="strong" sx={{ mr: 0.5, color: 'text.primary' }}>
-              4.96/5
-            </Box>
-            (99+ reviews)
-          </Typography>
-        </Stack>
-      </m.div>
-
-      <m.div variants={varFade().in}>
-        <Stack spacing={1.5} direction={{ xs: 'column-reverse', sm: 'row' }} sx={{ mb: 5 }}>
+        <Stack spacing={1.5} direction={{ xs: 'column-reverse', sm: 'row' }} sx={{ mb: 5, my: 4 }}>
           <Stack alignItems="center" spacing={2}>
             <Button
               component={RouterLink}
@@ -225,19 +216,8 @@ export default function HomeHero() {
               variant="contained"
               startIcon={<Iconify icon="eva:flash-fill" width={24} />}
             >
-              Live Preview
+              Empieza gratis
             </Button>
-
-            <Link
-              color="inherit"
-              variant="caption"
-              target="_blank"
-              rel="noopener"
-              sx={{ textDecoration: 'underline', display: 'inline-flex', alignItems: 'center' }}
-            >
-              <Iconify icon="eva:external-link-fill" width={16} sx={{ mr: 0.5 }} />
-              Get Free Version
-            </Link>
           </Stack>
 
           <Button
@@ -249,26 +229,10 @@ export default function HomeHero() {
             rel="noopener"
             sx={{ borderColor: 'text.primary' }}
           >
-            Design Preview
+            Hablar con un asesor
           </Button>
         </Stack>
       </m.div>
-
-      <Stack spacing={3} sx={{ textAlign: 'center' }}>
-        <m.div variants={varFade().in}>
-          <Typography variant="overline" sx={{ opacity: 0.4 }}>
-            Available For
-          </Typography>
-        </m.div>
-
-        <Stack spacing={2} direction="row" justifyContent="center">
-          {['figma', 'js', 'ts', 'nextjs', 'vite'].map((platform) => (
-            <m.div key={platform} variants={varFade().in}>
-              <Box component="img" src={`/assets/icons/platforms/ic_${platform}.svg`} sx={{ width: 24, height: 24 }} />
-            </m.div>
-          ))}
-        </Stack>
-      </Stack>
     </Stack>
   );
 
