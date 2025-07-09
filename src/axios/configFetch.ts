@@ -2,7 +2,6 @@ import { AxiosRequestConfig } from 'axios';
 
 export const configGetWithToken = (url: string): AxiosRequestConfig => {
   const localUser = localStorage.getItem('accessToken');
-  console.log(localUser);
   return {
     method: 'get',
     url,
@@ -41,7 +40,6 @@ export const configGet = (url: string): AxiosRequestConfig => ({
 
 export const configPatchWithToken = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
-  console.log(localUser);
   return {
     method: 'patch',
     url,
