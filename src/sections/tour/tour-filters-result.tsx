@@ -64,12 +64,7 @@ export default function TourFiltersResult({
         {!!filters.services.length && (
           <Block label="Services:">
             {filters.services.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveServices(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveServices(item)} />
             ))}
           </Block>
         )}
@@ -91,22 +86,13 @@ export default function TourFiltersResult({
         {!!filters.destination.length && (
           <Block label="Destination:">
             {filters.destination.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveDestination(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveDestination(item)} />
             ))}
           </Block>
         )}
 
         {canReset && (
-          <Button
-            color="error"
-            onClick={onResetFilters}
-            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-          >
+          <Button color="error" onClick={onResetFilters} startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
             Clear
           </Button>
         )}
@@ -120,7 +106,7 @@ TourFiltersResult.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
-  results: PropTypes.number,
+  results: PropTypes.number
 };
 
 // ----------------------------------------------------------------------
@@ -137,7 +123,7 @@ function Block({ label, children, sx, ...other }) {
         borderRadius: 1,
         overflow: 'hidden',
         borderStyle: 'dashed',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -155,5 +141,5 @@ function Block({ label, children, sx, ...other }) {
 Block.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

@@ -58,7 +58,7 @@ export default function CalendarFiltersResult({
                       height: 18,
                       bgcolor: item,
                       borderRadius: '50%',
-                      border: (theme) => `solid 1px ${alpha(theme.palette.common.white, 0.24)}`,
+                      border: (theme) => `solid 1px ${alpha(theme.palette.common.white, 0.24)}`
                     }}
                   />
                 }
@@ -75,11 +75,7 @@ export default function CalendarFiltersResult({
         )}
 
         {canReset && (
-          <Button
-            color="error"
-            onClick={onResetFilters}
-            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-          >
+          <Button color="error" onClick={onResetFilters} startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
             Clear
           </Button>
         )}
@@ -93,7 +89,7 @@ CalendarFiltersResult.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
-  results: PropTypes.number,
+  results: PropTypes.number
 };
 
 // ----------------------------------------------------------------------
@@ -110,7 +106,7 @@ function Block({ label, children, sx, ...other }) {
         borderRadius: 1,
         overflow: 'hidden',
         borderStyle: 'dashed',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -128,5 +124,5 @@ function Block({ label, children, sx, ...other }) {
 Block.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

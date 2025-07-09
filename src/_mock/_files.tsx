@@ -31,7 +31,7 @@ const FILES = [
   'trinidad-samuel-morse-bring.m4v',
   'cover-12.jpg',
   'cover-18.jpg',
-  'xl-david-blaine-component-tanzania-books.pdf',
+  'xl-david-blaine-component-tanzania-books.pdf'
 ];
 
 const URLS = [
@@ -58,7 +58,7 @@ const URLS = [
   'https://www.cloud.com/s/c218bo6kjuqyv66/trinidad_samuel-morse_bring.m4v',
   _mock.image.cover(11),
   _mock.image.cover(17),
-  'https://www.cloud.com/s/c218bo6kjuqyv66/xl_david-blaine_component_tanzania_books.pdf',
+  'https://www.cloud.com/s/c218bo6kjuqyv66/xl_david-blaine_component_tanzania_books.pdf'
 ];
 
 const SHARED_PERSONS = [...Array(20)].map((_, index) => ({
@@ -66,7 +66,7 @@ const SHARED_PERSONS = [...Array(20)].map((_, index) => ({
   name: _mock.fullName(index),
   email: _mock.email(index),
   avatarUrl: _mock.image.avatar(index),
-  permission: index % 2 ? 'view' : 'edit',
+  permission: index % 2 ? 'view' : 'edit'
 }));
 
 export const FILE_TYPE_OPTIONS = [
@@ -81,7 +81,7 @@ export const FILE_TYPE_OPTIONS = [
   'powerpoint',
   'pdf',
   'photoshop',
-  'illustrator',
+  'illustrator'
 ];
 
 // ----------------------------------------------------------------------
@@ -104,7 +104,7 @@ export const _folders = FOLDERS.map((name, index) => ({
   totalFiles: (index + 1) * 100,
   createdAt: _mock.time(index),
   modifiedAt: _mock.time(index),
-  isFavorited: _mock.boolean(index + 1),
+  isFavorited: _mock.boolean(index + 1)
 }));
 
 export const _files = FILES.map((name, index) => ({
@@ -117,7 +117,7 @@ export const _files = FILES.map((name, index) => ({
   createdAt: _mock.time(index),
   modifiedAt: _mock.time(index),
   type: `${name.split('.').pop()}`,
-  isFavorited: _mock.boolean(index + 1),
+  isFavorited: _mock.boolean(index + 1)
 }));
 
 export const _allFiles = [..._folders, ..._files];

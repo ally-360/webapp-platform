@@ -23,27 +23,17 @@ import Lightbox, { useLightBox } from 'src/components/lightbox';
 // ----------------------------------------------------------------------
 
 export default function TourDetailsContent({ tour }) {
-  const {
-    name,
-    images,
-    content,
-    services,
-    tourGuides,
-    available,
-    durations,
-    destination,
-    ratingNumber,
-  } = tour;
+  const { name, images, content, services, tourGuides, available, durations, destination, ratingNumber } = tour;
 
   const slides = images.map((slide) => ({
-    src: slide,
+    src: slide
   }));
 
   const {
     selected: selectedImage,
     open: openLightbox,
     onOpen: handleOpenLightbox,
-    onClose: handleCloseLightbox,
+    onClose: handleCloseLightbox
   } = useLightBox(slides);
 
   const renderGallery = (
@@ -53,17 +43,17 @@ export default function TourDetailsContent({ tour }) {
         display="grid"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          md: 'repeat(2, 1fr)',
+          md: 'repeat(2, 1fr)'
         }}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         <m.div
           key={slides[0].src}
           whileHover="hover"
           variants={{
-            hover: { opacity: 0.8 },
+            hover: { opacity: 0.8 }
           }}
           transition={varTranHover()}
         >
@@ -82,7 +72,7 @@ export default function TourDetailsContent({ tour }) {
               key={slide.src}
               whileHover="hover"
               variants={{
-                hover: { opacity: 0.8 },
+                hover: { opacity: 0.8 }
               }}
               transition={varTranHover()}
             >
@@ -98,12 +88,7 @@ export default function TourDetailsContent({ tour }) {
         </Box>
       </Box>
 
-      <Lightbox
-        index={selectedImage}
-        slides={slides}
-        open={openLightbox}
-        close={handleCloseLightbox}
-      />
+      <Lightbox index={selectedImage} slides={slides} open={openLightbox} close={handleCloseLightbox} />
     </>
   );
 
@@ -157,30 +142,30 @@ export default function TourDetailsContent({ tour }) {
       display="grid"
       gridTemplateColumns={{
         xs: 'repeat(1, 1fr)',
-        md: 'repeat(2, 1fr)',
+        md: 'repeat(2, 1fr)'
       }}
     >
       {[
         {
           label: 'Available',
           value: `${fDate(available.startDate)} - ${fDate(available.endDate)}`,
-          icon: <Iconify icon="solar:calendar-date-bold" />,
+          icon: <Iconify icon="solar:calendar-date-bold" />
         },
         {
           label: 'Contact name',
           value: tourGuides.map((tourGuide) => tourGuide.phoneNumber).join(', '),
-          icon: <Iconify icon="solar:user-rounded-bold" />,
+          icon: <Iconify icon="solar:user-rounded-bold" />
         },
         {
           label: 'Durations',
           value: durations,
-          icon: <Iconify icon="solar:clock-circle-bold" />,
+          icon: <Iconify icon="solar:clock-circle-bold" />
         },
         {
           label: 'Contact phone',
           value: tourGuides.map((tourGuide) => tourGuide.name).join(', '),
-          icon: <Iconify icon="solar:phone-bold" />,
-        },
+          icon: <Iconify icon="solar:phone-bold" />
+        }
       ].map((item) => (
         <Stack key={item.label} spacing={1.5} direction="row">
           {item.icon}
@@ -190,12 +175,12 @@ export default function TourDetailsContent({ tour }) {
             primaryTypographyProps={{
               typography: 'body2',
               color: 'text.secondary',
-              mb: 0.5,
+              mb: 0.5
             }}
             secondaryTypographyProps={{
               typography: 'subtitle2',
               color: 'text.primary',
-              component: 'span',
+              component: 'span'
             }}
           />
         </Stack>
@@ -215,7 +200,7 @@ export default function TourDetailsContent({ tour }) {
           display="grid"
           gridTemplateColumns={{
             xs: 'repeat(1, 1fr)',
-            md: 'repeat(2, 1fr)',
+            md: 'repeat(2, 1fr)'
           }}
         >
           {TOUR_SERVICE_OPTIONS.map((benefit) => (
@@ -226,8 +211,8 @@ export default function TourDetailsContent({ tour }) {
               alignItems="center"
               sx={{
                 ...(services.includes(benefit.label) && {
-                  color: 'text.disabled',
-                }),
+                  color: 'text.disabled'
+                })
               }}
             >
               <Iconify
@@ -235,8 +220,8 @@ export default function TourDetailsContent({ tour }) {
                 sx={{
                   color: 'primary.main',
                   ...(services.includes(benefit.label) && {
-                    color: 'text.disabled',
-                  }),
+                    color: 'text.disabled'
+                  })
                 }}
               />
               {benefit.label}
@@ -267,5 +252,5 @@ export default function TourDetailsContent({ tour }) {
 }
 
 TourDetailsContent.propTypes = {
-  tour: PropTypes.object,
+  tour: PropTypes.object
 };

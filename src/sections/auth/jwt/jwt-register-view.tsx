@@ -42,12 +42,12 @@ export default function JwtRegisterView() {
 
   const defaultValues = {
     password: '',
+    email: '',
     profile: {
       personalPhoneNumber: '',
       dni: '',
       name: '',
       lastname: '',
-      email: '',
       // agregar un avatar generico de internet
       photo: 'https://i.pravatar.cc/300'
     }
@@ -130,7 +130,7 @@ export default function JwtRegisterView() {
           <RHFTextField name="profile.dni" label="Cédula de ciudadania" />
         </Stack>
 
-        <RHFTextField name="profile.email" label="Correo electrónico" />
+        <RHFTextField name="email" label="Correo electrónico" />
 
         <RHFTextField
           name="password"

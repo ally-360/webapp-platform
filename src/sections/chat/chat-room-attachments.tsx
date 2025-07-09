@@ -32,7 +32,7 @@ export default function ChatRoomAttachments({ attachments }) {
         flexGrow: 'unset',
         typography: 'overline',
         color: 'text.secondary',
-        bgcolor: 'background.neutral',
+        bgcolor: 'background.neutral'
       }}
     >
       <Box component="span" sx={{ flexGrow: 1 }}>
@@ -52,13 +52,7 @@ export default function ChatRoomAttachments({ attachments }) {
   const renderContent = (
     <Scrollbar sx={{ px: 2, py: 2.5 }}>
       {attachments.map((attachment, index) => (
-        <Stack
-          key={attachment.name + index}
-          spacing={1.5}
-          direction="row"
-          alignItems="center"
-          sx={{ mb: 2 }}
-        >
+        <Stack key={attachment.name + index} spacing={1.5} direction="row" alignItems="center" sx={{ mb: 2 }}>
           <Stack
             alignItems="center"
             justifyContent="center"
@@ -69,7 +63,7 @@ export default function ChatRoomAttachments({ attachments }) {
               borderRadius: 1,
               overflow: 'hidden',
               position: 'relative',
-              backgroundColor: 'background.neutral',
+              backgroundColor: 'background.neutral'
             }}
           >
             <FileThumbnail
@@ -85,14 +79,14 @@ export default function ChatRoomAttachments({ attachments }) {
             secondary={fDateTime(attachment.createdAt)}
             primaryTypographyProps={{
               noWrap: true,
-              typography: 'body2',
+              typography: 'body2'
             }}
             secondaryTypographyProps={{
               mt: 0.25,
               noWrap: true,
               component: 'span',
               typography: 'caption',
-              color: 'text.disabled',
+              color: 'text.disabled'
             }}
           />
         </Stack>
@@ -110,8 +104,8 @@ export default function ChatRoomAttachments({ attachments }) {
           height: collapse.value ? 1 : 0,
           transition: (theme) =>
             theme.transitions.create(['height'], {
-              duration: theme.transitions.duration.shorter,
-            }),
+              duration: theme.transitions.duration.shorter
+            })
         }}
       >
         {renderContent}
@@ -121,5 +115,5 @@ export default function ChatRoomAttachments({ attachments }) {
 }
 
 ChatRoomAttachments.propTypes = {
-  attachments: PropTypes.array,
+  attachments: PropTypes.array
 };

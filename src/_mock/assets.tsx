@@ -1,8 +1,6 @@
 // ----------------------------------------------------------------------
 
-export const _id = [...Array(40)].map(
-  (_, index) => `e99f09a7-dd88-49d5-b1c8-1daf80c2d7b${index + 1}`
-);
+export const _id = [...Array(40)].map((_, index) => `e99f09a7-dd88-49d5-b1c8-1daf80c2d7b${index + 1}`);
 
 export const _fullAddress = [
   '19034 Verna Unions Apt. 164 - Honolulu, RI / 87535',
@@ -28,7 +26,7 @@ export const _fullAddress = [
   '74794 Asha Flat Suite 890 - Lancaster, OR / 13466',
   '8135 Keeling Pines Apt. 326 - Alexandria, MA / 89442',
   '441 Gibson Shores Suite 247 - Pasco, NM / 60678',
-  '4373 Emelia Valley Suite 596 - Columbia, NM / 42586',
+  '4373 Emelia Valley Suite 596 - Columbia, NM / 42586'
 ];
 
 // ----------------------------------------------------------------------
@@ -57,7 +55,7 @@ export const _booleans = [
   true,
   false,
   false,
-  true,
+  true
 ];
 
 // ----------------------------------------------------------------------
@@ -86,7 +84,7 @@ export const _emails = [
   'olen_legros@gmail.com',
   'jimmie.gerhold73@hotmail.com',
   'genevieve.powlowski@hotmail.com',
-  'louie.kuphal39@gmail.com',
+  'louie.kuphal39@gmail.com'
 ];
 
 // ----------------------------------------------------------------------
@@ -115,7 +113,7 @@ export const _fullNames = [
   'Amiah Pruitt',
   'Harold Mcgrath',
   'Esperanza Mcintyre',
-  'Mireya Conner',
+  'Mireya Conner'
 ];
 
 export const _firstNames = [
@@ -142,7 +140,7 @@ export const _firstNames = [
   'Keon',
   'Ella',
   'Ken',
-  'Whitney',
+  'Whitney'
 ];
 
 export const _lastNames = [
@@ -169,42 +167,36 @@ export const _lastNames = [
   'McDermott',
   'McDermott',
   'Cruickshank',
-  'Parisian',
+  'Parisian'
 ];
 
 // ----------------------------------------------------------------------
 
 export const _prices = [
-  83.74, 97.14, 68.71, 85.21, 52.17, 25.18, 43.84, 60.98, 98.42, 53.37, 72.75, 56.61, 64.55, 77.32,
-  60.62, 79.81, 93.68, 47.44, 76.24, 92.87, 72.91, 20.54, 94.25, 37.51,
+  83.74, 97.14, 68.71, 85.21, 52.17, 25.18, 43.84, 60.98, 98.42, 53.37, 72.75, 56.61, 64.55, 77.32, 60.62, 79.81, 93.68,
+  47.44, 76.24, 92.87, 72.91, 20.54, 94.25, 37.51
 ];
 
 export const _ratings = [
-  4.2, 3.7, 4.5, 3.5, 0.5, 3.0, 2.5, 2.8, 4.9, 3.6, 2.5, 1.7, 3.9, 2.8, 4.1, 4.5, 2.2, 3.2, 0.6,
-  1.3, 3.8, 3.8, 3.8, 2.0,
+  4.2, 3.7, 4.5, 3.5, 0.5, 3.0, 2.5, 2.8, 4.9, 3.6, 2.5, 1.7, 3.9, 2.8, 4.1, 4.5, 2.2, 3.2, 0.6, 1.3, 3.8, 3.8, 3.8, 2.0
 ];
 
-export const _ages = [
-  30, 26, 59, 47, 29, 46, 18, 56, 39, 19, 45, 18, 46, 56, 38, 41, 44, 48, 32, 45, 42, 60, 33, 57,
-];
+export const _ages = [30, 26, 59, 47, 29, 46, 18, 56, 39, 19, 45, 18, 46, 56, 38, 41, 44, 48, 32, 45, 42, 60, 33, 57];
 
 export const _percents = [
-  10.1, 13.6, 28.2, 42.1, 37.2, 18.5, 40.1, 94.8, 91.4, 53.0, 25.4, 62.9, 86.6, 62.4, 35.4, 17.6,
-  52.0, 6.8, 95.3, 26.6, 69.9, 92.1, 46.2, 85.6,
+  10.1, 13.6, 28.2, 42.1, 37.2, 18.5, 40.1, 94.8, 91.4, 53.0, 25.4, 62.9, 86.6, 62.4, 35.4, 17.6, 52.0, 6.8, 95.3, 26.6,
+  69.9, 92.1, 46.2, 85.6
 ];
 
-export const _nativeS = [
-  11, 10, 7, 10, 12, 5, 10, 1, 8, 8, 10, 11, 12, 8, 4, 11, 8, 9, 4, 9, 2, 6, 3, 7,
-];
+export const _nativeS = [11, 10, 7, 10, 12, 5, 10, 1, 8, 8, 10, 11, 12, 8, 4, 11, 8, 9, 4, 9, 2, 6, 3, 7];
 
 export const _nativeM = [
-  497, 763, 684, 451, 433, 463, 951, 194, 425, 435, 807, 521, 538, 839, 394, 269, 453, 821, 364,
-  849, 804, 776, 263, 239,
+  497, 763, 684, 451, 433, 463, 951, 194, 425, 435, 807, 521, 538, 839, 394, 269, 453, 821, 364, 849, 804, 776, 263, 239
 ];
 
 export const _nativeL = [
-  9911, 1947, 9124, 6984, 8488, 2034, 3364, 8401, 8996, 5271, 8478, 1139, 8061, 3035, 6733, 3952,
-  2405, 3127, 6843, 4672, 6995, 6053, 5192, 9686,
+  9911, 1947, 9124, 6984, 8488, 2034, 3364, 8401, 8996, 5271, 8478, 1139, 8061, 3035, 6733, 3952, 2405, 3127, 6843,
+  4672, 6995, 6053, 5192, 9686
 ];
 
 // ----------------------------------------------------------------------
@@ -233,7 +225,7 @@ export const _phoneNumbers = [
   '272-940-8266',
   '812-685-8057',
   '353-801-5212',
-  '606-285-8928',
+  '606-285-8928'
 ];
 
 // ----------------------------------------------------------------------
@@ -262,7 +254,7 @@ export const _roles = [
   'Quality Assurance Specialist',
   'CEO',
   'CFO',
-  'CTO',
+  'CTO'
 ];
 
 // ----------------------------------------------------------------------
@@ -291,7 +283,7 @@ export const _postTitles = [
   'Exploring the History and Culture of [City/Region]',
   'The Power of Positive Thinking: Transform Your Mindset',
   'The Influence of Music on Mood and Emotions',
-  'Travel Photography Tips: Capturing Memories Around the World',
+  'Travel Photography Tips: Capturing Memories Around the World'
 ];
 
 // ----------------------------------------------------------------------
@@ -320,7 +312,7 @@ export const _productNames = [
   'Relaxed Adjustable Strap Slingback Sandal',
   'Superturf Adventure X Atmos',
   'Chuck Taylor All Star Lift Sneaker',
-  'Run Star Hike Platform Sneaker',
+  'Run Star Hike Platform Sneaker'
 ];
 
 // ----------------------------------------------------------------------
@@ -349,7 +341,7 @@ export const _tourNames = [
   'Scenic Train Ride Experience',
   'Historical Landmarks Expedition',
   'Surfing and Beach Adventure',
-  'Nightlife and Entertainment Tour',
+  'Nightlife and Entertainment Tour'
 ];
 
 // ----------------------------------------------------------------------
@@ -378,7 +370,7 @@ export const _jobTitles = [
   'Chef',
   'Financial Planner',
   'Architect',
-  'Event Planner',
+  'Event Planner'
 ];
 
 // ----------------------------------------------------------------------
@@ -407,7 +399,7 @@ export const _companyNames = [
   'Bosco and Sons',
   'Bartell - Kovacek',
   'Schimmel - Raynor',
-  'Tremblay LLC',
+  'Tremblay LLC'
 ];
 
 // ----------------------------------------------------------------------
@@ -436,7 +428,7 @@ export const _tags = [
   'Cooking',
   'Finance',
   'Selfcare',
-  'Writing',
+  'Writing'
 ];
 
 // ----------------------------------------------------------------------
@@ -465,7 +457,7 @@ export const _taskNames = [
   'Create Training Materials',
   'Plan and Execute Marketing Campaign',
   'Develop Mobile Application',
-  'Coordinate Project Meetings',
+  'Coordinate Project Meetings'
 ];
 
 // ----------------------------------------------------------------------
@@ -494,7 +486,7 @@ export const _sentences = [
   'The athlete sprinted across the finish line, arms raised in victory as the crowd erupted in applause.',
   'The ancient ruins stood as a testament to a civilization long gone, their grandeur still awe-inspiring.',
   'The artist dipped the brush into vibrant paint, bringing the canvas to life with bold strokes and vivid colors.',
-  'The laughter of children echoed through the playground, filling the atmosphere with pure joy.',
+  'The laughter of children echoed through the playground, filling the atmosphere with pure joy.'
 ];
 
 // ----------------------------------------------------------------------
@@ -523,5 +515,5 @@ export const _descriptions = [
   `Modi hic asperiores ab cumque quam est aut. Voluptas atque quos molestias. Ut excepturi distinctio ipsam aspernatur sit.`,
   `Sunt totam facilis. Quam commodi voluptatem veniam. Tempora deleniti itaque fugit nihil voluptas.`,
   `Ipsam aliquam velit nobis repellendus officiis aut deserunt id et. Nihil sunt aut dolores aut. Dolores est ipsa quia et laborum quidem laborum accusamus id. Facilis odit quod hic laudantium saepe omnis nisi in sint. Sed cupiditate possimus id.`,
-  `Magnam non eveniet optio optio ut aliquid atque. Velit libero aspernatur quis laborum consequatur laudantium. Tempora facere optio fugit accusantium ut. Omnis aspernatur reprehenderit autem esse ut ut enim voluptatibus.`,
+  `Magnam non eveniet optio optio ut aliquid atque. Velit libero aspernatur quis laborum consequatur laudantium. Tempora facere optio fugit accusantium ut. Omnis aspernatur reprehenderit autem esse ut ut enim voluptatibus.`
 ];

@@ -4,7 +4,7 @@ import 'highlight.js/styles/base16/tomorrow-night.css';
 // ----------------------------------------------------------------------
 
 hljs.configure({
-  languages: ['javascript', 'sh', 'bash', 'html', 'scss', 'css', 'json'],
+  languages: ['javascript', 'sh', 'bash', 'html', 'scss', 'css', 'json']
 });
 
 if (typeof window !== 'undefined') {

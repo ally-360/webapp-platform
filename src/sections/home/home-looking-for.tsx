@@ -8,7 +8,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
 // routes
-import { paths } from 'src/routes/paths';
 // components
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
@@ -26,7 +25,6 @@ export default function HomeLookingFor() {
       variant="outlined"
       target="_blank"
       rel="noopener"
-      href={paths.zoneUI}
       endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
     >
       Visit Zone Landing Page
@@ -38,8 +36,8 @@ export default function HomeLookingFor() {
       sx={{
         textAlign: {
           xs: 'center',
-          md: 'left',
-        },
+          md: 'left'
+        }
       }}
     >
       <m.div variants={varFade().inDown}>
@@ -53,7 +51,7 @@ export default function HomeLookingFor() {
           variant="h2"
           sx={{
             mt: 3,
-            mb: { md: 5 },
+            mb: { md: 5 }
           }}
         >
           Landing Page Template?
@@ -68,7 +66,7 @@ export default function HomeLookingFor() {
     <Container
       component={MotionViewport}
       sx={{
-        py: { xs: 10, md: 15 },
+        py: { xs: 10, md: 15 }
       }}
     >
       <Grid container alignItems="center" justifyContent="space-between" spacing={{ xs: 5, md: 0 }}>

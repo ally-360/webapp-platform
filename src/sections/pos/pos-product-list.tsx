@@ -6,6 +6,7 @@ import Pagination, { paginationClasses } from '@mui/material/Pagination';
 import PosProductItem from 'src/sections/pos/pos-product-item';
 import { useMediaQuery } from '@mui/material';
 import json2mq from 'json2mq';
+import React from 'react';
 import { PosProductItemSkeleton } from './pos-product-skeleton';
 
 // ----------------------------------------------------------------------

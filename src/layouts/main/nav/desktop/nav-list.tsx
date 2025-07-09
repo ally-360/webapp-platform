@@ -54,11 +54,7 @@ export default function NavList({ item, offsetTop }) {
       {!!children && nav.value && (
         <Portal>
           <Fade in={nav.value}>
-            <StyledMenu
-              onMouseEnter={handleOpenMenu}
-              onMouseLeave={nav.onFalse}
-              sx={{ display: 'flex' }}
-            >
+            <StyledMenu onMouseEnter={handleOpenMenu} onMouseLeave={nav.onFalse} sx={{ display: 'flex' }}>
               {children.map((list) => (
                 <NavSubList
                   key={list.subheader}
@@ -78,7 +74,7 @@ export default function NavList({ item, offsetTop }) {
 
 NavList.propTypes = {
   item: PropTypes.object,
-  offsetTop: PropTypes.bool,
+  offsetTop: PropTypes.bool
 };
 
 // ----------------------------------------------------------------------
@@ -93,8 +89,8 @@ function NavSubList({ items, isDashboard, subheader, onClose }) {
       sx={{
         flexGrow: 1,
         ...(isDashboard && {
-          maxWidth: 540,
-        }),
+          maxWidth: 540
+        })
       }}
     >
       <StyledSubheader disableSticky>{subheader}</StyledSubheader>
@@ -103,13 +99,7 @@ function NavSubList({ items, isDashboard, subheader, onClose }) {
         isDashboard ? (
           <NavItemDashboard key={item.title} item={item} onClick={onClose} />
         ) : (
-          <NavItem
-            subItem
-            key={item.title}
-            item={item}
-            active={pathname === `${item.path}/`}
-            onClick={onClose}
-          />
+          <NavItem subItem key={item.title} item={item} active={pathname === `${item.path}/`} onClick={onClose} />
         )
       )}
     </Stack>
@@ -120,5 +110,5 @@ NavSubList.propTypes = {
   isDashboard: PropTypes.bool,
   items: PropTypes.array,
   onClose: PropTypes.func,
-  subheader: PropTypes.string,
+  subheader: PropTypes.string
 };

@@ -25,16 +25,16 @@ export default function TourEditView({ id }) {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Tour',
-            href: paths.dashboard.tour.root,
+            href: paths.dashboard.tour.root
           },
-          { name: currentTour?.name },
+          { name: currentTour?.name }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -44,5 +44,5 @@ export default function TourEditView({ id }) {
 }
 
 TourEditView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

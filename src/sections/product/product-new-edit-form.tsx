@@ -271,25 +271,25 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const priceBase = watch('priceBase');
   const tax = watch('taxesOption');
   // TaxesOption
-  // useEffect(() => {
-  //   if (tax === 0) {
-  //     setValue('priceSale', priceBase);
-  //     return;
-  //   }
-  //   if (priceBase && tax) {
-  //     // si es 0 no se le agrega impuesto
-  //     console.log('priceBase', priceBase);
+  useEffect(() => {
+    if (tax === 0) {
+      setValue('priceSale', priceBase);
+      return;
+    }
+    if (priceBase && tax) {
+      // si es 0 no se le agrega impuesto
+      console.log('priceBase', priceBase);
 
-  //     console.log('tax', tax);
-  //     const priceBaseNumber = Number(priceBase.replace(/[^0-9.-]+/g, ''));
-  //     const taxAmount = priceBaseNumber * (tax / 100);
-  //     console.log('taxAmount', taxAmount);
-  //     const priceSale = priceBaseNumber + taxAmount;
-  //     console.log('priceBaseNumber', priceBaseNumber);
-  //     console.log('priceSale', priceSale);
-  //     setValue('priceSale', fNumber(priceSale));
-  //   }
-  // }, [priceBase, tax, setValue]);
+      console.log('tax', tax);
+      const priceBaseNumber = Number(priceBase.replace(/[^0-9.-]+/g, ''));
+      const taxAmount = priceBaseNumber * (tax / 100);
+      console.log('taxAmount', taxAmount);
+      const priceSale = priceBaseNumber + taxAmount;
+      console.log('priceBaseNumber', priceBaseNumber);
+      console.log('priceSale', priceSale);
+      setValue('priceSale', fNumber(priceSale));
+    }
+  }, [priceBase, tax, setValue]);
   // Assign inventory
 
   // Edit inventory

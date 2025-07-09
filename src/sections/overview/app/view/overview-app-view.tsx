@@ -61,9 +61,10 @@ export default function OverviewAppView() {
         </Grid>
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total Active Users"
+            title="Total ventas"
             percent={2.6}
             total={18765}
+            sx={{}}
             chart={{
               series: [5, 18, 12, 51, 68, 11, 39, 37, 27, 20]
             }}
@@ -72,8 +73,9 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total Installed"
+            title="Total facturas"
             percent={0.2}
+            sx={{}}
             total={4876}
             chart={{
               colors: [theme.palette.info.light, theme.palette.info.main],
@@ -84,7 +86,8 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={4}>
           <AppWidgetSummary
-            title="Total Downloads"
+            title="Total clientes"
+            sx={{}}
             percent={-0.1}
             total={678}
             chart={{
@@ -96,13 +99,15 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={6} lg={4}>
           <AppCurrentDownload
-            title="Current Download"
+            title="Productos más vendidos"
+            subheader="(+43%) más que el mes pasado"
+            sx={{}}
             chart={{
               series: [
-                { label: 'Mac', value: 12244 },
-                { label: 'Window', value: 53345 },
-                { label: 'iOS', value: 44313 },
-                { label: 'Android', value: 78343 }
+                { label: 'Otros', value: 12244 },
+                { label: 'Iphone 12 pro max', value: 53345 },
+                { label: 'Samsung Galaxy s23', value: 44313 },
+                { label: 'Xiaomi T13 Pro', value: 78343 }
               ]
             }}
           />
@@ -110,13 +115,14 @@ export default function OverviewAppView() {
 
         <Grid xs={12} md={6} lg={8}>
           <AppAreaInstalled
-            title="Area Installed"
-            subheader="(+43%) than last year"
+            title="Ventas por Punto de Venta"
+            subheader="(+43%) más que el mes pasado"
+            sx={{}}
             chart={{
               categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
               series: [
                 {
-                  year: '2019',
+                  year: '2024',
                   data: [
                     {
                       name: 'Asia',
@@ -129,7 +135,7 @@ export default function OverviewAppView() {
                   ]
                 },
                 {
-                  year: '2020',
+                  year: '2025',
                   data: [
                     {
                       name: 'Asia',
@@ -148,13 +154,14 @@ export default function OverviewAppView() {
 
         <Grid xs={12} lg={8}>
           <AppNewInvoice
-            title="New Invoice"
+            title="Ultimas Facturas"
+            subheader="(+43%) más que el mes pasado"
             tableData={_appInvoices}
             tableLabels={[
-              { id: 'id', label: 'Invoice ID' },
-              { id: 'category', label: 'Category' },
-              { id: 'price', label: 'Price' },
-              { id: 'status', label: 'Status' },
+              { id: 'id', label: 'SKU' },
+              { id: 'category', label: 'Categoria' },
+              { id: 'price', label: 'Precio' },
+              { id: 'status', label: 'Estado' },
               { id: '' }
             ]}
           />

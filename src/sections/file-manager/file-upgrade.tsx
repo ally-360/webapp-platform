@@ -21,12 +21,12 @@ export default function FileUpgrade({ sx, ...other }) {
         ...bgGradient({
           direction: '135deg',
           startColor: alpha(theme.palette.primary.light, 0.2),
-          endColor: alpha(theme.palette.primary.main, 0.2),
+          endColor: alpha(theme.palette.primary.main, 0.2)
         }),
         p: 5,
         borderRadius: 2,
         backgroundColor: 'common.white',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -44,5 +44,5 @@ export default function FileUpgrade({ sx, ...other }) {
 }
 
 FileUpgrade.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

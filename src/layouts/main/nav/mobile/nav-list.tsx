@@ -48,11 +48,11 @@ export default function NavList({ item }) {
                     backgroundRepeat: 'no-repeat',
                     backgroundImage: 'url(/assets/illustrations/illustration_dashboard.png)',
                     [`& .${listItemTextClasses.root}`]: {
-                      display: 'none',
-                    },
-                  },
-                },
-              },
+                      display: 'none'
+                    }
+                  }
+                }
+              }
             }}
           />
         </Collapse>
@@ -62,5 +62,5 @@ export default function NavList({ item }) {
 }
 
 NavList.propTypes = {
-  item: PropTypes.object,
+  item: PropTypes.object
 };

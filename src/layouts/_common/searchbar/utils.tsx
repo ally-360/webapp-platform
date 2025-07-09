@@ -12,7 +12,7 @@ export function getAllItems({ data }) {
     return {
       group: group && group.length > 1 ? group[0] : option.subheader,
       title: option.title,
-      path: option.path,
+      path: option.path
     };
   });
 
@@ -38,7 +38,7 @@ export function applyFilter({ inputData, query }) {
 export function splitPath(array, key) {
   let stack = array.map((item) => ({
     path: [item.title],
-    currItem: item,
+    currItem: item
   }));
 
   while (stack.length) {
@@ -52,7 +52,7 @@ export function splitPath(array, key) {
       stack = stack.concat(
         currItem.children.map((item) => ({
           path: path.concat(item.title),
-          currItem: item,
+          currItem: item
         }))
       );
     }
@@ -67,8 +67,8 @@ export function handleLoop(array, subheader) {
     subheader,
     ...list,
     ...(list.children && {
-      children: handleLoop(list.children, subheader),
-    }),
+      children: handleLoop(list.children, subheader)
+    })
   }));
 }
 

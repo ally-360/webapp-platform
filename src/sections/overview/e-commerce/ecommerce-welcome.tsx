@@ -18,13 +18,13 @@ export default function EcommerceWelcome({ title, description, action, img, ...o
         ...bgGradient({
           direction: '135deg',
           startColor: alpha(theme.palette.primary.light, 0.2),
-          endColor: alpha(theme.palette.primary.main, 0.2),
+          endColor: alpha(theme.palette.primary.main, 0.2)
         }),
         height: { md: 1 },
         borderRadius: 2,
         position: 'relative',
         color: 'primary.darker',
-        backgroundColor: 'common.white',
+        backgroundColor: 'common.white'
       }}
       {...other}
     >
@@ -35,9 +35,9 @@ export default function EcommerceWelcome({ title, description, action, img, ...o
         sx={{
           p: {
             xs: theme.spacing(5, 3, 0, 3),
-            md: theme.spacing(5),
+            md: theme.spacing(5)
           },
-          textAlign: { xs: 'center', md: 'left' },
+          textAlign: { xs: 'center', md: 'left' }
         }}
       >
         <Typography paragraph variant="h4" sx={{ whiteSpace: 'pre-line' }}>
@@ -49,7 +49,7 @@ export default function EcommerceWelcome({ title, description, action, img, ...o
           sx={{
             opacity: 0.8,
             maxWidth: 360,
-            mb: { xs: 3, xl: 5 },
+            mb: { xs: 3, xl: 5 }
           }}
         >
           {description}
@@ -65,7 +65,7 @@ export default function EcommerceWelcome({ title, description, action, img, ...o
           sx={{
             p: { xs: 5, md: 3 },
             maxWidth: 360,
-            mx: 'auto',
+            mx: 'auto'
           }}
         >
           {img}
@@ -79,5 +79,5 @@ EcommerceWelcome.propTypes = {
   action: PropTypes.node,
   description: PropTypes.string,
   img: PropTypes.node,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

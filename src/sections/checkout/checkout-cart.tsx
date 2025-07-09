@@ -73,14 +73,7 @@ export default function CheckoutCart() {
           onApplyDiscount={checkout.onApplyDiscount}
         />
 
-        <Button
-          fullWidth
-          size="large"
-          type="submit"
-          variant="contained"
-          disabled={empty}
-          onClick={checkout.onNextStep}
-        >
+        <Button fullWidth size="large" type="submit" variant="contained" disabled={empty} onClick={checkout.onNextStep}>
           Check Out
         </Button>
       </Grid>

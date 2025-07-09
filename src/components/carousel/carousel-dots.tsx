@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 // ----------------------------------------------------------------------
 
 const StyledRoot = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'rounded',
+  shouldForwardProp: (prop) => prop !== 'rounded'
 })(({ rounded, theme }) => ({
   zIndex: 9,
   margin: 0,
@@ -30,11 +30,11 @@ const StyledRoot = styled(Box, {
       ...(rounded && {
         '& span': {
           width: 16,
-          borderRadius: 6,
-        },
-      }),
-    },
-  },
+          borderRadius: 6
+        }
+      })
+    }
+  }
 }));
 
 const StyledDot = styled('span')(({ theme }) => ({
@@ -43,8 +43,8 @@ const StyledDot = styled('span')(({ theme }) => ({
   borderRadius: '50%',
   transition: theme.transitions.create(['width'], {
     easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.short,
-  }),
+    duration: theme.transitions.duration.short
+  })
 }));
 
 // ----------------------------------------------------------------------
@@ -63,23 +63,18 @@ export default function CarouselDots(props) {
       </>
     ),
     customPaging: () => (
-      <Stack
-        component="div"
-        alignItems="center"
-        justifyContent="center"
-        sx={{ width: 1, height: 1 }}
-      >
+      <Stack component="div" alignItems="center" justifyContent="center" sx={{ width: 1, height: 1 }}>
         <StyledDot
           sx={{
-            bgcolor: 'currentColor',
+            bgcolor: 'currentColor'
           }}
         />
       </Stack>
-    ),
+    )
   };
 }
 
 CarouselDots.propTypes = {
   rounded: PropTypes.bool,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

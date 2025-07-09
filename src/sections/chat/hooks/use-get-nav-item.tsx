@@ -3,9 +3,7 @@
 export default function useGetNavItem({ currentUserId, conversation }) {
   const { messages, participants } = conversation;
 
-  const participantsInConversation = participants.filter(
-    (participant) => participant.id !== currentUserId
-  );
+  const participantsInConversation = participants.filter((participant) => participant.id !== currentUserId);
 
   const lastMessage = messages[messages.length - 1];
 
@@ -13,9 +11,7 @@ export default function useGetNavItem({ currentUserId, conversation }) {
 
   const displayName = participantsInConversation.map((participant) => participant.name).join(', ');
 
-  const hasOnlineInGroup = group
-    ? participantsInConversation.map((item) => item.status).includes('online')
-    : false;
+  const hasOnlineInGroup = group ? participantsInConversation.map((item) => item.status).includes('online') : false;
 
   let displayText = '';
 
@@ -33,6 +29,6 @@ export default function useGetNavItem({ currentUserId, conversation }) {
     displayText,
     participants: participantsInConversation,
     lastActivity: lastMessage.createdAt,
-    hasOnlineInGroup,
+    hasOnlineInGroup
   };
 }

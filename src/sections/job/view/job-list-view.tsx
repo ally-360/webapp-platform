@@ -17,7 +17,7 @@ import {
   JOB_SORT_OPTIONS,
   JOB_BENEFIT_OPTIONS,
   JOB_EXPERIENCE_OPTIONS,
-  JOB_EMPLOYMENT_TYPE_OPTIONS,
+  JOB_EMPLOYMENT_TYPE_OPTIONS
 } from 'src/_mock';
 // assets
 import { countries } from 'src/assets/data';
@@ -40,7 +40,7 @@ const defaultFilters = {
   locations: [],
   benefits: [],
   experience: 'all',
-  employmentTypes: [],
+  employmentTypes: []
 };
 
 // ----------------------------------------------------------------------
@@ -54,7 +54,7 @@ export default function JobListView() {
 
   const [search, setSearch] = useState({
     query: '',
-    results: [],
+    results: []
   });
 
   const [filters, setFilters] = useState(defaultFilters);
@@ -62,7 +62,7 @@ export default function JobListView() {
   const dataFiltered = applyFilter({
     inputData: _jobs,
     filters,
-    sortBy,
+    sortBy
   });
 
   const canReset = !isEqual(defaultFilters, filters);
@@ -72,7 +72,7 @@ export default function JobListView() {
   const handleFilters = useCallback((name, value) => {
     setFilters((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: value
     }));
   }, []);
 
@@ -84,17 +84,15 @@ export default function JobListView() {
     (inputValue) => {
       setSearch((prevState) => ({
         ...prevState,
-        query: inputValue,
+        query: inputValue
       }));
 
       if (inputValue) {
-        const results = _jobs.filter(
-          (job) => job.title.toLowerCase().indexOf(search.query.toLowerCase()) !== -1
-        );
+        const results = _jobs.filter((job) => job.title.toLowerCase().indexOf(search.query.toLowerCase()) !== -1);
 
         setSearch((prevState) => ({
           ...prevState,
-          results,
+          results
         }));
       }
     },
@@ -163,9 +161,9 @@ export default function JobListView() {
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Job',
-            href: paths.dashboard.job.root,
+            href: paths.dashboard.job.root
           },
-          { name: 'List' },
+          { name: 'List' }
         ]}
         action={
           <Button
@@ -178,14 +176,14 @@ export default function JobListView() {
           </Button>
         }
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
       <Stack
         spacing={2.5}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         {renderFilters}
@@ -220,9 +218,7 @@ const applyFilter = ({ inputData, filters, sortBy }) => {
 
   // FILTERS
   if (employmentTypes.length) {
-    inputData = inputData.filter((job) =>
-      job.employmentTypes.some((item) => employmentTypes.includes(item))
-    );
+    inputData = inputData.filter((job) => job.employmentTypes.some((item) => employmentTypes.includes(item)));
   }
 
   if (experience !== 'all') {

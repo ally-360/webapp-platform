@@ -17,12 +17,7 @@ import KanbanInputName from './kanban-input-name';
 
 // ----------------------------------------------------------------------
 
-export default function KanbanColumnToolBar({
-  columnName,
-  onDeleteColumn,
-  onClearColumn,
-  onUpdateColumn,
-}) {
+export default function KanbanColumnToolBar({ columnName, onDeleteColumn, onClearColumn, onUpdateColumn }) {
   const renameRef = useRef(null);
 
   const popover = usePopover();
@@ -57,13 +52,7 @@ export default function KanbanColumnToolBar({
 
   return (
     <>
-      <Stack
-        spacing={1}
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ pt: 3 }}
-      >
+      <Stack spacing={1} direction="row" alignItems="center" justifyContent="space-between" sx={{ pt: 3 }}>
         <KanbanInputName
           inputRef={renameRef}
           placeholder="Section name"
@@ -82,7 +71,7 @@ export default function KanbanColumnToolBar({
         onClose={popover.onClose}
         sx={{
           ml: 1.5,
-          width: 160,
+          width: 160
         }}
       >
         <MenuItem onClick={popover.onClose}>
@@ -145,5 +134,5 @@ KanbanColumnToolBar.propTypes = {
   columnName: PropTypes.string,
   onClearColumn: PropTypes.func,
   onDeleteColumn: PropTypes.func,
-  onUpdateColumn: PropTypes.func,
+  onUpdateColumn: PropTypes.func
 };

@@ -28,7 +28,7 @@ export const formats = [
   'strike',
   'table',
   'underline',
-  'video',
+  'video'
 ];
 
 export default function Toolbar({ id, isSimple, ...other }) {
@@ -103,5 +103,5 @@ export default function Toolbar({ id, isSimple, ...other }) {
 
 Toolbar.propTypes = {
   id: PropTypes.string,
-  isSimple: PropTypes.bool,
+  isSimple: PropTypes.bool
 };

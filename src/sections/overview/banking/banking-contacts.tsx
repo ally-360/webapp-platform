@@ -52,5 +52,5 @@ export default function BankingContacts({ title, subheader, list, ...other }) {
 BankingContacts.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

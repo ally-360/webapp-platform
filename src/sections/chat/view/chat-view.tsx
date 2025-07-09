@@ -59,12 +59,7 @@ export default function ChatView() {
   const details = !!conversation;
 
   const renderHead = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      flexShrink={0}
-      sx={{ pr: 1, pl: 2.5, py: 1, minHeight: 72 }}
-    >
+    <Stack direction="row" alignItems="center" flexShrink={0} sx={{ pr: 1, pl: 2.5, py: 1, minHeight: 72 }}>
       {selectedConversationId ? (
         <>{details && <ChatHeaderDetail participants={participants} />}</>
       ) : (
@@ -87,7 +82,7 @@ export default function ChatView() {
       sx={{
         width: 1,
         height: 1,
-        overflow: 'hidden',
+        overflow: 'hidden'
       }}
     >
       <ChatMessageList messages={conversation?.messages} participants={participants} />
@@ -107,7 +102,7 @@ export default function ChatView() {
       <Typography
         variant="h4"
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         Chat
@@ -120,7 +115,7 @@ export default function ChatView() {
           sx={{
             width: 1,
             height: 1,
-            overflow: 'hidden',
+            overflow: 'hidden'
           }}
         >
           {renderHead}
@@ -131,7 +126,7 @@ export default function ChatView() {
               width: 1,
               height: 1,
               overflow: 'hidden',
-              borderTop: (theme) => `solid 1px ${theme.palette.divider}`,
+              borderTop: (theme) => `solid 1px ${theme.palette.divider}`
             }}
           >
             {renderMessages}

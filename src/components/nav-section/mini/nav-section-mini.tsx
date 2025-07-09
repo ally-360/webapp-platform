@@ -20,7 +20,7 @@ function NavSectionMini({ data, config, sx, ...other }) {
 NavSectionMini.propTypes = {
   config: PropTypes.object,
   data: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 export default memo(NavSectionMini);
@@ -31,13 +31,7 @@ function Group({ items, config }) {
   return (
     <>
       {items.map((list) => (
-        <NavList
-          key={list.title + list.path}
-          data={list}
-          depth={1}
-          hasChild={!!list.children}
-          config={config}
-        />
+        <NavList key={list.title + list.path} data={list} depth={1} hasChild={!!list.children} config={config} />
       ))}
     </>
   );
@@ -45,5 +39,5 @@ function Group({ items, config }) {
 
 Group.propTypes = {
   config: PropTypes.object,
-  items: PropTypes.array,
+  items: PropTypes.array
 };

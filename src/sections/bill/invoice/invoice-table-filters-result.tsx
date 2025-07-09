@@ -49,12 +49,7 @@ export default function InvoiceTableFiltersResult({
         {!!filters.service.length && (
           <Block label="Service:">
             {filters.service.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveService(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveService(item)} />
             ))}
           </Block>
         )}
@@ -71,11 +66,7 @@ export default function InvoiceTableFiltersResult({
           </Block>
         )}
 
-        <Button
-          color="error"
-          onClick={onResetFilters}
-          startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-        >
+        <Button color="error" onClick={onResetFilters} startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
           Clear
         </Button>
       </Stack>
@@ -87,7 +78,7 @@ InvoiceTableFiltersResult.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
-  results: PropTypes.number,
+  results: PropTypes.number
 };
 
 // ----------------------------------------------------------------------
@@ -104,7 +95,7 @@ function Block({ label, children, sx, ...other }) {
         borderRadius: 1,
         overflow: 'hidden',
         borderStyle: 'dashed',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -122,5 +113,5 @@ function Block({ label, children, sx, ...other }) {
 Block.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

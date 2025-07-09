@@ -1,5 +1,6 @@
 import {
   Autocomplete,
+  Box,
   Card,
   CardHeader,
   Divider,
@@ -13,22 +14,22 @@ import {
 import { Stack } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { paths } from 'src/routes/paths';
 import OrderDetailsToolbar from 'src/sections/order/order-details-toolbar';
 import { Icon } from '@iconify/react';
 import OrderDetailsItems from 'src/sections/order/order-details-item';
-import { ORDER_STATUS_OPTIONS, _orders } from 'src/_mock';
+import { _orders } from 'src/_mock';
+import ButtonAutocomplete from 'src/sections/product/common/ButtonAutocomplete';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import match from 'autosuggest-highlight/match';
+import parse from 'autosuggest-highlight/parse';
+import { useForm } from 'react-hook-form';
+import { getAllContacts, togglePopup } from 'src/redux/inventory/contactsSlice';
 import PosProductShopView from '../pos-product-shop-view';
 import PosCartIcon from '../pos-cart-icon';
 
 export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
-  const clientes = [
-    { name: 'Cliente 1', id: 1, cc: '123456789', phone: '123456789', email: 'prueba@gmail.com', address: 'Calle 123' },
-    { name: 'Cliente 2', id: 2, cc: '123456789', phone: '123456789', email: 'prueba2@gmail.com', address: 'Calle 123' },
-    { name: 'Cliente 3', id: 3, cc: '123456789', phone: '123456789', email: 'prueba3@gmail.com', address: 'Calle 123' }
-  ];
-
   const id = 'e99f09a7-dd88-49d5-b1c8-1daf80c2d7b1';
 
   const currentOrder = _orders.filter((order) => order.id === id)[0];
@@ -39,12 +40,49 @@ export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
     setStatus(newValue);
   }, []);
 
+  const defaultValues = {
+    name: '',
+    address: '',
+    nit: '',
+    phoneNumber: '',
+    website: '',
+    quantityEmployees: '',
+    economicActivity: ''
+  };
+
+  const methods = useForm({
+    defaultValues
+  });
+
   const theme = useTheme();
 
   const drawerWidthLg = '30vw';
   const drawerWidth = '500px';
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl'));
 
+  const dispatch = useAppDispatch();
+
+  const handleClickContactsPopup = () => {
+    dispatch(togglePopup());
+  };
+
+  const [searchQueryContact, setSearchQueryContact] = useState('');
+  const handleInputContactChange = (event, value) => {
+    setSearchQueryContact(value);
+  };
+
+  const isOptionEqualToValue = (option, value) => {
+    if (option && value) {
+      return option.id === value.id && option.name === value.name;
+    }
+    return false;
+  };
+
+  useEffect(() => {
+    dispatch(getAllContacts());
+  }, [dispatch]);
+
+  const { contacts, contactsLoading, contactsEmpty } = useAppSelector((state) => state.contacts);
   return (
     <>
       <Grid
@@ -65,16 +103,8 @@ export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
           })
         }}
       >
-        {sale.id}
         <Card sx={{ p: 2, mb: 2 }}>
-          <OrderDetailsToolbar
-            backLink={paths.dashboard.order.root}
-            orderNumber={currentOrder.orderNumber}
-            createdAt={currentOrder.createdAt}
-            status={status}
-            onChangeStatus={handleChangeStatus}
-            statusOptions={ORDER_STATUS_OPTIONS}
-          />
+          <OrderDetailsToolbar backLink={paths.dashboard.order.root} orderNumber="1" createdAt="12/12/2021" />
           <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
             <TextField size="small" fullWidth label="Tipo de venta" name="saleType" />
             <TextField size="small" fullWidth label="IVA" name="iva" />
@@ -150,16 +180,59 @@ export default function PosWindowView({ hiddenDrawer, openDrawer, sale }) {
               disablePortal
               fullWidth
               size="small"
-              options={clientes}
+              options={contacts}
               getOptionLabel={(option) => option.name}
+              onInputChange={handleInputContactChange}
+              isOptionEqualToValue={isOptionEqualToValue}
               renderInput={(params) => <TextField {...params} placeholder="Buscar cliente" />}
+              renderOption={(props, option) => {
+                const matches = match(option.name, searchQueryContact);
+                const parts = parse(option.name, matches);
+
+                return (
+                  <li {...props}>
+                    <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.primary">
+                        {parts.map((part, index) => (
+                          <span
+                            key={index}
+                            style={{
+                              fontWeight: part.highlight ? 700 : 400,
+                              color: part.highlight ? theme.palette.primary.main : 'inherit'
+                            }}
+                          >
+                            {part.text}
+                          </span>
+                        ))}
+                      </Typography>
+                    </Box>
+                  </li>
+                );
+              }}
+              noOptionsText={
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
+                  {contactsLoading && 'Cargando...'}
+                  {contactsEmpty && !contactsLoading && 'No hay contactos registradas'}
+                  {!contactsLoading &&
+                    !contactsEmpty &&
+                    searchQueryContact &&
+                    `No se encontraron resultados ${searchQueryContact}`}
+                </Typography>
+              }
+              PaperComponent={({ children }) =>
+                ButtonAutocomplete({
+                  title: 'Crear Cliente',
+                  handleOnClick: handleClickContactsPopup,
+                  children
+                })
+              }
             />
           </Stack>
 
           <Divider />
           <Stack spacing={3} direction={{ xs: 'column-reverse', md: 'column' }}>
             <OrderDetailsItems
-              items={currentOrder.items}
+              items={currentOrder.items} // TODO: agregar items de sales.
               taxes={currentOrder.taxes}
               shipping={currentOrder.shipping}
               discount={currentOrder.discount}

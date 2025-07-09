@@ -19,42 +19,42 @@ export default function AppWidget({ title, total, icon, color = 'primary', chart
   const chartOptions = useChart({
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     legend: {
-      show: false,
+      show: false
     },
     fill: {
       type: 'gradient',
       gradient: {
         colorStops: [
           { offset: 0, color: theme.palette[color].light },
-          { offset: 100, color: theme.palette[color].main },
-        ],
-      },
+          { offset: 100, color: theme.palette[color].main }
+        ]
+      }
     },
     plotOptions: {
       radialBar: {
         hollow: {
-          size: '78%',
+          size: '78%'
         },
         track: {
-          margin: 0,
+          margin: 0
         },
         dataLabels: {
           name: {
-            show: false,
+            show: false
           },
           value: {
             offsetY: 6,
             color: theme.palette.common.white,
-            fontSize: theme.typography.subtitle2.fontSize,
-          },
-        },
-      },
+            fontSize: theme.typography.subtitle2.fontSize
+          }
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -68,7 +68,7 @@ export default function AppWidget({ title, total, icon, color = 'primary', chart
         position: 'relative',
         color: 'common.white',
         bgcolor: `${color}.dark`,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -80,13 +80,13 @@ export default function AppWidget({ title, total, icon, color = 'primary', chart
         secondary={title}
         primaryTypographyProps={{
           typography: 'h4',
-          component: 'span',
+          component: 'span'
         }}
         secondaryTypographyProps={{
           color: 'inherit',
           component: 'span',
           sx: { opacity: 0.64 },
-          typography: 'subtitle2',
+          typography: 'subtitle2'
         }}
       />
 
@@ -97,7 +97,7 @@ export default function AppWidget({ title, total, icon, color = 'primary', chart
           right: -32,
           height: 112,
           opacity: 0.08,
-          position: 'absolute',
+          position: 'absolute'
         }}
       />
     </Stack>
@@ -110,5 +110,5 @@ AppWidget.propTypes = {
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

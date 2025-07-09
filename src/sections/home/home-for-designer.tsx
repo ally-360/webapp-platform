@@ -11,7 +11,6 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // theme
 import { textGradient, bgGradient } from 'src/theme/css';
 // routes
-import { paths } from 'src/routes/paths';
 // components
 import Iconify from 'src/components/iconify';
 import { MotionViewport, varFade } from 'src/components/animate';
@@ -37,9 +36,7 @@ export default function HomeForDesigner() {
           sx={{
             mt: 3,
             mb: 5,
-            ...textGradient(
-              `300deg, ${theme.palette.primary.main} 0%, ${theme.palette.warning.main} 100%`
-            ),
+            ...textGradient(`300deg, ${theme.palette.primary.main} 0%, ${theme.palette.warning.main} 100%`)
           }}
         >
           For Designer
@@ -54,7 +51,6 @@ export default function HomeForDesigner() {
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
           target="_blank"
           rel="noopener"
-          href={paths.figma}
         >
           Figma Workspace
         </Button>
@@ -76,7 +72,7 @@ export default function HomeForDesigner() {
           theme.palette.mode === 'light'
             ? alpha(theme.palette.grey[500], 0.48)
             : alpha(theme.palette.common.black, 0.24)
-        }`,
+        }`
       }}
     />
   );
@@ -90,14 +86,14 @@ export default function HomeForDesigner() {
         ...bgGradient({
           startColor: `${theme.palette.grey[900]} 25%`,
           endColor: alpha(theme.palette.grey[900], 0),
-          imgUrl: '/assets/images/home/for_designer.webp',
+          imgUrl: '/assets/images/home/for_designer.webp'
         }),
         ...(upMd && {
           ...bgGradient({
             color: alpha(theme.palette.background.default, 0.8),
-            imgUrl: '/assets/background/overlay_4.jpg',
-          }),
-        }),
+            imgUrl: '/assets/background/overlay_4.jpg'
+          })
+        })
       }}
     >
       <Container component={MotionViewport}>

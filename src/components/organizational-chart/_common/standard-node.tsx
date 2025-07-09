@@ -26,7 +26,7 @@ export default function StandardNode({ node, onEdit, onDelete, sx }) {
           display: 'inline-flex',
           flexDirection: 'column',
           textTransform: 'capitalize',
-          ...sx,
+          ...sx
         }}
       >
         <IconButton
@@ -37,11 +37,7 @@ export default function StandardNode({ node, onEdit, onDelete, sx }) {
           <Iconify icon="eva:more-horizontal-fill" />
         </IconButton>
 
-        <Avatar
-          alt={node.name}
-          src={node.avatarUrl || ''}
-          sx={{ mr: 2, mb: 1, width: 48, height: 48 }}
-        />
+        <Avatar alt={node.name} src={node.avatarUrl || ''} sx={{ mr: 2, mb: 1, width: 48, height: 48 }} />
 
         <Typography variant="subtitle2" noWrap>
           {node.name}
@@ -52,12 +48,7 @@ export default function StandardNode({ node, onEdit, onDelete, sx }) {
         </Typography>
       </Card>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="left-center"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="left-center" sx={{ width: 160 }}>
         {onDelete && (
           <MenuItem
             onClick={() => {
@@ -91,5 +82,5 @@ StandardNode.propTypes = {
   node: PropTypes.object,
   onDelete: PropTypes.func,
   onEdit: PropTypes.func,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

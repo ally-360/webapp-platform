@@ -30,6 +30,6 @@ export default function useCollapseNav() {
     onOpenMobile,
     onCloseMobile,
     onCloseDesktop,
-    onCollapseDesktop,
+    onCollapseDesktop
   };
 }

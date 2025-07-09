@@ -1,38 +1,52 @@
 /* eslint-disable class-methods-use-this */
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import {
   AuthCredentials,
   RegisterCompany,
   RegisterUser,
-  getUserResponse,
-  updateProfile
+  GetUserResponse,
+  UpdateProfile,
+  changePassword
 } from 'src/interfaces/auth/userInterfaces';
-import { configGetWithToken, configPostWithToken, configPatchWithToken, configDeleteWithToken } from '../configFetch';
+import {
+  configGetWithToken,
+  configPostWithToken,
+  configPostWithoutToken,
+  configPatchWithToken,
+  configDeleteWithToken
+} from '../configFetch';
 import apiClient from '../axios';
 
 class RequestService {
   /**
    *
    */
-  fetchLoginUser = async (databody: AuthCredentials): Promise<AxiosResponse> =>
-    apiClient(configPostWithToken('/auth/login', databody));
+  fetchLoginUser = async (databody: AuthCredentials) => apiClient.post('/auth/login', databody);
 
-  fetchRegisterUser = async (databody: RegisterUser): Promise<AxiosResponse> =>
-    apiClient(configPostWithToken('/auth/register', databody));
+  fetchRegisterUser = async (databody: RegisterUser) => apiClient.post('/auth/register', databody);
 
+  changePassword = async (databody: changePassword) =>
+    apiClient(configPatchWithToken('/auth/change-password', databody));
+
+  fetchSendCodeResetPassword = async (email: string) => configPostWithoutToken('/auth/reset-password', { email });
   // Users
 
-  fetchGetUserById = async (id: string): Promise<AxiosResponse> => apiClient(configGetWithToken(`/user/${id}`));
+  fetchGetUserById = async (id: string) => apiClient.get(`/user/${id}`);
 
-  updateUser = async ({ id, databody }: { id: string; databody: getUserResponse }) =>
+  updateUser = async ({ id, databody }: { id: string; databody: GetUserResponse }) =>
     apiClient(configPatchWithToken(`/user/${id}`, databody));
 
-  updateProfile = async ({ id, databody }: { id: string; databody: updateProfile }) =>
+  updateProfile = async ({ id, databody }: { id: string; databody: UpdateProfile }) =>
     apiClient(configPatchWithToken(`/profile/${id}`, databody));
+
+  // update company to user
+  updateCompanyToUser = async ({ companyId, userId }) =>
+    apiClient(configPostWithToken(`/company/${companyId}/user/${userId}`, {}));
 
   // Products
 
-  getProducts = async () => apiClient(configGetWithToken('/product'));
+  getProducts = async (page = 0, pageSize = 25) =>
+    apiClient(configGetWithToken(`/product?page=${page}&pageSize=${pageSize}`));
 
   updateProduct = async ({ id, databody }: { id: string; databody: object }) =>
     apiClient(configPatchWithToken(`/product/${id}`, databody));

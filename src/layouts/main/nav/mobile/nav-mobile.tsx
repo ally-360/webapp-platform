@@ -36,8 +36,8 @@ export default function NavMobile({ offsetTop, data }) {
         sx={{
           ml: 1,
           ...(offsetTop && {
-            color: 'text.primary',
-          }),
+            color: 'text.primary'
+          })
         }}
       >
         <SvgColor src="/assets/icons/navbar/ic_menu_item.svg" />
@@ -49,8 +49,8 @@ export default function NavMobile({ offsetTop, data }) {
         PaperProps={{
           sx: {
             pb: 5,
-            width: 260,
-          },
+            width: 260
+          }
         }}
       >
         <Scrollbar>
@@ -69,5 +69,5 @@ export default function NavMobile({ offsetTop, data }) {
 
 NavMobile.propTypes = {
   data: PropTypes.array,
-  offsetTop: PropTypes.bool,
+  offsetTop: PropTypes.bool
 };

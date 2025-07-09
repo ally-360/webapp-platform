@@ -1,10 +1,14 @@
 // routes
-import { paths } from 'src/routes/paths';
 // utils
 import axios from 'src/utils/axios';
 
 // ----------------------------------------------------------------------
 
+/**
+ * Decode JWT token for get user information
+ * @param token
+ * @returns user information
+ */
 function jwtDecode(token: string) {
   const base64Url = token.split('.')[1];
   const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -18,6 +22,11 @@ function jwtDecode(token: string) {
 
   return JSON.parse(jsonPayload);
 }
+
+/**
+ * Get access token from local storage
+ * @returns access token
+ */
 
 export const getAccessToken = () => {
   const accessToken = window.localStorage.getItem('accessToken');
@@ -40,30 +49,11 @@ export const isValidToken = (accessToken: string) => {
 
 // ----------------------------------------------------------------------
 
-export const tokenExpired = (exp: number) => {
-  // eslint-disable-next-line prefer-const
-  let expiredTimer;
-
-  const currentTime = Date.now();
-
-  // Test token expires after 10s
-  // const timeLeft = currentTime + 10000 - currentTime; // ~10s
-  const timeLeft = exp * 1000 - currentTime;
-
-  clearTimeout(expiredTimer);
-
-  expiredTimer = setTimeout(() => {
-    alert('Token expired');
-
-    sessionStorage.removeItem('accessToken');
-
-    window.location.href = paths.auth.jwt.login;
-  }, timeLeft);
-};
-
-// ----------------------------------------------------------------------
-
-export const setSession = (accessToken: string) => {
+/**
+ * Set session in localStorage and axios headers for accessToken
+ * @param accessToken
+ */
+export const setSession = (accessToken: string | null) => {
   if (accessToken) {
     localStorage.setItem('accessToken', accessToken);
 
@@ -72,5 +62,24 @@ export const setSession = (accessToken: string) => {
     localStorage.removeItem('accessToken');
 
     delete axios.defaults.headers.common.Authorization;
+  }
+};
+
+/**
+ * Set session for company id in localStorage and axios headers for company-id
+ * @param companyId
+ * @returns
+ * @example
+ * setSessionCompanyId('company-id');
+ */
+export const setSessionCompanyId = (companyId: string) => {
+  if (companyId) {
+    localStorage.setItem('companyId', companyId);
+
+    axios.defaults.headers['company-id'] = companyId;
+  } else {
+    localStorage.removeItem('companyId');
+
+    delete axios.defaults.headers['company-id'];
   }
 };

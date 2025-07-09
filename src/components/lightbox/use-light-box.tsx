@@ -25,6 +25,6 @@ export default function useLightBox(slides) {
     open: selected >= 0,
     onOpen: handleOpen,
     onClose: handleClose,
-    setSelected,
+    setSelected
   };
 }

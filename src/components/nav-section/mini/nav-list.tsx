@@ -86,13 +86,13 @@ export default function NavList({ data, depth, hasChild, config }) {
                 mt: 0.5,
                 width: 160,
                 ...(open && {
-                  pointerEvents: 'auto',
-                }),
-              },
-            },
+                  pointerEvents: 'auto'
+                })
+              }
+            }
           }}
           sx={{
-            pointerEvents: 'none',
+            pointerEvents: 'none'
           }}
         >
           <NavSubList data={data.children} depth={depth} config={config} />
@@ -106,7 +106,7 @@ NavList.propTypes = {
   config: PropTypes.object,
   data: PropTypes.object,
   depth: PropTypes.number,
-  hasChild: PropTypes.bool,
+  hasChild: PropTypes.bool
 };
 
 // ----------------------------------------------------------------------
@@ -130,5 +130,5 @@ function NavSubList({ data, depth, config }) {
 NavSubList.propTypes = {
   config: PropTypes.object,
   data: PropTypes.array,
-  depth: PropTypes.number,
+  depth: PropTypes.number
 };

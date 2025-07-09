@@ -24,7 +24,7 @@ export default function ChatMessageInput({
   onAddRecipients,
   //
   disabled,
-  selectedConversationId,
+  selectedConversationId
 }) {
   const router = useRouter();
 
@@ -44,7 +44,7 @@ export default function ChatMessageInput({
       lastActivity: new Date(),
       avatarUrl: user.photoURL,
       phoneNumber: user.phoneNumber,
-      status: 'online',
+      status: 'online'
     }),
     [user]
   );
@@ -56,7 +56,7 @@ export default function ChatMessageInput({
       body: message,
       contentType: 'text',
       createdAt: sub(new Date(), { minutes: 1 }),
-      senderId: myContact.id,
+      senderId: myContact.id
     }),
     [message, myContact.id]
   );
@@ -67,7 +67,7 @@ export default function ChatMessageInput({
       messages: [messageData],
       participants: [...recipients, myContact],
       type: recipients.length > 1 ? 'GROUP' : 'ONE_TO_ONE',
-      unreadCount: 0,
+      unreadCount: 0
     }),
     [messageData, myContact, recipients]
   );
@@ -136,7 +136,7 @@ export default function ChatMessageInput({
           px: 1,
           height: 56,
           flexShrink: 0,
-          borderTop: (theme) => `solid 1px ${theme.palette.divider}`,
+          borderTop: (theme) => `solid 1px ${theme.palette.divider}`
         }}
       />
 
@@ -149,5 +149,5 @@ ChatMessageInput.propTypes = {
   disabled: PropTypes.bool,
   onAddRecipients: PropTypes.func,
   recipients: PropTypes.array,
-  selectedConversationId: PropTypes.string,
+  selectedConversationId: PropTypes.string
 };

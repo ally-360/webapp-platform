@@ -11,7 +11,7 @@ import Iconify from '../iconify';
 export default function UploadBox({ placeholder, error, disabled, sx, ...other }) {
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     disabled,
-    ...other,
+    ...other
   });
 
   const hasError = isDragReject || error;
@@ -33,21 +33,21 @@ export default function UploadBox({ placeholder, error, disabled, sx, ...other }
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.08),
         border: (theme) => `dashed 1px ${alpha(theme.palette.grey[500], 0.16)}`,
         ...(isDragActive && {
-          opacity: 0.72,
+          opacity: 0.72
         }),
         ...(disabled && {
           opacity: 0.48,
-          pointerEvents: 'none',
+          pointerEvents: 'none'
         }),
         ...(hasError && {
           color: 'error.main',
           bgcolor: 'error.lighter',
-          borderColor: 'error.light',
+          borderColor: 'error.light'
         }),
         '&:hover': {
-          opacity: 0.72,
+          opacity: 0.72
         },
-        ...sx,
+        ...sx
       }}
     >
       <input {...getInputProps()} />
@@ -61,5 +61,5 @@ UploadBox.propTypes = {
   disabled: PropTypes.object,
   error: PropTypes.bool,
   placeholder: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

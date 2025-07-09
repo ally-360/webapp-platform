@@ -15,7 +15,7 @@ export function MailNavItemSkeleton({ sx, ...other }) {
       sx={{
         py: 1,
         color: (theme) => alpha(theme.palette.grey[500], 0.24),
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -27,7 +27,7 @@ export function MailNavItemSkeleton({ sx, ...other }) {
 }
 
 MailNavItemSkeleton.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -40,7 +40,7 @@ export function MailItemSkeleton({ sx, ...other }) {
       alignItems="center"
       sx={{
         py: 1,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -55,5 +55,5 @@ export function MailItemSkeleton({ sx, ...other }) {
 }
 
 MailItemSkeleton.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

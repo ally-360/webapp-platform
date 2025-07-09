@@ -43,16 +43,13 @@ export default function ChatRoomGroup({ participants }) {
         flexGrow: 'unset',
         typography: 'overline',
         color: 'text.secondary',
-        bgcolor: 'background.neutral',
+        bgcolor: 'background.neutral'
       }}
     >
       <Box component="span" sx={{ flexGrow: 1 }}>
         In room ({totalParticipants})
       </Box>
-      <Iconify
-        width={16}
-        icon={collapse.value ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
-      />
+      <Iconify width={16} icon={collapse.value ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'} />
     </ListItemButton>
   );
 
@@ -60,10 +57,7 @@ export default function ChatRoomGroup({ participants }) {
     <Scrollbar sx={{ height: 56 * 4 }}>
       {participants.map((participant) => (
         <ListItemButton key={participant.id} onClick={() => handleOpen(participant)}>
-          <Badge
-            variant={participant.status}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          >
+          <Badge variant={participant.status} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
             <Avatar alt={participant.name} src={participant.avatarUrl} />
           </Badge>
 
@@ -73,12 +67,12 @@ export default function ChatRoomGroup({ participants }) {
             secondary={participant.role}
             primaryTypographyProps={{
               noWrap: true,
-              typography: 'subtitle2',
+              typography: 'subtitle2'
             }}
             secondaryTypographyProps={{
               noWrap: true,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </ListItemButton>
@@ -94,13 +88,11 @@ export default function ChatRoomGroup({ participants }) {
         <Collapse in={collapse.value}>{renderContent}</Collapse>
       </div>
 
-      {selected && (
-        <ChatRoomParticipantDialog participant={selected} open={!!selected} onClose={handleClose} />
-      )}
+      {selected && <ChatRoomParticipantDialog participant={selected} open={!!selected} onClose={handleClose} />}
     </>
   );
 }
 
 ChatRoomGroup.propTypes = {
-  participants: PropTypes.array,
+  participants: PropTypes.array
 };

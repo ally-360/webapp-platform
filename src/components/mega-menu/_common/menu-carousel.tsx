@@ -19,8 +19,8 @@ export default function MenuCarousel({ products, numberShow, sx }) {
     slidesToShow: numberShow,
     slidesToScroll: numberShow,
     ...CarouselDots({
-      sx: { mt: 3 },
-    }),
+      sx: { mt: 3 }
+    })
   });
 
   return (
@@ -31,11 +31,11 @@ export default function MenuCarousel({ products, numberShow, sx }) {
         onPrev={carousel.onPrev}
         leftButtonProps={{
           size: 'small',
-          sx: { top: 'calc(50% - 40px)', left: -8 },
+          sx: { top: 'calc(50% - 40px)', left: -8 }
         }}
         rightButtonProps={{
           size: 'small',
-          sx: { top: 'calc(50% - 40px)', right: -8 },
+          sx: { top: 'calc(50% - 40px)', right: -8 }
         }}
       >
         <Carousel ref={carousel.carouselRef} {...carousel.carouselSettings}>
@@ -49,7 +49,7 @@ export default function MenuCarousel({ products, numberShow, sx }) {
                 sx={{
                   display: 'block',
                   transition: theme.transitions.create('all'),
-                  '&:hover': { color: 'primary.main' },
+                  '&:hover': { color: 'primary.main' }
                 }}
               >
                 <Image
@@ -75,5 +75,5 @@ export default function MenuCarousel({ products, numberShow, sx }) {
 MenuCarousel.propTypes = {
   numberShow: PropTypes.number,
   products: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
-import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import { inputBaseClasses } from '@mui/material/InputBase';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -17,10 +16,9 @@ import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 
 // components
 import Iconify from 'src/components/iconify';
-import { RHFAutocomplete, RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
-import { NumericFormatCustom } from 'src/sections/product/common/NumericFormatCustom';
 
 // ----------------------------------------------------------------------
 

@@ -10,6 +10,7 @@ import PopupCreateCategory from 'src/sections/categories/PopupCreateCategory';
 import PopupCreateBrand from 'src/sections/brands/PopupCreateBrand';
 import FormPDVS from 'src/sections/PDVS/pdv-new-edit-form';
 import { useAppDispatch } from 'src/hooks/store';
+import { UserPopupCreateView } from 'src/sections/user/view';
 
 // ----------------------------------------------------------------------
 
@@ -49,6 +50,7 @@ export default function PosLayout({ children }: PosLayoutProps) {
       </Box>
       <PopupCreateCategory />
       <PopupCreateBrand />
+      <UserPopupCreateView />
       <FormPDVS />
     </Box>
   );

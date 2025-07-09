@@ -24,7 +24,7 @@ export default function RejectionFiles({ fileRejections }) {
         px: 2,
         mt: 3,
         bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
-        borderColor: (theme) => alpha(theme.palette.error.main, 0.24),
+        borderColor: (theme) => alpha(theme.palette.error.main, 0.24)
       }}
     >
       {fileRejections.map(({ file, errors }) => {
@@ -49,5 +49,5 @@ export default function RejectionFiles({ fileRejections }) {
 }
 
 RejectionFiles.propTypes = {
-  fileRejections: PropTypes.array,
+  fileRejections: PropTypes.array
 };

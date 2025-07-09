@@ -50,31 +50,31 @@ export default function BankingQuickTransfer({ title, subheader, list, sx, ...ot
         // Down 1600
         breakpoint: 1600,
         settings: {
-          slidesToShow: 5,
-        },
+          slidesToShow: 5
+        }
       },
       {
         // Down 1400
         breakpoint: 1400,
         settings: {
-          slidesToShow: 3,
-        },
+          slidesToShow: 3
+        }
       },
       {
         // Down 900
         breakpoint: theme.breakpoints.values.md,
         settings: {
-          slidesToShow: 5,
-        },
+          slidesToShow: 5
+        }
       },
       {
         // Down 400
         breakpoint: 400,
         settings: {
-          slidesToShow: 3,
-        },
-      },
-    ],
+          slidesToShow: 3
+        }
+      }
+    ]
   });
 
   const [autoWidth, setAutoWidth] = useState(24);
@@ -124,16 +124,16 @@ export default function BankingQuickTransfer({ title, subheader, list, sx, ...ot
             p: 0.5,
             mt: -1.5,
             left: -8,
-            '& svg': { width: 16, height: 16 },
-          },
+            '& svg': { width: 16, height: 16 }
+          }
         }}
         rightButtonProps={{
           sx: {
             p: 0.5,
             mt: -1.5,
             right: -8,
-            '& svg': { width: 16, height: 16 },
-          },
+            '& svg': { width: 16, height: 16 }
+          }
         }}
       >
         <Box
@@ -143,7 +143,7 @@ export default function BankingQuickTransfer({ title, subheader, list, sx, ...ot
           sx={{
             width: 1,
             mx: 'auto',
-            maxWidth: AVATAR_SIZE * 7 + 160,
+            maxWidth: AVATAR_SIZE * 7 + 160
           }}
         >
           {list.map((contact, index) => (
@@ -159,8 +159,8 @@ export default function BankingQuickTransfer({ title, subheader, list, sx, ...ot
                     ...(index === carousel.currentIndex && {
                       opacity: 1,
                       transform: 'scale(1.25)',
-                      boxShadow: '-4px 12px 24px 0 rgb(0,0,0,0.24)',
-                    }),
+                      boxShadow: '-4px 12px 24px 0 rgb(0,0,0,0.24)'
+                    })
                   }}
                 />
               </Tooltip>
@@ -177,12 +177,7 @@ export default function BankingQuickTransfer({ title, subheader, list, sx, ...ot
         insert amount
       </Typography>
 
-      <InputAmount
-        amount={amount}
-        onBlur={handleBlur}
-        autoWidth={autoWidth}
-        onChange={handleChangeInput}
-      />
+      <InputAmount amount={amount} onBlur={handleBlur} autoWidth={autoWidth} onChange={handleChangeInput} />
 
       <Slider
         value={typeof amount === 'number' ? amount : 0}
@@ -201,13 +196,7 @@ export default function BankingQuickTransfer({ title, subheader, list, sx, ...ot
         {fCurrency(34212)}
       </Stack>
 
-      <Button
-        size="large"
-        color="inherit"
-        variant="contained"
-        disabled={amount === 0}
-        onClick={confirm.onTrue}
-      >
+      <Button size="large" color="inherit" variant="contained" disabled={amount === 0} onClick={confirm.onTrue}>
         Transfer Now
       </Button>
     </Stack>
@@ -219,7 +208,7 @@ export default function BankingQuickTransfer({ title, subheader, list, sx, ...ot
         sx={{
           borderRadius: 2,
           bgcolor: 'background.neutral',
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -264,7 +253,7 @@ BankingQuickTransfer.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
   sx: PropTypes.object,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -286,8 +275,8 @@ function InputAmount({ autoWidth, amount, onBlur, onChange, sx, ...other }) {
             p: 0,
             typography: 'h3',
             textAlign: 'center',
-            width: autoWidth,
-          },
+            width: autoWidth
+          }
         }}
         {...other}
       />
@@ -300,20 +289,12 @@ InputAmount.propTypes = {
   autoWidth: PropTypes.number,
   onBlur: PropTypes.func,
   onChange: PropTypes.func,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
 
-function ConfirmTransferDialog({
-  open,
-  amount,
-  autoWidth,
-  contactInfo,
-  onClose,
-  onBlur,
-  onChange,
-}) {
+function ConfirmTransferDialog({ open, amount, autoWidth, contactInfo, onClose, onBlur, onChange }) {
   return (
     <Dialog open={open} fullWidth maxWidth="xs" onClose={onClose}>
       <DialogTitle>Transfer to</DialogTitle>
@@ -359,5 +340,5 @@ ConfirmTransferDialog.propTypes = {
   onBlur: PropTypes.func,
   onChange: PropTypes.func,
   onClose: PropTypes.func,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };

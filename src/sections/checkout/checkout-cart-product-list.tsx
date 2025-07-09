@@ -16,17 +16,12 @@ const TABLE_HEAD = [
   { id: 'price', label: 'Price' },
   { id: 'quantity', label: 'Quantity' },
   { id: 'totalAmount', label: 'Total Price', align: 'right' },
-  { id: '' },
+  { id: '' }
 ];
 
 // ----------------------------------------------------------------------
 
-export default function CheckoutCartProductList({
-  products,
-  onDelete,
-  onIncreaseQuantity,
-  onDecreaseQuantity,
-}) {
+export default function CheckoutCartProductList({ products, onDelete, onIncreaseQuantity, onDecreaseQuantity }) {
   return (
     <TableContainer sx={{ overflow: 'unset' }}>
       <Scrollbar>
@@ -54,5 +49,5 @@ CheckoutCartProductList.propTypes = {
   onDelete: PropTypes.func,
   products: PropTypes.array,
   onDecreaseQuantity: PropTypes.func,
-  onIncreaseQuantity: PropTypes.func,
+  onIncreaseQuantity: PropTypes.func
 };

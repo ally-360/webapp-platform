@@ -29,7 +29,7 @@ export default function CartIcon({ totalItems }) {
         padding: (theme) => theme.spacing(1, 3, 1, 2),
         boxShadow: (theme) => theme.customShadows.dropdown,
         transition: (theme) => theme.transitions.create(['opacity']),
-        '&:hover': { opacity: 0.72 },
+        '&:hover': { opacity: 0.72 }
       }}
     >
       <Badge showZero badgeContent={totalItems} color="error" max={99}>
@@ -40,5 +40,5 @@ export default function CartIcon({ totalItems }) {
 }
 
 CartIcon.propTypes = {
-  totalItems: PropTypes.number,
+  totalItems: PropTypes.number
 };

@@ -1,42 +1,39 @@
-// export interface LoginUser {
-//   email: string;
-//   password: string;
-// }
+import { InferType } from 'yup';
+import { LoginSchema, RegisterCompanySchema, RegisterSchema, ChangePassWordSchema } from './yupSchemas';
 
-import * as Yup from 'yup';
-import { LoginSchema, RegisterCompanySchema, RegisterSchema } from './yupSchemas';
+export type AuthCredentials = InferType<typeof LoginSchema>;
 
-export type AuthCredentials = Yup.InferType<typeof LoginSchema>;
+export type RegisterUser = InferType<typeof RegisterSchema>;
 
-export type RegisterUser = Yup.InferType<typeof RegisterSchema>;
+export type RegisterCompany = InferType<typeof RegisterCompanySchema>;
 
-export type RegisterCompany = Yup.InferType<typeof RegisterCompanySchema>;
+export type changePassword = InferType<typeof ChangePassWordSchema>;
 
-export interface responseCompany extends RegisterCompany {
+export interface ResponseCompany extends RegisterCompany {
   id: string;
 }
 
-export interface getUserResponse {
+export interface GetUserResponse {
   id: string;
   verified: boolean;
+  email: string;
   verifyToken: unknown;
   resetPasswordToken: unknown;
   firstLogin: boolean;
-  profile: getProfileResponse;
+  profile: GetProfileResponse;
+  company: GetCompanyResponse;
 }
 
-export interface getProfileResponse {
+export interface GetProfileResponse {
   id: string;
-  email: string;
   name: string;
   lastname: string;
   dni: string;
   personalPhoneNumber: string;
   photo: string;
-  company: getCompanyResponse;
 }
 
-export interface getCompanyResponse {
+export interface GetCompanyResponse {
   id: string;
   name: string;
   nit: string;
@@ -47,7 +44,7 @@ export interface getCompanyResponse {
   economicActivity: string;
 }
 
-export interface updateProfile {
+export interface UpdateProfile {
   id?: string;
   email?: string;
   name?: string;
@@ -61,7 +58,7 @@ export interface updateProfile {
 }
 
 // TODO: retornar en location el departamento y la ciudad
-export interface getPDVResponse {
+export interface GetPDVResponse {
   id: string;
   name: string;
   description: string;
@@ -69,11 +66,43 @@ export interface getPDVResponse {
   phoneNumber: string;
   main: boolean;
   location?: Location;
-  departamento?: string;
-  municipio?: string;
+  departamento?: string | null;
+  municipio?: string | null;
 }
 
 export interface Location {
   id: number;
   name?: string;
+}
+
+export interface Identity {
+  id: number;
+  typeDocument: number;
+  typePerson: number;
+  number: number;
+  dv: number;
+}
+
+export interface Town {
+  id: number;
+  name: string;
+}
+
+export interface ContactInterface {
+  id: number;
+  name: string;
+  lastname: string;
+  email: string;
+  address: string;
+  phoneNumber: string;
+  phoneNumber2: string;
+  type: number;
+  identityId: number;
+  companyId: string;
+  townId: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  identity: Identity;
+  town: Town;
 }

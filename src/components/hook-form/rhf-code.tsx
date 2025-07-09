@@ -22,7 +22,7 @@ export default function RHFCode({ name, ...other }) {
             length={6}
             TextFieldsProps={{
               error: !!error,
-              placeholder: '-',
+              placeholder: '-'
             }}
             {...other}
           />
@@ -39,5 +39,5 @@ export default function RHFCode({ name, ...other }) {
 }
 
 RHFCode.propTypes = {
-  name: PropTypes.string,
+  name: PropTypes.string
 };

@@ -35,7 +35,7 @@ export default function AppTopRelated({ title, subheader, list, ...other }) {
 AppTopRelated.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -50,7 +50,7 @@ function ApplicationItem({ app }) {
         sx={{
           width: 48,
           height: 48,
-          bgcolor: 'background.neutral',
+          bgcolor: 'background.neutral'
         }}
       >
         <Box component="img" src={shortcut} sx={{ width: 24, height: 24 }} />
@@ -62,18 +62,13 @@ function ApplicationItem({ app }) {
         </Typography>
 
         <Stack direction="row" alignItems="center" sx={{ mt: 0.5, color: 'text.secondary' }}>
-          <Iconify
-            width={14}
-            icon={system === 'Mac' ? 'mingcute:apple-fill' : 'mingcute:windows-fill'}
-          />
+          <Iconify width={14} icon={system === 'Mac' ? 'mingcute:apple-fill' : 'mingcute:windows-fill'} />
 
           <Typography variant="caption" sx={{ ml: 0.5, mr: 1 }}>
             {system}
           </Typography>
 
-          <Label color={price === 0 ? 'success' : 'error'}>
-            {price === 0 ? 'Free' : fCurrency(price)}
-          </Label>
+          <Label color={price === 0 ? 'success' : 'error'}>{price === 0 ? 'Free' : fCurrency(price)}</Label>
         </Stack>
       </Box>
 
@@ -88,5 +83,5 @@ function ApplicationItem({ app }) {
 }
 
 ApplicationItem.propTypes = {
-  app: PropTypes.object,
+  app: PropTypes.object
 };

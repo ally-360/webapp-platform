@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
@@ -10,41 +10,28 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Switch from '@mui/material/Switch';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
-import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
-import { fData } from 'src/utils/format-number';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 // assets
-import { countries } from 'src/assets/data';
 // components
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, {
-  RHFSwitch,
-  RHFTextField,
-  RHFUploadAvatar,
-  RHFAutocomplete,
-  RHFSelect
-} from 'src/components/hook-form';
-import { CardHeader, Divider, IconButton, Tooltip, Zoom } from '@mui/material';
+import FormProvider, { RHFSwitch, RHFTextField, RHFAutocomplete, RHFSelect } from 'src/components/hook-form';
+import { Divider, IconButton, Tooltip, Zoom } from '@mui/material';
 import { Icon } from '@iconify/react';
 import MenuItem from '@mui/material/MenuItem';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import parse from 'autosuggest-highlight/parse';
 import match from 'autosuggest-highlight/match';
-import { useSettingsContext } from 'src/components/settings';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import { useTheme } from '@emotion/react';
 import { createContact } from 'src/redux/inventory/contactsSlice';
 import { store } from 'src/redux/store';
 import { useTranslation } from 'react-i18next';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
@@ -92,7 +79,7 @@ export default function UserNewEditForm({ currentUser }) {
     }),
     [currentUser]
   );
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const methods = useForm({
     resolver: yupResolver(NewUserSchema),
@@ -154,7 +141,8 @@ export default function UserNewEditForm({ currentUser }) {
   useEffect(() => {
     dispatch(getAllMunicipios());
   }, [dispatch]);
-  const { locations } = useSelector((state) => state.locations);
+
+  const { locations } = useAppSelector((state) => state.locations);
   const departmentValue = watch('departamento');
   const [searchQueryMunicipio, setSearchQueryMunicipio] = useState('');
   const [searchQueryDepartamento, setSearchQueryDepartamento] = useState('');

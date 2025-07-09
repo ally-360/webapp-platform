@@ -18,9 +18,9 @@ export default function UploadAvatar({ error, file, disabled, helperText, sx, ..
     multiple: false,
     disabled,
     accept: {
-      'image/*': [],
+      'image/*': []
     },
-    ...other,
+    ...other
   });
 
   const hasFile = !!file;
@@ -36,7 +36,7 @@ export default function UploadAvatar({ error, file, disabled, helperText, sx, ..
       sx={{
         width: 1,
         height: 1,
-        borderRadius: '50%',
+        borderRadius: '50%'
       }}
     />
   );
@@ -59,21 +59,21 @@ export default function UploadAvatar({ error, file, disabled, helperText, sx, ..
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.08),
         transition: (theme) =>
           theme.transitions.create(['opacity'], {
-            duration: theme.transitions.duration.shorter,
+            duration: theme.transitions.duration.shorter
           }),
         '&:hover': {
-          opacity: 0.72,
+          opacity: 0.72
         },
         ...(hasError && {
           color: 'error.main',
-          bgcolor: 'error.lighter',
+          bgcolor: 'error.lighter'
         }),
         ...(hasFile && {
           zIndex: 9,
           opacity: 0,
           color: 'common.white',
-          bgcolor: (theme) => alpha(theme.palette.grey[900], 0.64),
-        }),
+          bgcolor: (theme) => alpha(theme.palette.grey[900], 0.64)
+        })
       }}
     >
       <Iconify icon="solar:camera-add-bold" width={32} />
@@ -89,7 +89,7 @@ export default function UploadAvatar({ error, file, disabled, helperText, sx, ..
         height: 1,
         overflow: 'hidden',
         borderRadius: '50%',
-        position: 'relative',
+        position: 'relative'
       }}
     >
       {renderPreview}
@@ -111,24 +111,24 @@ export default function UploadAvatar({ error, file, disabled, helperText, sx, ..
           borderRadius: '50%',
           border: (theme) => `1px dashed ${alpha(theme.palette.grey[500], 0.2)}`,
           ...(isDragActive && {
-            opacity: 0.72,
+            opacity: 0.72
           }),
           ...(disabled && {
             opacity: 0.48,
-            pointerEvents: 'none',
+            pointerEvents: 'none'
           }),
           ...(hasError && {
-            borderColor: 'error.light',
+            borderColor: 'error.light'
           }),
           ...(hasFile && {
             ...(hasError && {
-              bgcolor: 'error.lighter',
+              bgcolor: 'error.lighter'
             }),
             '&:hover .upload-placeholder': {
-              opacity: 1,
-            },
+              opacity: 1
+            }
           }),
-          ...sx,
+          ...sx
         }}
       >
         <input {...getInputProps()} />
@@ -148,5 +148,5 @@ UploadAvatar.propTypes = {
   error: PropTypes.bool,
   file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   helperText: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

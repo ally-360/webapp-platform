@@ -28,7 +28,7 @@ import PostListHorizontal from '../post-list-horizontal';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
-  publish: 'all',
+  publish: 'all'
 };
 
 // ----------------------------------------------------------------------
@@ -51,7 +51,7 @@ export default function PostListView() {
   const dataFiltered = applyFilter({
     inputData: posts,
     filters,
-    sortBy,
+    sortBy
   });
 
   const handleSortBy = useCallback((newValue) => {
@@ -61,7 +61,7 @@ export default function PostListView() {
   const handleFilters = useCallback((name, value) => {
     setFilters((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: value
     }));
   }, []);
 
@@ -83,15 +83,15 @@ export default function PostListView() {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Blog',
-            href: paths.dashboard.post.root,
+            href: paths.dashboard.post.root
           },
           {
-            name: 'List',
-          },
+            name: 'List'
+          }
         ]}
         action={
           <Button
@@ -104,7 +104,7 @@ export default function PostListView() {
           </Button>
         }
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -114,7 +114,7 @@ export default function PostListView() {
         alignItems={{ xs: 'flex-end', sm: 'center' }}
         direction={{ xs: 'column', sm: 'row' }}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         <PostSearch
@@ -132,7 +132,7 @@ export default function PostListView() {
         value={filters.publish}
         onChange={handleFilterPublish}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         {['all', 'published', 'draft'].map((tab) => (

@@ -29,19 +29,19 @@ export default function ButtonGroup(theme) {
           ...(!outlinedVariant && {
             borderStyle: 'solid',
             ...(inheritColor && {
-              borderColor: alpha(theme.palette.grey[500], 0.32),
+              borderColor: alpha(theme.palette.grey[500], 0.32)
             }),
             // HORIZONTAL
             ...(horizontalOrientation && {
-              borderWidth: '0px 1px 0px 0px',
+              borderWidth: '0px 1px 0px 0px'
             }),
             // VERTICAL
             ...(verticalOrientation && {
-              borderWidth: '0px 0px 1px 0px',
-            }),
-          }),
-        },
-      },
+              borderWidth: '0px 0px 1px 0px'
+            })
+          })
+        }
+      }
     };
 
     const colorStyle = COLORS.map((color) => ({
@@ -51,30 +51,30 @@ export default function ButtonGroup(theme) {
             ...(ownerState.color === color && {
               // CONTAINED
               ...(containedVariant && {
-                borderColor: alpha(theme.palette[color].dark, 0.48),
+                borderColor: alpha(theme.palette[color].dark, 0.48)
               }),
               // TEXT
               ...(textVariant && {
-                borderColor: alpha(theme.palette[color].main, 0.48),
+                borderColor: alpha(theme.palette[color].main, 0.48)
               }),
               // SOFT
               ...(softVariant && {
-                borderColor: alpha(theme.palette[color].dark, 0.24),
-              }),
-            }),
-          }),
-        },
-      },
+                borderColor: alpha(theme.palette[color].dark, 0.24)
+              })
+            })
+          })
+        }
+      }
     }));
 
     const disabledState = {
       [`& .${buttonGroupClasses.grouped}`]: {
         [`&.${buttonGroupClasses.disabled}`]: {
           '&:not(:last-of-type)': {
-            borderColor: theme.palette.action.disabledBackground,
-          },
-        },
-      },
+            borderColor: theme.palette.action.disabledBackground
+          }
+        }
+      }
     };
 
     return [defaultStyle, ...colorStyle, disabledState];
@@ -83,12 +83,12 @@ export default function ButtonGroup(theme) {
   return {
     MuiButtonGroup: {
       defaultProps: {
-        disableElevation: true,
+        disableElevation: true
       },
 
       styleOverrides: {
-        root: ({ ownerState }) => rootStyles(ownerState),
-      },
-    },
+        root: ({ ownerState }) => rootStyles(ownerState)
+      }
+    }
   };
 }

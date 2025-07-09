@@ -92,7 +92,7 @@ export default function useCalendar() {
       onOpenForm();
       setSelectedRange({
         start: fTimestamp(arg.start),
-        end: fTimestamp(arg.end),
+        end: fTimestamp(arg.end)
       });
     },
     [calendarEl, onOpenForm]
@@ -115,7 +115,7 @@ export default function useCalendar() {
       id: event.id,
       allDay: event.allDay,
       start: fTimestamp(event.start),
-      end: fTimestamp(event.end),
+      end: fTimestamp(event.end)
     });
   }, []);
 
@@ -126,7 +126,7 @@ export default function useCalendar() {
       id: event.id,
       allDay: event.allDay,
       start: fTimestamp(event.start),
-      end: fTimestamp(event.end),
+      end: fTimestamp(event.end)
     });
   }, []);
 
@@ -163,6 +163,6 @@ export default function useCalendar() {
     selectEventId,
     selectedRange,
     //
-    onClickEventInFilters,
+    onClickEventInFilters
   };
 }

@@ -34,7 +34,7 @@ export default function EcommerceLatestProducts({ title, subheader, list, ...oth
 EcommerceLatestProducts.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -44,12 +44,7 @@ function ProductItem({ product }) {
 
   return (
     <Stack direction="row" spacing={2}>
-      <Avatar
-        variant="rounded"
-        alt={name}
-        src={coverUrl}
-        sx={{ width: 48, height: 48, flexShrink: 0 }}
-      />
+      <Avatar variant="rounded" alt={name} src={coverUrl} sx={{ width: 48, height: 48, flexShrink: 0 }} />
 
       <ListItemText
         primary={<Link sx={{ color: 'text.primary', typography: 'subtitle2' }}>{name}</Link>}
@@ -67,10 +62,10 @@ function ProductItem({ product }) {
           </>
         }
         primaryTypographyProps={{
-          noWrap: true,
+          noWrap: true
         }}
         secondaryTypographyProps={{
-          mt: 0.5,
+          mt: 0.5
         }}
       />
 
@@ -80,5 +75,5 @@ function ProductItem({ product }) {
 }
 
 ProductItem.propTypes = {
-  product: PropTypes.object,
+  product: PropTypes.object
 };

@@ -34,7 +34,7 @@ export default function ChatRoom({ participants, conversation }) {
     //
     openMobile,
     onOpenMobile,
-    onCloseMobile,
+    onCloseMobile
   } = useCollapseNav();
 
   useEffect(() => {
@@ -58,11 +58,7 @@ export default function ChatRoom({ participants, conversation }) {
 
   const renderContent = (
     <>
-      {group ? (
-        <ChatRoomGroup participants={participants} />
-      ) : (
-        <ChatRoomSingle participant={participants[0]} />
-      )}
+      {group ? <ChatRoomGroup participants={participants} /> : <ChatRoomSingle participant={participants[0]} />}
 
       <ChatRoomAttachments attachments={attachments} />
     </>
@@ -84,20 +80,17 @@ export default function ChatRoom({ participants, conversation }) {
         bgcolor: theme.palette.background.paper,
         border: `solid 1px ${theme.palette.divider}`,
         '&:hover': {
-          bgcolor: theme.palette.background.neutral,
+          bgcolor: theme.palette.background.neutral
         },
         ...(lgUp && {
           ...(!collapseDesktop && {
-            right: NAV_WIDTH,
-          }),
-        }),
+            right: NAV_WIDTH
+          })
+        })
       }}
     >
       {lgUp ? (
-        <Iconify
-          width={16}
-          icon={collapseDesktop ? 'eva:arrow-ios-back-fill' : 'eva:arrow-ios-forward-fill'}
-        />
+        <Iconify width={16} icon={collapseDesktop ? 'eva:arrow-ios-back-fill' : 'eva:arrow-ios-forward-fill'} />
       ) : (
         <Iconify width={16} icon="eva:arrow-ios-back-fill" />
       )}
@@ -116,11 +109,11 @@ export default function ChatRoom({ participants, conversation }) {
             width: NAV_WIDTH,
             borderLeft: `solid 1px ${theme.palette.divider}`,
             transition: theme.transitions.create(['width'], {
-              duration: theme.transitions.duration.shorter,
+              duration: theme.transitions.duration.shorter
             }),
             ...(collapseDesktop && {
-              width: 0,
-            }),
+              width: 0
+            })
           }}
         >
           {!collapseDesktop && renderContent}
@@ -131,10 +124,10 @@ export default function ChatRoom({ participants, conversation }) {
           open={openMobile}
           onClose={onCloseMobile}
           slotProps={{
-            backdrop: { invisible: true },
+            backdrop: { invisible: true }
           }}
           PaperProps={{
-            sx: { width: NAV_WIDTH },
+            sx: { width: NAV_WIDTH }
           }}
         >
           {renderContent}
@@ -146,5 +139,5 @@ export default function ChatRoom({ participants, conversation }) {
 
 ChatRoom.propTypes = {
   conversation: PropTypes.object,
-  participants: PropTypes.array,
+  participants: PropTypes.array
 };

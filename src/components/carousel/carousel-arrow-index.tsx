@@ -14,7 +14,7 @@ import { LeftIcon, RightIcon } from './arrow-icons';
 const StyledRoot = styled(Box)(({ theme }) => ({
   ...bgBlur({
     opacity: 0.48,
-    color: theme.palette.grey[900],
+    color: theme.palette.grey[900]
   }),
   zIndex: 9,
   display: 'inline-flex',
@@ -24,7 +24,7 @@ const StyledRoot = styled(Box)(({ theme }) => ({
   right: theme.spacing(2),
   padding: theme.spacing(0.25),
   color: theme.palette.common.white,
-  borderRadius: theme.shape.borderRadius,
+  borderRadius: theme.shape.borderRadius
 }));
 
 const StyledIconButton = styled(IconButton)({
@@ -32,7 +32,7 @@ const StyledIconButton = styled(IconButton)({
   height: 28,
   padding: 0,
   opacity: 0.48,
-  '&:hover': { opacity: 1 },
+  '&:hover': { opacity: 1 }
 });
 
 // ----------------------------------------------------------------------
@@ -65,5 +65,5 @@ CarouselArrowIndex.propTypes = {
   onNext: PropTypes.func,
   onPrev: PropTypes.func,
   sx: PropTypes.object,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

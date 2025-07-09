@@ -57,6 +57,8 @@ const BillInvoiceCreatePage = lazy(() => import('src/pages/dashboard/bill/invoic
 const BillInvoiceEditPage = lazy(() => import('src/pages/dashboard/bill/invoice/edit'));
 const BillInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/bill/invoice/details'));
 
+const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
+
 // POS
 
 const PosListView = lazy(() => import('src/pages/dashboard/pos/list'));
@@ -100,6 +102,20 @@ const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
 
 export const dashboardRoutes = [
   {
+    path: '/select-business',
+    element: (
+      <AuthGuard>
+        <StepGuard>
+          <Suspense fallback={<LoadingScreen />}>
+            <SelectBussinessPage />
+          </Suspense>
+        </StepGuard>
+      </AuthGuard>
+    )
+  },
+
+  {
+    // DASHBOARD ROOT
     path: '/dashboard',
     element: (
       <AuthGuard>

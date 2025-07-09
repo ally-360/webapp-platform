@@ -83,7 +83,7 @@ export default function ProductListView({ categoryView }) {
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  const { products, productsLoading, productsEmpty } = useAppSelector((state) => state.products);
+  const { products, productsLoading, productsEmpty, totalProducts } = useAppSelector((state) => state.products);
   const { viewCategoryById } = useAppSelector((state) => state.categories);
 
   const confirm = useBoolean(false);
@@ -93,8 +93,6 @@ export default function ProductListView({ categoryView }) {
       setTableData(products);
     }
   }, [products, viewCategoryById]);
-
-  // TODO: descomentar cuando funcione correctamente el endpoint de productos de categoria front.
 
   useEffect(() => {
     if (viewCategoryById?.products) {
@@ -177,9 +175,9 @@ export default function ProductListView({ categoryView }) {
 
   useEffect(() => {
     if (!categoryView) {
-      dispatch(getAllProducts());
+      dispatch(getAllProducts({ page: table.page * table.rowsPerPage + 1, pageSize: table.rowsPerPage }));
     }
-  }, [dispatch, categoryView]);
+  }, [dispatch, categoryView, table.page, table.rowsPerPage]);
 
   return (
     <>
@@ -270,6 +268,16 @@ export default function ProductListView({ categoryView }) {
               <Scrollbar>
                 <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                   <TableHeadCustom
+                    count={1000}
+                    onPageChange={(event, newPage) => {
+                      table.onChangePage(event, newPage);
+                      dispatch(getAllProducts({ page: newPage + 1, pageSize: table.rowsPerPage }));
+                    }}
+                    onRowsPerPageChange={(event) => {
+                      const newRowsPerPage = parseInt(event.target.value, 10);
+                      table.onChangeRowsPerPage(event);
+                      dispatch(getAllProducts({ page: 1, pageSize: newRowsPerPage })); // Reinicia paginación
+                    }}
                     order={table.order}
                     orderBy={table.orderBy}
                     headLabel={TABLE_HEAD}
@@ -321,7 +329,7 @@ export default function ProductListView({ categoryView }) {
             </TableContainer>
 
             <TablePaginationCustom
-              count={dataFiltered.length}
+              count={totalProducts}
               page={table.page}
               rowsPerPage={table.rowsPerPage}
               onPageChange={table.onChangePage}
@@ -366,6 +374,16 @@ export default function ProductListView({ categoryView }) {
             <Scrollbar>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
+                  count={1000}
+                  onPageChange={(event, newPage) => {
+                    table.onChangePage(event, newPage);
+                    dispatch(getAllProducts({ page: newPage + 1, pageSize: table.rowsPerPage }));
+                  }}
+                  onRowsPerPageChange={(event) => {
+                    const newRowsPerPage = parseInt(event.target.value, 10);
+                    table.onChangeRowsPerPage(event);
+                    dispatch(getAllProducts({ page: 1, pageSize: newRowsPerPage })); // Reinicia paginación
+                  }}
                   order={table.order}
                   orderBy={table.orderBy}
                   headLabel={TABLE_HEAD}
@@ -414,7 +432,7 @@ export default function ProductListView({ categoryView }) {
           </TableContainer>
 
           <TablePaginationCustom
-            count={dataFiltered.length}
+            count={totalProducts}
             page={table.page}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}

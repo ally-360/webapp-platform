@@ -25,17 +25,17 @@ export default function BankingBalanceStatistics({ title, subheader, chart, ...o
     stroke: {
       show: true,
       width: 2,
-      colors: ['transparent'],
+      colors: ['transparent']
     },
     xaxis: {
-      categories,
+      categories
     },
     tooltip: {
       y: {
-        formatter: (value) => `$${value}`,
-      },
+        formatter: (value) => `$${value}`
+      }
     },
-    ...options,
+    ...options
   });
 
   const handleChangeSeries = useCallback(
@@ -61,7 +61,7 @@ export default function BankingBalanceStatistics({ title, subheader, chart, ...o
                 pr: 0.5,
                 borderRadius: 1,
                 typography: 'subtitle2',
-                bgcolor: 'background.neutral',
+                bgcolor: 'background.neutral'
               }}
             >
               {seriesData}
@@ -102,5 +102,5 @@ export default function BankingBalanceStatistics({ title, subheader, chart, ...o
 BankingBalanceStatistics.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

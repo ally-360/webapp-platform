@@ -77,14 +77,10 @@ export default function NavList({ data, depth, hasChild, config }) {
           open={open}
           anchorEl={navRef.current}
           anchorOrigin={
-            depth === 1
-              ? { vertical: 'bottom', horizontal: 'left' }
-              : { vertical: 'center', horizontal: 'right' }
+            depth === 1 ? { vertical: 'bottom', horizontal: 'left' } : { vertical: 'center', horizontal: 'right' }
           }
           transformOrigin={
-            depth === 1
-              ? { vertical: 'top', horizontal: 'left' }
-              : { vertical: 'center', horizontal: 'left' }
+            depth === 1 ? { vertical: 'top', horizontal: 'left' } : { vertical: 'center', horizontal: 'left' }
           }
           slotProps={{
             paper: {
@@ -93,13 +89,13 @@ export default function NavList({ data, depth, hasChild, config }) {
               sx: {
                 width: 160,
                 ...(open && {
-                  pointerEvents: 'auto',
-                }),
-              },
-            },
+                  pointerEvents: 'auto'
+                })
+              }
+            }
           }}
           sx={{
-            pointerEvents: 'none',
+            pointerEvents: 'none'
           }}
         >
           <NavSubList data={data.children} depth={depth} config={config} />
@@ -113,7 +109,7 @@ NavList.propTypes = {
   config: PropTypes.object,
   data: PropTypes.object,
   depth: PropTypes.number,
-  hasChild: PropTypes.bool,
+  hasChild: PropTypes.bool
 };
 
 // ----------------------------------------------------------------------
@@ -137,5 +133,5 @@ function NavSubList({ data, depth, config }) {
 NavSubList.propTypes = {
   config: PropTypes.object,
   data: PropTypes.array,
-  depth: PropTypes.number,
+  depth: PropTypes.number
 };

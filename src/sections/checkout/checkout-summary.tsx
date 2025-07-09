@@ -24,7 +24,7 @@ export default function CheckoutSummary({
   shipping,
   //
   onEdit,
-  onApplyDiscount,
+  onApplyDiscount
 }) {
   const displayShipping = shipping !== null ? 'Free' : '-';
 
@@ -61,9 +61,7 @@ export default function CheckoutSummary({
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Shipping
             </Typography>
-            <Typography variant="subtitle2">
-              {shipping ? fCurrency(shipping) : displayShipping}
-            </Typography>
+            <Typography variant="subtitle2">{shipping ? fCurrency(shipping) : displayShipping}</Typography>
           </Stack>
 
           <Divider sx={{ borderStyle: 'dashed' }} />
@@ -92,7 +90,7 @@ export default function CheckoutSummary({
                       Apply
                     </Button>
                   </InputAdornment>
-                ),
+                )
               }}
             />
           )}
@@ -108,5 +106,5 @@ CheckoutSummary.propTypes = {
   shipping: PropTypes.number,
   subTotal: PropTypes.number,
   onEdit: PropTypes.func,
-  onApplyDiscount: PropTypes.func,
+  onApplyDiscount: PropTypes.func
 };

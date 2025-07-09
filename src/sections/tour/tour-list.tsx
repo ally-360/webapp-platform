@@ -41,7 +41,7 @@ export default function TourList({ tours }) {
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
           sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
       >
         {tours.map((tour) => (
@@ -61,8 +61,8 @@ export default function TourList({ tours }) {
           sx={{
             mt: 8,
             [`& .${paginationClasses.ul}`]: {
-              justifyContent: 'center',
-            },
+              justifyContent: 'center'
+            }
           }}
         />
       )}
@@ -71,5 +71,5 @@ export default function TourList({ tours }) {
 }
 
 TourList.propTypes = {
-  tours: PropTypes.array,
+  tours: PropTypes.array
 };

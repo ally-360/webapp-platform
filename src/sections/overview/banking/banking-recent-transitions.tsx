@@ -28,13 +28,7 @@ import { TableHeadCustom } from 'src/components/table';
 
 // ----------------------------------------------------------------------
 
-export default function BankingRecentTransitions({
-  title,
-  subheader,
-  tableLabels,
-  tableData,
-  ...other
-}) {
+export default function BankingRecentTransitions({ title, subheader, tableLabels, tableData, ...other }) {
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 3 }} />
@@ -72,7 +66,7 @@ BankingRecentTransitions.propTypes = {
   subheader: PropTypes.string,
   tableData: PropTypes.array,
   tableLabels: PropTypes.array,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -112,19 +106,15 @@ function BankingRecentTransitionsRow({ row }) {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         badgeContent={
           <Iconify
-            icon={
-              row.type === 'Income'
-                ? 'eva:diagonal-arrow-left-down-fill'
-                : 'eva:diagonal-arrow-right-up-fill'
-            }
+            icon={row.type === 'Income' ? 'eva:diagonal-arrow-left-down-fill' : 'eva:diagonal-arrow-right-up-fill'}
             width={16}
           />
         }
         sx={{
           [`& .${badgeClasses.badge}`]: {
             p: 0,
-            width: 20,
-          },
+            width: 20
+          }
         }}
       >
         <Avatar
@@ -133,7 +123,7 @@ function BankingRecentTransitionsRow({ row }) {
             width: 48,
             height: 48,
             color: 'text.secondary',
-            bgcolor: 'background.neutral',
+            bgcolor: 'background.neutral'
           }}
         >
           {row.category === 'Books' && <Iconify icon="eva:book-fill" width={24} />}
@@ -159,7 +149,7 @@ function BankingRecentTransitionsRow({ row }) {
             secondaryTypographyProps={{
               mt: 0.5,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </TableCell>
@@ -169,11 +159,7 @@ function BankingRecentTransitionsRow({ row }) {
         <TableCell>
           <Label
             variant={isLight ? 'soft' : 'filled'}
-            color={
-              (row.status === 'completed' && 'success') ||
-              (row.status === 'progress' && 'warning') ||
-              'error'
-            }
+            color={(row.status === 'completed' && 'success') || (row.status === 'progress' && 'warning') || 'error'}
           >
             {row.status}
           </Label>
@@ -186,12 +172,7 @@ function BankingRecentTransitionsRow({ row }) {
         </TableCell>
       </TableRow>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem onClick={handleDownload}>
           <Iconify icon="eva:cloud-download-fill" />
           Download
@@ -219,5 +200,5 @@ function BankingRecentTransitionsRow({ row }) {
 }
 
 BankingRecentTransitionsRow.propTypes = {
-  row: PropTypes.object,
+  row: PropTypes.object
 };

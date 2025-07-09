@@ -14,17 +14,17 @@ export default function Progress(theme) {
     const defaultStyle = {
       borderRadius: 4,
       [`& .${linearProgressClasses.bar}`]: {
-        borderRadius: 4,
+        borderRadius: 4
       },
       ...(bufferVariant && {
-        backgroundColor: 'transparent',
-      }),
+        backgroundColor: 'transparent'
+      })
     };
 
     const colorStyle = COLORS.map((color) => ({
       ...(ownerState.color === color && {
-        backgroundColor: alpha(theme.palette[color].main, 0.24),
-      }),
+        backgroundColor: alpha(theme.palette[color].main, 0.24)
+      })
     }));
 
     return [defaultStyle, ...colorStyle];
@@ -33,8 +33,8 @@ export default function Progress(theme) {
   return {
     MuiLinearProgress: {
       styleOverrides: {
-        root: ({ ownerState }) => rootStyles(ownerState),
-      },
-    },
+        root: ({ ownerState }) => rootStyles(ownerState)
+      }
+    }
   };
 }

@@ -31,7 +31,7 @@ export default function KanbanColumnAdd() {
         createColumn({
           id: uuidv4(),
           name: columnName,
-          taskIds: [],
+          taskIds: []
         });
         setColumnName('');
       }
@@ -63,8 +63,8 @@ export default function KanbanColumnAdd() {
             onKeyUp={handleKeyUpCreateColumn}
             sx={{
               [`& .${inputBaseClasses.input}`]: {
-                typography: 'h6',
-              },
+                typography: 'h6'
+              }
             }}
           />
         </ClickAwayListener>

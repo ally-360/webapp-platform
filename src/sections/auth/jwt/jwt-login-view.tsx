@@ -25,6 +25,7 @@ import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { Box } from '@mui/material';
 import { AuthCredentials } from 'src/interfaces/auth/userInterfaces';
 import { LoginSchema } from 'src/interfaces/auth/yupSchemas';
+import { useTranslation } from 'react-i18next';
 
 // ----------------------------------------------------------------------
 
@@ -32,6 +33,8 @@ export default function JwtLoginView() {
   const { login } = useAuthContext();
 
   const router = useRouter();
+
+  const { t } = useTranslation();
 
   const [errorMsg, setErrorMsg] = useState<string>('');
 
@@ -42,8 +45,8 @@ export default function JwtLoginView() {
   const viewPassword = useBoolean(false); // Pass a default value of false to useBoolean
 
   const defaultValues: AuthCredentials = {
-    email: 'example@example.com',
-    password: 'myPassword123'
+    email: 'example@gmail.com',
+    password: 'Example123.'
   };
 
   const methods = useForm({
@@ -81,7 +84,7 @@ export default function JwtLoginView() {
 
   const renderForm = (
     <Stack spacing={2.5}>
-      {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+      {!!errorMsg && <Alert severity="error">{t(errorMsg)}</Alert>}
 
       <RHFTextField name="email" label="Email address" />
 

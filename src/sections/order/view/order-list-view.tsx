@@ -35,7 +35,7 @@ import {
   TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
-  TablePaginationCustom,
+  TablePaginationCustom
 } from 'src/components/table';
 //
 import OrderTableRow from '../order-table-row';
@@ -53,14 +53,14 @@ const TABLE_HEAD = [
   { id: 'totalQuantity', label: 'Items', width: 120, align: 'center' },
   { id: 'totalAmount', label: 'Price', width: 140 },
   { id: 'status', label: 'Status', width: 110 },
-  { id: '', width: 88 },
+  { id: '', width: 88 }
 ];
 
 const defaultFilters = {
   name: '',
   status: 'all',
   startDate: null,
-  endDate: null,
+  endDate: null
 };
 
 // ----------------------------------------------------------------------
@@ -79,15 +79,13 @@ export default function OrderListView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
+    filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters,
-    dateError,
+    dateError
   });
 
   const dataInPage = dataFiltered.slice(
@@ -97,8 +95,7 @@ export default function OrderListView() {
 
   const denseHeight = table.dense ? 52 : 72;
 
-  const canReset =
-    !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
+  const canReset = !!filters.name || filters.status !== 'all' || (!!filters.startDate && !!filters.endDate);
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
@@ -107,7 +104,7 @@ export default function OrderListView() {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
-        [name]: value,
+        [name]: value
       }));
     },
     [table]
@@ -130,7 +127,7 @@ export default function OrderListView() {
     table.onUpdatePageDeleteRows({
       totalRows: tableData.length,
       totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
+      totalRowsFiltered: dataFiltered.length
     });
   }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
@@ -160,16 +157,16 @@ export default function OrderListView() {
           links={[
             {
               name: 'Dashboard',
-              href: paths.dashboard.root,
+              href: paths.dashboard.root
             },
             {
               name: 'Order',
-              href: paths.dashboard.order.root,
+              href: paths.dashboard.order.root
             },
-            { name: 'List' },
+            { name: 'List' }
           ]}
           sx={{
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 3, md: 5 }
           }}
         />
 
@@ -179,7 +176,7 @@ export default function OrderListView() {
             onChange={handleFilterStatus}
             sx={{
               px: 2.5,
-              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
             }}
           >
             {STATUS_OPTIONS.map((tab) => (
@@ -190,9 +187,7 @@ export default function OrderListView() {
                 label={tab.label}
                 icon={
                   <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
-                    }
+                    variant={((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'}
                     color={
                       (tab.value === 'completed' && 'success') ||
                       (tab.value === 'pending' && 'warning') ||
@@ -201,15 +196,11 @@ export default function OrderListView() {
                     }
                   >
                     {tab.value === 'all' && _orders.length}
-                    {tab.value === 'completed' &&
-                      _orders.filter((order) => order.status === 'completed').length}
+                    {tab.value === 'completed' && _orders.filter((order) => order.status === 'completed').length}
 
-                    {tab.value === 'pending' &&
-                      _orders.filter((order) => order.status === 'pending').length}
-                    {tab.value === 'cancelled' &&
-                      _orders.filter((order) => order.status === 'cancelled').length}
-                    {tab.value === 'refunded' &&
-                      _orders.filter((order) => order.status === 'refunded').length}
+                    {tab.value === 'pending' && _orders.filter((order) => order.status === 'pending').length}
+                    {tab.value === 'cancelled' && _orders.filter((order) => order.status === 'cancelled').length}
+                    {tab.value === 'refunded' && _orders.filter((order) => order.status === 'refunded').length}
                   </Label>
                 }
               />
@@ -275,10 +266,7 @@ export default function OrderListView() {
 
                 <TableBody>
                   {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
+                    .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
                     .map((row) => (
                       <OrderTableRow
                         key={row.id}
@@ -372,8 +360,7 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
     if (startDate && endDate) {
       inputData = inputData.filter(
         (order) =>
-          fTimestamp(order.createdAt) >= fTimestamp(startDate) &&
-          fTimestamp(order.createdAt) <= fTimestamp(endDate)
+          fTimestamp(order.createdAt) >= fTimestamp(startDate) && fTimestamp(order.createdAt) <= fTimestamp(endDate)
       );
     }
   }

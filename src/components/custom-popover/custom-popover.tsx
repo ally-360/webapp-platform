@@ -13,6 +13,7 @@ interface CustomPopoverProps {
   children?: any;
   hiddenArrow?: boolean;
   disabledArrow?: boolean;
+  onClose?: any;
   arrow?: string;
 }
 
@@ -22,8 +23,9 @@ export default function CustomPopover({
   arrow = 'top-right',
   hiddenArrow,
   sx,
+  onClose,
   ...other
-}: CustomPopoverProps) {
+}: Readonly<CustomPopoverProps>) {
   const { style, anchorOrigin, transformOrigin } = getPosition(arrow);
 
   return (
@@ -48,6 +50,7 @@ export default function CustomPopover({
           }
         }
       }}
+      onClose={onClose}
       {...other}
     >
       {!hiddenArrow && <StyledArrow arrow={arrow} />}

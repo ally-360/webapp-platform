@@ -34,7 +34,7 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
         <StyledIcon
           size={config.iconSize}
           sx={{
-            ...(subItem && { mr: 1.5 }),
+            ...(subItem && { mr: 1.5 })
           }}
         >
           {icon}
@@ -45,8 +45,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
         <ListItemText
           sx={{
             ...(!subItem && {
-              ml: 1,
-            }),
+              ml: 1
+            })
           }}
           primary={title}
           primaryTypographyProps={{
@@ -55,8 +55,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
             textTransform: 'capitalize',
             fontWeight: active ? 'fontWeightBold' : 'fontWeightMedium',
             ...(subItem && {
-              fontWeight: active ? 'fontWeightSemiBold' : 'fontWeightMedium',
-            }),
+              fontWeight: active ? 'fontWeightSemiBold' : 'fontWeightMedium'
+            })
           }}
         />
       )}
@@ -98,8 +98,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
         underline="none"
         sx={{
           ...(disabled && {
-            cursor: 'default',
-          }),
+            cursor: 'default'
+          })
         }}
       >
         {renderContent}
@@ -114,8 +114,8 @@ const NavItem = forwardRef(({ item, depth, open, active, externalLink, config, .
       underline="none"
       sx={{
         ...(disabled && {
-          cursor: 'default',
-        }),
+          cursor: 'default'
+        })
       }}
     >
       {renderContent}
@@ -129,7 +129,7 @@ NavItem.propTypes = {
   depth: PropTypes.number,
   externalLink: PropTypes.bool,
   item: PropTypes.object,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };
 
 export default NavItem;

@@ -20,16 +20,16 @@ export default function AppAreaInstalled({ title, subheader, chart, ...other }) 
   const {
     colors = [
       [theme.palette.primary.light, theme.palette.primary.main],
-      [theme.palette.warning.light, theme.palette.warning.main],
+      [theme.palette.warning.light, theme.palette.warning.main]
     ],
     categories,
     series,
-    options,
+    options
   } = chart;
 
   const popover = usePopover();
 
-  const [seriesData, setSeriesData] = useState('2019');
+  const [seriesData, setSeriesData] = useState('2025');
 
   const chartOptions = useChart({
     colors: colors.map((colr) => colr[1]),
@@ -38,14 +38,14 @@ export default function AppAreaInstalled({ title, subheader, chart, ...other }) 
       gradient: {
         colorStops: colors.map((colr) => [
           { offset: 0, color: colr[0] },
-          { offset: 100, color: colr[1] },
-        ]),
-      },
+          { offset: 100, color: colr[1] }
+        ])
+      }
     },
     xaxis: {
-      categories,
+      categories
     },
-    ...options,
+    ...options
   });
 
   const handleChangeSeries = useCallback(
@@ -71,7 +71,7 @@ export default function AppAreaInstalled({ title, subheader, chart, ...other }) 
                 pr: 0.5,
                 borderRadius: 1,
                 typography: 'subtitle2',
-                bgcolor: 'background.neutral',
+                bgcolor: 'background.neutral'
               }}
             >
               {seriesData}
@@ -112,5 +112,5 @@ export default function AppAreaInstalled({ title, subheader, chart, ...other }) 
 AppAreaInstalled.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

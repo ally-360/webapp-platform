@@ -26,8 +26,8 @@ export default function PostCommentItem({ name, avatarUrl, message, tagUser, pos
         pt: 3,
         alignItems: 'flex-start',
         ...(hasReply && {
-          pl: 8,
-        }),
+          pl: 8
+        })
       }}
     >
       <Avatar alt={name} src={avatarUrl} sx={{ mr: 2, width: 48, height: 48 }} />
@@ -36,7 +36,7 @@ export default function PostCommentItem({ name, avatarUrl, message, tagUser, pos
         flexGrow={1}
         sx={{
           pb: 3,
-          borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
+          borderBottom: (theme) => `solid 1px ${theme.palette.divider}`
         }}
       >
         <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
@@ -84,5 +84,5 @@ PostCommentItem.propTypes = {
   message: PropTypes.string,
   name: PropTypes.string,
   postedAt: PropTypes.string,
-  tagUser: PropTypes.string,
+  tagUser: PropTypes.string
 };

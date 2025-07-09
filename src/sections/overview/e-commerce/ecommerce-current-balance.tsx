@@ -9,13 +9,7 @@ import { fCurrency } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
-export default function EcommerceCurrentBalance({
-  title,
-  sentAmount,
-  currentBalance,
-  sx,
-  ...other
-}) {
+export default function EcommerceCurrentBalance({ title, sentAmount, currentBalance, sx, ...other }) {
   const totalAmount = currentBalance - sentAmount;
 
   return (
@@ -66,5 +60,5 @@ EcommerceCurrentBalance.propTypes = {
   currentBalance: PropTypes.number,
   sentAmount: PropTypes.number,
   sx: PropTypes.object,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

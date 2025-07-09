@@ -6,26 +6,25 @@ import ListItemButton from '@mui/material/ListItemButton';
 // ----------------------------------------------------------------------
 
 export const StyledItem = styled(ListItemButton, {
-  shouldForwardProp: (prop) => prop !== 'active',
+  shouldForwardProp: (prop) => prop !== 'active'
 })(({ active, open, depth, config, theme }) => {
   const subItem = depth !== 1;
 
   const activeStyles = {
     root: {
-      color:
-        theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.light,
+      color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.light,
       backgroundColor: alpha(theme.palette.primary.main, 0.08),
       '&:hover': {
-        backgroundColor: alpha(theme.palette.primary.main, 0.16),
-      },
+        backgroundColor: alpha(theme.palette.primary.main, 0.16)
+      }
     },
     sub: {
       color: theme.palette.text.primary,
       backgroundColor: theme.palette.action.selected,
       '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
+        backgroundColor: theme.palette.action.hover
+      }
+    }
   };
 
   return {
@@ -38,12 +37,12 @@ export const StyledItem = styled(ListItemButton, {
     margin: `0 ${config.itemGap}px ${config.itemGap}px ${config.itemGap}px`,
     ...(config.hiddenLabel &&
       !subItem && {
-        padding: config.itemPadding,
+        padding: config.itemPadding
       }),
 
     // Active root item
     ...(active && {
-      ...activeStyles.root,
+      ...activeStyles.root
     }),
 
     // Sub item
@@ -54,16 +53,16 @@ export const StyledItem = styled(ListItemButton, {
       minHeight: config.itemSubHeight,
       // Active sub item
       ...(active && {
-        ...activeStyles.sub,
-      }),
+        ...activeStyles.sub
+      })
     }),
 
     // Open
     ...(open &&
       !active && {
         color: theme.palette.text.primary,
-        backgroundColor: theme.palette.action.hover,
-      }),
+        backgroundColor: theme.palette.action.hover
+      })
   };
 });
 
@@ -72,5 +71,5 @@ export const StyledItem = styled(ListItemButton, {
 export const StyledIcon = styled(ListItemIcon)(({ size }) => ({
   width: size,
   height: size,
-  marginRight: 0,
+  marginRight: 0
 }));

@@ -24,8 +24,8 @@ export default function ChatHeaderDetail({ participants }) {
       sx={{
         [`& .${avatarGroupClasses.avatar}`]: {
           width: 32,
-          height: 32,
-        },
+          height: 32
+        }
       }}
     >
       {participants.map((participant) => (
@@ -36,25 +36,20 @@ export default function ChatHeaderDetail({ participants }) {
 
   const renderSingle = (
     <Stack flexGrow={1} direction="row" alignItems="center" spacing={2}>
-      <Badge
-        variant={singleParticipant.status}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
+      <Badge variant={singleParticipant.status} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Avatar src={singleParticipant.avatarUrl} alt={singleParticipant.name} />
       </Badge>
 
       <ListItemText
         primary={singleParticipant.name}
         secondary={
-          singleParticipant.status === 'offline'
-            ? fToNow(singleParticipant.lastActivity)
-            : singleParticipant.status
+          singleParticipant.status === 'offline' ? fToNow(singleParticipant.lastActivity) : singleParticipant.status
         }
         secondaryTypographyProps={{
           component: 'span',
           ...(singleParticipant.status !== 'offline' && {
-            textTransform: 'capitalize',
-          }),
+            textTransform: 'capitalize'
+          })
         }}
       />
     </Stack>
@@ -80,5 +75,5 @@ export default function ChatHeaderDetail({ participants }) {
 }
 
 ChatHeaderDetail.propTypes = {
-  participants: PropTypes.array,
+  participants: PropTypes.array
 };

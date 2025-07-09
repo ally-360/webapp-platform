@@ -22,8 +22,8 @@ export default function AppWelcome({ title, description, action, img, ...other }
       sx={{
         ...bgGradient({
           direction: '135deg',
-          startColor: alpha(theme.palette.primary.light, 0.2),
-          endColor: alpha(theme.palette.primary.main, 0.2)
+          startColor: alpha(theme.palette.primary.light, 0.4),
+          endColor: alpha(theme.palette.primary.main, 0.7)
         }),
         height: { md: 1 },
         borderRadius: 2,

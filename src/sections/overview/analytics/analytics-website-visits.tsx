@@ -15,15 +15,15 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
     colors,
     plotOptions: {
       bar: {
-        columnWidth: '16%',
-      },
+        columnWidth: '16%'
+      }
     },
     fill: {
-      type: series.map((i) => i.fill),
+      type: series.map((i) => i.fill)
     },
     labels,
     xaxis: {
-      type: 'datetime',
+      type: 'datetime'
     },
     tooltip: {
       shared: true,
@@ -34,10 +34,10 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
             return `${value.toFixed(0)} visits`;
           }
           return value;
-        },
-      },
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -54,5 +54,5 @@ export default function AnalyticsWebsiteVisits({ title, subheader, chart, ...oth
 AnalyticsWebsiteVisits.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

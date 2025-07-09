@@ -28,6 +28,6 @@ export default function useMessagesScroll(messages) {
   );
 
   return {
-    messagesEndRef,
+    messagesEndRef
   };
 }

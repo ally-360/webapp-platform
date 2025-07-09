@@ -40,7 +40,7 @@ export default function TourDetailsView({ id }) {
       value={currentTab}
       onChange={handleChangeTab}
       sx={{
-        mb: { xs: 3, md: 5 },
+        mb: { xs: 3, md: 5 }
       }}
     >
       {TOUR_DETAILS_TABS.map((tab) => (
@@ -49,13 +49,7 @@ export default function TourDetailsView({ id }) {
           iconPosition="end"
           value={tab.value}
           label={tab.label}
-          icon={
-            tab.value === 'bookers' ? (
-              <Label variant="filled">{currentTour?.bookers.length}</Label>
-            ) : (
-              ''
-            )
-          }
+          icon={tab.value === 'bookers' ? <Label variant="filled">{currentTour?.bookers.length}</Label> : ''}
         />
       ))}
     </Tabs>
@@ -81,5 +75,5 @@ export default function TourDetailsView({ id }) {
 }
 
 TourDetailsView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

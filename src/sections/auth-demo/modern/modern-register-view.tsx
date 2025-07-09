@@ -26,24 +26,24 @@ export default function ModernRegisterView() {
     firstName: Yup.string().required('First name required'),
     lastName: Yup.string().required('Last name required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    password: Yup.string().required('Password is required')
   });
 
   const defaultValues = {
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
+    password: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(RegisterSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -70,10 +70,7 @@ export default function ModernRegisterView() {
   );
 
   const renderTerms = (
-    <Typography
-      component="div"
-      sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}
-    >
+    <Typography component="div" sx={{ color: 'text.secondary', mt: 2.5, typography: 'caption', textAlign: 'center' }}>
       {'By signing up, I agree to '}
       <Link underline="always" color="text.primary">
         Terms of Service
@@ -106,7 +103,7 @@ export default function ModernRegisterView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 

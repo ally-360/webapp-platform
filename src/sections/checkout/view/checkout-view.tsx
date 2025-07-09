@@ -34,11 +34,7 @@ export default function CheckoutView() {
       </Grid>
 
       {checkout.completed ? (
-        <CheckoutOrderComplete
-          open={checkout.completed}
-          onReset={checkout.onReset}
-          onDownloadPDF={() => {}}
-        />
+        <CheckoutOrderComplete open={checkout.completed} onReset={checkout.onReset} onDownloadPDF={() => {}} />
       ) : (
         <>
           {checkout.activeStep === 0 && <CheckoutCart />}

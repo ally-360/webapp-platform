@@ -19,9 +19,9 @@ export default function MailItem({ mail, selected, onClickMail, sx, ...other }) 
         mb: 0.5,
         borderRadius: 1,
         ...(selected && {
-          bgcolor: 'action.selected',
+          bgcolor: 'action.selected'
         }),
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -34,14 +34,14 @@ export default function MailItem({ mail, selected, onClickMail, sx, ...other }) 
           primary={mail.from.name}
           primaryTypographyProps={{
             noWrap: true,
-            variant: 'subtitle2',
+            variant: 'subtitle2'
           }}
           secondary={mail.message}
           secondaryTypographyProps={{
             noWrap: true,
             component: 'span',
             variant: mail.isUnread ? 'subtitle2' : 'body2',
-            color: mail.isUnread ? 'text.primary' : 'text.secondary',
+            color: mail.isUnread ? 'text.primary' : 'text.secondary'
           }}
         />
 
@@ -53,17 +53,15 @@ export default function MailItem({ mail, selected, onClickMail, sx, ...other }) 
             sx={{
               mb: 1.5,
               fontSize: 12,
-              color: 'text.disabled',
+              color: 'text.disabled'
             }}
           >
             {formatDistanceToNowStrict(new Date(mail.createdAt), {
-              addSuffix: false,
+              addSuffix: false
             })}
           </Typography>
 
-          {!!mail.isUnread && (
-            <Box sx={{ bgcolor: 'info.main', width: 8, height: 8, borderRadius: '50%' }} />
-          )}
+          {!!mail.isUnread && <Box sx={{ bgcolor: 'info.main', width: 8, height: 8, borderRadius: '50%' }} />}
         </Stack>
       </>
     </ListItemButton>
@@ -74,5 +72,5 @@ MailItem.propTypes = {
   mail: PropTypes.object,
   onClickMail: PropTypes.func,
   selected: PropTypes.bool,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

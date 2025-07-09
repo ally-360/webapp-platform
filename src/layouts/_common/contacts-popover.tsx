@@ -1,25 +1,32 @@
 import { m } from 'framer-motion';
 // @mui
-import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
 // utils
-import { fToNow } from 'src/utils/format-time';
 // _mock
-import { _contacts } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { varHover } from 'src/components/animate';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import React, { useEffect } from 'react';
+import { getAllContacts } from 'src/redux/inventory/contactsSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
 export default function ContactsPopover() {
   const popover = usePopover();
+
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    dispatch(getAllContacts());
+  }, [dispatch]);
+
+  const { contacts } = useAppSelector((state) => state.contacts);
 
   return (
     <>
@@ -31,9 +38,7 @@ export default function ContactsPopover() {
         color={popover.open ? 'inherit' : 'default'}
         onClick={popover.onOpen}
         sx={{
-          ...(popover.open && {
-            bgcolor: (theme) => theme.palette.action.selected,
-          }),
+          ...(popover.open ? { bgcolor: (theme) => theme.palette.action.selected } : {})
         }}
       >
         <Iconify icon="solar:users-group-rounded-bold-duotone" width={24} />
@@ -41,23 +46,19 @@ export default function ContactsPopover() {
 
       <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 320 }}>
         <Typography variant="h6" sx={{ p: 1.5 }}>
-          Contacts <Typography component="span">({_contacts.length})</Typography>
+          Contacts <Typography component="span">({contacts.length})</Typography>
         </Typography>
 
         <Scrollbar sx={{ height: 320 }}>
-          {_contacts.map((contact) => (
+          {contacts.map((contact) => (
             <MenuItem key={contact.id} sx={{ p: 1 }}>
-              <Badge
-                variant={contact.status}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                sx={{ mr: 2 }}
-              >
-                <Avatar alt={contact.name} src={contact.avatarUrl} />
-              </Badge>
+              <Avatar alt={contact.name} sx={{ mr: 2 }}>
+                {contact.name[0]}
+              </Avatar>
 
               <ListItemText
-                primary={contact.name}
-                secondary={contact.status === 'offline' ? fToNow(contact.lastActivity) : ''}
+                primary={`${contact.name} ${contact.lastname}`}
+                secondary={contact.email}
                 primaryTypographyProps={{ typography: 'subtitle2' }}
                 secondaryTypographyProps={{ typography: 'caption', color: 'text.disabled' }}
               />

@@ -3,31 +3,34 @@ import { styled, alpha } from '@mui/material/styles';
 // theme
 import { bgBlur } from 'src/theme/css';
 
+interface StyledArrowProps {
+  arrow: string;
+}
 // ----------------------------------------------------------------------
 
-export const StyledArrow = styled('span')(({ arrow, theme }) => {
+export const StyledArrow = styled('span')<StyledArrowProps>(({ arrow, theme }) => {
   const SIZE = 14;
 
   const POSITION = -(SIZE / 2) + 0.5;
 
   const topStyle = {
     top: POSITION,
-    transform: 'rotate(135deg)',
+    transform: 'rotate(135deg)'
   };
 
   const bottomStyle = {
     bottom: POSITION,
-    transform: 'rotate(-45deg)',
+    transform: 'rotate(-45deg)'
   };
 
   const leftStyle = {
     left: POSITION,
-    transform: 'rotate(45deg)',
+    transform: 'rotate(45deg)'
   };
 
   const rightStyle = {
     right: POSITION,
-    transform: 'rotate(-135deg)',
+    transform: 'rotate(-135deg)'
   };
 
   return {
@@ -41,7 +44,7 @@ export const StyledArrow = styled('span')(({ arrow, theme }) => {
       0.12
     )}`,
     ...bgBlur({
-      color: theme.palette.background.paper,
+      color: theme.palette.background.paper
     }),
     // Top
     ...(arrow === 'top-left' && { ...topStyle, left: 20 }),
@@ -58,6 +61,6 @@ export const StyledArrow = styled('span')(({ arrow, theme }) => {
     // Right
     ...(arrow === 'right-top' && { ...rightStyle, top: 20 }),
     ...(arrow === 'right-center' && { ...rightStyle, top: 0, bottom: 0, margin: 'auto' }),
-    ...(arrow === 'right-bottom' && { ...rightStyle, bottom: 20 }),
+    ...(arrow === 'right-bottom' && { ...rightStyle, bottom: 20 })
   };
 });

@@ -41,7 +41,7 @@ export default function MailDetails({ mail, renderLabel }) {
         imgUrl="/assets/icons/empty/ic_email_selected.svg"
         sx={{
           borderRadius: 1.5,
-          bgcolor: 'background.default',
+          bgcolor: 'background.default'
         }}
       />
     );
@@ -59,9 +59,7 @@ export default function MailDetails({ mail, renderLabel }) {
               sx={{
                 bgcolor: alpha(label.color, 0.16),
                 color: (theme) =>
-                  theme.palette.mode === 'light'
-                    ? darken(label.color, 0.24)
-                    : lighten(label.color, 0.24),
+                  theme.palette.mode === 'light' ? darken(label.color, 0.24) : lighten(label.color, 0.24)
               }}
             >
               {label.name}
@@ -144,7 +142,7 @@ export default function MailDetails({ mail, renderLabel }) {
       direction="row"
       alignItems="center"
       sx={{
-        p: (theme) => theme.spacing(2, 2, 1, 2),
+        p: (theme) => theme.spacing(2, 2, 1, 2)
       }}
     >
       <Avatar alt={mail.from.name} src={`${mail.from.avatarUrl}`} sx={{ mr: 2 }}>
@@ -174,7 +172,7 @@ export default function MailDetails({ mail, renderLabel }) {
           mt: 0.5,
           noWrap: true,
           component: 'span',
-          typography: 'caption',
+          typography: 'caption'
         }}
       />
     </Stack>
@@ -186,7 +184,7 @@ export default function MailDetails({ mail, renderLabel }) {
       sx={{
         p: 1,
         borderRadius: 1,
-        bgcolor: 'background.neutral',
+        bgcolor: 'background.neutral'
       }}
     >
       <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -197,9 +195,7 @@ export default function MailDetails({ mail, renderLabel }) {
           <Iconify icon="eva:attach-2-fill" sx={{ mr: 0.5 }} />
           {mail.attachments.length} attachments
           <Iconify
-            icon={
-              showAttachments.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'
-            }
+            icon={showAttachments.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
             width={16}
             sx={{ ml: 0.5 }}
           />
@@ -222,7 +218,7 @@ export default function MailDetails({ mail, renderLabel }) {
                 borderRadius: 1,
                 overflow: 'hidden',
                 position: 'relative',
-                backgroundColor: 'background.neutral',
+                backgroundColor: 'background.neutral'
               }}
             >
               <FileThumbnail
@@ -247,8 +243,8 @@ export default function MailDetails({ mail, renderLabel }) {
           sx={{
             px: 2,
             '& p': {
-              typography: 'body2',
-            },
+              typography: 'body2'
+            }
           }}
         />
       </Scrollbar>
@@ -259,7 +255,7 @@ export default function MailDetails({ mail, renderLabel }) {
     <Stack
       spacing={2}
       sx={{
-        p: (theme) => theme.spacing(0, 2, 2, 2),
+        p: (theme) => theme.spacing(0, 2, 2, 2)
       }}
     >
       <Editor simple id="reply-mail" />
@@ -275,11 +271,7 @@ export default function MailDetails({ mail, renderLabel }) {
           </IconButton>
         </Stack>
 
-        <Button
-          variant="contained"
-          color="primary"
-          endIcon={<Iconify icon="iconamoon:send-fill" />}
-        >
+        <Button variant="contained" color="primary" endIcon={<Iconify icon="iconamoon:send-fill" />}>
           Send
         </Button>
       </Stack>
@@ -293,7 +285,7 @@ export default function MailDetails({ mail, renderLabel }) {
         width: 1,
         minWidth: 0,
         borderRadius: 1.5,
-        bgcolor: 'background.default',
+        bgcolor: 'background.default'
       }}
     >
       {renderHead}
@@ -317,5 +309,5 @@ export default function MailDetails({ mail, renderLabel }) {
 
 MailDetails.propTypes = {
   mail: PropTypes.object,
-  renderLabel: PropTypes.func,
+  renderLabel: PropTypes.func
 };

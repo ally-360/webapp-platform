@@ -3,10 +3,10 @@ import { Outlet } from 'react-router-dom';
 // auth
 import { AuthGuard } from 'src/auth/guard';
 // layouts
+import PosLayout from 'src/layouts/auth/pos/poslayout';
 // components
 import { LoadingScreen } from 'src/components/loading-screen';
 import StepGuard from 'src/auth/guard/step-guard';
-import PosLayout from 'src/layouts/auth/pos/poslayout';
 
 // ----------------------------------------------------------------------
 

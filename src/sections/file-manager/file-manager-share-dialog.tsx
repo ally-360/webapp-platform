@@ -42,16 +42,11 @@ export default function FileManagerShareDialog({
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <Button
-                    color="inherit"
-                    variant="contained"
-                    disabled={!inviteEmail}
-                    sx={{ mr: -0.75 }}
-                  >
+                  <Button color="inherit" variant="contained" disabled={!inviteEmail} sx={{ mr: -0.75 }}>
                     Send Invite
                   </Button>
                 </InputAdornment>
-              ),
+              )
             }}
             sx={{ mb: 2 }}
           />
@@ -91,5 +86,5 @@ FileManagerShareDialog.propTypes = {
   onClose: PropTypes.func,
   onCopyLink: PropTypes.func,
   open: PropTypes.bool,
-  shared: PropTypes.array,
+  shared: PropTypes.array
 };

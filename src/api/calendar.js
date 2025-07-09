@@ -10,7 +10,7 @@ const URL = endpoints.calendar;
 const options = {
   revalidateIfStale: false,
   revalidateOnFocus: false,
-  revalidateOnReconnect: false,
+  revalidateOnReconnect: false
 };
 
 export function useGetEvents() {
@@ -19,7 +19,7 @@ export function useGetEvents() {
   const memoizedValue = useMemo(() => {
     const events = data?.events.map((event) => ({
       ...event,
-      textColor: event.color,
+      textColor: event.color
     }));
 
     return {
@@ -27,7 +27,7 @@ export function useGetEvents() {
       eventsLoading: isLoading,
       eventsError: error,
       eventsValidating: isValidating,
-      eventsEmpty: !isLoading && !data?.events.length,
+      eventsEmpty: !isLoading && !data?.events.length
     };
   }, [data?.events, error, isLoading, isValidating]);
 
@@ -53,7 +53,7 @@ export async function createEvent(eventData) {
 
       return {
         ...currentData,
-        events,
+        events
       };
     },
     false
@@ -81,7 +81,7 @@ export async function updateEvent(eventData) {
 
       return {
         ...currentData,
-        events,
+        events
       };
     },
     false
@@ -107,7 +107,7 @@ export async function deleteEvent(eventId) {
 
       return {
         ...currentData,
-        events,
+        events
       };
     },
     false

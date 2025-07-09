@@ -34,18 +34,18 @@ const SUMMARY = [
   {
     title: '100% Original',
     description: 'Chocolate bar candy canes ice cream toffee cookie halvah.',
-    icon: 'solar:verified-check-bold',
+    icon: 'solar:verified-check-bold'
   },
   {
     title: '10 Day Replacement',
     description: 'Marshmallow biscuit donut dragée fruitcake wafer.',
-    icon: 'solar:clock-circle-bold',
+    icon: 'solar:clock-circle-bold'
   },
   {
     title: 'Year Warranty',
     description: 'Cotton candy gingerbread cake I love sugar sweet.',
-    icon: 'solar:shield-check-bold',
-  },
+    icon: 'solar:shield-check-bold'
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -90,9 +90,9 @@ export default function ProductShopDetailsView({ id }) {
           { name: 'Home', href: '/' },
           {
             name: 'Shop',
-            href: paths.product.root,
+            href: paths.product.root
           },
-          { name: product?.name },
+          { name: product?.name }
         ]}
         sx={{ mb: 5 }}
       />
@@ -117,7 +117,7 @@ export default function ProductShopDetailsView({ id }) {
         display="grid"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
         sx={{ my: 10 }}
       >
@@ -142,26 +142,24 @@ export default function ProductShopDetailsView({ id }) {
           onChange={handleChangeTab}
           sx={{
             px: 3,
-            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
           }}
         >
           {[
             {
               value: 'description',
-              label: 'Description',
+              label: 'Description'
             },
             {
               value: 'reviews',
-              label: `Reviews (${product.reviews.length})`,
-            },
+              label: `Reviews (${product.reviews.length})`
+            }
           ].map((tab) => (
             <Tab key={tab.value} value={tab.value} label={tab.label} />
           ))}
         </Tabs>
 
-        {currentTab === 'description' && (
-          <ProductDetailsDescription description={product?.description} />
-        )}
+        {currentTab === 'description' && <ProductDetailsDescription description={product?.description} />}
 
         {currentTab === 'reviews' && (
           <ProductDetailsReview
@@ -180,7 +178,7 @@ export default function ProductShopDetailsView({ id }) {
       maxWidth={settings.themeStretch ? false : 'lg'}
       sx={{
         mt: 5,
-        mb: 15,
+        mb: 15
       }}
     >
       <CartIcon totalItems={checkout.totalItems} />
@@ -195,5 +193,5 @@ export default function ProductShopDetailsView({ id }) {
 }
 
 ProductShopDetailsView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

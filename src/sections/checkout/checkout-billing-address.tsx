@@ -35,11 +35,7 @@ export default function CheckoutBillingAddress() {
                       Delete
                     </Button>
                   )}
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => checkout.onCreateBilling(address)}
-                  >
+                  <Button variant="outlined" size="small" onClick={() => checkout.onCreateBilling(address)}>
                     Deliver to this Address
                   </Button>
                 </Stack>
@@ -48,7 +44,7 @@ export default function CheckoutBillingAddress() {
                 p: 3,
                 mb: 3,
                 borderRadius: 2,
-                boxShadow: (theme) => theme.customShadows.card,
+                boxShadow: (theme) => theme.customShadows.card
               }}
             />
           ))}
@@ -75,19 +71,11 @@ export default function CheckoutBillingAddress() {
         </Grid>
 
         <Grid xs={12} md={4}>
-          <CheckoutSummary
-            total={checkout.total}
-            subTotal={checkout.subTotal}
-            discount={checkout.discount}
-          />
+          <CheckoutSummary total={checkout.total} subTotal={checkout.subTotal} discount={checkout.discount} />
         </Grid>
       </Grid>
 
-      <AddressNewForm
-        open={addressForm.value}
-        onClose={addressForm.onFalse}
-        onCreate={checkout.onCreateBilling}
-      />
+      <AddressNewForm open={addressForm.value} onClose={addressForm.onFalse} onCreate={checkout.onCreateBilling} />
     </>
   );
 }

@@ -63,7 +63,7 @@ BookingDetails.propTypes = {
   subheader: PropTypes.string,
   tableData: PropTypes.array,
   tableLabels: PropTypes.array,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -116,7 +116,7 @@ function BookingDetailsRow({ row }) {
             secondaryTypographyProps={{
               mt: 0.5,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </TableCell>
@@ -129,7 +129,7 @@ function BookingDetailsRow({ row }) {
             secondaryTypographyProps={{
               mt: 0.5,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </TableCell>
@@ -142,7 +142,7 @@ function BookingDetailsRow({ row }) {
             secondaryTypographyProps={{
               mt: 0.5,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </TableCell>
@@ -150,11 +150,7 @@ function BookingDetailsRow({ row }) {
         <TableCell>
           <Label
             variant={isLight ? 'soft' : 'filled'}
-            color={
-              (row.status === 'Paid' && 'success') ||
-              (row.status === 'Pending' && 'warning') ||
-              'error'
-            }
+            color={(row.status === 'Paid' && 'success') || (row.status === 'Pending' && 'warning') || 'error'}
           >
             {row.status}
           </Label>
@@ -167,12 +163,7 @@ function BookingDetailsRow({ row }) {
         </TableCell>
       </TableRow>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem onClick={handleDownload}>
           <Iconify icon="eva:cloud-download-fill" />
           Download
@@ -200,5 +191,5 @@ function BookingDetailsRow({ row }) {
 }
 
 BookingDetailsRow.propTypes = {
-  row: PropTypes.object,
+  row: PropTypes.object
 };

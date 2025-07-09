@@ -24,12 +24,12 @@ export default function EcommerceYearlySales({ title, subheader, chart, ...other
     colors,
     legend: {
       position: 'top',
-      horizontalAlign: 'right',
+      horizontalAlign: 'right'
     },
     xaxis: {
-      categories,
+      categories
     },
-    ...options,
+    ...options
   });
 
   const handleChangeSeries = useCallback(
@@ -55,7 +55,7 @@ export default function EcommerceYearlySales({ title, subheader, chart, ...other
                 pr: 0.5,
                 borderRadius: 1,
                 typography: 'subtitle2',
-                bgcolor: 'background.neutral',
+                bgcolor: 'background.neutral'
               }}
             >
               {seriesData}
@@ -96,5 +96,5 @@ export default function EcommerceYearlySales({ title, subheader, chart, ...other
 EcommerceYearlySales.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

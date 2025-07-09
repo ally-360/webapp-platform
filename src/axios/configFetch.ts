@@ -2,7 +2,6 @@ import { AxiosRequestConfig } from 'axios';
 
 export const configGetWithToken = (url: string): AxiosRequestConfig => {
   const localUser = localStorage.getItem('accessToken');
-  console.log(localUser);
   return {
     method: 'get',
     url,
@@ -12,6 +11,15 @@ export const configGetWithToken = (url: string): AxiosRequestConfig => {
     }
   };
 };
+
+export const configPostWithoutToken = (url: string, databody: object | string): AxiosRequestConfig => ({
+  method: 'post',
+  url,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  data: databody
+});
 
 export const configGetWithTokenParametrized = (url: string, param: string): AxiosRequestConfig => ({
   method: 'get',
@@ -32,7 +40,6 @@ export const configGet = (url: string): AxiosRequestConfig => ({
 
 export const configPatchWithToken = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
-  console.log(localUser);
   return {
     method: 'patch',
     url,
@@ -46,6 +53,7 @@ export const configPatchWithToken = (url: string, databody: object | string) => 
 
 export const configPostWithToken = (url: string, databody: object | string) => {
   const localUser = localStorage.getItem('accessToken');
+  // TODO: establecer company id en el local storage y pasarlo en el fetchwithtoken
   return {
     method: 'post',
     url,

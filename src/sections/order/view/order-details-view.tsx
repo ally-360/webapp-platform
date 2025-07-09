@@ -70,5 +70,5 @@ export default function OrderDetailsView({ id }) {
 }
 
 OrderDetailsView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

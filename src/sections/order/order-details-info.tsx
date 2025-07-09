@@ -27,11 +27,7 @@ export default function OrderDetailsInfo({ customer, delivery, payment, shipping
         }
       />
       <Stack direction="row" sx={{ p: 3 }}>
-        <Avatar
-          alt={customer.name}
-          src={customer.avatarUrl}
-          sx={{ width: 48, height: 48, mr: 2 }}
-        />
+        <Avatar alt={customer.name} src={customer.avatarUrl} sx={{ width: 48, height: 48, mr: 2 }} />
 
         <Stack spacing={0.5} alignItems="flex-start" sx={{ typography: 'body2' }}>
           <Typography variant="subtitle2">{customer.name}</Typography>
@@ -45,12 +41,7 @@ export default function OrderDetailsInfo({ customer, delivery, payment, shipping
             </Box>
           </Box>
 
-          <Button
-            size="small"
-            color="error"
-            startIcon={<Iconify icon="mingcute:add-line" />}
-            sx={{ mt: 1 }}
-          >
+          <Button size="small" color="error" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ mt: 1 }}>
             Add to Blacklist
           </Button>
         </Stack>
@@ -164,5 +155,5 @@ OrderDetailsInfo.propTypes = {
   customer: PropTypes.object,
   delivery: PropTypes.object,
   payment: PropTypes.object,
-  shippingAddress: PropTypes.object,
+  shippingAddress: PropTypes.object
 };

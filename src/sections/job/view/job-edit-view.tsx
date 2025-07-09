@@ -25,16 +25,16 @@ export default function JobEditView({ id }) {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Job',
-            href: paths.dashboard.job.root,
+            href: paths.dashboard.job.root
           },
-          { name: currentJob?.title },
+          { name: currentJob?.title }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -44,5 +44,5 @@ export default function JobEditView({ id }) {
 }
 
 JobEditView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

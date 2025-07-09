@@ -9,7 +9,7 @@ import axios, { endpoints, fetcher } from 'src/utils/axios';
 const options = {
   revalidateIfStale: false,
   revalidateOnFocus: false,
-  revalidateOnReconnect: false,
+  revalidateOnReconnect: false
 };
 
 export function useGetContacts() {
@@ -23,7 +23,7 @@ export function useGetContacts() {
       contactsLoading: isLoading,
       contactsError: error,
       contactsValidating: isValidating,
-      contactsEmpty: !isLoading && !data?.contacts.length,
+      contactsEmpty: !isLoading && !data?.contacts.length
     }),
     [data?.contacts, error, isLoading, isValidating]
   );
@@ -45,12 +45,12 @@ export function useGetConversations() {
     return {
       conversations: {
         byId,
-        allIds,
+        allIds
       },
       conversationsLoading: isLoading,
       conversationsError: error,
       conversationsValidating: isValidating,
-      conversationsEmpty: !isLoading && !allIds.length,
+      conversationsEmpty: !isLoading && !allIds.length
     };
   }, [data?.conversations, error, isLoading, isValidating]);
 
@@ -60,9 +60,7 @@ export function useGetConversations() {
 // ----------------------------------------------------------------------
 
 export function useGetConversation(conversationId) {
-  const URL = conversationId
-    ? [endpoints.chat, { params: { conversationId, endpoint: 'conversation' } }]
-    : null;
+  const URL = conversationId ? [endpoints.chat, { params: { conversationId, endpoint: 'conversation' } }] : null;
 
   const { data, isLoading, error, isValidating } = useSWR(URL, fetcher, options);
 
@@ -71,7 +69,7 @@ export function useGetConversation(conversationId) {
       conversation: data?.conversation,
       conversationLoading: isLoading,
       conversationError: error,
-      conversationValidating: isValidating,
+      conversationValidating: isValidating
     }),
     [data?.conversation, error, isLoading, isValidating]
   );
@@ -87,8 +85,8 @@ export async function sendMessage(conversationId, messageData) {
   const CONVERSATION_URL = [
     endpoints.chat,
     {
-      params: { conversationId, endpoint: 'conversation' },
-    },
+      params: { conversationId, endpoint: 'conversation' }
+    }
   ];
 
   /**
@@ -107,11 +105,11 @@ export async function sendMessage(conversationId, messageData) {
 
       const conversation = {
         ...currentConversation,
-        messages: [...currentConversation.messages, messageData],
+        messages: [...currentConversation.messages, messageData]
       };
 
       return {
-        conversation,
+        conversation
       };
     },
     false
@@ -129,13 +127,13 @@ export async function sendMessage(conversationId, messageData) {
         conversation.id === conversationId
           ? {
               ...conversation,
-              messages: [...conversation.messages, messageData],
+              messages: [...conversation.messages, messageData]
             }
           : conversation
       );
 
       return {
-        conversations,
+        conversations
       };
     },
     false
@@ -162,7 +160,7 @@ export async function createConversation(conversationData) {
       const conversations = [...currentData.conversations, conversationData];
       return {
         ...currentData,
-        conversations,
+        conversations
       };
     },
     false
@@ -188,8 +186,8 @@ export async function clickConversation(conversationId) {
     [
       URL,
       {
-        params: { endpoint: 'conversations' },
-      },
+        params: { endpoint: 'conversations' }
+      }
     ],
     (currentData) => {
       const conversations = currentData.conversations.map((conversation) =>
@@ -198,7 +196,7 @@ export async function clickConversation(conversationId) {
 
       return {
         ...currentData,
-        conversations,
+        conversations
       };
     },
     false

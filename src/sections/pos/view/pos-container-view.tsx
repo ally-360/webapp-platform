@@ -15,6 +15,7 @@ import Iconify from 'src/components/iconify';
 import { RouterLink } from 'src/routes/components';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { addSaleWindow, initializeSalesFromStorage } from 'src/redux/pos/posIndex';
+import { paths } from 'src/routes/paths';
 import PosWindowView from './pos-window-view';
 //
 const saveToLocalStorage = (state) => {
@@ -47,7 +48,7 @@ export default function PosContainerView() {
   useEffect(() => {
     if (addingNewSale && sales.length > 0) {
       setOpenTab(sales[sales.length - 1].id);
-      setAddingNewSale(false); // Restablecer el indicador
+      setAddingNewSale(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addingNewSale]);
@@ -108,7 +109,7 @@ export default function PosContainerView() {
         <CardHeader
           avatar={
             <>
-              <IconButton component={RouterLink} href="/">
+              <IconButton component={RouterLink} to={paths.dashboard.root}>
                 {/* back icon */}
                 <Iconify icon="eva:arrow-ios-back-fill" />
               </IconButton>

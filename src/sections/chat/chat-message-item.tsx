@@ -21,7 +21,7 @@ export default function ChatMessageItem({ message, participants, onOpenLightbox 
   const { me, senderDetails, hasImage } = useGetMessage({
     message,
     participants,
-    currentUserId: user.id,
+    currentUserId: user.id
   });
 
   const { firstName, avatarUrl } = senderDetails;
@@ -36,13 +36,13 @@ export default function ChatMessageItem({ message, participants, onOpenLightbox 
         mb: 1,
         color: 'text.disabled',
         ...(!me && {
-          mr: 'auto',
-        }),
+          mr: 'auto'
+        })
       }}
     >
       {!me && `${firstName},`} &nbsp;
       {formatDistanceToNowStrict(new Date(createdAt), {
-        addSuffix: true,
+        addSuffix: true
       })}
     </Typography>
   );
@@ -58,12 +58,12 @@ export default function ChatMessageItem({ message, participants, onOpenLightbox 
         bgcolor: 'background.neutral',
         ...(me && {
           color: 'grey.800',
-          bgcolor: 'primary.lighter',
+          bgcolor: 'primary.lighter'
         }),
         ...(hasImage && {
           p: 0,
-          bgcolor: 'transparent',
-        }),
+          bgcolor: 'transparent'
+        })
       }}
     >
       {hasImage ? (
@@ -77,8 +77,8 @@ export default function ChatMessageItem({ message, participants, onOpenLightbox 
             borderRadius: 1.5,
             cursor: 'pointer',
             '&:hover': {
-              opacity: 0.9,
-            },
+              opacity: 0.9
+            }
           }}
         />
       ) : (
@@ -99,12 +99,12 @@ export default function ChatMessageItem({ message, participants, onOpenLightbox 
         position: 'absolute',
         transition: (theme) =>
           theme.transitions.create(['opacity'], {
-            duration: theme.transitions.duration.shorter,
+            duration: theme.transitions.duration.shorter
           }),
         ...(me && {
           left: 'unset',
-          right: 0,
-        }),
+          right: 0
+        })
       }}
     >
       <IconButton size="small">
@@ -133,9 +133,9 @@ export default function ChatMessageItem({ message, participants, onOpenLightbox 
             position: 'relative',
             '&:hover': {
               '& .message-actions': {
-                opacity: 1,
-              },
-            },
+                opacity: 1
+              }
+            }
           }}
         >
           {renderBody}
@@ -149,5 +149,5 @@ export default function ChatMessageItem({ message, participants, onOpenLightbox 
 ChatMessageItem.propTypes = {
   message: PropTypes.object,
   onOpenLightbox: PropTypes.func,
-  participants: PropTypes.array,
+  participants: PropTypes.array
 };

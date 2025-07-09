@@ -31,7 +31,7 @@ export default function AppTopInstalledCountries({ title, subheader, list, ...ot
 AppTopInstalledCountries.propTypes = {
   list: PropTypes.array,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -48,11 +48,7 @@ function CountryItem({ country }) {
       </Stack>
 
       <Stack direction="row" alignItems="center" sx={{ minWidth: 80 }}>
-        <Iconify
-          width={14}
-          icon="ant-design:android-filled"
-          sx={{ mr: 0.5, color: 'text.disabled' }}
-        />
+        <Iconify width={14} icon="ant-design:android-filled" sx={{ mr: 0.5, color: 'text.disabled' }} />
         <Typography variant="body2">{fShortenNumber(country.android)}</Typography>
       </Stack>
 
@@ -70,5 +66,5 @@ function CountryItem({ country }) {
 }
 
 CountryItem.propTypes = {
-  country: PropTypes.object,
+  country: PropTypes.object
 };

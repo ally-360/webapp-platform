@@ -45,7 +45,7 @@ export default function InvoiceNewEditDetails() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(getAllProducts());
+    dispatch(getAllProducts({ page: 1, pageSize: 25 }));
     dispatch(getAllPDVS());
   }, [dispatch]);
 

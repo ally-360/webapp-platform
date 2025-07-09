@@ -22,21 +22,21 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
       y: {
         formatter: (value) => fNumber(value),
         title: {
-          formatter: () => '',
-        },
-      },
+          formatter: () => ''
+        }
+      }
     },
     plotOptions: {
       bar: {
         horizontal: true,
         barHeight: '28%',
-        borderRadius: 2,
-      },
+        borderRadius: 2
+      }
     },
     xaxis: {
-      categories: series.map((i) => i.label),
+      categories: series.map((i) => i.label)
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -44,13 +44,7 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
       <CardHeader title={title} subheader={subheader} />
 
       <Box sx={{ mx: 3 }}>
-        <Chart
-          type="bar"
-          dir="ltr"
-          series={[{ data: chartSeries }]}
-          options={chartOptions}
-          height={364}
-        />
+        <Chart type="bar" dir="ltr" series={[{ data: chartSeries }]} options={chartOptions} height={364} />
       </Box>
     </Card>
   );
@@ -59,5 +53,5 @@ export default function AnalyticsConversionRates({ title, subheader, chart, ...o
 AnalyticsConversionRates.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

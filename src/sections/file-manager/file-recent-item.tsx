@@ -64,8 +64,8 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
         position: 'absolute',
         ...(smUp && {
           flexShrink: 0,
-          position: 'unset',
-        }),
+          position: 'unset'
+        })
       }}
     >
       <Checkbox
@@ -89,15 +89,13 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
       secondary={
         <>
           {fData(file.size)}
-          <Box
-            sx={{ mx: 0.75, width: 2, height: 2, borderRadius: '50%', bgcolor: 'currentColor' }}
-          />
+          <Box sx={{ mx: 0.75, width: 2, height: 2, borderRadius: '50%', bgcolor: 'currentColor' }} />
           {fDateTime(file.modifiedAt)}
         </>
       }
       primaryTypographyProps={{
         noWrap: true,
-        typography: 'subtitle2',
+        typography: 'subtitle2'
       }}
       secondaryTypographyProps={{
         mt: 0.5,
@@ -105,7 +103,7 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
         alignItems: 'center',
         typography: 'caption',
         color: 'text.disabled',
-        display: 'inline-flex',
+        display: 'inline-flex'
       }}
     />
   );
@@ -118,9 +116,9 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
           width: 24,
           height: 24,
           '&:first-of-type': {
-            fontSize: 12,
-          },
-        },
+            fontSize: 12
+          }
+        }
       }}
     >
       {file.shared?.map((person) => (
@@ -145,9 +143,9 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
           p: { xs: 2.5, sm: 2 },
           '&:hover': {
             bgcolor: 'background.paper',
-            boxShadow: (theme) => theme.customShadows.z20,
+            boxShadow: (theme) => theme.customShadows.z20
           },
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -160,12 +158,7 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
         {renderAction}
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -231,5 +224,5 @@ export default function FileRecentItem({ file, onDelete, sx, ...other }) {
 FileRecentItem.propTypes = {
   file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   onDelete: PropTypes.func,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

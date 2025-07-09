@@ -19,7 +19,7 @@ export default function FaqsView() {
         sx={{
           pb: 10,
           pt: { xs: 10, md: 15 },
-          position: 'relative',
+          position: 'relative'
         }}
       >
         <FaqsCategory />
@@ -27,10 +27,10 @@ export default function FaqsView() {
         <Typography
           variant="h3"
           sx={{
-            my: { xs: 5, md: 10 },
+            my: { xs: 5, md: 10 }
           }}
         >
-          Frequently asked questions
+          Preguntas Frecuentes
         </Typography>
 
         <Box
@@ -38,7 +38,7 @@ export default function FaqsView() {
           display="grid"
           gridTemplateColumns={{
             xs: 'repeat(1, 1fr)',
-            md: 'repeat(2, 1fr)',
+            md: 'repeat(2, 1fr)'
           }}
         >
           <FaqsList />

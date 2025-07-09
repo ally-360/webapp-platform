@@ -62,11 +62,7 @@ export default function ProfilePostItem({ post }) {
           {user?.displayName}
         </Link>
       }
-      subheader={
-        <Box sx={{ color: 'text.disabled', typography: 'caption', mt: 0.5 }}>
-          {fDate(post.createdAt)}
-        </Box>
-      }
+      subheader={<Box sx={{ color: 'text.disabled', typography: 'caption', mt: 0.5 }}>{fDate(post.createdAt)}</Box>}
       action={
         <IconButton>
           <Iconify icon="eva:more-vertical-fill" />
@@ -85,7 +81,7 @@ export default function ProfilePostItem({ post }) {
             sx={{
               p: 1.5,
               flexGrow: 1,
-              bgcolor: 'background.neutral',
+              bgcolor: 'background.neutral'
             }}
           >
             <Stack
@@ -96,9 +92,7 @@ export default function ProfilePostItem({ post }) {
             >
               <Box sx={{ typography: 'subtitle2' }}>{comment.author.name}</Box>
 
-              <Box sx={{ typography: 'caption', color: 'text.disabled' }}>
-                {fDate(comment.createdAt)}
-              </Box>
+              <Box sx={{ typography: 'caption', color: 'text.disabled' }}>{fDate(comment.createdAt)}</Box>
             </Stack>
 
             <Box sx={{ typography: 'body2', color: 'text.secondary' }}>{comment.message}</Box>
@@ -114,7 +108,7 @@ export default function ProfilePostItem({ post }) {
       direction="row"
       alignItems="center"
       sx={{
-        p: (theme) => theme.spacing(0, 3, 3, 3),
+        p: (theme) => theme.spacing(0, 3, 3, 3)
       }}
     >
       <Avatar src={user?.photoURL} alt={user?.displayName} />
@@ -140,7 +134,7 @@ export default function ProfilePostItem({ post }) {
           pl: 1.5,
           height: 40,
           borderRadius: 1,
-          border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.32)}`,
+          border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.32)}`
         }}
       />
 
@@ -153,7 +147,7 @@ export default function ProfilePostItem({ post }) {
       direction="row"
       alignItems="center"
       sx={{
-        p: (theme) => theme.spacing(2, 3, 3, 3),
+        p: (theme) => theme.spacing(2, 3, 3, 3)
       }}
     >
       <FormControlLabel
@@ -174,8 +168,8 @@ export default function ProfilePostItem({ post }) {
           sx={{
             [`& .${avatarGroupClasses.avatar}`]: {
               width: 32,
-              height: 32,
-            },
+              height: 32
+            }
           }}
         >
           {post.personLikes.map((person) => (
@@ -203,7 +197,7 @@ export default function ProfilePostItem({ post }) {
       <Typography
         variant="body2"
         sx={{
-          p: (theme) => theme.spacing(3, 3, 2, 3),
+          p: (theme) => theme.spacing(3, 3, 2, 3)
         }}
       >
         {post.message}
@@ -223,5 +217,5 @@ export default function ProfilePostItem({ post }) {
 }
 
 ProfilePostItem.propTypes = {
-  post: PropTypes.object,
+  post: PropTypes.object
 };

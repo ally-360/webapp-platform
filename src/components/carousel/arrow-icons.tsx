@@ -11,8 +11,8 @@ export function LeftIcon({ icon = 'eva:arrow-ios-forward-fill', isRTL }) {
       sx={{
         transform: ' scaleX(-1)',
         ...(isRTL && {
-          transform: ' scaleX(1)',
-        }),
+          transform: ' scaleX(1)'
+        })
       }}
     />
   );
@@ -20,7 +20,7 @@ export function LeftIcon({ icon = 'eva:arrow-ios-forward-fill', isRTL }) {
 
 LeftIcon.propTypes = {
   icon: PropTypes.string,
-  isRTL: PropTypes.bool,
+  isRTL: PropTypes.bool
 };
 
 export function RightIcon({ icon = 'eva:arrow-ios-forward-fill', isRTL }) {
@@ -29,8 +29,8 @@ export function RightIcon({ icon = 'eva:arrow-ios-forward-fill', isRTL }) {
       icon={icon}
       sx={{
         ...(isRTL && {
-          transform: ' scaleX(-1)',
-        }),
+          transform: ' scaleX(-1)'
+        })
       }}
     />
   );
@@ -38,5 +38,5 @@ export function RightIcon({ icon = 'eva:arrow-ios-forward-fill', isRTL }) {
 
 RightIcon.propTypes = {
   icon: PropTypes.string,
-  isRTL: PropTypes.bool,
+  isRTL: PropTypes.bool
 };

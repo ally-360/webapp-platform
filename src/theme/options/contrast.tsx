@@ -9,10 +9,10 @@ export function contrast(contrastBold, mode) {
       mode === 'light' && {
         palette: {
           background: {
-            default: palette(mode).grey[100],
-          },
-        },
-      }),
+            default: palette(mode).grey[100]
+          }
+        }
+      })
   };
 
   const components = {
@@ -20,15 +20,15 @@ export function contrast(contrastBold, mode) {
       MuiCard: {
         styleOverrides: {
           root: {
-            boxShadow: customShadows(mode).z4,
-          },
-        },
-      },
-    }),
+            boxShadow: customShadows(mode).z4
+          }
+        }
+      }
+    })
   };
 
   return {
     theme,
-    components,
+    components
   };
 }

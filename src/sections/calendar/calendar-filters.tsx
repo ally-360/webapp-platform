@@ -36,7 +36,7 @@ export default function CalendarFilters({
   //
   events,
   colorOptions,
-  onClickEvent,
+  onClickEvent
 }) {
   const handleFilterColors = useCallback(
     (newValue) => {
@@ -60,12 +60,7 @@ export default function CalendarFilters({
   );
 
   const renderHead = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      sx={{ py: 2, pr: 1, pl: 2.5 }}
-    >
+    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 2, pr: 1, pl: 2.5 }}>
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
         Filters
       </Typography>
@@ -87,11 +82,7 @@ export default function CalendarFilters({
   const renderColors = (
     <Stack spacing={1} sx={{ my: 3, px: 2.5 }}>
       <Typography variant="subtitle2">Colors</Typography>
-      <ColorPicker
-        colors={colorOptions}
-        selected={filters.colors}
-        onSelectColor={handleFilterColors}
-      />
+      <ColorPicker colors={colorOptions} selected={filters.colors} onSelectColor={handleFilterColors} />
     </Stack>
   );
 
@@ -109,8 +100,8 @@ export default function CalendarFilters({
           slotProps={{
             textField: {
               error: dateError,
-              helperText: dateError && 'End date must be later than start date',
-            },
+              helperText: dateError && 'End date must be later than start date'
+            }
           }}
         />
       </Stack>
@@ -138,7 +129,7 @@ export default function CalendarFilters({
                 height: 0,
                 position: 'absolute',
                 borderRight: '10px solid transparent',
-                borderTop: `10px solid ${event.color}`,
+                borderTop: `10px solid ${event.color}`
               }}
             />
 
@@ -150,20 +141,11 @@ export default function CalendarFilters({
                 </Typography>
               }
               secondary={
-                <Typography
-                  variant="caption"
-                  component="div"
-                  sx={{ fontSize: 11, color: 'text.disabled' }}
-                >
+                <Typography variant="caption" component="div" sx={{ fontSize: 11, color: 'text.disabled' }}>
                   {event.allDay ? (
                     fDateTime(event.start, 'dd MMM yy')
                   ) : (
-                    <>
-                      {`${fDateTime(event.start, 'dd MMM yy p')} - ${fDateTime(
-                        event.end,
-                        'dd MMM yy p'
-                      )}`}
-                    </>
+                    <>{`${fDateTime(event.start, 'dd MMM yy p')} - ${fDateTime(event.end, 'dd MMM yy p')}`}</>
                   )}
                 </Typography>
               }
@@ -181,10 +163,10 @@ export default function CalendarFilters({
       open={open}
       onClose={onClose}
       slotProps={{
-        backdrop: { invisible: true },
+        backdrop: { invisible: true }
       }}
       PaperProps={{
-        sx: { width: 320 },
+        sx: { width: 320 }
       }}
     >
       {renderHead}
@@ -210,5 +192,5 @@ CalendarFilters.propTypes = {
   onClose: PropTypes.func,
   onFilters: PropTypes.func,
   onResetFilters: PropTypes.func,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };

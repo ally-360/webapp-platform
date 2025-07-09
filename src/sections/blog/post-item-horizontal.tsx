@@ -32,24 +32,14 @@ export default function PostItemHorizontal({ post }) {
 
   const mdUp = useResponsive('up', 'md');
 
-  const {
-    title,
-    author,
-    publish,
-    coverUrl,
-    createdAt,
-    totalViews,
-    totalShares,
-    totalComments,
-    description,
-  } = post;
+  const { title, author, publish, coverUrl, createdAt, totalViews, totalShares, totalComments, description } = post;
 
   return (
     <>
       <Stack component={Card} direction="row">
         <Stack
           sx={{
-            p: (theme) => theme.spacing(3, 3, 2, 3),
+            p: (theme) => theme.spacing(3, 3, 2, 3)
           }}
         >
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
@@ -86,7 +76,7 @@ export default function PostItemHorizontal({ post }) {
               justifyContent="flex-end"
               sx={{
                 typography: 'caption',
-                color: 'text.disabled',
+                color: 'text.disabled'
               }}
             >
               <Stack direction="row" alignItems="center">
@@ -119,12 +109,7 @@ export default function PostItemHorizontal({ post }) {
         )}
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="bottom-center"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="bottom-center" sx={{ width: 140 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -169,6 +154,6 @@ PostItemHorizontal.propTypes = {
     title: PropTypes.string,
     totalComments: PropTypes.number,
     totalShares: PropTypes.number,
-    totalViews: PropTypes.number,
-  }),
+    totalViews: PropTypes.number
+  })
 };

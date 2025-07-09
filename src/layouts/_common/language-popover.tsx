@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { m } from 'framer-motion';
 // @mui
 import MenuItem from '@mui/material/MenuItem';
@@ -36,9 +36,7 @@ export default function LanguagePopover() {
         sx={{
           width: 40,
           height: 40,
-          ...(popover.open && {
-            bgcolor: 'action.selected',
-          }),
+          ...(popover.open ? { bgcolor: 'action.selected' } : {})
         }}
       >
         <Iconify icon={locales.currentLang.icon} sx={{ borderRadius: 0.65, width: 28 }} />

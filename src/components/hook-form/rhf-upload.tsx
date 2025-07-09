@@ -30,7 +30,7 @@ export function RHFUploadAvatar({ name, ...other }) {
 }
 
 RHFUploadAvatar.propTypes = {
-  name: PropTypes.string,
+  name: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -42,15 +42,13 @@ export function RHFUploadBox({ name, ...other }) {
     <Controller
       name={name}
       control={control}
-      render={({ field, fieldState: { error } }) => (
-        <UploadBox files={field.value} error={!!error} {...other} />
-      )}
+      render={({ field, fieldState: { error } }) => <UploadBox files={field.value} error={!!error} {...other} />}
     />
   );
 }
 
 RHFUploadBox.propTypes = {
-  name: PropTypes.string,
+  name: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -101,5 +99,5 @@ export function RHFUpload({ name, multiple, helperText, ...other }) {
 RHFUpload.propTypes = {
   helperText: PropTypes.string,
   multiple: PropTypes.bool,
-  name: PropTypes.string,
+  name: PropTypes.string
 };

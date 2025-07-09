@@ -28,7 +28,7 @@ export default function CustomDateRangePicker({
   open,
   onClose,
   //
-  error,
+  error
 }) {
   const mdUp = useResponsive('up', 'md');
 
@@ -43,9 +43,9 @@ export default function CustomDateRangePicker({
       PaperProps={{
         sx: {
           ...(isCalendarView && {
-            maxWidth: 720,
-          }),
-        },
+            maxWidth: 720
+          })
+        }
       }}
     >
       <DialogTitle sx={{ pb: 2 }}>{title}</DialogTitle>
@@ -54,8 +54,8 @@ export default function CustomDateRangePicker({
         sx={{
           ...(isCalendarView &&
             mdUp && {
-              overflow: 'unset',
-            }),
+              overflow: 'unset'
+            })
         }}
       >
         <Stack
@@ -66,17 +66,11 @@ export default function CustomDateRangePicker({
         >
           {isCalendarView ? (
             <>
-              <Paper
-                variant="outlined"
-                sx={{ borderRadius: 2, borderColor: 'divider', borderStyle: 'dashed' }}
-              >
+              <Paper variant="outlined" sx={{ borderRadius: 2, borderColor: 'divider', borderStyle: 'dashed' }}>
                 <DateCalendar value={startDate} onChange={onChangeStartDate} />
               </Paper>
 
-              <Paper
-                variant="outlined"
-                sx={{ borderRadius: 2, borderColor: 'divider', borderStyle: 'dashed' }}
-              >
+              <Paper variant="outlined" sx={{ borderRadius: 2, borderColor: 'divider', borderStyle: 'dashed' }}>
                 <DateCalendar value={endDate} onChange={onChangeEndDate} />
               </Paper>
             </>
@@ -118,5 +112,5 @@ CustomDateRangePicker.propTypes = {
   title: PropTypes.string,
   variant: PropTypes.oneOf(['input', 'calendar']),
   startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
-  endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]),
+  endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)])
 };

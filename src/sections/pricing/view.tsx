@@ -32,7 +32,7 @@ export default function PricingView() {
       sx={{
         pt: 15,
         pb: 10,
-        minHeight: 1,
+        minHeight: 1
       }}
     >
       <Typography variant="h3" align="center" paragraph>
@@ -58,7 +58,7 @@ export default function PricingView() {
                 sx={{
                   whiteSpace: 'nowrap',
                   color: 'success.main',
-                  typography: 'overline',
+                  typography: 'overline'
                 }}
               >
                 save 10%

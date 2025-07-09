@@ -98,7 +98,7 @@ export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, 
           value={currentStatus}
           onChange={onChangeStatus}
           sx={{
-            maxWidth: 160,
+            maxWidth: 160
           }}
         >
           {statusOptions.map((option) => (
@@ -113,7 +113,7 @@ export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, 
         <Box sx={{ height: 1, display: 'flex', flexDirection: 'column' }}>
           <DialogActions
             sx={{
-              p: 1.5,
+              p: 1.5
             }}
           >
             <Button color="inherit" variant="contained" onClick={view.onFalse}>
@@ -136,5 +136,5 @@ InvoiceToolbar.propTypes = {
   currentStatus: PropTypes.string,
   invoice: PropTypes.object,
   onChangeStatus: PropTypes.func,
-  statusOptions: PropTypes.array,
+  statusOptions: PropTypes.array
 };

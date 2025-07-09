@@ -38,7 +38,7 @@ export default function FileManagerNewFolderDialog({
     (acceptedFiles) => {
       const newFiles = acceptedFiles.map((file) =>
         Object.assign(file, {
-          preview: URL.createObjectURL(file),
+          preview: URL.createObjectURL(file)
         })
       );
 
@@ -67,24 +67,14 @@ export default function FileManagerNewFolderDialog({
 
       <DialogContent dividers sx={{ pt: 1, pb: 0, border: 'none' }}>
         {(onCreate || onUpdate) && (
-          <TextField
-            fullWidth
-            label="Folder name"
-            value={folderName}
-            onChange={onChangeFolderName}
-            sx={{ mb: 3 }}
-          />
+          <TextField fullWidth label="Folder name" value={folderName} onChange={onChangeFolderName} sx={{ mb: 3 }} />
         )}
 
         <Upload multiple files={files} onDrop={handleDrop} onRemove={handleRemoveFile} />
       </DialogContent>
 
       <DialogActions>
-        <Button
-          variant="contained"
-          startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          onClick={handleUpload}
-        >
+        <Button variant="contained" startIcon={<Iconify icon="eva:cloud-upload-fill" />} onClick={handleUpload}>
           Upload
         </Button>
 
@@ -113,5 +103,5 @@ FileManagerNewFolderDialog.propTypes = {
   onCreate: PropTypes.func,
   onUpdate: PropTypes.func,
   open: PropTypes.bool,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

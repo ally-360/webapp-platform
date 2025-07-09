@@ -31,9 +31,9 @@ export default function BankingCurrentBalance({ list, sx }) {
         right: 16,
         bottom: 16,
         position: 'absolute',
-        color: 'primary.light',
-      },
-    }),
+        color: 'primary.light'
+      }
+    })
   });
 
   return (
@@ -41,14 +41,14 @@ export default function BankingCurrentBalance({ list, sx }) {
       sx={{
         ...bgGradient({
           color: alpha(theme.palette.grey[900], 0.8),
-          imgUrl: '/assets/background/overlay_2.jpg',
+          imgUrl: '/assets/background/overlay_2.jpg'
         }),
         height: 262,
         borderRadius: 2,
         position: 'relative',
         color: 'common.white',
         '.slick-slider, .slick-list, .slick-track, .slick-slide > div': {
-          height: 1,
+          height: 1
         },
         '&:before, &:after': {
           left: 0,
@@ -61,14 +61,14 @@ export default function BankingCurrentBalance({ list, sx }) {
           opacity: 0.16,
           borderRadius: 2,
           bgcolor: 'grey.500',
-          position: 'absolute',
+          position: 'absolute'
         },
         '&:after': {
           mx: 1,
           bottom: -8,
-          opacity: 0.24,
+          opacity: 0.24
         },
-        ...sx,
+        ...sx
       }}
     >
       <Carousel {...carousel.carouselSettings}>
@@ -82,7 +82,7 @@ export default function BankingCurrentBalance({ list, sx }) {
 
 BankingCurrentBalance.propTypes = {
   list: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -117,22 +117,18 @@ function CardItem({ card }) {
             opacity: 0.48,
             position: 'absolute',
             ...(popover.open && {
-              opacity: 1,
-            }),
+              opacity: 1
+            })
           }}
         >
           <Iconify icon="eva:more-vertical-fill" />
         </IconButton>
 
         <div>
-          <Typography sx={{ mb: 2, typography: 'subtitle2', opacity: 0.48 }}>
-            Current Balance
-          </Typography>
+          <Typography sx={{ mb: 2, typography: 'subtitle2', opacity: 0.48 }}>Current Balance</Typography>
 
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography sx={{ typography: 'h3' }}>
-              {currency.value ? '********' : fCurrency(balance)}
-            </Typography>
+            <Typography sx={{ typography: 'h3' }}>{currency.value ? '********' : fCurrency(balance)}</Typography>
 
             <IconButton color="inherit" onClick={currency.onToggle} sx={{ opacity: 0.48 }}>
               <Iconify icon={currency.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
@@ -140,12 +136,7 @@ function CardItem({ card }) {
           </Stack>
         </div>
 
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="flex-end"
-          sx={{ typography: 'subtitle1' }}
-        >
+        <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ typography: 'subtitle1' }}>
           <Box sx={{ bgcolor: 'white', lineHeight: 0, px: 0.75, borderRadius: 0.5, mr: 1 }}>
             {cardType === 'mastercard' && <Iconify width={24} icon="logos:mastercard" />}
             {cardType === 'visa' && <Iconify width={24} icon="logos:visa" />}
@@ -181,5 +172,5 @@ function CardItem({ card }) {
 }
 
 CardItem.propTypes = {
-  card: PropTypes.object,
+  card: PropTypes.object
 };

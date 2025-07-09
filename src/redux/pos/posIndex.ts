@@ -22,17 +22,15 @@ const initialState = {
         }
       ],
       customer: 'Cliente 1',
-      date: new Date(),
+      date: '',
       seller: 'Vendedor 1'
     }
-  ] // Agregando esto para manejar las ventanas de venta
-  // ...otros estados que ya tienes
+  ]
 };
 const posSlice = createSlice({
   name: 'posIndex',
   initialState,
   reducers: {
-    // START LOADING
     startLoading(state) {
       state.isLoading = true;
     },
@@ -42,13 +40,27 @@ const posSlice = createSlice({
     },
     addSaleWindow(state) {
       state.salesWindows.push({
-        id: Date.now(),
+        id: state.salesWindows.length + 1,
         products: [],
         customer: '',
-        date: new Date(),
+        date: '',
         seller: '',
         name: `venta ${state.salesWindows.length}`
       });
+    },
+    addProductToSaleWindow(state, action) {
+      const index = state.salesWindows.findIndex((window) => window.id === action.payload.id);
+      if (index !== -1) {
+        state.salesWindows[index].products.push(action.payload.product);
+      }
+    },
+    removeProductFromSaleWindow(state, action) {
+      const index = state.salesWindows.findIndex((window) => window.id === action.payload.id);
+      if (index !== -1) {
+        state.salesWindows[index].products = state.salesWindows[index].products.filter(
+          (product) => product.id !== action.payload.productId
+        );
+      }
     },
     updateSaleWindow(state, action) {
       const index = state.salesWindows.findIndex((window) => window.id === action.payload.id);

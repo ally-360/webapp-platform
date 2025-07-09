@@ -22,7 +22,7 @@ export default function BlankView() {
           height: 320,
           borderRadius: 2,
           bgcolor: (theme) => alpha(theme.palette.grey[500], 0.04),
-          border: (theme) => `dashed 1px ${theme.palette.divider}`,
+          border: (theme) => `dashed 1px ${theme.palette.divider}`
         }}
       />
     </Container>

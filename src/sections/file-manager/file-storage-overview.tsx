@@ -21,51 +21,51 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
     chart: {
       offsetY: -16,
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     grid: {
       padding: {
         top: 24,
-        bottom: 24,
-      },
+        bottom: 24
+      }
     },
     legend: {
-      show: false,
+      show: false
     },
     plotOptions: {
       radialBar: {
         startAngle: -90,
         endAngle: 90,
         hollow: {
-          size: '56%',
+          size: '56%'
         },
         dataLabels: {
           name: {
-            offsetY: 8,
+            offsetY: 8
           },
           value: {
-            offsetY: -40,
+            offsetY: -40
           },
           total: {
             label: `Used of ${fData(total)} / 50GB`,
             color: theme.palette.text.disabled,
             fontSize: theme.typography.body2.fontSize,
-            fontWeight: theme.typography.body2.fontWeight,
-          },
-        },
-      },
+            fontWeight: theme.typography.body2.fontWeight
+          }
+        }
+      }
     },
     fill: {
       type: 'gradient',
       gradient: {
         colorStops: [
           { offset: 0, color: colors[0] },
-          { offset: 100, color: colors[1] },
-        ],
-      },
+          { offset: 100, color: colors[1] }
+        ]
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -84,7 +84,7 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
                 mt: 0.5,
                 component: 'span',
                 typography: 'caption',
-                color: 'text.disabled',
+                color: 'text.disabled'
               }}
             />
 
@@ -99,5 +99,5 @@ export default function FileStorageOverview({ data, total, chart, ...other }) {
 FileStorageOverview.propTypes = {
   chart: PropTypes.object,
   data: PropTypes.array,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

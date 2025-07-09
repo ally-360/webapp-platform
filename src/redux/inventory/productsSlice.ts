@@ -11,6 +11,7 @@ interface ProductsState {
   success: boolean;
   productsEmpty: boolean;
   popupAssignInventory: boolean;
+  totalProducts: number;
 
   // Product detail
   product: getProductResponse | null;
@@ -24,6 +25,7 @@ const initialState: ProductsState = {
   success: false,
   productsEmpty: false,
   popupAssignInventory: false,
+  totalProducts: 0,
 
   // Product detail
   product: null
@@ -47,6 +49,8 @@ const productSlice = createSlice({
       state.productsLoading = false;
       state.error = null;
       state.success = true;
+      // TODO: cambiar por el total de productos que se obtengan
+      state.totalProducts = 1000;
       state.productsEmpty = action.payload.length === 0;
     },
     getProductByIdSuccess(state, action) {
@@ -90,16 +94,18 @@ export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInvento
 
 // Actions
 
-export const getAllProducts = () => async (dispatch: Dispatch) => {
-  try {
-    dispatch(productSlice.actions.startLoading());
-    const resp = await RequestService.getProducts();
-    dispatch(productSlice.actions.getAllProductsSuccess(resp.data));
-  } catch (error) {
-    console.log(error);
-    dispatch(productSlice.actions.hasError(error));
-  }
-};
+export const getAllProducts =
+  ({ page, pageSize }) =>
+  async (dispatch: Dispatch) => {
+    try {
+      dispatch(productSlice.actions.startLoading());
+      const resp = await RequestService.getProducts(page, pageSize);
+      dispatch(productSlice.actions.getAllProductsSuccess(resp.data));
+    } catch (error) {
+      console.log(error);
+      dispatch(productSlice.actions.hasError(error));
+    }
+  };
 
 export const getProductById = (id: string) => async (dispatch: Dispatch) => {
   try {

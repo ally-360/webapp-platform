@@ -15,7 +15,7 @@ export default function MenuHotProducts({ tags, ...other }) {
         variant="caption"
         sx={{
           mr: 0.5,
-          fontWeight: 'fontWeightBold',
+          fontWeight: 'fontWeightBold'
         }}
       >
         Hot Products:
@@ -31,7 +31,7 @@ export default function MenuHotProducts({ tags, ...other }) {
           sx={{
             color: 'text.secondary',
             transition: (theme) => theme.transitions.create('all'),
-            '&:hover': { color: 'primary.main' },
+            '&:hover': { color: 'primary.main' }
           }}
         >
           {index === 0 ? tag.name : `, ${tag.name} `}
@@ -42,5 +42,5 @@ export default function MenuHotProducts({ tags, ...other }) {
 }
 
 MenuHotProducts.propTypes = {
-  tags: PropTypes.array,
+  tags: PropTypes.array
 };

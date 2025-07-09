@@ -22,13 +22,13 @@ export default function Pagination(theme) {
     const defaultStyle = {
       [`& .${paginationItemClasses.root}`]: {
         ...(outlinedVariant && {
-          borderColor: alpha(theme.palette.grey[500], 0.24),
+          borderColor: alpha(theme.palette.grey[500], 0.24)
         }),
 
         [`&.${paginationItemClasses.selected}`]: {
           fontWeight: theme.typography.fontWeightSemiBold,
           ...(outlinedVariant && {
-            borderColor: 'currentColor',
+            borderColor: 'currentColor'
           }),
 
           ...(defaultColor && {
@@ -37,12 +37,12 @@ export default function Pagination(theme) {
               color: isLight ? theme.palette.common.white : theme.palette.grey[800],
               backgroundColor: theme.palette.text.primary,
               '&:hover': {
-                backgroundColor: isLight ? theme.palette.grey[700] : theme.palette.grey[100],
-              },
-            }),
-          }),
-        },
-      },
+                backgroundColor: isLight ? theme.palette.grey[700] : theme.palette.grey[100]
+              }
+            })
+          })
+        }
+      }
     };
 
     const colorStyle = COLORS.map((color) => ({
@@ -55,13 +55,13 @@ export default function Pagination(theme) {
                 color: theme.palette[color][isLight ? 'dark' : 'light'],
                 backgroundColor: alpha(theme.palette[color].main, 0.08),
                 '&:hover': {
-                  backgroundColor: alpha(theme.palette[color].main, 0.16),
-                },
-              }),
-            }),
-          },
-        },
-      }),
+                  backgroundColor: alpha(theme.palette[color].main, 0.16)
+                }
+              })
+            })
+          }
+        }
+      })
     }));
 
     return [defaultStyle, ...colorStyle];
@@ -70,8 +70,8 @@ export default function Pagination(theme) {
   return {
     MuiPagination: {
       styleOverrides: {
-        root: ({ ownerState }) => rootStyles(ownerState),
-      },
-    },
+        root: ({ ownerState }) => rootStyles(ownerState)
+      }
+    }
   };
 }

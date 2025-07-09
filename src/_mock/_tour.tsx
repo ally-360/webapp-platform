@@ -8,24 +8,24 @@ import { _tags } from './assets';
 
 export const TOUR_DETAILS_TABS = [
   { value: 'content', label: 'Tour Content' },
-  { value: 'bookers', label: 'Booker' },
+  { value: 'bookers', label: 'Booker' }
 ];
 
 export const TOUR_SORT_OPTIONS = [
   { value: 'latest', label: 'Latest' },
   { value: 'popular', label: 'Popular' },
-  { value: 'oldest', label: 'Oldest' },
+  { value: 'oldest', label: 'Oldest' }
 ];
 
 export const TOUR_PUBLISH_OPTIONS = [
   {
     value: 'published',
-    label: 'Published',
+    label: 'Published'
   },
   {
     value: 'draft',
-    label: 'Draft',
-  },
+    label: 'Draft'
+  }
 ];
 
 export const TOUR_SERVICE_OPTIONS = [
@@ -38,7 +38,7 @@ export const TOUR_SERVICE_OPTIONS = [
   { value: 'Gratuities', label: 'Gratuities' },
   { value: 'Pick-up and drop off', label: 'Pick-up and drop off' },
   { value: 'Professional guide', label: 'Professional guide' },
-  { value: 'Transport by air-conditioned', label: 'Transport by air-conditioned' },
+  { value: 'Transport by air-conditioned', label: 'Transport by air-conditioned' }
 ];
 
 const CONTENT = `
@@ -86,14 +86,14 @@ const BOOKER = [...Array(12)].map((_, index) => ({
   id: _mock.id(index),
   guests: index + 10,
   name: _mock.fullName(index),
-  avatarUrl: _mock.image.avatar(index),
+  avatarUrl: _mock.image.avatar(index)
 }));
 
 export const _tourGuides = [...Array(12)].map((_, index) => ({
   id: _mock.id(index),
   name: _mock.fullName(index),
   avatarUrl: _mock.image.avatar(index),
-  phoneNumber: _mock.phoneNumber(index),
+  phoneNumber: _mock.phoneNumber(index)
 }));
 
 export const TRAVEL_IMAGES = [...Array(16)].map((_, index) => _mock.image.travel(index));
@@ -101,7 +101,7 @@ export const TRAVEL_IMAGES = [...Array(16)].map((_, index) => _mock.image.travel
 export const _tours = [...Array(12)].map((_, index) => {
   const available = {
     startDate: _mock.time(index + 1),
-    endDate: _mock.time(index),
+    endDate: _mock.time(index)
   };
 
   const publish = index % 3 ? 'published' : 'draft';
@@ -114,7 +114,7 @@ export const _tours = [...Array(12)].map((_, index) => {
       'Gratuities',
       'Pick-up and drop off',
       'Professional guide',
-      'Transport by air-conditioned',
+      'Transport by air-conditioned'
     ];
 
   const tourGuides =
@@ -143,6 +143,6 @@ export const _tours = [...Array(12)].map((_, index) => {
     price: _mock.number.price(index),
     priceSale: _mock.number.price(index),
     totalViews: _mock.number.nativeL(index),
-    ratingNumber: _mock.number.rating(index),
+    ratingNumber: _mock.number.rating(index)
   };
 });

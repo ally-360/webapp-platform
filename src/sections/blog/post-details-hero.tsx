@@ -35,8 +35,8 @@ export default function PostDetailsHero({ title, author, coverUrl, createdAt }) 
         ...bgGradient({
           imgUrl: coverUrl,
           startColor: `${alpha(theme.palette.grey[900], 0.64)} 0%`,
-          endColor: `${alpha(theme.palette.grey[900], 0.64)} 100%`,
-        }),
+          endColor: `${alpha(theme.palette.grey[900], 0.64)} 100%`
+        })
       }}
     >
       <Container sx={{ height: 1, position: 'relative' }}>
@@ -48,7 +48,7 @@ export default function PostDetailsHero({ title, author, coverUrl, createdAt }) 
             color: 'common.white',
             position: 'absolute',
             maxWidth: 480,
-            pt: { xs: 2, md: 8 },
+            pt: { xs: 2, md: 8 }
           }}
         >
           {title}
@@ -59,7 +59,7 @@ export default function PostDetailsHero({ title, author, coverUrl, createdAt }) 
             left: 0,
             width: 1,
             bottom: 0,
-            position: 'absolute',
+            position: 'absolute'
           }}
         >
           {author && createdAt && (
@@ -68,14 +68,10 @@ export default function PostDetailsHero({ title, author, coverUrl, createdAt }) 
               alignItems="center"
               sx={{
                 px: { xs: 2, md: 3 },
-                pb: { xs: 3, md: 8 },
+                pb: { xs: 3, md: 8 }
               }}
             >
-              <Avatar
-                alt={author.name}
-                src={author.avatarUrl}
-                sx={{ width: 64, height: 64, mr: 2 }}
-              />
+              <Avatar alt={author.name} src={author.avatarUrl} sx={{ width: 64, height: 64, mr: 2 }} />
 
               <ListItemText
                 sx={{ color: 'common.white' }}
@@ -95,7 +91,7 @@ export default function PostDetailsHero({ title, author, coverUrl, createdAt }) 
             sx={{
               position: 'absolute',
               bottom: { xs: 32, md: 64 },
-              right: { xs: 16, md: 24 },
+              right: { xs: 16, md: 24 }
             }}
           >
             {_socials.map((action) => (
@@ -118,5 +114,5 @@ PostDetailsHero.propTypes = {
   author: PropTypes.object,
   coverUrl: PropTypes.string,
   createdAt: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

@@ -17,6 +17,6 @@ export default function usePopover() {
     open,
     onOpen,
     onClose,
-    setOpen,
+    setOpen
   };
 }

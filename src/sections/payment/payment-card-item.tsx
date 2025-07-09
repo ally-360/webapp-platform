@@ -25,15 +25,12 @@ export default function PaymentCardItem({ card, sx, ...other }) {
           p: 2.5,
           width: 1,
           position: 'relative',
-          ...sx,
+          ...sx
         }}
         {...other}
       >
         <Stack direction="row" alignItems="center" spacing={1}>
-          <Iconify
-            icon={(card.cardType === 'visa' && 'logos:visa') || 'logos:mastercard'}
-            width={36}
-          />
+          <Iconify icon={(card.cardType === 'visa' && 'logos:visa') || 'logos:mastercard'} width={36} />
 
           {card.primary && <Label color="info">Default</Label>}
         </Stack>
@@ -45,7 +42,7 @@ export default function PaymentCardItem({ card, sx, ...other }) {
           sx={{
             top: 8,
             right: 8,
-            position: 'absolute',
+            position: 'absolute'
           }}
         >
           <Iconify icon="eva:more-vertical-fill" />
@@ -74,5 +71,5 @@ export default function PaymentCardItem({ card, sx, ...other }) {
 
 PaymentCardItem.propTypes = {
   card: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

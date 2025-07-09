@@ -19,8 +19,8 @@ export default function BreadcrumbsLink({ link, activeLast, disabled }) {
       !activeLast && {
         cursor: 'default',
         pointerEvents: 'none',
-        color: 'text.disabled',
-      }),
+        color: 'text.disabled'
+      })
   };
 
   const renderContent = (
@@ -31,7 +31,7 @@ export default function BreadcrumbsLink({ link, activeLast, disabled }) {
           sx={{
             mr: 1,
             display: 'inherit',
-            '& svg': { width: 20, height: 20 },
+            '& svg': { width: 20, height: 20 }
           }}
         >
           {icon}
@@ -59,6 +59,6 @@ BreadcrumbsLink.propTypes = {
   link: PropTypes.shape({
     href: PropTypes.string,
     icon: PropTypes.node,
-    name: PropTypes.string,
-  }),
+    name: PropTypes.string
+  })
 };

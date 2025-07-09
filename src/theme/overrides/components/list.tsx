@@ -7,36 +7,36 @@ export default function List(theme) {
         root: {
           color: 'inherit',
           minWidth: 'auto',
-          marginRight: theme.spacing(2),
-        },
-      },
+          marginRight: theme.spacing(2)
+        }
+      }
     },
     MuiListItemAvatar: {
       styleOverrides: {
         root: {
           minWidth: 'auto',
-          marginRight: theme.spacing(2),
-        },
-      },
+          marginRight: theme.spacing(2)
+        }
+      }
     },
     MuiListItemText: {
       defaultProps: {
         primaryTypographyProps: {
-          typography: 'subtitle2',
+          typography: 'subtitle2'
         },
         secondaryTypographyProps: {
-          component: 'span',
-        },
+          component: 'span'
+        }
       },
 
       styleOverrides: {
         root: {
-          margin: 0,
+          margin: 0
         },
         multiline: {
-          margin: 0,
-        },
-      },
-    },
+          margin: 0
+        }
+      }
+    }
   };
 }
