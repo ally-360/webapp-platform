@@ -48,16 +48,16 @@ import MenuCategories from 'src/sections/categories/MenuCategories';
 import { setPopupAssignInventory } from 'src/redux/inventory/productsSlice';
 import PopupAssingInventory from 'src/sections/product/PopupAssignInventory';
 import { NewProductSchema } from 'src/interfaces/inventory/productsSchemas';
-import { NewProductInterface, PDVproduct } from 'src/interfaces/inventory/productsInterface';
+import { NewProductInterface, PDVproduct, getProductResponse } from 'src/interfaces/inventory/productsInterface';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { fNumber } from 'src/utils/format-number';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
 import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
-export default function ProductNewEditForm({ currentProduct }: { currentProduct: NewProductInterface }) {
+export default function ProductNewEditForm({ currentProduct }: { currentProduct: getProductResponse }) {
   const router = useRouter();
-  console.log('currentProduct', currentProduct);
   const mdUp = useResponsive('up', 'md', true);
 
   const dispatch = useAppDispatch();
@@ -148,10 +148,18 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     }
   }, [currentProduct?.taxesOption, includeTaxes, setValue]);
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async (data: NewProductInterface) => {
+    const lastProductsPdvs = data.productsPdvs;
+    const priceBase = data.priceBase.replace(/[^0-9.-]+/g, '');
+    const priceSale = data.priceSale.replace(/[^0-9.-]+/g, '');
+
     try {
       setValue('quantityStock', data.productsPdvs.reduce((acc: number, pdv: PDVproduct) => acc + pdv.quantity, 0) || 0);
       // Cambiar en todos los pdvs el pdv por el id del pdv y dejar el minQuantity y quantity
+      // remover las comas del precio
+
+      data.priceBase = priceBase;
+      data.priceSale = priceSale;
       data.productsPdvs = data.productsPdvs.map((pdv: PDVproduct) => ({
         pdv: pdv.id,
         minQuantity: pdv.minQuantity,
@@ -172,6 +180,8 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
       console.info('DATA', data);
     } catch (error) {
       console.error(error);
+      enqueueSnackbar('Error al crear el producto', { variant: 'error' });
+      data.productsPdvs = lastProductsPdvs;
     }
   });
 
@@ -268,15 +278,16 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     }
     if (priceBase && tax) {
       // si es 0 no se le agrega impuesto
-      console.log('tax', tax);
+      console.log('priceBase', priceBase);
 
-      const priceBaseNumber = priceBase;
+      console.log('tax', tax);
+      const priceBaseNumber = Number(priceBase.replace(/[^0-9.-]+/g, ''));
       const taxAmount = priceBaseNumber * (tax / 100);
       console.log('taxAmount', taxAmount);
       const priceSale = priceBaseNumber + taxAmount;
       console.log('priceBaseNumber', priceBaseNumber);
       console.log('priceSale', priceSale);
-      setValue('priceSale', priceSale.toFixed(0));
+      setValue('priceSale', fNumber(priceSale));
     }
   }, [priceBase, tax, setValue]);
   // Assign inventory
@@ -585,6 +596,9 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
             <RHFTextField
               name="priceBase"
               label="Precio de venta"
+              onChange={(event) => {
+                setValue('priceBase', fNumber(event.target.value));
+              }}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}

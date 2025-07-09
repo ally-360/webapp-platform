@@ -17,16 +17,12 @@ function NavSectionHorizontal({ data, config, sx, ...other }) {
       sx={{
         mx: 'auto',
         ...hideScroll.y,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
       {data.map((group, index) => (
-        <Group
-          key={group.subheader || index}
-          items={group.items}
-          config={navHorizontalConfig(config)}
-        />
+        <Group key={group.subheader || index} items={group.items} config={navHorizontalConfig(config)} />
       ))}
     </Stack>
   );
@@ -35,7 +31,7 @@ function NavSectionHorizontal({ data, config, sx, ...other }) {
 NavSectionHorizontal.propTypes = {
   config: PropTypes.object,
   data: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 export default memo(NavSectionHorizontal);
@@ -46,13 +42,7 @@ function Group({ items, config }) {
   return (
     <>
       {items.map((list) => (
-        <NavList
-          key={list.title + list.path}
-          data={list}
-          depth={1}
-          hasChild={!!list.children}
-          config={config}
-        />
+        <NavList key={list.title + list.path} data={list} depth={1} hasChild={!!list.children} config={config} />
       ))}
     </>
   );
@@ -60,5 +50,5 @@ function Group({ items, config }) {
 
 Group.propTypes = {
   config: PropTypes.object,
-  items: PropTypes.array,
+  items: PropTypes.array
 };

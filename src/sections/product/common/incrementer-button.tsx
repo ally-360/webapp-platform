@@ -23,27 +23,17 @@ const IncrementerButton = forwardRef(
         borderRadius: 1,
         typography: 'subtitle2',
         border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
-      <IconButton
-        size="small"
-        onClick={onDecrease}
-        disabled={disabledDecrease}
-        sx={{ borderRadius: 0.75 }}
-      >
+      <IconButton size="small" onClick={onDecrease} disabled={disabledDecrease} sx={{ borderRadius: 0.75 }}>
         <Iconify icon="eva:minus-fill" width={16} />
       </IconButton>
 
       {quantity}
 
-      <IconButton
-        size="small"
-        onClick={onIncrease}
-        disabled={disabledIncrease}
-        sx={{ borderRadius: 0.75 }}
-      >
+      <IconButton size="small" onClick={onIncrease} disabled={disabledIncrease} sx={{ borderRadius: 0.75 }}>
         <Iconify icon="mingcute:add-line" width={16} />
       </IconButton>
     </Stack>
@@ -56,7 +46,7 @@ IncrementerButton.propTypes = {
   onDecrease: PropTypes.func,
   onIncrease: PropTypes.func,
   quantity: PropTypes.number,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 export default IncrementerButton;

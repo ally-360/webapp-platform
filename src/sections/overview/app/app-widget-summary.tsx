@@ -16,11 +16,7 @@ import Chart from 'src/components/chart';
 export default function AppWidgetSummary({ title, percent, total, chart, sx, ...other }) {
   const theme = useTheme();
 
-  const {
-    colors = [theme.palette.primary.light, theme.palette.primary.main],
-    series,
-    options,
-  } = chart;
+  const { colors = [theme.palette.primary.light, theme.palette.primary.main], series, options } = chart;
 
   const chartOptions = {
     colors: colors.map((colr) => colr[1]),
@@ -29,32 +25,32 @@ export default function AppWidgetSummary({ title, percent, total, chart, sx, ...
       gradient: {
         colorStops: [
           { offset: 0, color: colors[0] },
-          { offset: 100, color: colors[1] },
-        ],
-      },
+          { offset: 100, color: colors[1] }
+        ]
+      }
     },
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     plotOptions: {
       bar: {
         columnWidth: '68%',
-        borderRadius: 2,
-      },
+        borderRadius: 2
+      }
     },
     tooltip: {
       x: { show: false },
       y: {
         formatter: (value) => fNumber(value),
         title: {
-          formatter: () => '',
-        },
+          formatter: () => ''
+        }
       },
-      marker: { show: false },
+      marker: { show: false }
     },
-    ...options,
+    ...options
   };
 
   return (
@@ -65,17 +61,13 @@ export default function AppWidgetSummary({ title, percent, total, chart, sx, ...
         <Stack direction="row" alignItems="center" sx={{ mt: 2, mb: 1 }}>
           <Iconify
             width={24}
-            icon={
-              percent < 0
-                ? 'solar:double-alt-arrow-down-bold-duotone'
-                : 'solar:double-alt-arrow-up-bold-duotone'
-            }
+            icon={percent < 0 ? 'solar:double-alt-arrow-down-bold-duotone' : 'solar:double-alt-arrow-up-bold-duotone'}
             sx={{
               mr: 1,
               color: 'success.main',
               ...(percent < 0 && {
-                color: 'error.main',
-              }),
+                color: 'error.main'
+              })
             }}
           />
 
@@ -99,5 +91,5 @@ AppWidgetSummary.propTypes = {
   percent: PropTypes.number,
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

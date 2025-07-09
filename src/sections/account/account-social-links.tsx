@@ -19,16 +19,16 @@ export default function AccountSocialLinks({ socialLinks }) {
     facebook: socialLinks.facebook,
     instagram: socialLinks.instagram,
     linkedin: socialLinks.linkedin,
-    twitter: socialLinks.twitter,
+    twitter: socialLinks.twitter
   };
 
   const methods = useForm({
-    defaultValues,
+    defaultValues
   });
 
   const {
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -69,7 +69,7 @@ export default function AccountSocialLinks({ socialLinks }) {
                     }
                   />
                 </InputAdornment>
-              ),
+              )
             }}
           />
         ))}
@@ -83,5 +83,5 @@ export default function AccountSocialLinks({ socialLinks }) {
 }
 
 AccountSocialLinks.propTypes = {
-  socialLinks: PropTypes.object,
+  socialLinks: PropTypes.object
 };

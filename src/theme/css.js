@@ -32,7 +32,7 @@ export const paper = ({ theme, bgcolor, dropdown }) => ({
 export const menuItem = (theme) => ({
   ...theme.typography.body2,
   padding: theme.spacing(0.75, 1),
-  borderRadius: theme.shape.borderRadius * 0.75,
+  borderRadius: 0,
   '&:not(:last-of-type)': {
     marginBottom: 4
   },

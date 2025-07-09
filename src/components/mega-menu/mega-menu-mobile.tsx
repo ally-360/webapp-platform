@@ -48,8 +48,8 @@ export default function MegaMenuMobile({ data, open, action, onOpen, onClose }) 
         PaperProps={{
           sx: {
             pb: 5,
-            width: 260,
-          },
+            width: 260
+          }
         }}
       >
         <Scrollbar>
@@ -69,7 +69,7 @@ MegaMenuMobile.propTypes = {
   data: PropTypes.array,
   onClose: PropTypes.func,
   onOpen: PropTypes.func,
-  open: PropTypes.bool,
+  open: PropTypes.bool
 };
 
 // ----------------------------------------------------------------------
@@ -79,14 +79,14 @@ const ParentItem = forwardRef(({ icon, title, hasSub, ...other }, ref) => (
     ref={ref}
     sx={{
       height: 44,
-      textTransform: 'capitalize',
+      textTransform: 'capitalize'
     }}
     {...other}
   >
     <ListItemIcon
       sx={{
         width: 24,
-        height: 24,
+        height: 24
       }}
     >
       {icon}
@@ -101,7 +101,7 @@ const ParentItem = forwardRef(({ icon, title, hasSub, ...other }, ref) => (
 ParentItem.propTypes = {
   hasSub: PropTypes.bool,
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -135,14 +135,14 @@ function SubMenu({ parent, pathname }) {
           open={openDrawer}
           onClose={handleCloseDrawer}
           slotProps={{
-            backdrop: { invisible: true },
+            backdrop: { invisible: true }
           }}
           ModalProps={{ keepMounted: true }}
           PaperProps={{
             sx: {
               width: 260 - 12,
-              borderRight: (theme) => `solid 1px ${theme.palette.divider}`,
-            },
+              borderRight: (theme) => `solid 1px ${theme.palette.divider}`
+            }
           }}
         >
           <Stack direction="row" alignItems="center" px={1} py={1.5}>
@@ -173,13 +173,7 @@ function SubMenu({ parent, pathname }) {
                     </Typography>
 
                     {items.map((link) => (
-                      <Link
-                        key={link.title}
-                        component={RouterLink}
-                        href={link.path}
-                        color="inherit"
-                        underline="none"
-                      >
+                      <Link key={link.title} component={RouterLink} href={link.path} color="inherit" underline="none">
                         <ListItemButton sx={{ px: 1.5 }}>
                           <ListItemIcon
                             sx={{
@@ -188,7 +182,7 @@ function SubMenu({ parent, pathname }) {
                               height: 24,
                               display: 'flex',
                               alignItems: 'center',
-                              justifyContent: 'center',
+                              justifyContent: 'center'
                             }}
                           >
                             <Box
@@ -196,7 +190,7 @@ function SubMenu({ parent, pathname }) {
                                 width: 4,
                                 height: 4,
                                 borderRadius: '50%',
-                                bgcolor: 'currentColor',
+                                bgcolor: 'currentColor'
                               }}
                             />
                           </ListItemIcon>
@@ -205,7 +199,7 @@ function SubMenu({ parent, pathname }) {
                             primary={link.title}
                             primaryTypographyProps={{
                               noWrap: true,
-                              typography: 'body2',
+                              typography: 'body2'
                             }}
                           />
                         </ListItemButton>
@@ -230,5 +224,5 @@ function SubMenu({ parent, pathname }) {
 
 SubMenu.propTypes = {
   parent: PropTypes.object,
-  pathname: PropTypes.string,
+  pathname: PropTypes.string
 };

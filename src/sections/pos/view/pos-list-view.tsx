@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -151,7 +151,7 @@ export default function PosListView() {
 
   return (
     <>
-      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+      <Container maxWidth={false}>
         <CustomBreadcrumbs
           heading="List"
           links={[

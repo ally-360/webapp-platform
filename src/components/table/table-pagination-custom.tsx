@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import React from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Switch from '@mui/material/Switch';
@@ -7,13 +7,22 @@ import TablePagination from '@mui/material/TablePagination';
 
 // ----------------------------------------------------------------------
 
+interface TablePaginationCustomProps {
+  dense: boolean;
+  onChangeDense: (event: any) => void;
+  rowsPerPageOptions?: number[];
+  sx?: object;
+
+  [x: string]: unknown;
+}
+
 export default function TablePaginationCustom({
   dense,
   onChangeDense,
-  rowsPerPageOptions = [10, 25, 50, 100],
+  rowsPerPageOptions = [10, 25],
   sx,
   ...other
-}) {
+}: Readonly<TablePaginationCustomProps>) {
   return (
     <Box sx={{ position: 'relative', ...sx }}>
       <TablePagination
@@ -42,10 +51,3 @@ export default function TablePaginationCustom({
     </Box>
   );
 }
-
-TablePaginationCustom.propTypes = {
-  dense: PropTypes.bool,
-  onChangeDense: PropTypes.func,
-  rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
-  sx: PropTypes.object
-};

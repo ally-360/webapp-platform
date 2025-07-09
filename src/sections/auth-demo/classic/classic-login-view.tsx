@@ -24,22 +24,22 @@ export default function ClassicLoginView() {
 
   const LoginSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string().required('Password is required'),
+    password: Yup.string().required('Password is required')
   });
 
   const defaultValues = {
     email: '',
-    password: '',
+    password: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(LoginSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -80,7 +80,7 @@ export default function ClassicLoginView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
@@ -95,14 +95,7 @@ export default function ClassicLoginView() {
         Forgot password?
       </Link>
 
-      <LoadingButton
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
+      <LoadingButton fullWidth color="inherit" size="large" type="submit" variant="contained" loading={isSubmitting}>
         Login
       </LoadingButton>
     </Stack>

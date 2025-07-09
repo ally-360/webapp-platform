@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -7,22 +7,18 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useMockedUser } from 'src/hooks/use-mocked-user';
 // utils
 import { fData } from 'src/utils/format-number';
+import { t } from 'i18next';
 // assets
-import { countries } from 'src/assets/data';
 // components
-import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import FormProvider, { RHFSwitch, RHFTextField, RHFUploadAvatar, RHFAutocomplete } from 'src/components/hook-form';
+import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
 import { useAuthContext } from 'src/auth/hooks';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { CardHeader } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -41,12 +37,12 @@ export default function AccountGeneral() {
   });
 
   const defaultValues = {
-    name: user?.profile?.name || '',
-    lastname: user?.profile?.lastname || '',
-    email: user?.profile?.email || '',
-    photo: user?.profile?.photo || null,
-    personalPhoneNumber: user?.profile?.personalPhoneNumber || '',
-    dni: user?.profile?.dni || ''
+    name: user?.profile?.name ?? '',
+    lastname: user?.profile?.lastname ?? '',
+    email: user?.email ?? '',
+    photo: user?.profile?.photo ?? '',
+    personalPhoneNumber: user?.profile?.personalPhoneNumber ?? '',
+    dni: user?.profile?.dni ?? ''
   };
 
   const methods = useForm({
@@ -59,6 +55,8 @@ export default function AccountGeneral() {
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
+
+  // TODO: revisar a donde se hace el submit porque cambio el email y está afuera del profile
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -127,7 +125,7 @@ export default function AccountGeneral() {
             >
               <RHFTextField name="name" label="Nombre" />
               <RHFTextField name="lastname" label="Apellido" />
-              <RHFTextField name="email" label="Email Address" />
+              <RHFTextField name="email" label={t('Email Address')} />
               <RHFPhoneNumber
                 type="string"
                 variant="outlined"
@@ -138,7 +136,7 @@ export default function AccountGeneral() {
                 name="personalPhoneNumber"
                 label="Télefono"
               />
-              <RHFTextField name="dni" label="Cédula de ciudadania" />
+              <RHFTextField name="dni" label="Cédula de ciudadania" disabled />
             </Box>
 
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>

@@ -19,7 +19,7 @@ export default function OrderTableToolbar({
   onFilters,
   //
   canReset,
-  onResetFilters,
+  onResetFilters
 }) {
   const popover = usePopover();
 
@@ -51,11 +51,11 @@ export default function OrderTableToolbar({
         alignItems={{ xs: 'flex-end', md: 'center' }}
         direction={{
           xs: 'column',
-          md: 'row',
+          md: 'row'
         }}
         sx={{
           p: 2.5,
-          pr: { xs: 2.5, md: 1 },
+          pr: { xs: 2.5, md: 1 }
         }}
       >
         <DatePicker
@@ -64,11 +64,11 @@ export default function OrderTableToolbar({
           onChange={handleFilterStartDate}
           slotProps={{
             textField: {
-              fullWidth: true,
-            },
+              fullWidth: true
+            }
           }}
           sx={{
-            maxWidth: { md: 200 },
+            maxWidth: { md: 200 }
           }}
         />
 
@@ -78,7 +78,7 @@ export default function OrderTableToolbar({
           onChange={handleFilterEndDate}
           slotProps={{ textField: { fullWidth: true } }}
           sx={{
-            maxWidth: { md: 200 },
+            maxWidth: { md: 200 }
           }}
         />
 
@@ -93,7 +93,7 @@ export default function OrderTableToolbar({
                 <InputAdornment position="start">
                   <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
                 </InputAdornment>
-              ),
+              )
             }}
           />
 
@@ -114,12 +114,7 @@ export default function OrderTableToolbar({
         )}
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -155,5 +150,5 @@ OrderTableToolbar.propTypes = {
   canReset: PropTypes.bool,
   filters: PropTypes.object,
   onFilters: PropTypes.func,
-  onResetFilters: PropTypes.func,
+  onResetFilters: PropTypes.func
 };

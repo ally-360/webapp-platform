@@ -17,23 +17,23 @@ const CONTACTS = [
   {
     country: 'Bali',
     address: '508 Bridle Avenue Newnan, GA 30263',
-    phoneNumber: '(239) 555-0108',
+    phoneNumber: '(239) 555-0108'
   },
   {
     country: 'London',
     address: '508 Bridle Avenue Newnan, GA 30263',
-    phoneNumber: '(319) 555-0115',
+    phoneNumber: '(319) 555-0115'
   },
   {
     country: 'Prague',
     address: '508 Bridle Avenue Newnan, GA 30263',
-    phoneNumber: '(252) 555-0126',
+    phoneNumber: '(252) 555-0126'
   },
   {
     country: 'Moscow',
     address: '508 Bridle',
-    phoneNumber: '(307) 555-0133',
-  },
+    phoneNumber: '(307) 555-0133'
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -46,12 +46,12 @@ export default function ContactHero() {
       sx={{
         ...bgGradient({
           color: alpha(theme.palette.grey[900], 0.8),
-          imgUrl: '/assets/images/contact/hero.jpg',
+          imgUrl: '/assets/images/contact/hero.jpg'
         }),
         height: { md: 560 },
         py: { xs: 10, md: 0 },
         overflow: 'hidden',
-        position: 'relative',
+        position: 'relative'
       }}
     >
       <Container component={MotionContainer}>
@@ -59,7 +59,7 @@ export default function ContactHero() {
           sx={{
             bottom: { md: 80 },
             position: { md: 'absolute' },
-            textAlign: { xs: 'center', md: 'unset' },
+            textAlign: { xs: 'center', md: 'unset' }
           }}
         >
           <TextAnimate text="Where" sx={{ color: 'primary.main' }} variants={varFade().inRight} />
@@ -109,7 +109,7 @@ function TextAnimate({ text, variants, sx, ...other }) {
         typography: 'h1',
         overflow: 'hidden',
         display: 'inline-flex',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -125,5 +125,5 @@ function TextAnimate({ text, variants, sx, ...other }) {
 TextAnimate.propTypes = {
   sx: PropTypes.object,
   text: PropTypes.string,
-  variants: PropTypes.object,
+  variants: PropTypes.object
 };

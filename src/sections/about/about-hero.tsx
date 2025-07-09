@@ -20,8 +20,7 @@ export default function AboutHero() {
         position: 'relative',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundImage:
-          'url(/assets/background/overlay_1.svg), url(/assets/images/about/hero.jpg)',
+        backgroundImage: 'url(/assets/background/overlay_1.svg), url(/assets/images/about/hero.jpg)'
       }}
     >
       <Container component={MotionContainer}>
@@ -31,8 +30,8 @@ export default function AboutHero() {
             position: { md: 'absolute' },
             textAlign: {
               xs: 'center',
-              md: 'unset',
-            },
+              md: 'unset'
+            }
           }}
         >
           <TextAnimate text="Who" variants={varFade().inRight} sx={{ color: 'primary.main' }} />
@@ -50,7 +49,7 @@ export default function AboutHero() {
               sx={{
                 mt: 3,
                 color: 'common.white',
-                fontWeight: 'fontWeightSemiBold',
+                fontWeight: 'fontWeightSemiBold'
               }}
             >
               Let&apos;s work together and
@@ -73,7 +72,7 @@ function TextAnimate({ text, variants, sx, ...other }) {
         typography: 'h1',
         overflow: 'hidden',
         display: 'inline-flex',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -89,5 +88,5 @@ function TextAnimate({ text, variants, sx, ...other }) {
 TextAnimate.propTypes = {
   sx: PropTypes.object,
   text: PropTypes.string,
-  variants: PropTypes.object,
+  variants: PropTypes.object
 };

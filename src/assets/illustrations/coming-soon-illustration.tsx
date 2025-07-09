@@ -19,14 +19,7 @@ function ComingSoonIllustration({ ...other }) {
   const PRIMARY_DARKER = theme.palette.primary.darker;
 
   return (
-    <Box
-      component="svg"
-      width="100%"
-      height="100%"
-      viewBox="0 0 480 360"
-      xmlns="http://www.w3.org/2000/svg"
-      {...other}
-    >
+    <Box component="svg" width="100%" height="100%" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" {...other}>
       <BackgroundShape />
 
       <image href="/assets/illustrations/characters/character_1.png" height="300" x="320" y="30" />
@@ -49,11 +42,7 @@ function ComingSoonIllustration({ ...other }) {
         d="M182.079 239.7h-5.1c-.6 0-1 .4-1 1V289c0 .6.4 1 1 1h5.2c.6 0 1-.4 1-1v-48.3c-.1-.5-.5-1-1.1-1zM130.978 239.7h-5.2c-.6 0-1 .4-1 1v46.7c0 .6.4 1 1 1h5.2c.6 0 1-.4 1-1v-46.6c0-.6-.4-1.1-1-1.1z"
       />
 
-      <path
-        fill="#C4CDD5"
-        d="M175.779 266h7.2v-24.7h-7.4l.2 24.7zm-50.9 0h7.2v-24.7h-7.4l.2 24.7z"
-        opacity="0.5"
-      />
+      <path fill="#C4CDD5" d="M175.779 266h7.2v-24.7h-7.4l.2 24.7zm-50.9 0h7.2v-24.7h-7.4l.2 24.7z" opacity="0.5" />
 
       <path
         fill={PRIMARY_LIGHT}

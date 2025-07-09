@@ -87,7 +87,7 @@ export default function HomeHugePackElements() {
       sx={{
         textAlign: { xs: 'center', md: 'unset' },
         pl: { md: 5 },
-        pt: { md: 15 },
+        pt: { md: 15 }
       }}
     >
       <m.div variants={varFade().inUp}>
@@ -107,11 +107,10 @@ export default function HomeHugePackElements() {
         <Typography
           sx={{
             mb: 5,
-            color: 'text.secondary',
+            color: 'text.secondary'
           }}
         >
-          We collected most popular elements. Menu, sliders, buttons, inputs etc. are all here. Just
-          dive in!
+          We collected most popular elements. Menu, sliders, buttons, inputs etc. are all here. Just dive in!
         </Typography>
       </m.div>
 
@@ -129,7 +128,7 @@ export default function HomeHugePackElements() {
         borderRadius: 2,
         bgcolor: 'unset',
         borderStyle: 'dashed',
-        p: { xs: 3, md: 5 },
+        p: { xs: 3, md: 5 }
       }}
     >
       {/* Row 1 */}
@@ -142,21 +141,13 @@ export default function HomeHugePackElements() {
         sx={{ width: 1 }}
       >
         <m.div variants={varFade().in}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Iconify icon="solar:cart-plus-bold" />}
-          >
+          <Button variant="contained" color="primary" startIcon={<Iconify icon="solar:cart-plus-bold" />}>
             Add To Cart
           </Button>
         </m.div>
 
         <m.div variants={varFade().in}>
-          <Button
-            variant="soft"
-            color="primary"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-          >
+          <Button variant="soft" color="primary" startIcon={<Iconify icon="eva:cloud-upload-fill" />}>
             Upload
           </Button>
         </m.div>
@@ -186,7 +177,7 @@ export default function HomeHugePackElements() {
             value={currentTab}
             onChange={handleChangeTab}
             sx={{
-              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
             }}
           >
             {['Angular', 'React', 'Vue'].map((tab) => (
@@ -195,7 +186,7 @@ export default function HomeHugePackElements() {
                 value={tab}
                 label={tab}
                 sx={{
-                  '&:not(:last-of-type)': { mr: 3 },
+                  '&:not(:last-of-type)': { mr: 3 }
                 }}
               />
             ))}
@@ -282,7 +273,7 @@ export default function HomeHugePackElements() {
           width: 1,
           gap: 3,
           display: 'grid',
-          gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+          gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' }
         }}
       >
         <m.div variants={varFade().in}>
@@ -319,19 +310,11 @@ export default function HomeHugePackElements() {
             </m.div>
 
             <m.div variants={varFade().in}>
-              <FormControlLabel
-                control={<Radio color="error" defaultChecked />}
-                label="Radio Button"
-                sx={{ m: 0 }}
-              />
+              <FormControlLabel control={<Radio color="error" defaultChecked />} label="Radio Button" sx={{ m: 0 }} />
             </m.div>
 
             <m.div variants={varFade().in}>
-              <FormControlLabel
-                control={<Checkbox color="info" defaultChecked />}
-                label="Checkbox"
-                sx={{ m: 0 }}
-              />
+              <FormControlLabel control={<Checkbox color="info" defaultChecked />} label="Checkbox" sx={{ m: 0 }} />
             </m.div>
 
             <m.div variants={varFade().in}>
@@ -350,23 +333,20 @@ export default function HomeHugePackElements() {
                 sx={{
                   width: 320,
                   borderRadius: 2,
-                  boxShadow: (theme) => theme.customShadows.z20,
+                  boxShadow: (theme) => theme.customShadows.z20
                 }}
               >
                 <CardHeader
                   title="Jayvion Simon"
                   subheader="California, United States"
                   avatar={
-                    <Badge
-                      variant="online"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    >
+                    <Badge variant="online" anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
                       <Avatar
                         alt={_mock.fullName(0)}
                         src={_mock.image.avatar(0)}
                         sx={{
                           width: 48,
-                          height: 48,
+                          height: 48
                         }}
                       />
                     </Badge>
@@ -381,7 +361,7 @@ export default function HomeHugePackElements() {
                     src={_mock.image.cover(12)}
                     ratio="16/9"
                     sx={{
-                      borderRadius: 1.5,
+                      borderRadius: 1.5
                     }}
                   />
                 </Box>
@@ -418,13 +398,7 @@ export default function HomeHugePackElements() {
               </m.div>
 
               <m.div variants={varFade().in}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Select"
-                  value={select}
-                  onChange={handleChangeSelect}
-                >
+                <TextField select fullWidth label="Select" value={select} onChange={handleChangeSelect}>
                   {['Option 1', 'Option 2', 'Option 3', 'Option 4'].map((option) => (
                     <MenuItem key={option} value={option}>
                       {option}
@@ -447,7 +421,7 @@ export default function HomeHugePackElements() {
     <Container
       component={MotionViewport}
       sx={{
-        py: { xs: 10, md: 15 },
+        py: { xs: 10, md: 15 }
       }}
     >
       <Grid container direction={{ xs: 'column', md: 'row-reverse' }} spacing={5}>

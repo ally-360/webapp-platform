@@ -44,7 +44,7 @@ export default function OrganizationalChart({ data, variant = 'simple', sx, ...o
 OrganizationalChart.propTypes = {
   data: PropTypes.object,
   sx: PropTypes.object,
-  variant: PropTypes.string,
+  variant: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -65,12 +65,7 @@ export function List({ data, depth, variant, sx }) {
           />
         )) ||
         (variant === 'group' && (
-          <GroupNode
-            sx={sx}
-            node={data}
-            depth={depth}
-            length={flattenArray(data.children)?.length}
-          />
+          <GroupNode sx={sx} node={data} depth={depth} length={flattenArray(data.children)?.length} />
         ))
       }
     >
@@ -83,7 +78,7 @@ List.propTypes = {
   data: PropTypes.object,
   depth: PropTypes.number,
   sx: PropTypes.object,
-  variant: PropTypes.string,
+  variant: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -102,5 +97,5 @@ SubList.propTypes = {
   data: PropTypes.array,
   depth: PropTypes.number,
   sx: PropTypes.object,
-  variant: PropTypes.string,
+  variant: PropTypes.string
 };

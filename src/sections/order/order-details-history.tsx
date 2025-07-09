@@ -29,7 +29,7 @@ export default function OrderDetailsHistory({ history }) {
         flexShrink: 0,
         borderRadius: 2,
         typography: 'body2',
-        borderStyle: 'dashed',
+        borderStyle: 'dashed'
       }}
     >
       <Stack spacing={0.5}>
@@ -58,8 +58,8 @@ export default function OrderDetailsHistory({ history }) {
         m: 0,
         [`& .${timelineItemClasses.root}:before`]: {
           flex: 0,
-          padding: 0,
-        },
+          padding: 0
+        }
       }}
     >
       {history.timeline.map((item, index) => {
@@ -77,9 +77,7 @@ export default function OrderDetailsHistory({ history }) {
             <TimelineContent>
               <Typography variant="subtitle2">{item.title}</Typography>
 
-              <Box sx={{ color: 'text.disabled', typography: 'caption', mt: 0.5 }}>
-                {fDateTime(item.time)}
-              </Box>
+              <Box sx={{ color: 'text.disabled', typography: 'caption', mt: 0.5 }}>{fDateTime(item.time)}</Box>
             </TimelineContent>
           </TimelineItem>
         );
@@ -105,5 +103,5 @@ export default function OrderDetailsHistory({ history }) {
 }
 
 OrderDetailsHistory.propTypes = {
-  history: PropTypes.object,
+  history: PropTypes.object
 };

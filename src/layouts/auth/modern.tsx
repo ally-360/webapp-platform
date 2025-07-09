@@ -19,13 +19,13 @@ export default function AuthModernLayout({ children, image }) {
         width: 1,
         mx: 'auto',
         maxWidth: 480,
-        px: { xs: 2, md: 8 },
+        px: { xs: 2, md: 8 }
       }}
     >
       <Logo
         sx={{
           mt: { xs: 2, md: 8 },
-          mb: { xs: 10, md: 8 },
+          mb: { xs: 10, md: 8 }
         }}
       />
 
@@ -35,7 +35,7 @@ export default function AuthModernLayout({ children, image }) {
           px: { xs: 3, md: 0 },
           boxShadow: { md: 'none' },
           overflow: { md: 'unset' },
-          bgcolor: { md: 'background.default' },
+          bgcolor: { md: 'background.default' }
         }}
       >
         {children}
@@ -55,7 +55,7 @@ export default function AuthModernLayout({ children, image }) {
           objectFit: 'cover',
           position: 'absolute',
           width: 'calc(100% - 32px)',
-          height: 'calc(100% - 32px)',
+          height: 'calc(100% - 32px)'
         }}
       />
     </Stack>
@@ -78,8 +78,8 @@ export default function AuthModernLayout({ children, image }) {
           opacity: { xs: 0.24, md: 0 },
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center center',
-          backgroundImage: 'url(/assets/background/overlay_4.jpg)',
-        },
+          backgroundImage: 'url(/assets/background/overlay_4.jpg)'
+        }
       }}
     >
       {renderContent}
@@ -91,5 +91,5 @@ export default function AuthModernLayout({ children, image }) {
 
 AuthModernLayout.propTypes = {
   children: PropTypes.node,
-  image: PropTypes.string,
+  image: PropTypes.string
 };

@@ -21,15 +21,60 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import React from 'react';
+import { Box, Collapse } from '@mui/material';
+import { Stack } from '@mui/system';
+import Paper from '@mui/material/Paper';
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditRow, onDeleteRow }) {
   const { sent, invoiceNumber, createDate, dueDate, status, invoiceTo, totalAmount } = row;
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
+  const collapse = useBoolean(false);
 
   const popover = usePopover();
+
+  const renderSecondary = (
+    <TableRow>
+      <TableCell sx={{ p: 0, border: 'none' }} colSpan={9}>
+        <Collapse in={collapse.value} timeout="auto" unmountOnExit sx={{ bgcolor: 'background.neutral' }}>
+          <Stack component={Paper} sx={{ m: 1.5 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              sx={{
+                p: (theme) => theme.spacing(1.5, 2, 1.5, 1.5),
+                '&:not(:last-of-type)': {
+                  borderBottom: (theme) => `solid 2px ${theme.palette.background.neutral}`
+                }
+              }}
+            >
+              <Avatar src="prueba.png" variant="rounded" sx={{ width: 48, height: 48, mr: 2 }} />
+
+              <ListItemText
+                primary="Producto 1"
+                secondary="Producto 2"
+                primaryTypographyProps={{
+                  typography: 'body2'
+                }}
+                secondaryTypographyProps={{
+                  component: 'span',
+                  color: 'text.disabled',
+                  mt: 0.5
+                }}
+              />
+
+              <Box>x 200</Box>
+
+              <Box sx={{ width: 110, textAlign: 'right' }}>{fCurrency(200000)}</Box>
+            </Stack>
+          </Stack>
+        </Collapse>
+      </TableCell>
+    </TableRow>
+  );
 
   return (
     <>
@@ -106,13 +151,25 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           </Label>
         </TableCell>
 
-        <TableCell align="right" sx={{ px: 1 }}>
+        <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+          <IconButton
+            color={collapse.value ? 'inherit' : 'default'}
+            onClick={collapse.onToggle}
+            sx={{
+              ...(collapse.value && {
+                bgcolor: 'action.hover'
+              })
+            }}
+          >
+            <Iconify icon="eva:arrow-ios-downward-fill" />
+          </IconButton>
+
           <IconButton color={popover.open ? 'inherit' : 'default'} onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
       </TableRow>
-
+      {renderSecondary}
       <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem
           onClick={() => {
@@ -147,7 +204,6 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           Delete
         </MenuItem>
       </CustomPopover>
-
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}

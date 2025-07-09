@@ -39,7 +39,7 @@ export default function MultiFilePreview({ thumbnail, files, onRemove, sx }) {
                 overflow: 'hidden',
                 position: 'relative',
                 border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
-                ...sx,
+                ...sx
               }}
             >
               <FileThumbnail
@@ -62,8 +62,8 @@ export default function MultiFilePreview({ thumbnail, files, onRemove, sx }) {
                     color: 'common.white',
                     bgcolor: (theme) => alpha(theme.palette.grey[900], 0.48),
                     '&:hover': {
-                      bgcolor: (theme) => alpha(theme.palette.grey[900], 0.72),
-                    },
+                      bgcolor: (theme) => alpha(theme.palette.grey[900], 0.72)
+                    }
                   }}
                 >
                   <Iconify icon="mingcute:close-line" width={14} />
@@ -87,7 +87,7 @@ export default function MultiFilePreview({ thumbnail, files, onRemove, sx }) {
               px: 1.5,
               borderRadius: 1,
               border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
-              ...sx,
+              ...sx
             }}
           >
             <FileThumbnail file={file} />
@@ -97,7 +97,7 @@ export default function MultiFilePreview({ thumbnail, files, onRemove, sx }) {
               secondary={isNotFormatFile ? '' : fData(size)}
               secondaryTypographyProps={{
                 component: 'span',
-                typography: 'caption',
+                typography: 'caption'
               }}
             />
 
@@ -117,5 +117,5 @@ MultiFilePreview.propTypes = {
   files: PropTypes.array,
   onRemove: PropTypes.func,
   sx: PropTypes.object,
-  thumbnail: PropTypes.bool,
+  thumbnail: PropTypes.bool
 };

@@ -18,13 +18,13 @@ const StepConnector = styled(MuiStepConnector)(({ theme }) => ({
   right: 'calc(50% + 20px)',
   [`& .${stepConnectorClasses.line}`]: {
     borderTopWidth: 2,
-    borderColor: theme.palette.divider,
+    borderColor: theme.palette.divider
   },
   [`&.${stepConnectorClasses.active}, &.${stepConnectorClasses.completed}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      borderColor: theme.palette.primary.main,
-    },
-  },
+      borderColor: theme.palette.primary.main
+    }
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -37,7 +37,7 @@ export default function CheckoutSteps({ steps, activeStep, sx, ...other }) {
       connector={<StepConnector />}
       sx={{
         mb: { xs: 3, md: 5 },
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -47,8 +47,8 @@ export default function CheckoutSteps({ steps, activeStep, sx, ...other }) {
             StepIconComponent={StepIcon}
             sx={{
               [`& .${stepLabelClasses.label}`]: {
-                fontWeight: 'fontWeightSemiBold',
-              },
+                fontWeight: 'fontWeightSemiBold'
+              }
             }}
           >
             {label}
@@ -62,7 +62,7 @@ export default function CheckoutSteps({ steps, activeStep, sx, ...other }) {
 CheckoutSteps.propTypes = {
   activeStep: PropTypes.number,
   steps: PropTypes.arrayOf(PropTypes.string),
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -77,8 +77,8 @@ function StepIcon({ active, completed }) {
         height: 24,
         color: 'text.disabled',
         ...(active && {
-          color: 'primary.main',
-        }),
+          color: 'primary.main'
+        })
       }}
     >
       {completed ? (
@@ -89,7 +89,7 @@ function StepIcon({ active, completed }) {
             width: 8,
             height: 8,
             borderRadius: '50%',
-            backgroundColor: 'currentColor',
+            backgroundColor: 'currentColor'
           }}
         />
       )}
@@ -99,5 +99,5 @@ function StepIcon({ active, completed }) {
 
 StepIcon.propTypes = {
   active: PropTypes.bool,
-  completed: PropTypes.bool,
+  completed: PropTypes.bool
 };

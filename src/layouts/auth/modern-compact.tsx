@@ -33,15 +33,15 @@ export default function AuthModernCompactLayout({ children }) {
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center center',
-            backgroundImage: 'url(/assets/background/overlay_4.jpg)',
-          },
+            backgroundImage: 'url(/assets/background/overlay_4.jpg)'
+          }
         }}
       >
         <Card
           sx={{
             py: 5,
             px: 3,
-            maxWidth: 420,
+            maxWidth: 420
           }}
         >
           {children}
@@ -52,5 +52,5 @@ export default function AuthModernCompactLayout({ children }) {
 }
 
 AuthModernCompactLayout.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

@@ -18,11 +18,7 @@ export default function PostSort({ sort, sortOptions, onSort }) {
         disableRipple
         color="inherit"
         onClick={popover.onOpen}
-        endIcon={
-          <Iconify
-            icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-          />
-        }
+        endIcon={<Iconify icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'} />}
         sx={{ fontWeight: 'fontWeightSemiBold', textTransform: 'capitalize' }}
       >
         Sort By:
@@ -52,5 +48,5 @@ export default function PostSort({ sort, sortOptions, onSort }) {
 PostSort.propTypes = {
   onSort: PropTypes.func,
   sort: PropTypes.string,
-  sortOptions: PropTypes.array,
+  sortOptions: PropTypes.array
 };

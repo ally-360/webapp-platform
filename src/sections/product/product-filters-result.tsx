@@ -56,12 +56,7 @@ export default function ProductFiltersResult({
         {!!filters.gender.length && (
           <Block label="Gender:">
             {filters.gender.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                size="small"
-                onDelete={() => handleRemoveGender(item)}
-              />
+              <Chip key={item} label={item} size="small" onDelete={() => handleRemoveGender(item)} />
             ))}
           </Block>
         )}
@@ -86,7 +81,7 @@ export default function ProductFiltersResult({
                       height: 18,
                       bgcolor: item,
                       borderRadius: '50%',
-                      border: (theme) => `solid 1px ${alpha(theme.palette.common.white, 0.24)}`,
+                      border: (theme) => `solid 1px ${alpha(theme.palette.common.white, 0.24)}`
                     }}
                   />
                 }
@@ -113,11 +108,7 @@ export default function ProductFiltersResult({
         )}
 
         {canReset && (
-          <Button
-            color="error"
-            onClick={onResetFilters}
-            startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-          >
+          <Button color="error" onClick={onResetFilters} startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}>
             Clear
           </Button>
         )}
@@ -131,7 +122,7 @@ ProductFiltersResult.propTypes = {
   filters: PropTypes.object,
   onFilters: PropTypes.func,
   results: PropTypes.number,
-  onResetFilters: PropTypes.func,
+  onResetFilters: PropTypes.func
 };
 
 // ----------------------------------------------------------------------
@@ -148,7 +139,7 @@ function Block({ label, children, sx, ...other }) {
         borderRadius: 1,
         overflow: 'hidden',
         borderStyle: 'dashed',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -166,5 +157,5 @@ function Block({ label, children, sx, ...other }) {
 Block.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

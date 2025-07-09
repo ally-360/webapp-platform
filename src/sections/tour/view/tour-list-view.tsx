@@ -34,7 +34,7 @@ const defaultFilters = {
   tourGuides: [],
   services: [],
   startDate: null,
-  endDate: null,
+  endDate: null
 };
 
 // ----------------------------------------------------------------------
@@ -48,21 +48,19 @@ export default function TourListView() {
 
   const [search, setSearch] = useState({
     query: '',
-    results: [],
+    results: []
   });
 
   const [filters, setFilters] = useState(defaultFilters);
 
   const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
+    filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
   const dataFiltered = applyFilter({
     inputData: _tours,
     filters,
     sortBy,
-    dateError,
+    dateError
   });
 
   const canReset =
@@ -76,7 +74,7 @@ export default function TourListView() {
   const handleFilters = useCallback((name, value) => {
     setFilters((prevState) => ({
       ...prevState,
-      [name]: value,
+      [name]: value
     }));
   }, []);
 
@@ -88,17 +86,15 @@ export default function TourListView() {
     (inputValue) => {
       setSearch((prevState) => ({
         ...prevState,
-        query: inputValue,
+        query: inputValue
       }));
 
       if (inputValue) {
-        const results = _tours.filter(
-          (tour) => tour.name.toLowerCase().indexOf(search.query.toLowerCase()) !== -1
-        );
+        const results = _tours.filter((tour) => tour.name.toLowerCase().indexOf(search.query.toLowerCase()) !== -1);
 
         setSearch((prevState) => ({
           ...prevState,
-          results,
+          results
         }));
       }
     },
@@ -167,9 +163,9 @@ export default function TourListView() {
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Tour',
-            href: paths.dashboard.tour.root,
+            href: paths.dashboard.tour.root
           },
-          { name: 'List' },
+          { name: 'List' }
         ]}
         action={
           <Button
@@ -182,14 +178,14 @@ export default function TourListView() {
           </Button>
         }
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
       <Stack
         spacing={2.5}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       >
         {renderFilters}
@@ -240,9 +236,7 @@ const applyFilter = ({ inputData, filters, sortBy, dateError }) => {
   }
 
   if (tourGuideIds.length) {
-    inputData = inputData.filter((tour) =>
-      tour.tourGuides.some((filterItem) => tourGuideIds.includes(filterItem.id))
-    );
+    inputData = inputData.filter((tour) => tour.tourGuides.some((filterItem) => tourGuideIds.includes(filterItem.id)));
   }
 
   if (services.length) {

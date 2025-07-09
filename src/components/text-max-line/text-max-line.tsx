@@ -19,9 +19,9 @@ const TextMaxLine = forwardRef(
       WebkitLineClamp: line,
       WebkitBoxOrient: 'vertical',
       ...(persistent && {
-        height: lineHeight * line,
+        height: lineHeight * line
       }),
-      ...sx,
+      ...sx
     };
 
     if (asLink) {
@@ -60,8 +60,8 @@ TextMaxLine.propTypes = {
     'inherit',
     'overline',
     'subtitle1',
-    'subtitle2',
-  ]),
+    'subtitle2'
+  ])
 };
 
 export default TextMaxLine;

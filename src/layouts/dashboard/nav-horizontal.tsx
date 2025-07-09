@@ -27,20 +27,20 @@ function NavHorizontal() {
     <AppBar
       component="nav"
       sx={{
-        top: HEADER.H_DESKTOP_OFFSET,
+        top: HEADER.H_DESKTOP_OFFSET
       }}
     >
       <Toolbar
         sx={{
           ...bgBlur({
-            color: theme.palette.background.default,
-          }),
+            color: theme.palette.background.default
+          })
         }}
       >
         <NavSectionHorizontal
           data={navData}
           config={{
-            currentRole: user?.role || 'admin',
+            currentRole: user?.role || 'admin'
           }}
         />
       </Toolbar>

@@ -16,7 +16,7 @@ export default function BookingWidgetSummary({ title, total, icon, sx, ...other 
         justifyContent: 'space-between',
         p: 2,
         pl: 3,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -31,7 +31,7 @@ export default function BookingWidgetSummary({ title, total, icon, sx, ...other 
           height: 120,
           lineHeight: 0,
           borderRadius: '50%',
-          bgcolor: 'background.neutral',
+          bgcolor: 'background.neutral'
         }}
       >
         {icon}
@@ -44,5 +44,5 @@ BookingWidgetSummary.propTypes = {
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

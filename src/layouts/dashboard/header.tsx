@@ -16,15 +16,11 @@ import SvgColor from 'src/components/svg-color';
 import { useSettingsContext } from 'src/components/settings';
 //
 import React from 'react';
+import { companies } from 'src/_mock/business';
+import { Box } from '@mui/system';
 import { HEADER, NAV } from '../config-layout';
-import {
-  Searchbar,
-  AccountPopover,
-  SettingsButton,
-  LanguagePopover,
-  ContactsPopover,
-  NotificationsPopover
-} from '../_common';
+import { Searchbar, AccountPopover, SettingsButton, ContactsPopover, NotificationsPopover } from '../_common';
+import BusinessSwitcher from './BusinessSwitcher';
 // ----------------------------------------------------------------------
 
 export default function Header({ onOpenNav }) {
@@ -41,11 +37,17 @@ export default function Header({ onOpenNav }) {
   const offset = useOffSetTop(HEADER.H_DESKTOP);
 
   const offsetTop = offset && !isNavHorizontal;
+  const userCompanies = companies; // Aquí podrías obtener las empresas del usuario desde el estado global o contexto
 
   const renderContent = (
     <>
       {lgUp && isNavHorizontal && <Logo sx={{ mr: 2.5 }} />}
 
+      {userCompanies.length > 1 && (
+        <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+          <BusinessSwitcher />
+        </Box>
+      )}
       {!lgUp && (
         <IconButton onClick={onOpenNav}>
           <SvgColor src="/assets/icons/navbar/ic_menu_item.svg" />
@@ -55,8 +57,10 @@ export default function Header({ onOpenNav }) {
       <Searchbar />
 
       <Stack flexGrow={1} direction="row" alignItems="center" justifyContent="flex-end" spacing={{ xs: 0.5, sm: 1 }}>
-        <LanguagePopover />
+        {/* Comentado switch idioma */}
+        {/* <LanguagePopover /> */}
 
+        {/* Comantado las notificaciones */}
         <NotificationsPopover />
 
         <ContactsPopover />

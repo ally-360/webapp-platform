@@ -26,20 +26,20 @@ export default function BankingExpensesCategories({ title, subheader, chart, ...
     colors,
     labels: series.map((i) => i.label),
     stroke: {
-      colors: [theme.palette.background.paper],
+      colors: [theme.palette.background.paper]
     },
     fill: {
-      opacity: 0.8,
+      opacity: 0.8
     },
     legend: {
       position: 'right',
       itemMargin: {
         horizontal: 10,
-        vertical: 7,
-      },
+        vertical: 7
+      }
     },
     tooltip: {
-      fillSeriesColor: false,
+      fillSeriesColor: false
     },
     responsive: [
       {
@@ -47,12 +47,12 @@ export default function BankingExpensesCategories({ title, subheader, chart, ...
         options: {
           legend: {
             position: 'bottom',
-            horizontalAlign: 'left',
-          },
-        },
-      },
+            horizontalAlign: 'left'
+          }
+        }
+      }
     ],
-    ...options,
+    ...options
   });
 
   return (
@@ -66,29 +66,19 @@ export default function BankingExpensesCategories({ title, subheader, chart, ...
             m: 'auto',
             height: { sm: 160 },
             flexWrap: { sm: 'wrap' },
-            width: { xs: 240, sm: '50%' },
+            width: { xs: 240, sm: '50%' }
           },
           '& .apexcharts-datalabels-group': {
-            display: 'none',
-          },
+            display: 'none'
+          }
         }}
       >
-        <Chart
-          dir="ltr"
-          type="polarArea"
-          series={chartSeries}
-          options={chartOptions}
-          height={smUp ? 240 : 360}
-        />
+        <Chart dir="ltr" type="polarArea" series={chartSeries} options={chartOptions} height={smUp ? 240 : 360} />
       </Box>
 
       <Divider sx={{ borderStyle: 'dashed' }} />
 
-      <Box
-        display="grid"
-        gridTemplateColumns="repeat(2, 1fr)"
-        sx={{ textAlign: 'center', typography: 'h4' }}
-      >
+      <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" sx={{ textAlign: 'center', typography: 'h4' }}>
         <Stack sx={{ py: 2, borderRight: `dashed 1px ${theme.palette.divider}` }}>
           <Box component="span" sx={{ mb: 1, typography: 'body2', color: 'text.secondary' }}>
             Categories
@@ -110,5 +100,5 @@ export default function BankingExpensesCategories({ title, subheader, chart, ...
 BankingExpensesCategories.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

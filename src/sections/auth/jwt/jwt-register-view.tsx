@@ -24,7 +24,7 @@ import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { enqueueSnackbar } from 'notistack';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { RegisterSchema } from 'src/auth/interfaces/yupSchemas';
+import { RegisterSchema } from 'src/interfaces/auth/yupSchemas';
 // ----------------------------------------------------------------------
 
 export default function JwtRegisterView() {
@@ -42,12 +42,12 @@ export default function JwtRegisterView() {
 
   const defaultValues = {
     password: '',
+    email: '',
     profile: {
       personalPhoneNumber: '',
       dni: '',
       name: '',
       lastname: '',
-      email: '',
       // agregar un avatar generico de internet
       photo: 'https://i.pravatar.cc/300'
     }
@@ -130,7 +130,7 @@ export default function JwtRegisterView() {
           <RHFTextField name="profile.dni" label="Cédula de ciudadania" />
         </Stack>
 
-        <RHFTextField name="profile.email" label="Correo electrónico" />
+        <RHFTextField name="email" label="Correo electrónico" />
 
         <RHFTextField
           name="password"

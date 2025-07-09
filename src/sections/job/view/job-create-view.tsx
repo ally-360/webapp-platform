@@ -20,16 +20,16 @@ export default function JobCreateView() {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Job',
-            href: paths.dashboard.job.root,
+            href: paths.dashboard.job.root
           },
-          { name: 'New job' },
+          { name: 'New job' }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 

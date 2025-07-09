@@ -27,30 +27,28 @@ export default function ModernNewPasswordView() {
   const NewPasswordSchema = Yup.object().shape({
     code: Yup.string().min(6, 'Code must be at least 6 characters').required('Code is required'),
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    password: Yup.string()
-      .min(6, 'Password must be at least 6 characters')
-      .required('Password is required'),
+    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
     confirmPassword: Yup.string()
       .required('Confirm password is required')
-      .oneOf([Yup.ref('password')], 'Passwords must match'),
+      .oneOf([Yup.ref('password')], 'Passwords must match')
   });
 
   const defaultValues = {
     code: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    confirmPassword: ''
   };
 
   const methods = useForm({
     mode: 'onChange',
     resolver: yupResolver(NewPasswordSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -64,12 +62,7 @@ export default function ModernNewPasswordView() {
 
   const renderForm = (
     <Stack spacing={3} alignItems="center">
-      <RHFTextField
-        name="email"
-        label="Email"
-        placeholder="example@gmail.com"
-        InputLabelProps={{ shrink: true }}
-      />
+      <RHFTextField name="email" label="Email" placeholder="example@gmail.com" InputLabelProps={{ shrink: true }} />
 
       <RHFCode name="code" />
 
@@ -84,7 +77,7 @@ export default function ModernNewPasswordView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
@@ -99,17 +92,11 @@ export default function ModernNewPasswordView() {
                 <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
               </IconButton>
             </InputAdornment>
-          ),
+          )
         }}
       />
 
-      <LoadingButton
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
+      <LoadingButton fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
         Update Password
       </LoadingButton>
 
@@ -118,7 +105,7 @@ export default function ModernNewPasswordView() {
         <Link
           variant="subtitle2"
           sx={{
-            cursor: 'pointer',
+            cursor: 'pointer'
           }}
         >
           Resend code
@@ -132,7 +119,7 @@ export default function ModernNewPasswordView() {
         variant="subtitle2"
         sx={{
           alignItems: 'center',
-          display: 'inline-flex',
+          display: 'inline-flex'
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />

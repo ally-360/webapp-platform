@@ -1,45 +1,37 @@
-import PropTypes from 'prop-types';
 import isEqual from 'lodash/isEqual';
-import { useEffect, useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 // hooks
 import { useLocalStorage } from 'src/hooks/use-local-storage';
 // utils
-import { localStorageGetItem } from 'src/utils/storage-available';
 //
 import { SettingsContext } from './settings-context';
-
 // ----------------------------------------------------------------------
+export interface defaultSettingsInterface {
+  themeMode: 'light' | 'dark';
+  themeDirection: 'rtl' | 'ltr';
+  themeContrast: 'default' | 'bold';
+  themeLayout: 'vertical' | 'horizontal' | 'mini' | 'hidden';
+  themeColorPresets: 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red';
+  themeStretch: boolean;
+}
 
-export function SettingsProvider({ children, defaultSettings }) {
+export interface SettingProps {
+  children: React.ReactNode;
+  defaultSettings: defaultSettingsInterface;
+}
+export function SettingsProvider({ children, defaultSettings }: SettingProps) {
   const [openDrawer, setOpenDrawer] = useState(false);
 
   const [settings, setSettings] = useLocalStorage('settings', defaultSettings);
 
-  const isArabic = localStorageGetItem('i18nextLng') === 'ar';
-
-  useEffect(() => {
-    if (isArabic) {
-      onChangeDirectionByLang('ar');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isArabic]);
-
   const onUpdate = useCallback(
-    (name, value) => {
-      setSettings((prevState) => ({
+    (name: string, value: string) => {
+      setSettings((prevState: object) => ({
         ...prevState,
         [name]: value
       }));
     },
     [setSettings]
-  );
-
-  // Direction by lang
-  const onChangeDirectionByLang = useCallback(
-    (lang) => {
-      onUpdate('themeDirection', lang === 'ar' ? 'rtl' : 'ltr');
-    },
-    [onUpdate]
   );
 
   // Reset
@@ -62,23 +54,46 @@ export function SettingsProvider({ children, defaultSettings }) {
     () => ({
       ...settings,
       onUpdate,
-      // Direction
-      onChangeDirectionByLang,
-      // Reset
       canReset,
       onReset,
-      // Drawer
       open: openDrawer,
       onToggle: onToggleDrawer,
       onClose: onCloseDrawer
     }),
-    [onReset, onUpdate, settings, canReset, openDrawer, onCloseDrawer, onToggleDrawer, onChangeDirectionByLang]
+    [onReset, onUpdate, settings, canReset, openDrawer, onCloseDrawer, onToggleDrawer]
   );
 
   return <SettingsContext.Provider value={memoizedValue}>{children}</SettingsContext.Provider>;
 }
 
-SettingsProvider.propTypes = {
-  children: PropTypes.node,
-  defaultSettings: PropTypes.object
-};
+export interface settingProviderInterface extends defaultSettingsInterface {
+  /**
+   * Actualiza el valor de una configuración
+   */
+  onUpdate: (
+    name: 'themeMode' | 'themeDirection' | 'themeContrast' | 'themeLayout' | 'themeColorPresets' | 'themeStretch',
+    value:
+      | 'light'
+      | 'dark'
+      | 'rtl'
+      | 'ltr'
+      | 'default'
+      | 'bold'
+      | 'vertical'
+      | 'horizontal'
+      | 'hidden'
+      | 'mini'
+      | 'cyan'
+      | 'purple'
+      | 'blue'
+      | 'orange'
+      | 'red'
+      | boolean
+  ) => void;
+  canReset: boolean;
+
+  onReset: () => void;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}

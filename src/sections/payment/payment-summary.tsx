@@ -19,10 +19,7 @@ export default function PaymentSummary({ sx, ...other }) {
 
       <Typography variant="h2">9.99</Typography>
 
-      <Typography
-        component="span"
-        sx={{ alignSelf: 'center', color: 'text.disabled', ml: 1, typography: 'body2' }}
-      >
+      <Typography component="span" sx={{ alignSelf: 'center', color: 'text.disabled', ml: 1, typography: 'body2' }}>
         / mo
       </Typography>
     </Stack>
@@ -34,7 +31,7 @@ export default function PaymentSummary({ sx, ...other }) {
         p: 5,
         borderRadius: 2,
         bgcolor: 'background.neutral',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -94,5 +91,5 @@ export default function PaymentSummary({ sx, ...other }) {
 }
 
 PaymentSummary.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

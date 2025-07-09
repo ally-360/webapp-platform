@@ -8,16 +8,16 @@ export const NewProductSchema = Yup.object().shape({
 
   barCode: Yup.string().required('Código de barras es requerido'),
   sku: Yup.string().optional(),
-  priceBase: Yup.string().required('El precio debe ser mayo a $0.00'),
-  priceSale: Yup.string().required('El precio debe ser mayo a $0.00'),
+  priceBase: Yup.string().required('El precio debe ser mayor a $0.00'),
+  priceSale: Yup.string().required('El precio debe ser mayor a $0.00'),
   quantityStock: Yup.number(),
 
   category: Yup.string().required('La categoria es requerida'),
   brand: Yup.string().required('La marca es requerida'),
 
   typeProduct: Yup.number(),
-  state: Yup.boolean(),
-  sellInNegative: Yup.boolean(),
+  state: Yup.boolean().required(),
+  sellInNegative: Yup.boolean().required(),
 
   // not required
   taxesOption: Yup.number()

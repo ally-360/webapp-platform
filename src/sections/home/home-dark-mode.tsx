@@ -31,17 +31,13 @@ export default function HomeDarkMode() {
       </m.div>
 
       <m.div variants={varFade().inUp}>
-        <Typography sx={{ color: 'grey.500' }}>
-          A dark theme that feels easier on the eyes.
-        </Typography>
+        <Typography sx={{ color: 'grey.500' }}>A dark theme that feels easier on the eyes.</Typography>
       </m.div>
 
       <m.div variants={varFade().inUp}>
         <Switch
           checked={settings.themeMode === 'dark'}
-          onClick={() =>
-            settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')
-          }
+          onClick={() => settings.onUpdate('themeMode', settings.themeMode === 'light' ? 'dark' : 'light')}
         />
       </m.div>
     </Stack>
@@ -55,7 +51,7 @@ export default function HomeDarkMode() {
         sx={{
           borderRadius: 2,
           my: { xs: 5, md: 10 },
-          boxShadow: (theme) => `-40px 40px 80px ${alpha(theme.palette.common.black, 0.24)}`,
+          boxShadow: (theme) => `-40px 40px 80px ${alpha(theme.palette.common.black, 0.24)}`
         }}
       />
     </m.div>
@@ -67,7 +63,7 @@ export default function HomeDarkMode() {
         textAlign: 'center',
         bgcolor: 'grey.900',
         pt: { xs: 10, md: 15 },
-        pb: { xs: 10, md: 20 },
+        pb: { xs: 10, md: 20 }
       }}
     >
       <Container component={MotionViewport}>

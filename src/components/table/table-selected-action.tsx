@@ -1,10 +1,19 @@
-import PropTypes from 'prop-types';
 // @mui
 import Checkbox from '@mui/material/Checkbox';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import React from 'react';
 
 // ----------------------------------------------------------------------
+interface TableSelectedActionProps {
+  dense: boolean;
+  action: React.ReactNode;
+  rowCount: number;
+  numSelected: number;
+  onSelectAllRows: (checked: boolean) => void;
+  sx?: object;
+  [x: string]: unknown;
+}
 
 export default function TableSelectedAction({
   dense,
@@ -14,7 +23,7 @@ export default function TableSelectedAction({
   onSelectAllRows,
   sx,
   ...other
-}) {
+}: TableSelectedActionProps) {
   if (!numSelected) {
     return null;
   }
@@ -34,9 +43,9 @@ export default function TableSelectedAction({
         position: 'absolute',
         bgcolor: 'primary.lighter',
         ...(dense && {
-          height: 38,
+          height: 38
         }),
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -53,8 +62,8 @@ export default function TableSelectedAction({
           flexGrow: 1,
           color: 'primary.main',
           ...(dense && {
-            ml: 3,
-          }),
+            ml: 3
+          })
         }}
       >
         {numSelected} selected
@@ -64,12 +73,3 @@ export default function TableSelectedAction({
     </Stack>
   );
 }
-
-TableSelectedAction.propTypes = {
-  action: PropTypes.node,
-  dense: PropTypes.bool,
-  numSelected: PropTypes.number,
-  onSelectAllRows: PropTypes.func,
-  rowCount: PropTypes.number,
-  sx: PropTypes.object,
-};

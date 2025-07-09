@@ -19,9 +19,7 @@ export default function TourDetailsBookers({ bookers }) {
 
   const handleClick = useCallback(
     (item) => {
-      const selected = approved.includes(item)
-        ? approved.filter((value) => value !== item)
-        : [...approved, item];
+      const selected = approved.includes(item) ? approved.filter((value) => value !== item) : [...approved, item];
 
       setApproved(selected);
     },
@@ -35,7 +33,7 @@ export default function TourDetailsBookers({ bookers }) {
       gridTemplateColumns={{
         xs: 'repeat(1, 1fr)',
         sm: 'repeat(2, 1fr)',
-        md: 'repeat(3, 1fr)',
+        md: 'repeat(3, 1fr)'
       }}
     >
       {bookers.map((booker) => (
@@ -51,7 +49,7 @@ export default function TourDetailsBookers({ bookers }) {
 }
 
 TourDetailsBookers.propTypes = {
-  bookers: PropTypes.array,
+  bookers: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -74,7 +72,7 @@ function BookerItem({ booker, selected, onSelected }) {
             mt: 0.5,
             component: 'span',
             typography: 'caption',
-            color: 'text.disabled',
+            color: 'text.disabled'
           }}
         />
 
@@ -86,8 +84,8 @@ function BookerItem({ booker, selected, onSelected }) {
               borderRadius: 1,
               bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
               '&:hover': {
-                bgcolor: (theme) => alpha(theme.palette.error.main, 0.16),
-              },
+                bgcolor: (theme) => alpha(theme.palette.error.main, 0.16)
+              }
             }}
           >
             <Iconify width={18} icon="solar:phone-bold" />
@@ -100,8 +98,8 @@ function BookerItem({ booker, selected, onSelected }) {
               borderRadius: 1,
               bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
               '&:hover': {
-                bgcolor: (theme) => alpha(theme.palette.info.main, 0.16),
-              },
+                bgcolor: (theme) => alpha(theme.palette.info.main, 0.16)
+              }
             }}
           >
             <Iconify width={18} icon="solar:chat-round-dots-bold" />
@@ -114,8 +112,8 @@ function BookerItem({ booker, selected, onSelected }) {
               borderRadius: 1,
               bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
               '&:hover': {
-                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
-              },
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16)
+              }
             }}
           >
             <Iconify width={18} icon="fluent:mail-24-filled" />
@@ -127,9 +125,7 @@ function BookerItem({ booker, selected, onSelected }) {
         size="small"
         variant={selected ? 'text' : 'outlined'}
         color={selected ? 'success' : 'inherit'}
-        startIcon={
-          selected ? <Iconify width={18} icon="eva:checkmark-fill" sx={{ mr: -0.75 }} /> : null
-        }
+        startIcon={selected ? <Iconify width={18} icon="eva:checkmark-fill" sx={{ mr: -0.75 }} /> : null}
         onClick={onSelected}
       >
         {selected ? 'Approved' : 'Approve'}
@@ -141,5 +137,5 @@ function BookerItem({ booker, selected, onSelected }) {
 BookerItem.propTypes = {
   booker: PropTypes.object,
   onSelected: PropTypes.func,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

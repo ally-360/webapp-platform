@@ -2,13 +2,14 @@ import { Navigate, useRoutes } from 'react-router-dom';
 // layouts
 // config
 //
-import { IndexGuard } from 'src/auth/guard';
 import React from 'react';
+import MainLayout from 'src/layouts/main';
+import HomePage from 'src/pages/home';
 import { mainRoutes } from './main';
 import { authRoutes } from './auth';
-import { authDemoRoutes } from './auth-demo';
 import { dashboardRoutes } from './dashboard';
 import { componentsRoutes } from './components';
+import { posRoutes } from './pos';
 
 // ----------------------------------------------------------------------
 
@@ -25,12 +26,15 @@ export default function Router() {
     // SET INDEX PAGE WITH HOME PAGE
     {
       path: '/',
-      element: <IndexGuard />
+      element: (
+        <MainLayout>
+          <HomePage />
+        </MainLayout>
+      )
     },
 
     // Auth routes
     ...authRoutes,
-    ...authDemoRoutes,
 
     // Dashboard routes
     ...dashboardRoutes,
@@ -40,6 +44,9 @@ export default function Router() {
 
     // Components routes
     ...componentsRoutes,
+
+    // POS routes
+    ...posRoutes,
 
     // No match 404
     { path: '*', element: <Navigate to="/404" replace /> }

@@ -10,15 +10,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 
 // ----------------------------------------------------------------------
 
-export default function RHFRadioGroup({
-  row,
-  name,
-  label,
-  options,
-  spacing,
-  helperText,
-  ...other
-}) {
+export default function RHFRadioGroup({ row, name, label, options, spacing, helperText, ...other }) {
   const { control } = useFormContext();
 
   const labelledby = label ? `${name}-${label}` : '';
@@ -44,14 +36,14 @@ export default function RHFRadioGroup({
                 label={option.label}
                 sx={{
                   '&:not(:last-of-type)': {
-                    mb: spacing || 0,
+                    mb: spacing || 0
                   },
                   ...(row && {
                     mr: 0,
                     '&:not(:last-of-type)': {
-                      mr: spacing || 2,
-                    },
-                  }),
+                      mr: spacing || 2
+                    }
+                  })
                 }}
               />
             ))}
@@ -74,5 +66,5 @@ RHFRadioGroup.propTypes = {
   name: PropTypes.string,
   options: PropTypes.array,
   row: PropTypes.bool,
-  spacing: PropTypes.number,
+  spacing: PropTypes.number
 };

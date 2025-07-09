@@ -1,26 +1,18 @@
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
-import Select from '@mui/material/Select';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import match from 'autosuggest-highlight/match';
-import parse from 'autosuggest-highlight/parse';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
-import { Autocomplete, Box, Typography } from '@mui/material';
+import { Autocomplete, FormControl } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 // ----------------------------------------------------------------------
 
 export default function UserTableToolbar({
@@ -30,7 +22,7 @@ export default function UserTableToolbar({
   roleOptions
 }) {
   const popover = usePopover();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const theme = useTheme();
 
   const handleFilterName = useCallback(
@@ -50,12 +42,11 @@ export default function UserTableToolbar({
   useEffect(() => {
     dispatch(getAllMunicipios());
   }, [dispatch]);
-  const { locations } = useSelector((state) => state.locations);
+  const { locations } = useAppSelector((state) => state.locations);
 
   const [municipios, setMunicipios] = useState([]);
 
   useEffect(() => {
-    console.log(locations);
     // Set towns in locations
     const towns = locations.flatMap((department) =>
       department.towns.map((town) => ({
@@ -63,9 +54,7 @@ export default function UserTableToolbar({
         id: town.id
       }))
     );
-
     setMunicipios(towns);
-    console.log(towns);
   }, [locations]);
 
   const [searchQueryMunicipio, setSearchQueryMunicipio] = useState('');
@@ -102,7 +91,7 @@ export default function UserTableToolbar({
             fullWidth
             value={filters.name}
             onChange={handleFilterName}
-            placeholder="Search..."
+            placeholder="Buscar por nombre o razón social"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -112,82 +101,29 @@ export default function UserTableToolbar({
             }}
           />
 
-          <FormControl
-            sx={{
-              flexShrink: 0,
-              width: { xs: 1, md: 200 }
-            }}
-          >
-            {/* <Select
-              multiple
-              value={filters.role}
-              onChange={handleFilterRole}
-              input={<OutlinedInput label="Role" />}
-              renderValue={(selected) => selected.map((value) => value).join(', ')}
-              MenuProps={{
-                PaperProps: {
-                  sx: { maxHeight: 240 }
-                }
-              }}
-            >
-              {roleOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  <Checkbox disableRipple size="small" checked={filters.role.includes(option)} />
-                  {option}
-                </MenuItem>
-              ))}
-            </Select> */}
-
-            <Autocomplete
-              name="municipio"
-              fullWidth
-              // onInputChange={handleInputMunicipioChange}
-              onChange={(event, value) => {
-                handleInputMunicipioChange(event, value);
-              }}
-              value={filters.municipio || ''}
-              isOptionEqualToValue={isOptionEqualToValue}
-              getOptionLabel={(option) => (option.name ? option.name : '')}
-              options={municipios}
-              renderInput={(params) => <TextField {...params} label="Municipio" margin="none" />}
-              // renderOption={(props, option) => {
-              //   const matches = match(option.name, searchQueryMunicipio);
-              //   const parts = parse(option.name, matches);
-
-              //   return (
-              //     <li {...props}>
-              //       <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
-              //         <Typography variant="body2" color="text.primary">
-              //           {parts.map((part, index) => (
-              //             <span
-              //               key={index}
-              //               style={{
-              //                 fontWeight: part.highlight ? 700 : 400,
-              //                 color: part.highlight ? theme.palette.primary.main : 'inherit'
-              //               }}
-              //             >
-              //               {part.text}
-              //             </span>
-              //           ))}
-              //         </Typography>
-              //       </Box>
-              //     </li>
-              //   );
-              // }}
-              noOptionsText={
-                <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                  {municipios.length === 0
-                    ? 'Seleciona un departamento'
-                    : `No hay resultados para ${searchQueryMunicipio}`}
-                </Typography>
-              }
-            />
-          </FormControl>
-
           <IconButton onClick={popover.onOpen}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </Stack>
+        <FormControl
+          sx={{
+            flexShrink: 0,
+            width: { xs: 1, md: 200 }
+          }}
+        >
+          <Autocomplete
+            fullWidth
+            // onInputChange={handleInputMunicipioChange}
+            onChange={(event, value) => {
+              handleInputMunicipioChange(event, value);
+            }}
+            value={filters.municipio || ''}
+            isOptionEqualToValue={isOptionEqualToValue}
+            getOptionLabel={(option) => (option.name ? option.name : '')}
+            options={municipios}
+            renderInput={(params) => <TextField {...params} label="Municipio" margin="none" />}
+          />
+        </FormControl>
       </Stack>
 
       <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>

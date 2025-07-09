@@ -16,9 +16,7 @@ export default function MaintenanceView() {
         Website currently under maintenance
       </Typography>
 
-      <Typography sx={{ color: 'text.secondary' }}>
-        We are currently working hard on this page!
-      </Typography>
+      <Typography sx={{ color: 'text.secondary' }}>We are currently working hard on this page!</Typography>
 
       <MaintenanceIllustration sx={{ my: 10, height: 240 }} />
 

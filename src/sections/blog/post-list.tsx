@@ -43,7 +43,7 @@ export default function PostList({ posts, loading, disabledIndex }) {
           alignItems="center"
           sx={{
             mt: 8,
-            mb: { xs: 10, md: 15 },
+            mb: { xs: 10, md: 15 }
           }}
         >
           <Button
@@ -62,5 +62,5 @@ export default function PostList({ posts, loading, disabledIndex }) {
 PostList.propTypes = {
   disabledIndex: PropTypes.bool,
   loading: PropTypes.bool,
-  posts: PropTypes.array,
+  posts: PropTypes.array
 };

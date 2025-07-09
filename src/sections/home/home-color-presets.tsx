@@ -20,7 +20,7 @@ export default function HomeColorPresets() {
 
   const options = primaryPresets.map((color) => ({
     name: color.name,
-    value: color.main,
+    value: color.main
   }));
 
   const renderDescription = (
@@ -36,9 +36,7 @@ export default function HomeColorPresets() {
       </m.div>
 
       <m.div variants={varFade().inDown}>
-        <Typography sx={{ color: 'text.secondary' }}>
-          Express your own style with just one click
-        </Typography>
+        <Typography sx={{ color: 'text.secondary' }}>Express your own style with just one click</Typography>
       </m.div>
     </Stack>
   );
@@ -105,7 +103,7 @@ export default function HomeColorPresets() {
           width: 100,
           height: 88,
           mx: 'auto',
-          position: 'relative',
+          position: 'relative'
         }}
       >
         {options.map((color, index) => {
@@ -132,7 +130,7 @@ export default function HomeColorPresets() {
                 ...(index === 2 && { right: 19 }),
                 ...(index === 3 && { top: 0, left: 0 }),
                 ...(index === 4 && { top: 0 }),
-                ...(index === 5 && { top: 0, right: 0 }),
+                ...(index === 5 && { top: 0, right: 0 })
               }}
             >
               {selected && <Iconify icon="eva:color-picker-fill" width={16} />}
@@ -148,7 +146,7 @@ export default function HomeColorPresets() {
       component={MotionViewport}
       sx={{
         position: 'relative',
-        py: { xs: 10, md: 15 },
+        py: { xs: 10, md: 15 }
       }}
     >
       {renderDescription}

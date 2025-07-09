@@ -36,7 +36,7 @@ export default function JobFilters({
   locationOptions,
   benefitOptions,
   experienceOptions,
-  employmentTypeOptions,
+  employmentTypeOptions
 }) {
   const handleFilterEmploymentTypes = useCallback(
     (newValue) => {
@@ -80,12 +80,7 @@ export default function JobFilters({
   );
 
   const renderHead = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      sx={{ py: 2, pr: 1, pl: 2.5 }}
-    >
+    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 2, pr: 1, pl: 2.5 }}>
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
         Filters
       </Typography>
@@ -132,17 +127,12 @@ export default function JobFilters({
       {experienceOptions.map((option) => (
         <FormControlLabel
           key={option}
-          control={
-            <Radio
-              checked={option === filters.experience}
-              onClick={() => handleFilterExperience(option)}
-            />
-          }
+          control={<Radio checked={option === filters.experience} onClick={() => handleFilterExperience(option)} />}
           label={option}
           sx={{
             ...(option === 'all' && {
-              textTransform: 'capitalize',
-            }),
+              textTransform: 'capitalize'
+            })
           }}
         />
       ))}
@@ -169,13 +159,7 @@ export default function JobFilters({
         )}
         renderTags={(selected, getTagProps) =>
           selected.map((option, index) => (
-            <Chip
-              {...getTagProps({ index })}
-              key={option}
-              label={option}
-              size="small"
-              variant="soft"
-            />
+            <Chip {...getTagProps({ index })} key={option} label={option} size="small" variant="soft" />
           ))
         }
       />
@@ -196,9 +180,7 @@ export default function JobFilters({
         onChange={(event, newValue) => handleFilterLocations(newValue)}
         renderInput={(params) => <TextField placeholder="Select Locations" {...params} />}
         renderOption={(props, option) => {
-          const { code, label, phone } = locationOptions.filter(
-            (country) => country.label === option
-          )[0];
+          const { code, label, phone } = locationOptions.filter((country) => country.label === option)[0];
 
           if (!label) {
             return null;
@@ -206,25 +188,14 @@ export default function JobFilters({
 
           return (
             <li {...props} key={label}>
-              <Iconify
-                key={label}
-                icon={`circle-flags:${code.toLowerCase()}`}
-                width={28}
-                sx={{ mr: 1 }}
-              />
+              <Iconify key={label} icon={`circle-flags:${code.toLowerCase()}`} width={28} sx={{ mr: 1 }} />
               {label} ({code}) +{phone}
             </li>
           );
         }}
         renderTags={(selected, getTagProps) =>
           selected.map((option, index) => (
-            <Chip
-              {...getTagProps({ index })}
-              key={option}
-              label={option}
-              size="small"
-              variant="soft"
-            />
+            <Chip {...getTagProps({ index })} key={option} label={option} size="small" variant="soft" />
           ))
         }
       />
@@ -240,10 +211,7 @@ export default function JobFilters({
         <FormControlLabel
           key={option}
           control={
-            <Checkbox
-              checked={filters.benefits.includes(option)}
-              onClick={() => handleFilterBenefits(option)}
-            />
+            <Checkbox checked={filters.benefits.includes(option)} onClick={() => handleFilterBenefits(option)} />
           }
           label={option}
         />
@@ -271,10 +239,10 @@ export default function JobFilters({
         open={open}
         onClose={onClose}
         slotProps={{
-          backdrop: { invisible: true },
+          backdrop: { invisible: true }
         }}
         PaperProps={{
-          sx: { width: 280 },
+          sx: { width: 280 }
         }}
       >
         {renderHead}
@@ -311,5 +279,5 @@ JobFilters.propTypes = {
   onOpen: PropTypes.func,
   onResetFilters: PropTypes.func,
   open: PropTypes.bool,
-  roleOptions: PropTypes.array,
+  roleOptions: PropTypes.array
 };

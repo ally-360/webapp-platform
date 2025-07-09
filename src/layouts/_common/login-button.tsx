@@ -17,5 +17,5 @@ export default function LoginButton({ sx }) {
 }
 
 LoginButton.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

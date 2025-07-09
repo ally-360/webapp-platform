@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 // @mui
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
@@ -12,7 +12,7 @@ interface LogoProps {
   sx?: object;
 }
 
-const Logo = forwardRef(({ disabledLink = false, sx }: LogoProps) => {
+const Logo = ({ disabledLink = false, sx }: LogoProps) => {
   // OR using local (public folder)
   // -------------------------------------------------------
   const logo = (
@@ -32,6 +32,6 @@ const Logo = forwardRef(({ disabledLink = false, sx }: LogoProps) => {
       {logo}
     </Link>
   );
-});
+};
 
 export default Logo;

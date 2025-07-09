@@ -15,8 +15,7 @@ export function shortDateLabel(startDate, endDate) {
 
   const sameDay = startDate && endDate ? isSameDay(new Date(startDate), new Date(endDate)) : false;
 
-  const sameMonth =
-    startDate && endDate ? isSameMonth(new Date(startDate), new Date(endDate)) : false;
+  const sameMonth = startDate && endDate ? isSameMonth(new Date(startDate), new Date(endDate)) : false;
 
   if (currentYear) {
     if (sameMonth) {

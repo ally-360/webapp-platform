@@ -18,17 +18,7 @@ import Markdown from 'src/components/markdown';
 // ----------------------------------------------------------------------
 
 export default function JobDetailsContent({ job }) {
-  const {
-    title,
-    skills,
-    salary,
-    content,
-    benefits,
-    createdAt,
-    experience,
-    expiredDate,
-    employmentTypes,
-  } = job;
+  const { title, skills, salary, content, benefits, createdAt, experience, expiredDate, employmentTypes } = job;
 
   const renderContent = (
     <Stack component={Card} spacing={3} sx={{ p: 3 }}>
@@ -62,28 +52,28 @@ export default function JobDetailsContent({ job }) {
         {
           label: 'Date Posted',
           value: fDate(createdAt),
-          icon: <Iconify icon="solar:calendar-date-bold" />,
+          icon: <Iconify icon="solar:calendar-date-bold" />
         },
         {
           label: 'Expiration date',
           value: fDate(expiredDate),
-          icon: <Iconify icon="solar:calendar-date-bold" />,
+          icon: <Iconify icon="solar:calendar-date-bold" />
         },
         {
           label: 'Employment type',
           value: employmentTypes,
-          icon: <Iconify icon="solar:clock-circle-bold" />,
+          icon: <Iconify icon="solar:clock-circle-bold" />
         },
         {
           label: 'Offered salary',
           value: salary.negotiable ? 'Negotiable' : fCurrency(salary.price),
-          icon: <Iconify icon="solar:wad-of-money-bold" />,
+          icon: <Iconify icon="solar:wad-of-money-bold" />
         },
         {
           label: 'Experience',
           value: experience,
-          icon: <Iconify icon="carbon:skill-level-basic" />,
-        },
+          icon: <Iconify icon="carbon:skill-level-basic" />
+        }
       ].map((item) => (
         <Stack key={item.label} spacing={1.5} direction="row">
           {item.icon}
@@ -93,12 +83,12 @@ export default function JobDetailsContent({ job }) {
             primaryTypographyProps={{
               typography: 'body2',
               color: 'text.secondary',
-              mb: 0.5,
+              mb: 0.5
             }}
             secondaryTypographyProps={{
               typography: 'subtitle2',
               color: 'text.primary',
-              component: 'span',
+              component: 'span'
             }}
           />
         </Stack>
@@ -107,19 +97,8 @@ export default function JobDetailsContent({ job }) {
   );
 
   const renderCompany = (
-    <Stack
-      component={Paper}
-      variant="outlined"
-      spacing={2}
-      direction="row"
-      sx={{ p: 3, borderRadius: 2, mt: 3 }}
-    >
-      <Avatar
-        alt={job.company.name}
-        src={job.company.logo}
-        variant="rounded"
-        sx={{ width: 64, height: 64 }}
-      />
+    <Stack component={Paper} variant="outlined" spacing={2} direction="row" sx={{ p: 3, borderRadius: 2, mt: 3 }}>
+      <Avatar alt={job.company.name} src={job.company.logo} variant="rounded" sx={{ width: 64, height: 64 }} />
 
       <Stack spacing={1}>
         <Typography variant="subtitle1">{job.company.name}</Typography>
@@ -145,5 +124,5 @@ export default function JobDetailsContent({ job }) {
 }
 
 JobDetailsContent.propTypes = {
-  job: PropTypes.object,
+  job: PropTypes.object
 };

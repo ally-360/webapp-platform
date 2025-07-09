@@ -44,7 +44,7 @@ export default function PostItem({ post, index }) {
             top: 24,
             left: 24,
             zIndex: 9,
-            position: 'absolute',
+            position: 'absolute'
           }}
         />
 
@@ -63,7 +63,7 @@ export default function PostItem({ post, index }) {
           overlay={alpha(theme.palette.grey[900], 0.48)}
           sx={{
             width: 1,
-            height: 360,
+            height: 360
           }}
         />
       </Card>
@@ -80,7 +80,7 @@ export default function PostItem({ post, index }) {
             width: 88,
             height: 36,
             bottom: -16,
-            position: 'absolute',
+            position: 'absolute'
           }}
         />
 
@@ -91,7 +91,7 @@ export default function PostItem({ post, index }) {
             left: 24,
             zIndex: 9,
             bottom: -24,
-            position: 'absolute',
+            position: 'absolute'
           }}
         />
 
@@ -111,7 +111,7 @@ export default function PostItem({ post, index }) {
 
 PostItem.propTypes = {
   index: PropTypes.number,
-  post: PropTypes.object,
+  post: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -135,8 +135,8 @@ export function PostContent({ title, createdAt, totalViews, totalShares, totalCo
           zIndex: 9,
           bottom: 0,
           position: 'absolute',
-          color: 'common.white',
-        }),
+          color: 'common.white'
+        })
       }}
     >
       <Typography
@@ -147,8 +147,8 @@ export function PostContent({ title, createdAt, totalViews, totalShares, totalCo
           color: 'text.disabled',
           ...((latestPostLarge || latestPostSmall) && {
             opacity: 0.64,
-            color: 'common.white',
-          }),
+            color: 'common.white'
+          })
         }}
       >
         {fDate(createdAt)}
@@ -170,8 +170,8 @@ export function PostContent({ title, createdAt, totalViews, totalShares, totalCo
           color: 'text.disabled',
           ...((latestPostLarge || latestPostSmall) && {
             opacity: 0.64,
-            color: 'common.white',
-          }),
+            color: 'common.white'
+          })
         }}
       >
         <Stack direction="row" alignItems="center">
@@ -199,5 +199,5 @@ PostContent.propTypes = {
   title: PropTypes.string,
   totalComments: PropTypes.number,
   totalShares: PropTypes.number,
-  totalViews: PropTypes.number,
+  totalViews: PropTypes.number
 };

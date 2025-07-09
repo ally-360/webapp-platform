@@ -21,7 +21,7 @@ export default function useCarousel(props) {
     rtl,
     beforeChange: (current, next) => setCurrentIndex(next),
     ...props,
-    fade: !!(props?.fade && !rtl),
+    fade: !!(props?.fade && !rtl)
   };
 
   const onSetNav = useCallback(() => {
@@ -60,6 +60,6 @@ export default function useCarousel(props) {
     onSetNav,
     //
     setNav,
-    setCurrentIndex,
+    setCurrentIndex
   };
 }

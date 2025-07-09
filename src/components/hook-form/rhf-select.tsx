@@ -15,7 +15,6 @@ import React, { useState } from 'react';
 // ----------------------------------------------------------------------
 
 interface RHFSelectProps {
-  // Name es solo para el controlador de React Hook Form, no permite modificar el valor, solo es de lectura.
   readonly name: string;
   native?: boolean;
   maxHeight?: number;
@@ -33,11 +32,11 @@ export function RHFSelect({
   children,
   PaperPropsSx,
   ...other
-}: RHFSelectProps) {
+}: Readonly<RHFSelectProps>) {
   const { control } = useFormContext();
-  const theme = useTheme(); // Obtiene el tema actual de Material-UI
-  const [isFocused, setIsFocused] = useState(false); // Estado para rastrear el focus
-  console.log('isFocused', isFocused);
+  const theme = useTheme();
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <Controller
       name={name}
@@ -50,11 +49,11 @@ export function RHFSelect({
           SelectProps={{
             native,
             MenuProps: {
+              disablePortal: true, // ✅ Evita que el dropdown se oculte debajo del popup
               PaperProps: {
                 sx: {
-                  ...(!native && {
-                    maxHeight: typeof maxHeight === 'number' ? maxHeight : 'unset'
-                  }),
+                  zIndex: 1500, // ✅ Asegura que el menú tenga un z-index mayor que el popup
+                  maxHeight: typeof maxHeight === 'number' ? maxHeight : 'unset',
                   ...PaperPropsSx
                 }
               }
@@ -64,19 +63,19 @@ export function RHFSelect({
           error={!!error}
           helperText={error ? error?.message : helperText}
           {...other}
-          onFocus={() => setIsFocused(true)} // Establece isFocused a true cuando se hace focus
-          onBlur={() => setIsFocused(false)} // Establece isFocused a false cuando se pierde el focus
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {
-                borderColor: isFocused ? theme.palette.primary.main : '#ced4da' // Usa el color primario del tema cuando se hace focus
+                borderColor: isFocused ? theme.palette.primary.main : '#ced4da'
               },
               '&.Mui-focused fieldset': {
                 borderColor: theme.palette.primary.main
               }
             },
             '& label.Mui-focused': {
-              color: `${theme.palette.primary.main}!important` // Cambia el color del label cuando se hace focus
+              color: `${theme.palette.primary.main}!important`
             }
           }}
         >
@@ -111,7 +110,7 @@ export function RHFMultiSelect({
   helperText,
   sx,
   ...other
-}: RHFAutocompleteProps) {
+}: Readonly<RHFAutocompleteProps>) {
   const { control } = useFormContext();
 
   const renderValues = (selectedIds: string) => {
@@ -153,6 +152,14 @@ export function RHFMultiSelect({
             labelId={name}
             input={<OutlinedInput fullWidth label={label} error={!!error} />}
             renderValue={renderValues}
+            MenuProps={{
+              disablePortal: true,
+              PaperProps: {
+                sx: {
+                  zIndex: 1500
+                }
+              }
+            }}
             {...other}
           >
             {placeholder && (

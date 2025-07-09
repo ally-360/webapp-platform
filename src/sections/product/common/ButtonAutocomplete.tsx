@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react';
 import { Button, Paper } from '@mui/material';
+import React from 'react';
 
 const ButtonAutocomplete = ({ children, title, ...other }) => (
   <Paper
@@ -17,7 +18,6 @@ const ButtonAutocomplete = ({ children, title, ...other }) => (
       borderRadius: '10px'
     }}
   >
-    {console.log(title)}
     <Button
       fullWidth
       color="primary"

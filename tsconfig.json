@@ -84,7 +84,6 @@
 //     /* Type Checking */
 //     "strict": true,                                      /* Enable all strict type-checking options. */
 //     // "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied 'any' type. */
-//     // "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
 //     // "strictFunctionTypes": true,                      /* When assigning functions, check to ensure parameters and the return values are subtype-compatible. */
 //     // "strictBindCallApply": true,                      /* Check that the arguments for 'bind', 'call', and 'apply' methods match the original function. */
 //     // "strictPropertyInitialization": true,             /* Check for class properties that are declared but not set in the constructor. */
@@ -113,8 +112,8 @@
     "target": "esnext",
     "module": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "react",
-    "strict": true,
+    "jsx": "react-jsx",
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -122,11 +121,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-
-      "baseUrl": ".",
-      "paths": {
-        "src/*": ["src/*"]
-      },
+    "strictNullChecks": true,                         /* When type checking, take into account 'null' and 'undefined'. */
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    },
     
     
   },

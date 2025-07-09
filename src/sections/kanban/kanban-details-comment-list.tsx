@@ -12,9 +12,7 @@ import Lightbox, { useLightBox } from 'src/components/lightbox';
 // ----------------------------------------------------------------------
 
 export default function KanbanDetailsCommentList({ comments }) {
-  const slides = comments
-    .filter((comment) => comment.messageType === 'image')
-    .map((slide) => ({ src: slide.message }));
+  const slides = comments.filter((comment) => comment.messageType === 'image').map((slide) => ({ src: slide.message }));
 
   const lightbox = useLightBox(slides);
 
@@ -26,7 +24,7 @@ export default function KanbanDetailsCommentList({ comments }) {
         sx={{
           py: 3,
           px: 2.5,
-          bgcolor: 'background.neutral',
+          bgcolor: 'background.neutral'
         }}
       >
         {comments.map((comment) => (
@@ -51,8 +49,8 @@ export default function KanbanDetailsCommentList({ comments }) {
                     cursor: 'pointer',
                     transition: (theme) => theme.transitions.create(['opacity']),
                     '&:hover': {
-                      opacity: 0.8,
-                    },
+                      opacity: 0.8
+                    }
                   }}
                 />
               ) : (
@@ -63,16 +61,11 @@ export default function KanbanDetailsCommentList({ comments }) {
         ))}
       </Stack>
 
-      <Lightbox
-        index={lightbox.selected}
-        slides={slides}
-        open={lightbox.open}
-        close={lightbox.onClose}
-      />
+      <Lightbox index={lightbox.selected} slides={slides} open={lightbox.open} close={lightbox.onClose} />
     </>
   );
 }
 
 KanbanDetailsCommentList.propTypes = {
-  comments: PropTypes.array,
+  comments: PropTypes.array
 };

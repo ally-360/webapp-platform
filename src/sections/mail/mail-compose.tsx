@@ -56,8 +56,8 @@ export default function MailCompose({ onCloseCompose }) {
             right: POSITION / 2,
             bottom: POSITION / 2,
             width: `calc(100% - ${POSITION}px)`,
-            height: `calc(100% - ${POSITION}px)`,
-          }),
+            height: `calc(100% - ${POSITION}px)`
+          })
         }}
       >
         <Stack
@@ -65,7 +65,7 @@ export default function MailCompose({ onCloseCompose }) {
           alignItems="center"
           sx={{
             bgcolor: 'background.neutral',
-            p: (theme) => theme.spacing(1.5, 1, 1.5, 2),
+            p: (theme) => theme.spacing(1.5, 1, 1.5, 2)
           }}
         >
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -92,7 +92,7 @@ export default function MailCompose({ onCloseCompose }) {
           sx={{
             px: 2,
             height: 48,
-            borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
+            borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`
           }}
         />
 
@@ -101,7 +101,7 @@ export default function MailCompose({ onCloseCompose }) {
           sx={{
             px: 2,
             height: 48,
-            borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
+            borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`
           }}
         />
 
@@ -117,12 +117,12 @@ export default function MailCompose({ onCloseCompose }) {
               ...(fullScreen.value && {
                 height: 1,
                 '& .quill': {
-                  height: 1,
+                  height: 1
                 },
                 '& .ql-editor': {
-                  maxHeight: 'unset',
-                },
-              }),
+                  maxHeight: 'unset'
+                }
+              })
             }}
           />
 
@@ -137,11 +137,7 @@ export default function MailCompose({ onCloseCompose }) {
               </IconButton>
             </Stack>
 
-            <Button
-              variant="contained"
-              color="primary"
-              endIcon={<Iconify icon="iconamoon:send-fill" />}
-            >
+            <Button variant="contained" color="primary" endIcon={<Iconify icon="iconamoon:send-fill" />}>
               Send
             </Button>
           </Stack>
@@ -152,5 +148,5 @@ export default function MailCompose({ onCloseCompose }) {
 }
 
 MailCompose.propTypes = {
-  onCloseCompose: PropTypes.string,
+  onCloseCompose: PropTypes.string
 };

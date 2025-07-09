@@ -60,34 +60,29 @@ export default function PostDetailsHomeView({ title }) {
 
   const renderPost = post && (
     <>
-      <PostDetailsHero
-        title={post.title}
-        author={post.author}
-        coverUrl={post.coverUrl}
-        createdAt={post.createdAt}
-      />
+      <PostDetailsHero title={post.title} author={post.author} coverUrl={post.coverUrl} createdAt={post.createdAt} />
 
       <Container
         maxWidth={false}
         sx={{
           py: 3,
           mb: 5,
-          borderBottom: (theme) => `solid 1px ${theme.palette.divider}`,
+          borderBottom: (theme) => `solid 1px ${theme.palette.divider}`
         }}
       >
         <CustomBreadcrumbs
           links={[
             {
               name: 'Home',
-              href: '/',
+              href: '/'
             },
             {
               name: 'Blog',
-              href: paths.post.root,
+              href: paths.post.root
             },
             {
-              name: post?.title,
-            },
+              name: post?.title
+            }
           ]}
           sx={{ maxWidth: 720, mx: 'auto' }}
         />
@@ -106,7 +101,7 @@ export default function PostDetailsHomeView({ title }) {
             sx={{
               py: 3,
               borderTop: (theme) => `dashed 1px ${theme.palette.divider}`,
-              borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`,
+              borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`
             }}
           >
             <Stack direction="row" flexWrap="wrap" spacing={1}>
@@ -162,11 +157,7 @@ export default function PostDetailsHomeView({ title }) {
         Recent Posts
       </Typography>
 
-      <PostList
-        posts={latestPosts.slice(latestPosts.length - 4)}
-        loading={latestPostsLoading}
-        disabledIndex
-      />
+      <PostList posts={latestPosts.slice(latestPosts.length - 4)} loading={latestPostsLoading} disabledIndex />
     </>
   );
 
@@ -184,5 +175,5 @@ export default function PostDetailsHomeView({ title }) {
 }
 
 PostDetailsHomeView.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.string
 };

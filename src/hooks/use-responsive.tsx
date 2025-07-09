@@ -3,8 +3,17 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 // ----------------------------------------------------------------------
+interface UseResponsiveProps {
+  query: 'up' | 'down' | 'between' | 'only';
+  start: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  end?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+}
 
-export function useResponsive(query, start, end) {
+export function useResponsive(
+  query: UseResponsiveProps['query'],
+  start: UseResponsiveProps['start'],
+  end: UseResponsiveProps['end'] = null
+) {
   const theme = useTheme();
 
   const mediaUp = useMediaQuery(theme.breakpoints.up(start));

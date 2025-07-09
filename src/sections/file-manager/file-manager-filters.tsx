@@ -27,7 +27,7 @@ export default function FileManagerFilters({
   onFilters,
   //
   dateError,
-  typeOptions,
+  typeOptions
 }) {
   const popover = usePopover();
 
@@ -79,10 +79,10 @@ export default function FileManagerFilters({
           <InputAdornment position="start">
             <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
           </InputAdornment>
-        ),
+        )
       }}
       sx={{
-        width: { xs: 1, md: 260 },
+        width: { xs: 1, md: 260 }
       }}
     />
   );
@@ -114,7 +114,7 @@ export default function FileManagerFilters({
             display="grid"
             gridTemplateColumns={{
               xs: 'repeat(2, 1fr)',
-              sm: 'repeat(4, 1fr)',
+              sm: 'repeat(4, 1fr)'
             }}
           >
             {typeOptions.map((type) => {
@@ -130,8 +130,8 @@ export default function FileManagerFilters({
                     cursor: 'pointer',
                     border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
                     ...(selected && {
-                      bgcolor: 'action.selected',
-                    }),
+                      bgcolor: 'action.selected'
+                    })
                   }}
                 >
                   <Stack spacing={1} direction="row" alignItems="center">
@@ -169,9 +169,7 @@ export default function FileManagerFilters({
           />
         }
       >
-        {!!filters.startDate && !!filters.endDate
-          ? shortDateLabel(filters.startDate, filters.endDate)
-          : 'Select Date'}
+        {!!filters.startDate && !!filters.endDate ? shortDateLabel(filters.startDate, filters.endDate) : 'Select Date'}
       </Button>
 
       <CustomDateRangePicker
@@ -213,5 +211,5 @@ FileManagerFilters.propTypes = {
   onFilters: PropTypes.func,
   onOpenDateRange: PropTypes.func,
   openDateRange: PropTypes.bool,
-  typeOptions: PropTypes.array,
+  typeOptions: PropTypes.array
 };

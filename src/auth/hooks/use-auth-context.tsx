@@ -1,10 +1,7 @@
 import { useContext } from 'react';
 //
 import { AuthContext as ImportedAuthContext } from '../context/jwt/auth-context';
-import { AuthContextType } from './authInterfaces';
-// import { AuthContext } from '../context/auth0/auth-context';
-// import { AuthContext } from '../context/amplify/auth-context';
-// import { AuthContext } from '../context/firebase/auth-context';
+import { AuthContextType } from '../../interfaces/auth/authInterfaces';
 
 // Creación del contexto
 

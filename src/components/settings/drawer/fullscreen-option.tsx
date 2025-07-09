@@ -33,16 +33,16 @@ export default function FullScreenOption() {
           typography: 'subtitle2',
           border: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.08)}`,
           ...(fullscreen && {
-            color: 'text.primary',
+            color: 'text.primary'
           }),
           '& .svg-color': {
             background: (theme) =>
               `linear-gradient(135deg, ${theme.palette.grey[500]} 0%, ${theme.palette.grey[600]} 100%)`,
             ...(fullscreen && {
               background: (theme) =>
-                `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
-            }),
-          },
+                `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`
+            })
+          }
         }}
       >
         <SvgColor

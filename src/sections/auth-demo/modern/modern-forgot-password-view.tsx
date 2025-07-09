@@ -19,21 +19,21 @@ import FormProvider, { RHFTextField } from 'src/components/hook-form';
 
 export default function ModernForgotPasswordView() {
   const ForgotPasswordSchema = Yup.object().shape({
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    email: Yup.string().required('Email is required').email('Email must be a valid email address')
   });
 
   const defaultValues = {
-    email: '',
+    email: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(ForgotPasswordSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -68,7 +68,7 @@ export default function ModernForgotPasswordView() {
         variant="subtitle2"
         sx={{
           alignItems: 'center',
-          display: 'inline-flex',
+          display: 'inline-flex'
         }}
       >
         <Iconify icon="eva:arrow-ios-back-fill" width={16} />
@@ -85,8 +85,8 @@ export default function ModernForgotPasswordView() {
         <Typography variant="h3">Forgot your password?</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Please enter the email address associated with your account and We will email you a link
-          to reset your password.
+          Please enter the email address associated with your account and We will email you a link to reset your
+          password.
         </Typography>
       </Stack>
     </>

@@ -15,7 +15,7 @@ export default function SingleFilePreview({ imgUrl = '' }) {
         left: 0,
         width: 1,
         height: 1,
-        position: 'absolute',
+        position: 'absolute'
       }}
     >
       <Image
@@ -24,7 +24,7 @@ export default function SingleFilePreview({ imgUrl = '' }) {
         sx={{
           width: 1,
           height: 1,
-          borderRadius: 1,
+          borderRadius: 1
         }}
       />
     </Box>
@@ -32,5 +32,5 @@ export default function SingleFilePreview({ imgUrl = '' }) {
 }
 
 SingleFilePreview.propTypes = {
-  imgUrl: PropTypes.string,
+  imgUrl: PropTypes.string
 };

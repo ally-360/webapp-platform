@@ -21,7 +21,6 @@ export default function StepGuard({ children }: { children: React.ReactNode }) {
     if (authenticated && isFirstLogin === true) {
       router.replace(returnTo);
     }
-    console.log('authenticated', authenticated);
   }, [authenticated, returnTo, router, isFirstLogin]);
 
   useEffect(() => {

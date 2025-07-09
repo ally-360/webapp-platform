@@ -1,15 +1,31 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { createSlice } from '@reduxjs/toolkit';
+import { getProductResponse } from 'src/interfaces/inventory/productsInterface';
+import { Dispatch } from 'redux';
 import RequestService from '../../axios/services/service';
 
+interface ProductsState {
+  products: getProductResponse[];
+  productsLoading: boolean;
+  error: any;
+  success: boolean;
+  productsEmpty: boolean;
+  popupAssignInventory: boolean;
+  totalProducts: number;
+
+  // Product detail
+  product: getProductResponse | null;
+}
+
 // constantes
-const initialState = {
+const initialState: ProductsState = {
   products: [],
   productsLoading: false,
-  error: null,
-  success: null,
+  error: false,
+  success: false,
   productsEmpty: false,
   popupAssignInventory: false,
+  totalProducts: 0,
 
   // Product detail
   product: null
@@ -33,6 +49,8 @@ const productSlice = createSlice({
       state.productsLoading = false;
       state.error = null;
       state.success = true;
+      // TODO: cambiar por el total de productos que se obtengan
+      state.totalProducts = 1000;
       state.productsEmpty = action.payload.length === 0;
     },
     getProductByIdSuccess(state, action) {
@@ -65,6 +83,7 @@ const productSlice = createSlice({
     setPopupAssignInventory(state, action) {
       state.popupAssignInventory = action.payload;
     }
+    // changeStatusProduct(state, action) {}
   }
 });
 
@@ -75,21 +94,22 @@ export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInvento
 
 // Actions
 
-export const getAllProducts = () => async (dispatch, getState) => {
-  try {
-    dispatch(productSlice.actions.startLoading());
-    const resp = await RequestService.getProducts();
-    dispatch(productSlice.actions.getAllProductsSuccess(resp.data));
-  } catch (error) {
-    console.log(error);
-    dispatch(productSlice.actions.hasError(error));
-  }
-};
+export const getAllProducts =
+  ({ page, pageSize }) =>
+  async (dispatch: Dispatch) => {
+    try {
+      dispatch(productSlice.actions.startLoading());
+      const resp = await RequestService.getProducts(page, pageSize);
+      dispatch(productSlice.actions.getAllProductsSuccess(resp.data));
+    } catch (error) {
+      console.log(error);
+      dispatch(productSlice.actions.hasError(error));
+    }
+  };
 
-export const getProductById = (id: string) => async (dispatch, getState) => {
+export const getProductById = (id: string) => async (dispatch: Dispatch) => {
   try {
     // quitar el producto anterior
-    dispatch(productSlice.actions.getProductByIdSuccess(null));
     dispatch(productSlice.actions.startLoading());
     const resp = await RequestService.getProductById(id);
     dispatch(productSlice.actions.getProductByIdSuccess(resp.data));
@@ -99,7 +119,7 @@ export const getProductById = (id: string) => async (dispatch, getState) => {
   }
 };
 
-export const deleteProduct = (id) => async (dispatch, getState) => {
+export const deleteProduct = (id: string) => async (dispatch: Dispatch) => {
   try {
     dispatch(productSlice.actions.startLoading());
     await RequestService.deleteProduct(id);
@@ -109,3 +129,16 @@ export const deleteProduct = (id) => async (dispatch, getState) => {
     dispatch(productSlice.actions.deleteProductError(error));
   }
 };
+
+export const UpdateProduct =
+  ({ id, databody }: { id: string; databody: object }) =>
+  async (dispatch: Dispatch) => {
+    try {
+      dispatch(productSlice.actions.startLoading());
+      await RequestService.updateProduct({ id, databody });
+      dispatch(getProductById(id) as any);
+    } catch (error) {
+      console.log(error);
+      dispatch(productSlice.actions.hasError(error));
+    }
+  };

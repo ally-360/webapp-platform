@@ -132,7 +132,7 @@ export default function Button(theme) {
   return {
     MuiButton: {
       defaultProps: {
-        color: 'inherit',
+        color: 'primary',
         disableElevation: true
       },
 

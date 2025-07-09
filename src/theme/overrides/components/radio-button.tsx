@@ -20,23 +20,23 @@ export default function Radio(theme) {
     MuiFormControlLabel: {
       styleOverrides: {
         label: {
-          ...theme.typography.body2,
-        },
-      },
+          ...theme.typography.body2
+        }
+      }
     },
 
     MuiRadio: {
       defaultProps: {
         size: 'small',
         icon: <Icon />,
-        checkedIcon: <CheckedIcon />,
+        checkedIcon: <CheckedIcon />
       },
 
       styleOverrides: {
         root: {
-          padding: theme.spacing(1),
-        },
-      },
-    },
+          padding: theme.spacing(1)
+        }
+      }
+    }
   };
 }

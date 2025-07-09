@@ -1,15 +1,13 @@
 import orderBy from 'lodash/orderBy';
 import isEqual from 'lodash/isEqual';
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useDebounce } from 'src/hooks/use-debounce';
 // routes
-import { paths } from 'src/routes/paths';
 // _mock
 import {
   PRODUCT_SORT_OPTIONS,
@@ -19,21 +17,17 @@ import {
   PRODUCT_CATEGORY_OPTIONS
 } from 'src/_mock';
 // api
-import { useGetProducts, useSearchProducts } from 'src/api/product';
 // components
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 //
-import CartIcon from 'src/sections/product/common/cart-icon';
 import { useCheckoutContext } from 'src/sections/checkout/context';
-import PosProductList from 'src/sections/pos/pos-product-list';
 import PosProductSort from 'src/sections/pos/pos-product-sort';
-import PosProductSearch from 'src/sections/pos/pos-product-search';
 import PosProductFilters from 'src/sections/pos/pos-product-filters';
 import PosProductFiltersResult from 'src/sections/pos/pos-product-filters-result';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
-
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import PosProductList from 'src/sections/pos/pos-product-list';
 // ----------------------------------------------------------------------
 
 const defaultFilters = {
@@ -51,7 +45,7 @@ export default function PosProductShopView() {
 
   const checkout = useCheckoutContext();
 
-  const openFilters = useBoolean();
+  const openFilters = useBoolean(false);
 
   const [sortBy, setSortBy] = useState('featured');
 
@@ -61,17 +55,13 @@ export default function PosProductShopView() {
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  const { productsLoading, productsEmpty } = useGetProducts();
-
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(getAllProducts());
+    dispatch(getAllProducts({ page: 1, pageSize: 25 }));
   }, [dispatch]);
 
-  const { products } = useSelector((state) => state.products);
-
-  const { searchResults, searchLoading } = useSearchProducts(debouncedQuery);
+  const { products, productsEmpty, productsLoading } = useAppSelector((state) => state.products);
 
   const handleFilters = useCallback((name, value) => {
     setFilters((prevState) => ({
@@ -109,13 +99,13 @@ export default function PosProductShopView() {
       alignItems={{ xs: 'flex-end', sm: 'center' }}
       direction={{ xs: 'column', sm: 'row' }}
     >
-      <PosProductSearch
+      {/* <PosProductSearch
         query={debouncedQuery}
         results={searchResults}
         onSearch={handleSearch}
         loading={searchLoading}
         hrefItem={(id) => paths.product.details(id)}
-      />
+      /> */}
 
       <Stack direction="row" spacing={1} flexShrink={0}>
         <PosProductFilters
@@ -156,22 +146,13 @@ export default function PosProductShopView() {
 
   return (
     <Container
-      maxWidth={settings.themeStretch ? false : 'lg'}
+      maxWidth={false}
       sx={{
         mb: 15,
         p: '0 !important'
       }}
     >
-      {/* <Typography
-        variant="h4"
-        sx={{
-          my: { xs: 3, md: 5 }
-        }}
-      >
-        Produ
-      </Typography> */}
-
-      {/* <Stack
+      <Stack
         spacing={2.5}
         sx={{
           mb: { xs: 3, md: 5 }
@@ -180,7 +161,7 @@ export default function PosProductShopView() {
         {renderFilters}
 
         {canReset && renderResults}
-      </Stack> */}
+      </Stack>
 
       {(notFound || productsEmpty) && renderNotFound}
 

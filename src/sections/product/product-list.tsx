@@ -34,7 +34,7 @@ export default function ProductList({ products, loading, ...other }) {
           xs: 'repeat(1, 1fr)',
           sm: 'repeat(2, 1fr)',
           md: 'repeat(3, 1fr)',
-          lg: 'repeat(4, 1fr)',
+          lg: 'repeat(4, 1fr)'
         }}
         {...other}
       >
@@ -47,8 +47,8 @@ export default function ProductList({ products, loading, ...other }) {
           sx={{
             mt: 8,
             [`& .${paginationClasses.ul}`]: {
-              justifyContent: 'center',
-            },
+              justifyContent: 'center'
+            }
           }}
         />
       )}
@@ -58,5 +58,5 @@ export default function ProductList({ products, loading, ...other }) {
 
 ProductList.propTypes = {
   loading: PropTypes.bool,
-  products: PropTypes.array,
+  products: PropTypes.array
 };

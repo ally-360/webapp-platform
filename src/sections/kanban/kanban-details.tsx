@@ -33,7 +33,7 @@ const StyledLabel = styled('span')(({ theme }) => ({
   width: 100,
   flexShrink: 0,
   color: theme.palette.text.secondary,
-  fontWeight: theme.typography.fontWeightSemiBold,
+  fontWeight: theme.typography.fontWeightSemiBold
 }));
 
 // ----------------------------------------------------------------------
@@ -44,7 +44,7 @@ export default function KanbanDetails({
   onCloseDetails,
   //
   onUpdateTask,
-  onDeleteTask,
+  onDeleteTask
 }) {
   const [priority, setPriority] = useState(task.priority);
 
@@ -69,7 +69,7 @@ export default function KanbanDetails({
           if (taskName) {
             onUpdateTask({
               ...task,
-              name: taskName,
+              name: taskName
             });
           }
         }
@@ -129,18 +129,14 @@ export default function KanbanDetails({
             onClick={contacts.onTrue}
             sx={{
               bgcolor: (theme) => alpha(theme.palette.grey[500], 0.08),
-              border: (theme) => `dashed 1px ${theme.palette.divider}`,
+              border: (theme) => `dashed 1px ${theme.palette.divider}`
             }}
           >
             <Iconify icon="mingcute:add-line" />
           </IconButton>
         </Tooltip>
 
-        <KanbanContactsDialog
-          assignee={task.assignee}
-          open={contacts.value}
-          onClose={contacts.onFalse}
-        />
+        <KanbanContactsDialog assignee={task.assignee} open={contacts.value} onClose={contacts.onFalse} />
       </Stack>
     </Stack>
   );
@@ -173,7 +169,7 @@ export default function KanbanDetails({
             onClick={rangePicker.onOpen}
             sx={{
               bgcolor: (theme) => alpha(theme.palette.grey[500], 0.08),
-              border: (theme) => `dashed 1px ${theme.palette.divider}`,
+              border: (theme) => `dashed 1px ${theme.palette.divider}`
             }}
           >
             <Iconify icon="mingcute:add-line" />
@@ -215,7 +211,7 @@ export default function KanbanDetails({
         value={taskDescription}
         onChange={handleChangeTaskDescription}
         InputProps={{
-          sx: { typography: 'body2' },
+          sx: { typography: 'body2' }
         }}
       />
     </Stack>
@@ -236,15 +232,15 @@ export default function KanbanDetails({
       onClose={onCloseDetails}
       anchor="right"
       slotProps={{
-        backdrop: { invisible: true },
+        backdrop: { invisible: true }
       }}
       PaperProps={{
         sx: {
           width: {
             xs: 1,
-            sm: 480,
-          },
-        },
+            sm: 480
+          }
+        }
       }}
     >
       {renderHead}
@@ -257,8 +253,8 @@ export default function KanbanDetails({
           '& .simplebar-content': {
             height: 1,
             display: 'flex',
-            flexDirection: 'column',
-          },
+            flexDirection: 'column'
+          }
         }}
       >
         <Stack
@@ -266,7 +262,7 @@ export default function KanbanDetails({
           sx={{
             pt: 3,
             pb: 5,
-            px: 2.5,
+            px: 2.5
           }}
         >
           {renderName}
@@ -299,5 +295,5 @@ KanbanDetails.propTypes = {
   onDeleteTask: PropTypes.func,
   onUpdateTask: PropTypes.func,
   openDetails: PropTypes.bool,
-  task: PropTypes.object,
+  task: PropTypes.object
 };

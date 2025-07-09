@@ -32,7 +32,7 @@ const defaultFilters = {
   name: '',
   type: [],
   startDate: null,
-  endDate: null,
+  endDate: null
 };
 
 // ----------------------------------------------------------------------
@@ -55,15 +55,13 @@ export default function FileManagerView() {
   const [filters, setFilters] = useState(defaultFilters);
 
   const dateError =
-    filters.startDate && filters.endDate
-      ? filters.startDate.getTime() > filters.endDate.getTime()
-      : false;
+    filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters,
-    dateError,
+    dateError
   });
 
   const dataInPage = dataFiltered.slice(
@@ -71,8 +69,7 @@ export default function FileManagerView() {
     table.page * table.rowsPerPage + table.rowsPerPage
   );
 
-  const canReset =
-    !!filters.name || !!filters.type.length || (!!filters.startDate && !!filters.endDate);
+  const canReset = !!filters.name || !!filters.type.length || (!!filters.startDate && !!filters.endDate);
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
@@ -87,7 +84,7 @@ export default function FileManagerView() {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
-        [name]: value,
+        [name]: value
       }));
     },
     [table]
@@ -110,7 +107,7 @@ export default function FileManagerView() {
     table.onUpdatePageDeleteRows({
       totalRows: tableData.length,
       totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
+      totalRowsFiltered: dataFiltered.length
     });
   }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
@@ -119,11 +116,7 @@ export default function FileManagerView() {
   }, []);
 
   const renderFilters = (
-    <Stack
-      spacing={2}
-      direction={{ xs: 'column', md: 'row' }}
-      alignItems={{ xs: 'flex-end', md: 'center' }}
-    >
+    <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-end', md: 'center' }}>
       <FileManagerFilters
         openDateRange={openDateRange.value}
         onCloseDateRange={openDateRange.onFalse}
@@ -165,11 +158,7 @@ export default function FileManagerView() {
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File Manager</Typography>
-          <Button
-            variant="contained"
-            startIcon={<Iconify icon="eva:cloud-upload-fill" />}
-            onClick={upload.onTrue}
-          >
+          <Button variant="contained" startIcon={<Iconify icon="eva:cloud-upload-fill" />} onClick={upload.onTrue}>
             Upload
           </Button>
         </Stack>
@@ -177,7 +166,7 @@ export default function FileManagerView() {
         <Stack
           spacing={2.5}
           sx={{
-            my: { xs: 3, md: 5 },
+            my: { xs: 3, md: 5 }
           }}
         >
           {renderFilters}
@@ -190,7 +179,7 @@ export default function FileManagerView() {
             filled
             title="No Data"
             sx={{
-              py: 10,
+              py: 10
             }}
           />
         ) : (
@@ -261,9 +250,7 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (name) {
-    inputData = inputData.filter(
-      (file) => file.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
-    );
+    inputData = inputData.filter((file) => file.name.toLowerCase().indexOf(name.toLowerCase()) !== -1);
   }
 
   if (type.length) {
@@ -274,8 +261,7 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
     if (startDate && endDate) {
       inputData = inputData.filter(
         (file) =>
-          fTimestamp(file.createdAt) >= fTimestamp(startDate) &&
-          fTimestamp(file.createdAt) <= fTimestamp(endDate)
+          fTimestamp(file.createdAt) >= fTimestamp(startDate) && fTimestamp(file.createdAt) <= fTimestamp(endDate)
       );
     }
   }

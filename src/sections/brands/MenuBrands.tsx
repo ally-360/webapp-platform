@@ -7,14 +7,13 @@ import CustomPopover from 'src/components/custom-popover/custom-popover';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useBoolean } from 'src/hooks/use-boolean';
-// import trash2Outline from '@iconify/icons-eva/trash-2-outline';
 
 export default function MenuBrands({ handleEdit, handleDelete, handleView, view, element, edit }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
   const { t } = useTranslation();
   const popover = usePopover();
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -27,7 +26,6 @@ export default function MenuBrands({ handleEdit, handleDelete, handleView, view,
   }, [elementState]);
 
   const handleEditElement = () => {
-    // console.log(elementState);
     handleEdit(elementState);
     handleClose();
   };

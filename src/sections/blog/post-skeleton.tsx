@@ -15,7 +15,7 @@ export function PostItemSkeleton({ variant = 'vertical', sx, ...other }) {
         variant="outlined"
         sx={{
           borderRadius: 2,
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -43,7 +43,7 @@ export function PostItemSkeleton({ variant = 'vertical', sx, ...other }) {
       variant="outlined"
       sx={{
         borderRadius: 2,
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -64,7 +64,7 @@ export function PostItemSkeleton({ variant = 'vertical', sx, ...other }) {
 
 PostItemSkeleton.propTypes = {
   sx: PropTypes.object,
-  variant: PropTypes.string,
+  variant: PropTypes.string
 };
 
 // ----------------------------------------------------------------------

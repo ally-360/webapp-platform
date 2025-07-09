@@ -30,12 +30,12 @@ const StyledPolygon = styled('div')(({ anchor = 'top', theme }) => ({
   lineHeight: 0,
   ...(anchor === 'top' && {
     top: -1,
-    transform: 'scale(-1, -1)',
+    transform: 'scale(-1, -1)'
   }),
   ...(anchor === 'bottom' && {
     bottom: -1,
-    backgroundColor: theme.palette.grey[900],
-  }),
+    backgroundColor: theme.palette.grey[900]
+  })
 }));
 
 // ----------------------------------------------------------------------
@@ -53,7 +53,7 @@ export default function HomeView() {
         sx={{
           overflow: 'hidden',
           position: 'relative',
-          bgcolor: 'background.default',
+          bgcolor: 'background.default'
         }}
       >
         <HomeMinimal />

@@ -12,16 +12,7 @@ import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerPanel({
-  title,
-  subTitle,
-  link,
-  onOpen,
-  collapse,
-  onCollapse,
-  sx,
-  ...other
-}) {
+export default function FileManagerPanel({ title, subTitle, link, onOpen, collapse, onCollapse, sx, ...other }) {
   return (
     <Stack direction="row" alignItems="center" sx={{ mb: 3, ...sx }} {...other}>
       <Stack flexGrow={1}>
@@ -38,8 +29,8 @@ export default function FileManagerPanel({
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               '&:hover': {
-                bgcolor: 'primary.dark',
-              },
+                bgcolor: 'primary.dark'
+              }
             }}
           >
             <Iconify icon="mingcute:add-line" />
@@ -77,5 +68,5 @@ FileManagerPanel.propTypes = {
   onOpen: PropTypes.func,
   subTitle: PropTypes.string,
   sx: PropTypes.object,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

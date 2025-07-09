@@ -10,7 +10,7 @@ export default function SearchNotFound({ query, sx, ...other }) {
       sx={{
         bgcolor: 'unset',
         textAlign: 'center',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -33,5 +33,5 @@ export default function SearchNotFound({ query, sx, ...other }) {
 
 SearchNotFound.propTypes = {
   query: PropTypes.string,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

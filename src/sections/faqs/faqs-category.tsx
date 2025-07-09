@@ -24,33 +24,33 @@ const CATEGORIES = [
   {
     label: 'Managing your account',
     icon: '/assets/icons/faqs/ic_account.svg',
-    href: '#',
+    href: '#'
   },
   {
     label: 'Payment',
     icon: '/assets/icons/faqs/ic_payment.svg',
-    href: '#',
+    href: '#'
   },
   {
     label: 'Delivery',
     icon: '/assets/icons/faqs/ic_delivery.svg',
-    href: '#',
+    href: '#'
   },
   {
     label: 'Problem with the Product',
     icon: '/assets/icons/faqs/ic_package.svg',
-    href: '#',
+    href: '#'
   },
   {
     label: 'Return & Refund',
     icon: '/assets/icons/faqs/ic_refund.svg',
-    href: '#',
+    href: '#'
   },
   {
     label: 'Guarantees and assurances',
     icon: '/assets/icons/faqs/ic_assurances.svg',
-    href: '#',
-  },
+    href: '#'
+  }
 ];
 
 // ----------------------------------------------------------------------
@@ -90,7 +90,7 @@ export default function FaqsCategory() {
       display="grid"
       gridTemplateColumns={{
         md: 'repeat(3, 1fr)',
-        lg: 'repeat(6, 1fr)',
+        lg: 'repeat(6, 1fr)'
       }}
     >
       {CATEGORIES.map((category) => (
@@ -118,16 +118,11 @@ function CardDesktop({ category }) {
         textAlign: 'center',
         '&:hover': {
           bgcolor: 'background.paper',
-          boxShadow: (theme) => theme.customShadows.z20,
-        },
+          boxShadow: (theme) => theme.customShadows.z20
+        }
       }}
     >
-      <Image
-        disabledEffect
-        alt={icon}
-        src={icon}
-        sx={{ mb: 2, width: 80, height: 80, mx: 'auto' }}
-      />
+      <Image disabledEffect alt={icon} src={icon} sx={{ mb: 2, width: 80, height: 80, mx: 'auto' }} />
 
       <TextMaxLine variant="subtitle2" persistent>
         {label}
@@ -137,7 +132,7 @@ function CardDesktop({ category }) {
 }
 
 CardDesktop.propTypes = {
-  category: PropTypes.object,
+  category: PropTypes.object
 };
 
 // ----------------------------------------------------------------------
@@ -157,7 +152,7 @@ function CardMobile({ category }) {
         typography: 'subtitle2',
         flexDirection: 'column',
         justifyContent: 'center',
-        bgcolor: 'background.neutral',
+        bgcolor: 'background.neutral'
       }}
     >
       <Image alt={icon} src={icon} sx={{ width: 48, height: 48, mb: 1 }} />
@@ -168,5 +163,5 @@ function CardMobile({ category }) {
 }
 
 CardMobile.propTypes = {
-  category: PropTypes.object,
+  category: PropTypes.object
 };

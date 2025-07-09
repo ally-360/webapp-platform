@@ -44,12 +44,12 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
     //
     openMobile,
     onOpenMobile,
-    onCloseMobile,
+    onCloseMobile
   } = useCollapseNav();
 
   const [searchContacts, setSearchContacts] = useState({
     query: '',
-    results: [],
+    results: []
   });
 
   useEffect(() => {
@@ -77,17 +77,15 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
     (inputValue) => {
       setSearchContacts((prevState) => ({
         ...prevState,
-        query: inputValue,
+        query: inputValue
       }));
 
       if (inputValue) {
-        const results = contacts.filter((contact) =>
-          contact.name.toLowerCase().includes(inputValue)
-        );
+        const results = contacts.filter((contact) => contact.name.toLowerCase().includes(inputValue));
 
         setSearchContacts((prevState) => ({
           ...prevState,
-          results,
+          results
         }));
       }
     },
@@ -97,7 +95,7 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
   const handleClickAwaySearch = useCallback(() => {
     setSearchContacts({
       query: '',
-      results: [],
+      results: []
     });
   }, []);
 
@@ -125,8 +123,8 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
         boxShadow: theme.customShadows.primary,
         color: theme.palette.primary.contrastText,
         '&:hover': {
-          bgcolor: theme.palette.primary.darker,
-        },
+          bgcolor: theme.palette.primary.darker
+        }
       }}
     >
       <Iconify width={16} icon="solar:users-group-rounded-bold" />
@@ -175,7 +173,7 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
             <InputAdornment position="start">
               <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
             </InputAdornment>
-          ),
+          )
         }}
         sx={{ mt: 2.5 }}
       />
@@ -193,9 +191,7 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
         )}
 
         <IconButton onClick={handleToggleNav}>
-          <Iconify
-            icon={collapseDesktop ? 'eva:arrow-ios-forward-fill' : 'eva:arrow-ios-back-fill'}
-          />
+          <Iconify icon={collapseDesktop ? 'eva:arrow-ios-forward-fill' : 'eva:arrow-ios-back-fill'} />
         </IconButton>
 
         {!collapseDesktop && (
@@ -229,11 +225,11 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
             width: NAV_WIDTH,
             borderRight: `solid 1px ${theme.palette.divider}`,
             transition: theme.transitions.create(['width'], {
-              duration: theme.transitions.duration.shorter,
+              duration: theme.transitions.duration.shorter
             }),
             ...(collapseDesktop && {
-              width: NAV_COLLAPSE_WIDTH,
-            }),
+              width: NAV_COLLAPSE_WIDTH
+            })
           }}
         >
           {renderContent}
@@ -243,10 +239,10 @@ export default function ChatNav({ loading, contacts, conversations, selectedConv
           open={openMobile}
           onClose={onCloseMobile}
           slotProps={{
-            backdrop: { invisible: true },
+            backdrop: { invisible: true }
           }}
           PaperProps={{
-            sx: { width: NAV_WIDTH },
+            sx: { width: NAV_WIDTH }
           }}
         >
           {renderContent}
@@ -260,5 +256,5 @@ ChatNav.propTypes = {
   contacts: PropTypes.array,
   conversations: PropTypes.object,
   loading: PropTypes.bool,
-  selectedConversationId: PropTypes.string,
+  selectedConversationId: PropTypes.string
 };

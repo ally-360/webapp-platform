@@ -26,7 +26,7 @@ const visuallyHidden = {
 export default function TableHeadCustom({
   order,
   orderBy,
-  rowCount = 0,
+  rowCount = 100,
   headLabel,
   numSelected = 0,
   onSort,
@@ -53,7 +53,6 @@ export default function TableHeadCustom({
             sortDirection={orderBy === headCell.id ? order : false}
             sx={{ width: headCell.width, minWidth: headCell.minWidth }}
           >
-            {console.log(headCell)}
             {onSort ? (
               <TableSortLabel
                 hideSortIcon

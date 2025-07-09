@@ -67,10 +67,7 @@ export default function MailView() {
       }
 
       if (labelId) {
-        const href =
-          labelId !== LABEL_INDEX
-            ? `${paths.dashboard.mail}?label=${labelId}`
-            : paths.dashboard.mail;
+        const href = labelId !== LABEL_INDEX ? `${paths.dashboard.mail}?label=${labelId}` : paths.dashboard.mail;
         router.push(href);
       }
     },
@@ -117,7 +114,7 @@ export default function MailView() {
     <LoadingScreen
       sx={{
         borderRadius: 1.5,
-        bgcolor: 'background.default',
+        bgcolor: 'background.default'
       }}
     />
   );
@@ -130,7 +127,7 @@ export default function MailView() {
       sx={{
         borderRadius: 1.5,
         maxWidth: { md: 320 },
-        bgcolor: 'background.default',
+        bgcolor: 'background.default'
       }}
     />
   );
@@ -172,15 +169,12 @@ export default function MailView() {
             borderRadius: 1.5,
             bgcolor: 'background.default',
             ...(!upMd && {
-              display: 'none',
-            }),
+              display: 'none'
+            })
           }}
         />
       ) : (
-        <MailDetails
-          mail={mail}
-          renderLabel={(id) => labels.filter((label) => label.id === id)[0]}
-        />
+        <MailDetails mail={mail} renderLabel={(id) => labels.filter((label) => label.id === id)[0]} />
       )}
     </>
   );
@@ -191,7 +185,7 @@ export default function MailView() {
         <Typography
           variant="h4"
           sx={{
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 3, md: 5 }
           }}
         >
           Mail
@@ -204,15 +198,10 @@ export default function MailView() {
             borderRadius: 2,
             position: 'relative',
             overflow: 'hidden',
-            bgcolor: 'background.neutral',
+            bgcolor: 'background.neutral'
           }}
         >
-          {!upMd && (
-            <MailHeader
-              onOpenNav={openNav.onTrue}
-              onOpenMail={mailsEmpty ? null : openMail.onTrue}
-            />
-          )}
+          {!upMd && <MailHeader onOpenNav={openNav.onTrue} onOpenMail={mailsEmpty ? null : openMail.onTrue} />}
 
           <Stack
             spacing={1}
@@ -220,8 +209,8 @@ export default function MailView() {
             flexGrow={1}
             sx={{
               height: {
-                xs: '72vh',
-              },
+                xs: '72vh'
+              }
             }}
           >
             {renderMailNav}

@@ -28,22 +28,17 @@ export default function FileWidget({ title, value, total, icon, sx, ...other }) 
           height: 6,
           '&::before': {
             bgcolor: 'divider',
-            opacity: 1,
-          },
+            opacity: 1
+          }
         }}
       />
 
-      <Stack
-        direction="row"
-        spacing={0.5}
-        justifyContent="flex-end"
-        sx={{ typography: 'subtitle2' }}
-      >
+      <Stack direction="row" spacing={0.5} justifyContent="flex-end" sx={{ typography: 'subtitle2' }}>
         <Box
           sx={{
             mr: 0.5,
             typography: 'body2',
-            color: 'text.disabled',
+            color: 'text.disabled'
           }}
         >
           {fData(value)}
@@ -60,5 +55,5 @@ FileWidget.propTypes = {
   sx: PropTypes.object,
   title: PropTypes.string,
   total: PropTypes.number,
-  value: PropTypes.number,
+  value: PropTypes.number
 };

@@ -66,11 +66,7 @@ function PasswordIcon({ ...other }) {
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feColorMatrix
-            in="SourceAlpha"
-            result="hardAlpha"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-          />
+          <feColorMatrix in="SourceAlpha" result="hardAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
           <feOffset dx="-2" dy="-2" />
           <feGaussianBlur stdDeviation="2" />
           <feComposite in2="hardAlpha" k2="-1" k3="1" operator="arithmetic" />
@@ -88,11 +84,7 @@ function PasswordIcon({ ...other }) {
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-          <feColorMatrix
-            in="SourceAlpha"
-            result="hardAlpha"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-          />
+          <feColorMatrix in="SourceAlpha" result="hardAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
           <feOffset dx="-2" dy="-2" />
           <feGaussianBlur stdDeviation="2" />
           <feComposite in2="hardAlpha" k2="-1" k3="1" operator="arithmetic" />

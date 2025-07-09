@@ -9,14 +9,7 @@ import Button from '@mui/material/Button';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // api
-import {
-  updateColumn,
-  clearColumn,
-  deleteColumn,
-  createTask,
-  updateTask,
-  deleteTask,
-} from 'src/api/kanban';
+import { updateColumn, clearColumn, deleteColumn, createTask, updateTask, deleteTask } from 'src/api/kanban';
 // components
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
@@ -39,7 +32,7 @@ export default function KanbanColumn({ column, tasks, index }) {
           updateColumn(column.id, columnName);
 
           enqueueSnackbar('Update success!', {
-            anchorOrigin: { vertical: 'top', horizontal: 'center' },
+            anchorOrigin: { vertical: 'top', horizontal: 'center' }
           });
         }
       } catch (error) {
@@ -62,7 +55,7 @@ export default function KanbanColumn({ column, tasks, index }) {
       deleteColumn(column.id);
 
       enqueueSnackbar('Delete success!', {
-        anchorOrigin: { vertical: 'top', horizontal: 'center' },
+        anchorOrigin: { vertical: 'top', horizontal: 'center' }
       });
     } catch (error) {
       console.error(error);
@@ -96,7 +89,7 @@ export default function KanbanColumn({ column, tasks, index }) {
         deleteTask(column.id, taskId);
 
         enqueueSnackbar('Delete success!', {
-          anchorOrigin: { vertical: 'top', horizontal: 'center' },
+          anchorOrigin: { vertical: 'top', horizontal: 'center' }
         });
       } catch (error) {
         console.error(error);
@@ -109,15 +102,11 @@ export default function KanbanColumn({ column, tasks, index }) {
     <Stack
       spacing={2}
       sx={{
-        pb: 3,
+        pb: 3
       }}
     >
       {openAddTask.value && (
-        <KanbanTaskAdd
-          status={column.name}
-          onAddTask={handleAddTask}
-          onCloseAddTask={openAddTask.onFalse}
-        />
+        <KanbanTaskAdd status={column.name} onAddTask={handleAddTask} onCloseAddTask={openAddTask.onFalse} />
       )}
 
       <Button
@@ -150,8 +139,8 @@ export default function KanbanColumn({ column, tasks, index }) {
             borderRadius: 2,
             bgcolor: 'background.neutral',
             ...(snapshot.isDragging && {
-              bgcolor: (theme) => alpha(theme.palette.grey[500], 0.24),
-            }),
+              bgcolor: (theme) => alpha(theme.palette.grey[500], 0.24)
+            })
           }}
         >
           <Stack {...provided.dragHandleProps}>
@@ -170,7 +159,7 @@ export default function KanbanColumn({ column, tasks, index }) {
                   spacing={2}
                   sx={{
                     py: 3,
-                    width: 280,
+                    width: 280
                   }}
                 >
                   {column.taskIds.map((taskId, taskIndex) => (
@@ -198,5 +187,5 @@ export default function KanbanColumn({ column, tasks, index }) {
 KanbanColumn.propTypes = {
   column: PropTypes.object,
   index: PropTypes.number,
-  tasks: PropTypes.object,
+  tasks: PropTypes.object
 };

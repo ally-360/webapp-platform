@@ -25,16 +25,16 @@ export default function UserEditView({ id }) {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'User',
-            href: paths.dashboard.user.root,
+            href: paths.dashboard.user.root
           },
-          { name: currentUser?.name },
+          { name: currentUser?.name }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -44,5 +44,5 @@ export default function UserEditView({ id }) {
 }
 
 UserEditView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

@@ -17,14 +17,7 @@ function MotivationIllustration({ ...other }) {
   const PRIMARY_DARKER = theme.palette.primary.darker;
 
   return (
-    <Box
-      component="svg"
-      width="100%"
-      height="100%"
-      viewBox="0 0 480 360"
-      xmlns="http://www.w3.org/2000/svg"
-      {...other}
-    >
+    <Box component="svg" width="100%" height="100%" viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" {...other}>
       <BackgroundShape />
 
       <image href="/assets/illustrations/characters/character_2.png" height="300" x="322" y="30" />
@@ -51,14 +44,7 @@ function MotivationIllustration({ ...other }) {
       />
 
       <defs>
-        <linearGradient
-          id="paint0_linear_1_43"
-          x1="140"
-          x2="276.5"
-          y1="98"
-          y2="312.5"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id="paint0_linear_1_43" x1="140" x2="276.5" y1="98" y2="312.5" gradientUnits="userSpaceOnUse">
           <stop stopColor={PRIMARY_LIGHTER} />
           <stop offset="1" stopColor={PRIMARY_DARK} />
         </linearGradient>

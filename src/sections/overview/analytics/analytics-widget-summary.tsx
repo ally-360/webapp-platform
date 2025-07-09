@@ -12,14 +12,7 @@ import { fShortenNumber } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
-export default function AnalyticsWidgetSummary({
-  title,
-  total,
-  icon,
-  color = 'primary',
-  sx,
-  ...other
-}) {
+export default function AnalyticsWidgetSummary({ title, total, icon, color = 'primary', sx, ...other }) {
   const theme = useTheme();
 
   return (
@@ -29,14 +22,14 @@ export default function AnalyticsWidgetSummary({
         ...bgGradient({
           direction: '135deg',
           startColor: alpha(theme.palette[color].light, 0.2),
-          endColor: alpha(theme.palette[color].main, 0.2),
+          endColor: alpha(theme.palette[color].main, 0.2)
         }),
         py: 5,
         borderRadius: 2,
         textAlign: 'center',
         color: `${color}.darker`,
         backgroundColor: 'common.white',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -56,5 +49,5 @@ AnalyticsWidgetSummary.propTypes = {
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

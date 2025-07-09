@@ -25,18 +25,18 @@ export default function PostEditView({ title }) {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Blog',
-            href: paths.dashboard.post.root,
+            href: paths.dashboard.post.root
           },
           {
-            name: currentPost?.title,
-          },
+            name: currentPost?.title
+          }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 
@@ -46,5 +46,5 @@ export default function PostEditView({ title }) {
 }
 
 PostEditView.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.string
 };

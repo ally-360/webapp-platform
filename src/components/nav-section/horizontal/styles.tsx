@@ -6,13 +6,13 @@ import ListItemButton from '@mui/material/ListItemButton';
 // ----------------------------------------------------------------------
 
 export const StyledItem = styled(ListItemButton, {
-  shouldForwardProp: (prop) => prop !== 'active',
+  shouldForwardProp: (prop) => prop !== 'active'
 })(({ active, open, depth, config, theme }) => {
   const subItem = depth !== 1;
 
   const activeStyles = {
     color: theme.palette.text.primary,
-    backgroundColor: theme.palette.action.selected,
+    backgroundColor: theme.palette.action.selected
   };
 
   return {
@@ -26,22 +26,22 @@ export const StyledItem = styled(ListItemButton, {
 
     // Active item
     ...(active && {
-      ...activeStyles,
+      ...activeStyles
     }),
 
     // Sub item
     ...(subItem && {
       margin: 0,
       padding: theme.spacing(0, 1),
-      minHeight: config.itemSubHeight,
+      minHeight: config.itemSubHeight
     }),
 
     // Open
     ...(open &&
       !active && {
         color: theme.palette.text.primary,
-        backgroundColor: theme.palette.action.hover,
-      }),
+        backgroundColor: theme.palette.action.hover
+      })
   };
 });
 
@@ -51,5 +51,5 @@ export const StyledIcon = styled(ListItemIcon)(({ size }) => ({
   width: size,
   height: size,
   flexShrink: 0,
-  marginRight: 0,
+  marginRight: 0
 }));

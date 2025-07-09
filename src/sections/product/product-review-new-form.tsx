@@ -24,26 +24,26 @@ export default function ProductReviewNewForm({ onClose, ...other }) {
     rating: Yup.number().min(1, 'Rating must be greater than or equal to 1'),
     review: Yup.string().required('Review is required'),
     name: Yup.string().required('Name is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
+    email: Yup.string().required('Email is required').email('Email must be a valid email address')
   });
 
   const defaultValues = {
     rating: 0,
     review: '',
     name: '',
-    email: '',
+    email: ''
   };
 
   const methods = useForm({
     resolver: yupResolver(ReviewSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -111,5 +111,5 @@ export default function ProductReviewNewForm({ onClose, ...other }) {
 }
 
 ProductReviewNewForm.propTypes = {
-  onClose: PropTypes.func,
+  onClose: PropTypes.func
 };

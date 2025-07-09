@@ -43,6 +43,7 @@ import {
 } from 'src/components/table';
 //
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@mui/material';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -80,6 +81,8 @@ export default function InvoiceListView() {
   const router = useRouter();
 
   const table = useTable({ defaultOrderBy: 'createDate' });
+
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const confirm = useBoolean(0);
 
@@ -201,7 +204,7 @@ export default function InvoiceListView() {
               href: paths.dashboard.root
             },
             {
-              name: 'Facturas de venta',
+              name: 'Facturas de compra',
               href: paths.dashboard.bill.root
             },
             {
@@ -211,10 +214,11 @@ export default function InvoiceListView() {
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.sales.newSale}
+              href={paths.dashboard.bill.newBill}
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
+              sx={isMobile && { width: '100%' }}
             >
               {t('Nueva factura')}
             </Button>

@@ -20,18 +20,18 @@ export default function PostCreateView() {
         links={[
           {
             name: 'Dashboard',
-            href: paths.dashboard.root,
+            href: paths.dashboard.root
           },
           {
             name: 'Blog',
-            href: paths.dashboard.post.root,
+            href: paths.dashboard.post.root
           },
           {
-            name: 'Create',
-          },
+            name: 'Create'
+          }
         ]}
         sx={{
-          mb: { xs: 3, md: 5 },
+          mb: { xs: 3, md: 5 }
         }}
       />
 

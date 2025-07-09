@@ -23,7 +23,7 @@ export default function MailNav({
   selectedLabelId,
   handleClickLabel,
   //
-  onToggleCompose,
+  onToggleCompose
 }) {
   const mdUp = useResponsive('up', 'md');
 
@@ -56,8 +56,8 @@ export default function MailNav({
         sx={{
           p: (theme) => ({
             xs: theme.spacing(2.5, 2.5, 2, 2.5),
-            md: theme.spacing(2, 1.5),
-          }),
+            md: theme.spacing(2, 1.5)
+          })
         }}
       >
         <Button
@@ -74,7 +74,7 @@ export default function MailNav({
       <Scrollbar>
         <Stack
           sx={{
-            px: { xs: 3.5, md: 2.5 },
+            px: { xs: 3.5, md: 2.5 }
           }}
         >
           {loading && renderSkeleton}
@@ -89,7 +89,7 @@ export default function MailNav({
     <Stack
       sx={{
         width: 200,
-        flexShrink: 0,
+        flexShrink: 0
       }}
     >
       {renderContent}
@@ -99,12 +99,12 @@ export default function MailNav({
       open={openNav}
       onClose={onCloseNav}
       slotProps={{
-        backdrop: { invisible: true },
+        backdrop: { invisible: true }
       }}
       PaperProps={{
         sx: {
-          width: 260,
-        },
+          width: 260
+        }
       }}
     >
       {renderContent}
@@ -119,5 +119,5 @@ MailNav.propTypes = {
   onCloseNav: PropTypes.func,
   onToggleCompose: PropTypes.func,
   openNav: PropTypes.bool,
-  selectedLabelId: PropTypes.string,
+  selectedLabelId: PropTypes.string
 };

@@ -22,20 +22,20 @@ export default function SettingsButton({ sx }) {
       sx={{
         [`& .${badgeClasses.badge}`]: {
           top: 8,
-          right: 8,
+          right: 8
         },
-        ...sx,
+        ...sx
       }}
     >
       <Box
         component={m.div}
         animate={{
-          rotate: [0, settings.open ? 0 : 360],
+          rotate: [0, settings.open ? 0 : 360]
         }}
         transition={{
           duration: 12,
           ease: 'linear',
-          repeat: Infinity,
+          repeat: Infinity
         }}
       >
         <IconButton
@@ -47,7 +47,7 @@ export default function SettingsButton({ sx }) {
           onClick={settings.onToggle}
           sx={{
             width: 40,
-            height: 40,
+            height: 40
           }}
         >
           <Iconify icon="solar:settings-bold-duotone" width={24} />
@@ -58,5 +58,5 @@ export default function SettingsButton({ sx }) {
 }
 
 SettingsButton.propTypes = {
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

@@ -2,22 +2,20 @@ import PropTypes from 'prop-types';
 // @mui
 import Fab from '@mui/material/Fab';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 // routes
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 // components
 import Label from 'src/components/label';
 import Image from 'src/components/image';
 import Iconify from 'src/components/iconify';
-import { ColorPreview } from 'src/components/color-utils';
 //
 import { Typography } from '@mui/material';
+import React from 'react';
 import { useCheckoutContext } from '../checkout/context';
 
 // ----------------------------------------------------------------------
@@ -28,14 +26,12 @@ export default function PosProductItem({ product }) {
   // const { id, name, images[0], price, colors, available, sizes, priceSale, newLabel, saleLabel } = product;
   const { id, name, images, priceSale, sku, quantityStock } = product;
 
-  console.log(product);
-
   const colors = ['red', 'blue'];
   const available = true;
   const sizes = ['S', 'M', 'L'];
   const saleLabel = { enabled: true, content: 'Sale' };
 
-  const linkTo = paths.product.details(id);
+  const linkTo = paths.dashboard.product.details(id);
 
   const handleAddCart = async () => {
     const newProduct = {
@@ -49,6 +45,7 @@ export default function PosProductItem({ product }) {
       quantity: 1
     };
     try {
+      console.log('newProduct', newProduct);
       onAddToCart(newProduct);
     } catch (error) {
       console.error(error);
@@ -77,7 +74,6 @@ export default function PosProductItem({ product }) {
           color="warning"
           size="medium"
           className="add-cart-btn"
-          onClick={handleAddCart}
           sx={{
             right: 16,
             bottom: 16,
@@ -114,12 +110,10 @@ export default function PosProductItem({ product }) {
 
   const renderContent = (
     <Stack spacing={0.5} sx={{ p: 2, pt: 0.6 }}>
-      <Link component={RouterLink} href={linkTo} color="inherit" variant="subtitle2" noWrap>
-        {name}
-        <Typography variant="subtitle2" color="GrayText" sx={{ fontSize: 11 }} noWrap>
-          <strong>SKU:</strong> {sku}
-        </Typography>
-      </Link>
+      {name}
+      <Typography variant="subtitle2" color="GrayText" sx={{ fontSize: 11 }} noWrap>
+        <strong>SKU:</strong> {sku}
+      </Typography>
 
       <Stack direction="row" justifyContent="right" spacing={0.5} sx={{ typography: 'subtitle1' }}>
         <Box component="span">{fCurrency(priceSale)}</Box>
@@ -129,6 +123,7 @@ export default function PosProductItem({ product }) {
 
   return (
     <Card
+      onClick={handleAddCart}
       sx={{
         '&:hover .add-cart-btn': {
           opacity: 1

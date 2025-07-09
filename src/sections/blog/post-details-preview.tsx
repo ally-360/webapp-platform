@@ -27,7 +27,7 @@ export default function PostDetailsPreview({
   isValid,
   onClose,
   onSubmit,
-  isSubmitting,
+  isSubmitting
 }) {
   const hasContent = title || description || content || coverUrl;
 
@@ -44,13 +44,7 @@ export default function PostDetailsPreview({
           Cancel
         </Button>
 
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          disabled={!isValid}
-          loading={isSubmitting}
-          onClick={onSubmit}
-        >
+        <LoadingButton type="submit" variant="contained" disabled={!isValid} loading={isSubmitting} onClick={onSubmit}>
           Post
         </LoadingButton>
       </DialogActions>
@@ -65,7 +59,7 @@ export default function PostDetailsPreview({
             <Stack
               sx={{
                 maxWidth: 720,
-                mx: 'auto',
+                mx: 'auto'
               }}
             >
               <Typography variant="h6" sx={{ mb: 5 }}>
@@ -92,5 +86,5 @@ PostDetailsPreview.propTypes = {
   onClose: PropTypes.func,
   onSubmit: PropTypes.func,
   open: PropTypes.bool,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

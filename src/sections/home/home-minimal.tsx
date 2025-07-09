@@ -14,19 +14,23 @@ import { MotionViewport, varFade } from 'src/components/animate';
 const CARDS = [
   {
     icon: ' /assets/icons/home/ic_make_brand.svg',
-    title: 'Manejo de inventario',
-    description: 'Consistent design makes it easy to brand your own.'
+    title: 'Control total de tus operaciones',
+    description: 'Ventas, compras, inventario y puntos de venta en un solo sistema.'
   },
   {
     icon: ' /assets/icons/home/ic_design.svg',
-    title: 'Cuentas',
-    description:
-      'The kit is built on the principles of the atomic design system. It helps you to create projects fastest and easily customized packages for your projects.'
+    title: 'Reportes e indicadores claros',
+    description: 'Con información lista para tomar decisiones.'
   },
   {
     icon: ' /assets/icons/home/ic_development.svg',
-    title: 'Facturación electronica',
-    description: 'Easy to customize and extend, saving you time and money.'
+    title: 'Interfaz intuitiva',
+    description: 'Pensada para emprendedores sin experiencia técnica.'
+  },
+  {
+    icon: ' /assets/icons/home/ic_development.svg',
+    title: 'Soporte y capacitación',
+    description: 'Asistencia personalizada para que tu negocio crezca.'
   }
 ];
 
@@ -55,19 +59,19 @@ export default function HomeMinimal() {
 
         <m.div variants={varFade().inDown}>
           <Typography variant="h2">
-            Caracteristicas
+            Beneficios
             <br />
           </Typography>
         </m.div>
       </Stack>
 
       <Box
-        gap={{ xs: 3, lg: 10 }}
+        gap={{ xs: 3, lg: 5 }}
         display="grid"
         alignItems="center"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          md: 'repeat(3, 1fr)'
+          md: 'repeat(4, 1fr)'
         }}
       >
         {CARDS.map((card, index) => (
@@ -78,9 +82,9 @@ export default function HomeMinimal() {
                 boxShadow: { md: 'none' },
                 bgcolor: 'background.default',
                 p: (theme) => theme.spacing(10, 5),
-                ...(index === 1 && {
+                ...(index < 10 && {
                   boxShadow: (theme) => ({
-                    md: `-40px 40px 80px ${
+                    md: `-0px 0px 30px ${
                       theme.palette.mode === 'light'
                         ? alpha(theme.palette.grey[500], 0.16)
                         : alpha(theme.palette.common.black, 0.4)

@@ -23,7 +23,7 @@ export default function FileThumbnail({ file, tooltip, imageView, onDownload, sx
           height: 1,
           flexShrink: 0,
           objectFit: 'cover',
-          ...imgSx,
+          ...imgSx
         }}
       />
     ) : (
@@ -34,7 +34,7 @@ export default function FileThumbnail({ file, tooltip, imageView, onDownload, sx
           width: 32,
           height: 32,
           flexShrink: 0,
-          ...sx,
+          ...sx
         }}
       />
     );
@@ -49,7 +49,7 @@ export default function FileThumbnail({ file, tooltip, imageView, onDownload, sx
           justifyContent="center"
           sx={{
             width: 'fit-content',
-            height: 'inherit',
+            height: 'inherit'
           }}
         >
           {renderContent}
@@ -73,5 +73,5 @@ FileThumbnail.propTypes = {
   imgSx: PropTypes.object,
   onDownload: PropTypes.func,
   sx: PropTypes.object,
-  tooltip: PropTypes.bool,
+  tooltip: PropTypes.bool
 };

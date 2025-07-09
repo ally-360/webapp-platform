@@ -45,11 +45,11 @@ PosProductItemSkeleton.propTypes = {
 export function PosProductDetailsSkeleton({ ...other }) {
   return (
     <Grid container spacing={8} {...other}>
-      <Grid xs={12} md={6} lg={7}>
+      <Grid xs={12} item md={6} lg={7}>
         <Skeleton sx={{ paddingTop: '100%' }} />
       </Grid>
 
-      <Grid xs={12} md={6} lg={5}>
+      <Grid xs={12} item md={6} lg={5}>
         <Stack spacing={3}>
           <Skeleton variant="circular" sx={{ width: 80, height: 80 }} />
           <Skeleton sx={{ height: 240 }} />
@@ -59,7 +59,7 @@ export function PosProductDetailsSkeleton({ ...other }) {
         </Stack>
       </Grid>
 
-      <Grid xs={12}>
+      <Grid xs={12} item>
         <Stack direction="row" alignItems="center">
           {[...Array(3)].map((_, index) => (
             <Stack key={index} spacing={2} alignItems="center" justifyContent="center" sx={{ width: 1 }}>

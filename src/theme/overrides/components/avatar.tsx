@@ -28,21 +28,21 @@ export default function Avatar(theme) {
               props: { color: 'default' },
               style: {
                 color: theme.palette.text.secondary,
-                backgroundColor: alpha(theme.palette.grey[500], 0.24),
-              },
+                backgroundColor: alpha(theme.palette.grey[500], 0.24)
+              }
             }
           : {
               props: { color },
               style: {
                 color: theme.palette[color].contrastText,
-                backgroundColor: theme.palette[color].main,
-              },
+                backgroundColor: theme.palette[color].main
+              }
             }
       ),
 
       styleOverrides: {
         rounded: {
-          borderRadius: theme.shape.borderRadius * 1.5,
+          borderRadius: theme.shape.borderRadius * 1.5
         },
         colorDefault: ({ ownerState }) => {
           const color = colorByName(`${ownerState.alt}`);
@@ -52,20 +52,20 @@ export default function Avatar(theme) {
               ...(color !== 'default'
                 ? {
                     color: theme.palette[color].contrastText,
-                    backgroundColor: theme.palette[color].main,
+                    backgroundColor: theme.palette[color].main
                   }
                 : {
                     color: theme.palette.text.secondary,
-                    backgroundColor: alpha(theme.palette.grey[500], 0.24),
-                  }),
-            }),
+                    backgroundColor: alpha(theme.palette.grey[500], 0.24)
+                  })
+            })
           };
-        },
-      },
+        }
+      }
     },
     MuiAvatarGroup: {
       defaultProps: {
-        max: 4,
+        max: 4
       },
       styleOverrides: {
         root: ({ ownerState }) => ({
@@ -82,14 +82,14 @@ export default function Avatar(theme) {
               '&:first-of-type': {
                 left: 0,
                 bottom: 0,
-                zIndex: 9,
+                zIndex: 9
               },
               '&:last-of-type': {
                 top: 0,
-                right: 0,
-              },
-            },
-          }),
+                right: 0
+              }
+            }
+          })
         }),
         avatar: {
           fontSize: 16,
@@ -97,10 +97,10 @@ export default function Avatar(theme) {
           '&:first-of-type': {
             fontSize: 12,
             color: theme.palette.primary.dark,
-            backgroundColor: theme.palette.primary.lighter,
-          },
-        },
-      },
-    },
+            backgroundColor: theme.palette.primary.lighter
+          }
+        }
+      }
+    }
   };
 }

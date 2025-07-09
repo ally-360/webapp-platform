@@ -39,5 +39,5 @@ export default function CheckoutBillingInfo({ billing, onBackStep }) {
 
 CheckoutBillingInfo.propTypes = {
   billing: PropTypes.object,
-  onBackStep: PropTypes.func,
+  onBackStep: PropTypes.func
 };

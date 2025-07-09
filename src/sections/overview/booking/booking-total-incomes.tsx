@@ -13,22 +13,10 @@ import Chart, { useChart } from 'src/components/chart';
 
 // ----------------------------------------------------------------------
 
-export default function BookingTotalIncomes({
-  title,
-  total,
-  percent,
-  color = 'primary',
-  chart,
-  sx,
-  ...other
-}) {
+export default function BookingTotalIncomes({ title, total, percent, color = 'primary', chart, sx, ...other }) {
   const theme = useTheme();
 
-  const {
-    colors = [theme.palette[color].main, theme.palette[color].dark],
-    series,
-    options,
-  } = chart;
+  const { colors = [theme.palette[color].main, theme.palette[color].dark], series, options } = chart;
 
   const chartOptions = useChart({
     colors: [colors[1]],
@@ -37,46 +25,46 @@ export default function BookingTotalIncomes({
       gradient: {
         colorStops: [
           { offset: 0, color: colors[0] },
-          { offset: 100, color: colors[1] },
-        ],
-      },
+          { offset: 100, color: colors[1] }
+        ]
+      }
     },
     chart: {
       sparkline: {
-        enabled: true,
-      },
+        enabled: true
+      }
     },
     xaxis: {
       labels: {
-        show: false,
-      },
+        show: false
+      }
     },
     yaxis: {
       labels: {
-        show: false,
-      },
+        show: false
+      }
     },
     stroke: {
-      width: 4,
+      width: 4
     },
     legend: {
-      show: false,
+      show: false
     },
     grid: {
-      show: false,
+      show: false
     },
     tooltip: {
       marker: {
-        show: false,
+        show: false
       },
       y: {
         formatter: (value) => fCurrency(value),
         title: {
-          formatter: () => '',
-        },
-      },
+          formatter: () => ''
+        }
+      }
     },
-    ...options,
+    ...options
   });
 
   return (
@@ -85,13 +73,13 @@ export default function BookingTotalIncomes({
         ...bgGradient({
           direction: '135deg',
           startColor: alpha(theme.palette[color].light, 0.2),
-          endColor: alpha(theme.palette[color].main, 0.2),
+          endColor: alpha(theme.palette[color].main, 0.2)
         }),
         p: 3,
         borderRadius: 2,
         color: `${color}.darker`,
         backgroundColor: 'common.white',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -126,5 +114,5 @@ BookingTotalIncomes.propTypes = {
   percent: PropTypes.number,
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  total: PropTypes.number
 };

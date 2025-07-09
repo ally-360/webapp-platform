@@ -19,13 +19,7 @@ import FileManagerNewFolderDialog from './file-manager-new-folder-dialog';
 
 // ----------------------------------------------------------------------
 
-export default function FileManagerGridView({
-  table,
-  data,
-  dataFiltered,
-  onDeleteItem,
-  onOpenConfirm,
-}) {
+export default function FileManagerGridView({ table, data, dataFiltered, onDeleteItem, onOpenConfirm }) {
   const { selected, onSelectRow: onSelectItem, onSelectAllRows: onSelectAllItems } = table;
 
   const containerRef = useRef(null);
@@ -71,7 +65,7 @@ export default function FileManagerGridView({
               xs: 'repeat(1, 1fr)',
               sm: 'repeat(2, 1fr)',
               md: 'repeat(3, 1fr)',
-              lg: 'repeat(4, 1fr)',
+              lg: 'repeat(4, 1fr)'
             }}
           >
             {dataFiltered
@@ -106,7 +100,7 @@ export default function FileManagerGridView({
               xs: 'repeat(1, 1fr)',
               sm: 'repeat(2, 1fr)',
               md: 'repeat(3, 1fr)',
-              lg: 'repeat(4, 1fr)',
+              lg: 'repeat(4, 1fr)'
             }}
             gap={3}
           >
@@ -197,5 +191,5 @@ FileManagerGridView.propTypes = {
   dataFiltered: PropTypes.array,
   onDeleteItem: PropTypes.func,
   onOpenConfirm: PropTypes.func,
-  table: PropTypes.object,
+  table: PropTypes.object
 };

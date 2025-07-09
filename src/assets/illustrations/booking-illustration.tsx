@@ -19,14 +19,7 @@ function BookingIllustration({ ...other }) {
   const PRIMARY_DARKER = theme.palette.primary.darker;
 
   return (
-    <Box
-      component="svg"
-      width="100%"
-      height="100%"
-      viewBox="0 0 200 200"
-      xmlns="http://www.w3.org/2000/svg"
-      {...other}
-    >
+    <Box component="svg" width="100%" height="100%" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" {...other}>
       <path
         fill="#FFFFFF"
         d="M141.968 167.139H48.764a11.932 11.932 0 01-11.921-11.921V45.758a11.935 11.935 0 0111.921-11.922h86.712l18.414 14.677v106.705a11.937 11.937 0 01-11.922 11.921z"
@@ -53,16 +46,10 @@ function BookingIllustration({ ...other }) {
         d="M63.977 43.25A28.25 28.25 0 1135.727 15a28.26 28.26 0 0128.25 28.25z"
       />
 
-      <path
-        fill={PRIMARY_LIGHTER}
-        d="M62.975 43.249A27.249 27.249 0 1135.726 16a27.258 27.258 0 0127.25 27.249z"
-      />
+      <path fill={PRIMARY_LIGHTER} d="M62.975 43.249A27.249 27.249 0 1135.726 16a27.258 27.258 0 0127.25 27.249z" />
 
       <mask id="mask0" width="55" height="55" x="8" y="16" maskUnits="userSpaceOnUse">
-        <path
-          fill="#fff"
-          d="M62.975 43.249A27.249 27.249 0 1135.726 16a27.258 27.258 0 0127.25 27.249z"
-        />
+        <path fill="#fff" d="M62.975 43.249A27.249 27.249 0 1135.726 16a27.258 27.258 0 0127.25 27.249z" />
       </mask>
       <g mask="url(#mask0)">
         <path

@@ -19,9 +19,7 @@ export default function ProfileFollowers({ followers }) {
 
   const handleClick = useCallback(
     (item) => {
-      const selected = followed.includes(item)
-        ? followed.filter((value) => value !== item)
-        : [...followed, item];
+      const selected = followed.includes(item) ? followed.filter((value) => value !== item) : [...followed, item];
 
       setFollowed(selected);
     },
@@ -40,7 +38,7 @@ export default function ProfileFollowers({ followers }) {
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
           sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
       >
         {followers.map((follower) => (
@@ -57,7 +55,7 @@ export default function ProfileFollowers({ followers }) {
 }
 
 ProfileFollowers.propTypes = {
-  followers: PropTypes.array,
+  followers: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -70,7 +68,7 @@ function FollowerItem({ follower, selected, onSelected }) {
       sx={{
         display: 'flex',
         alignItems: 'center',
-        p: (theme) => theme.spacing(3, 2, 3, 3),
+        p: (theme) => theme.spacing(3, 2, 3, 3)
       }}
     >
       <Avatar alt={name} src={avatarUrl} sx={{ width: 48, height: 48, mr: 2 }} />
@@ -85,7 +83,7 @@ function FollowerItem({ follower, selected, onSelected }) {
         }
         primaryTypographyProps={{
           noWrap: true,
-          typography: 'subtitle2',
+          typography: 'subtitle2'
         }}
         secondaryTypographyProps={{
           mt: 0.5,
@@ -94,7 +92,7 @@ function FollowerItem({ follower, selected, onSelected }) {
           component: 'span',
           alignItems: 'center',
           typography: 'caption',
-          color: 'text.disabled',
+          color: 'text.disabled'
         }}
       />
 
@@ -102,9 +100,7 @@ function FollowerItem({ follower, selected, onSelected }) {
         size="small"
         variant={selected ? 'text' : 'outlined'}
         color={selected ? 'success' : 'inherit'}
-        startIcon={
-          selected ? <Iconify width={18} icon="eva:checkmark-fill" sx={{ mr: -0.75 }} /> : null
-        }
+        startIcon={selected ? <Iconify width={18} icon="eva:checkmark-fill" sx={{ mr: -0.75 }} /> : null}
         onClick={onSelected}
         sx={{ flexShrink: 0, ml: 1.5 }}
       >
@@ -117,5 +113,5 @@ function FollowerItem({ follower, selected, onSelected }) {
 FollowerItem.propTypes = {
   follower: PropTypes.object,
   onSelected: PropTypes.func,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

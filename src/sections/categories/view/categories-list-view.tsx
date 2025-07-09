@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import { Icon } from '@iconify/react';
-import { useState, useEffect, React, useRef, Fragment } from 'react';
+import React, { useState, useEffect, useRef, Fragment } from 'react';
 
 // material
 import {
@@ -14,9 +14,9 @@ import {
   Divider,
   ListItem,
   IconButton,
-  useTheme,
   AlertTitle,
-  Alert
+  Alert,
+  useMediaQuery
 } from '@mui/material';
 
 // redux
@@ -26,7 +26,6 @@ import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
 
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { useTranslation } from 'react-i18next';
 import {
   deleteCategory,
   getCategories,
@@ -35,16 +34,12 @@ import {
 } from 'src/redux/inventory/categoriesSlice';
 import { useSettingsContext } from 'src/components/settings';
 import { paths } from 'src/routes/paths';
-import Label from 'src/components/label';
 import MenuCategories from 'src/sections/categories/MenuCategories';
-import { useDispatch, useSelector } from 'react-redux';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Draggable from 'react-draggable';
-import Paper from '@mui/material/Paper';
 import { enqueueSnackbar } from 'notistack';
 import { ProductListView } from 'src/sections/product/view';
-import PopupCreateCategory from '../PopupCreateCategory';
-import RequestService from '../../../axios/services/service';
+import { Box } from '@mui/system';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 // utils
 
 // hooks
@@ -52,15 +47,14 @@ import RequestService from '../../../axios/services/service';
 export default function InvetoryCategoriesList() {
   const settings = useSettingsContext();
   const componentRef = useRef();
-  const theme = useTheme();
+  const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
   // const theme = useTheme();
-  const dispatch = useDispatch();
-  const { categories, openPopup, isEmpty, isLoading, viewCategoryById, viewCategoryByIdLoading } = useSelector(
+  const dispatch = useAppDispatch();
+  const { categories, openPopup, isEmpty, isLoading, viewCategoryById, viewCategoryByIdLoading } = useAppSelector(
     (state) => state.categories
   );
 
-  // Get categories and get products in category from API
   useEffect(() => {
     dispatch(getCategories());
   }, [dispatch]);
@@ -70,17 +64,13 @@ export default function InvetoryCategoriesList() {
   // states for menu options in categories
   const [viewCategory, setViewCategory] = useState(0);
 
-  // const [viewCategoryInfo, setViewCategoryInfo] = useState({});
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-
   useEffect(() => {
     if (viewCategory !== 0) {
       dispatch(getViewCategoryById(viewCategory));
     }
   }, [viewCategory, dispatch]);
 
-  const { products } = useSelector((state) => state.categories);
+  const { products } = useAppSelector((state) => state.categories);
 
   const menuRef = useRef(null);
 
@@ -112,7 +102,7 @@ export default function InvetoryCategoriesList() {
   };
 
   const handleClickPopup = () => {
-    dispatch(switchPopupState());
+    dispatch(switchPopupState(false));
   };
 
   return (
@@ -124,20 +114,23 @@ export default function InvetoryCategoriesList() {
           { name: 'Dashboard', href: paths.dashboard.root },
           {
             name: 'Inventario',
-            href: paths.dashboard.inventory
+            href: paths.dashboard.inventory.categories
           },
           { name: 'Categorias' }
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
         action={
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={handleClickPopup}
-            startIcon={<Icon icon="mingcute:add-line" />}
-          >
-            Crear categoria
-          </Button>
+          <Box sx={{ flex: 1 }}>
+            <Button
+              color="primary"
+              variant="contained"
+              onClick={handleClickPopup}
+              sx={isMobile ? { width: '100%' } : { width: 'auto' }}
+              startIcon={<Icon icon="mingcute:add-line" />}
+            >
+              Crear categoria
+            </Button>
+          </Box>
         }
       />
 

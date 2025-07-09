@@ -1,15 +1,33 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { ContactInterface } from '../../interfaces/auth/userInterfaces';
 import RequestService from '../../axios/services/service';
 
 // constantes
 
-const initialState = {
+interface ContactsState {
+  contacts: ContactInterface[];
+  contactsLoading: boolean;
+  error: any;
+  success: any;
+  contactsEmpty: boolean;
+
+  contactsPopup: boolean;
+
+  // Contact detail
+  contact: ContactInterface | null;
+  contactLoading: boolean;
+  contactError: any;
+  contactSuccess: any;
+}
+
+const initialState: ContactsState = {
   contacts: [],
   contactsLoading: false,
   error: null,
   success: null,
   contactsEmpty: false,
-  popupAssignInventory: false,
+
+  contactsPopup: false,
 
   // Contact detail
   contact: null,
@@ -96,6 +114,9 @@ const contactsSlice = createSlice({
       state.contactLoading = false;
       state.contactError = null;
       state.contactSuccess = null;
+    },
+    togglePopup(state) {
+      state.contactsPopup = !state.contactsPopup;
     }
   }
 });
@@ -115,7 +136,8 @@ export const {
   updateContactSuccess,
   updateContactError,
   createContactSuccess,
-  resetContact
+  resetContact,
+  togglePopup
 } = contactsSlice.actions;
 
 // actions
@@ -124,7 +146,7 @@ export const getAllContacts = () => async (dispatch) => {
   try {
     dispatch(startLoading());
     const response = await RequestService.getContacts();
-    dispatch(getAllContactsSuccess(response.data));
+    dispatch(getAllContactsSuccess(response.data.data));
   } catch (error) {
     dispatch(hasError(error));
   }

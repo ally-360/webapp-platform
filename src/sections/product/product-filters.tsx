@@ -37,7 +37,7 @@ export default function ProductFilters({
   colorOptions,
   genderOptions,
   ratingOptions,
-  categoryOptions,
+  categoryOptions
 }) {
   const marksLabel = [...Array(21)].map((_, index) => {
     const value = index * 10;
@@ -46,7 +46,7 @@ export default function ProductFilters({
 
     return {
       value,
-      label: index % 4 ? '' : firstValue,
+      label: index % 4 ? '' : firstValue
     };
   });
 
@@ -89,12 +89,7 @@ export default function ProductFilters({
   );
 
   const renderHead = (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      sx={{ py: 2, pr: 1, pl: 2.5 }}
-    >
+    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ py: 2, pr: 1, pl: 2.5 }}>
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
         Filters
       </Typography>
@@ -141,17 +136,12 @@ export default function ProductFilters({
       {categoryOptions.map((option) => (
         <FormControlLabel
           key={option}
-          control={
-            <Radio
-              checked={option === filters.category}
-              onClick={() => handleFilterCategory(option)}
-            />
-          }
+          control={<Radio checked={option === filters.category} onClick={() => handleFilterCategory(option)} />}
           label={option}
           sx={{
             ...(option === 'all' && {
-              textTransform: 'capitalize',
-            }),
+              textTransform: 'capitalize'
+            })
           }}
         />
       ))}
@@ -194,7 +184,7 @@ export default function ProductFilters({
         valueLabelFormat={(value) => `$${value}`}
         sx={{
           alignSelf: 'center',
-          width: `calc(100% - 24px)`,
+          width: `calc(100% - 24px)`
         }}
       />
     </Stack>
@@ -218,8 +208,8 @@ export default function ProductFilters({
               pl: 0.5,
               pr: 0.75,
               py: 0.25,
-              bgcolor: 'action.selected',
-            }),
+              bgcolor: 'action.selected'
+            })
           }}
         >
           <Rating readOnly value={4 - index} sx={{ mr: 1 }} /> & Up
@@ -248,10 +238,10 @@ export default function ProductFilters({
         open={open}
         onClose={onClose}
         slotProps={{
-          backdrop: { invisible: true },
+          backdrop: { invisible: true }
         }}
         PaperProps={{
-          sx: { width: 280 },
+          sx: { width: 280 }
         }}
       >
         {renderHead}
@@ -287,7 +277,7 @@ ProductFilters.propTypes = {
   onResetFilters: PropTypes.func,
   ratingOptions: PropTypes.array,
   categoryOptions: PropTypes.array,
-  colorOptions: PropTypes.arrayOf(PropTypes.string),
+  colorOptions: PropTypes.arrayOf(PropTypes.string)
 };
 
 // ----------------------------------------------------------------------
@@ -320,7 +310,7 @@ function InputRange({ type, value, onFilters }) {
           flexShrink: 0,
           color: 'text.disabled',
           textTransform: 'capitalize',
-          fontWeight: 'fontWeightSemiBold',
+          fontWeight: 'fontWeightSemiBold'
         }}
       >
         {`${type} ($)`}
@@ -340,7 +330,7 @@ function InputRange({ type, value, onFilters }) {
           min: 0,
           max: 200,
           type: 'number',
-          'aria-labelledby': 'input-slider',
+          'aria-labelledby': 'input-slider'
         }}
         sx={{
           maxWidth: 48,
@@ -350,8 +340,8 @@ function InputRange({ type, value, onFilters }) {
             pr: 1,
             py: 0.75,
             textAlign: 'right',
-            typography: 'body2',
-          },
+            typography: 'body2'
+          }
         }}
       />
     </Stack>
@@ -361,5 +351,5 @@ function InputRange({ type, value, onFilters }) {
 InputRange.propTypes = {
   onFilters: PropTypes.func,
   type: PropTypes.oneOf(['min', 'max']),
-  value: PropTypes.arrayOf(PropTypes.number),
+  value: PropTypes.arrayOf(PropTypes.number)
 };

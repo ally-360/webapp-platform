@@ -8,9 +8,9 @@ export default function Menu(theme) {
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          ...menuItem(theme),
-        },
-      },
-    },
+          ...menuItem(theme)
+        }
+      }
+    }
   };
 }

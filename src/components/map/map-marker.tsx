@@ -23,7 +23,7 @@ export default function MapMarker({ ...other }) {
           stroke: 'none',
           cursor: 'pointer',
           fill: (theme) => theme.palette.error.main,
-          transform: `translate(${-SIZE / 2}px,${-SIZE}px)`,
+          transform: `translate(${-SIZE / 2}px,${-SIZE}px)`
         }}
       >
         <path d={ICON} />

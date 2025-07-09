@@ -8,7 +8,6 @@ import SvgColor from 'src/components/svg-color';
 import { useDispatch } from 'react-redux';
 import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
-import { switchPopup } from 'src/redux/inventory/pdvsSlice';
 import { useNavigate } from 'react-router';
 
 // ----------------------------------------------------------------------
@@ -69,9 +68,9 @@ export function useNavData() {
         subheader: t('overview'),
         items: [
           { title: t('app'), path: paths.dashboard.root, icon: ICONS.dashboard },
-          { title: t('ecommerce'), path: paths.dashboard.general.ecommerce, icon: ICONS.ecommerce },
-          { title: t('analytics'), path: paths.dashboard.general.analytics, icon: ICONS.analytics },
-          { title: t('banking'), path: paths.dashboard.general.banking, icon: ICONS.banking }
+          // { title: t('ecommerce'), path: paths.dashboard.general.ecommerce, icon: ICONS.ecommerce },
+          { title: t('analytics'), path: paths.dashboard.general.analytics, icon: ICONS.analytics }
+          // { title: t('banking'), path: paths.dashboard.general.banking, icon: ICONS.banking }
           // { title: t('booking'), path: paths.dashboard.general.booking, icon: ICONS.booking },
           // { title: t('file'), path: paths.dashboard.general.file, icon: ICONS.file }
         ]
@@ -96,27 +95,41 @@ export function useNavData() {
                 title: t('Categorias'),
                 path: paths.dashboard.inventory.categories,
                 openPopup() {
-                  dispatch(switchPopupState());
+                  dispatch(switchPopupState(true));
                 }
               },
               {
                 title: t('Marcas'),
                 path: paths.dashboard.inventory.brands,
                 openPopup() {
-                  dispatch(switchPopupStateBrands());
+                  dispatch(switchPopupStateBrands(true));
                 }
-              },
-
+              }
+              // {
+              //   title: t('Puntos de venta'),
+              //   path: paths.dashboard.inventory.pdvs,
+              //   openPopup() {
+              //     dispatch(switchPopup(true));
+              //   }
+              // },
+              // {
+              //   title: t('Ajuste de inventario'),
+              //   path: paths.dashboard.inventory.pdvs
+              // }
+            ]
+          },
+          {
+            title: t('POS'),
+            path: paths.dashboard.pos,
+            icon: ICONS.inventory,
+            children: [
               {
-                title: t('Puntos de venta'),
-                path: paths.dashboard.inventory.pdvs,
-                openPopup() {
-                  dispatch(switchPopup());
-                }
+                title: t('Punto de venta'),
+                path: paths.dashboard.pos
               },
               {
-                title: t('Ajuste de inventario'),
-                path: paths.dashboard.inventory.pdvs
+                title: t('Caja'),
+                path: paths.dashboard.pos
               }
             ]
           },
@@ -146,6 +159,12 @@ export function useNavData() {
               }
             ]
           },
+          {
+            title: t('orden de compra'),
+            path: paths.dashboard.order.root,
+            icon: ICONS.order,
+            children: [{ title: t('Ordenes'), path: paths.dashboard.order.root }]
+          },
           // USER
           {
             title: t('Contactos'),
@@ -160,11 +179,11 @@ export function useNavData() {
             //   { title: t('account'), path: paths.dashboard.user.account }
             // ]
           },
-          {
-            title: t('Contabilidad'),
-            path: paths.dashboard.blank,
-            icon: ICONS.product
-          },
+          // {
+          //   title: t('Contabilidad'),
+          //   path: paths.dashboard.blank,
+          //   icon: ICONS.product
+          // },
           {
             title: t('Reportes'),
             path: paths.dashboard.blank,
@@ -190,16 +209,7 @@ export function useNavData() {
           //   ]
           // },
 
-          // // ORDER
-          // {
-          //   title: t('order'),
-          //   path: paths.dashboard.order.root,
-          //   icon: ICONS.order,
-          //   children: [
-          //     { title: t('list'), path: paths.dashboard.order.root },
-          //     { title: t('details'), path: paths.dashboard.order.demo.details }
-          //   ]
-          // },
+          // ORDER
 
           // // INVOICE
           // {

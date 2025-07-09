@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
@@ -15,7 +15,6 @@ import Select from '@mui/material/Select';
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import * as XLSX from 'xlsx';
-import { headerTable } from 'src/sections/product/constantsTableExportData';
 import ReactToPrint from 'react-to-print';
 import { useTranslation } from 'react-i18next';
 import { FormControlLabel, Switch } from '@mui/material';

@@ -25,7 +25,7 @@ export default function CheckoutOrderComplete({ open, onReset, onDownloadPDF }) 
         m: 'auto',
         maxWidth: 480,
         textAlign: 'center',
-        px: { xs: 2, sm: 0 },
+        px: { xs: 2, sm: 0 }
       }}
     >
       <Typography variant="h4">Thank you for your purchase!</Typography>
@@ -46,11 +46,7 @@ export default function CheckoutOrderComplete({ open, onReset, onDownloadPDF }) 
 
       <Divider sx={{ borderStyle: 'dashed' }} />
 
-      <Stack
-        spacing={2}
-        justifyContent="space-between"
-        direction={{ xs: 'column-reverse', sm: 'row' }}
-      >
+      <Stack spacing={2} justifyContent="space-between" direction={{ xs: 'column-reverse', sm: 'row' }}>
         <Button
           fullWidth
           size="large"
@@ -89,12 +85,12 @@ export default function CheckoutOrderComplete({ open, onReset, onDownloadPDF }) 
                 distance: 120,
                 durationIn: 0.32,
                 durationOut: 0.24,
-                easeIn: 'easeInOut',
+                easeIn: 'easeInOut'
               }).inUp}
               sx={{
                 width: 1,
                 height: 1,
-                p: { md: 3 },
+                p: { md: 3 }
               }}
             >
               <Paper {...props}>{props.children}</Paper>
@@ -112,5 +108,5 @@ CheckoutOrderComplete.propTypes = {
   open: PropTypes.bool,
   onReset: PropTypes.func,
   children: PropTypes.node,
-  onDownloadPDF: PropTypes.func,
+  onDownloadPDF: PropTypes.func
 };

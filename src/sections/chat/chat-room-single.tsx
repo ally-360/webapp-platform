@@ -39,16 +39,13 @@ export default function ChatRoomSingle({ participant }) {
         flexGrow: 'unset',
         typography: 'overline',
         color: 'text.secondary',
-        bgcolor: 'background.neutral',
+        bgcolor: 'background.neutral'
       }}
     >
       <Box component="span" sx={{ flexGrow: 1 }}>
         Information
       </Box>
-      <Iconify
-        width={16}
-        icon={collapse.value ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'}
-      />
+      <Iconify width={16} icon={collapse.value ? 'eva:arrow-ios-downward-fill' : 'eva:arrow-ios-forward-fill'} />
     </ListItemButton>
   );
 
@@ -61,8 +58,8 @@ export default function ChatRoomSingle({ participant }) {
         '& svg': {
           mr: 1,
           flexShrink: 0,
-          color: 'text.disabled',
-        },
+          color: 'text.disabled'
+        }
       }}
     >
       <Stack direction="row">
@@ -98,5 +95,5 @@ export default function ChatRoomSingle({ participant }) {
 }
 
 ChatRoomSingle.propTypes = {
-  participant: PropTypes.object,
+  participant: PropTypes.object
 };

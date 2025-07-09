@@ -49,8 +49,8 @@ export default function OverviewBankingView() {
                   { x: 2020, y: 132 },
                   { x: 2021, y: 146 },
                   { x: 2022, y: 169 },
-                  { x: 2023, y: 184 },
-                ],
+                  { x: 2023, y: 184 }
+                ]
               }}
             />
 
@@ -75,8 +75,8 @@ export default function OverviewBankingView() {
                   { x: 2020, y: 132 },
                   { x: 2021, y: 146 },
                   { x: 2022, y: 169 },
-                  { x: 2023, y: 184 },
-                ],
+                  { x: 2023, y: 184 }
+                ]
               }}
             />
           </Stack>
@@ -98,24 +98,24 @@ export default function OverviewBankingView() {
                     type: 'Week',
                     data: [
                       { name: 'Income', data: [10, 41, 35, 151, 49, 62, 69, 91, 48] },
-                      { name: 'Expenses', data: [10, 34, 13, 56, 77, 88, 99, 77, 45] },
-                    ],
+                      { name: 'Expenses', data: [10, 34, 13, 56, 77, 88, 99, 77, 45] }
+                    ]
                   },
                   {
                     type: 'Month',
                     data: [
                       { name: 'Income', data: [148, 91, 69, 62, 49, 51, 35, 41, 10] },
-                      { name: 'Expenses', data: [45, 77, 99, 88, 77, 56, 13, 34, 10] },
-                    ],
+                      { name: 'Expenses', data: [45, 77, 99, 88, 77, 56, 13, 34, 10] }
+                    ]
                   },
                   {
                     type: 'Year',
                     data: [
                       { name: 'Income', data: [76, 42, 29, 41, 27, 138, 117, 86, 63] },
-                      { name: 'Expenses', data: [80, 55, 34, 114, 80, 130, 15, 28, 55] },
-                    ],
-                  },
-                ],
+                      { name: 'Expenses', data: [80, 55, 34, 114, 80, 130, 15, 28, 55] }
+                    ]
+                  }
+                ]
               }}
             />
 
@@ -131,7 +131,7 @@ export default function OverviewBankingView() {
                   { label: 'Category 6', value: 10 },
                   { label: 'Category 7', value: 12 },
                   { label: 'Category 8', value: 17 },
-                  { label: 'Category 9', value: 21 },
+                  { label: 'Category 9', value: 21 }
                 ],
                 colors: [
                   theme.palette.primary.main,
@@ -142,8 +142,8 @@ export default function OverviewBankingView() {
                   theme.palette.info.darker,
                   theme.palette.success.main,
                   theme.palette.warning.main,
-                  theme.palette.info.main,
-                ],
+                  theme.palette.info.main
+                ]
               }}
             />
 
@@ -155,7 +155,7 @@ export default function OverviewBankingView() {
                 { id: 'date', label: 'Date' },
                 { id: 'amount', label: 'Amount' },
                 { id: 'status', label: 'Status' },
-                { id: '' },
+                { id: '' }
               ]}
             />
           </Stack>
@@ -165,11 +165,7 @@ export default function OverviewBankingView() {
           <Stack spacing={3}>
             <BankingQuickTransfer title="Quick Transfer" list={_bankingContacts} />
 
-            <BankingContacts
-              title="Contacts"
-              subheader="You have 122 contacts"
-              list={_bankingContacts.slice(-5)}
-            />
+            <BankingContacts title="Contacts" subheader="You have 122 contacts" list={_bankingContacts.slice(-5)} />
 
             <BankingInviteFriends
               price="$50"

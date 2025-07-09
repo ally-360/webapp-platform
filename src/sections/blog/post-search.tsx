@@ -45,16 +45,16 @@ export default function PostSearch({ query, results, onSearch, hrefItem, loading
         popper: {
           placement: 'bottom-start',
           sx: {
-            minWidth: 320,
-          },
+            minWidth: 320
+          }
         },
         paper: {
           sx: {
             [` .${autocompleteClasses.option}`]: {
-              pl: 0.75,
-            },
-          },
-        },
+              pl: 0.75
+            }
+          }
+        }
       }}
       renderInput={(params) => (
         <TextField
@@ -73,7 +73,7 @@ export default function PostSearch({ query, results, onSearch, hrefItem, loading
                 {loading ? <Iconify icon="svg-spinners:8-dots-rotate" sx={{ mr: -3 }} /> : null}
                 {params.InputProps.endAdornment}
               </>
-            ),
+            )
           }}
         />
       )}
@@ -99,7 +99,7 @@ export default function PostSearch({ query, results, onSearch, hrefItem, loading
                   color={part.highlight ? 'primary' : 'textPrimary'}
                   sx={{
                     typography: 'body2',
-                    fontWeight: part.highlight ? 'fontWeightSemiBold' : 'fontWeightMedium',
+                    fontWeight: part.highlight ? 'fontWeightSemiBold' : 'fontWeightMedium'
                   }}
                 >
                   {part.text}
@@ -118,5 +118,5 @@ PostSearch.propTypes = {
   loading: PropTypes.bool,
   onSearch: PropTypes.func,
   query: PropTypes.string,
-  results: PropTypes.array,
+  results: PropTypes.array
 };

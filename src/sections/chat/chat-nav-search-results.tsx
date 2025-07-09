@@ -19,7 +19,7 @@ export default function ChatNavSearchResults({ query, results, onClickResult }) 
         paragraph
         variant="h6"
         sx={{
-          px: 2.5,
+          px: 2.5
         }}
       >
         Contacts ({totalResults})
@@ -32,7 +32,7 @@ export default function ChatNavSearchResults({ query, results, onClickResult }) 
             p: 3,
             mx: 'auto',
             width: `calc(100% - 40px)`,
-            bgcolor: 'background.neutral',
+            bgcolor: 'background.neutral'
           }}
         />
       ) : (
@@ -44,7 +44,7 @@ export default function ChatNavSearchResults({ query, results, onClickResult }) 
               sx={{
                 px: 2.5,
                 py: 1.5,
-                typography: 'subtitle2',
+                typography: 'subtitle2'
               }}
             >
               <Avatar alt={result.name} src={result.avatarUrl} sx={{ mr: 2 }} />
@@ -60,5 +60,5 @@ export default function ChatNavSearchResults({ query, results, onClickResult }) 
 ChatNavSearchResults.propTypes = {
   query: PropTypes.string,
   results: PropTypes.array,
-  onClickResult: PropTypes.func,
+  onClickResult: PropTypes.func
 };

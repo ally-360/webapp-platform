@@ -20,7 +20,7 @@ export default function HomeCleanInterfaces() {
         mx: 'auto',
         zIndex: { md: 99 },
         position: { md: 'absolute' },
-        textAlign: { xs: 'center', md: 'left' },
+        textAlign: { xs: 'center', md: 'left' }
       }}
     >
       <m.div variants={varFade().inUp}>
@@ -34,9 +34,7 @@ export default function HomeCleanInterfaces() {
           variant="h2"
           sx={{
             textShadow: (theme) =>
-              theme.palette.mode === 'light'
-                ? 'unset'
-                : `4px 4px 16px ${alpha(theme.palette.grey[800], 0.48)}`,
+              theme.palette.mode === 'light' ? 'unset' : `4px 4px 16px ${alpha(theme.palette.grey[800], 0.48)}`
           }}
         >
           Beautiful, modern and clean user interfaces
@@ -57,14 +55,10 @@ export default function HomeCleanInterfaces() {
             left: 0,
             position: 'absolute',
             ...(index === 0 && { zIndex: 8 }),
-            ...(index === 9 && { position: 'relative', zIndex: 9 }),
+            ...(index === 9 && { position: 'relative', zIndex: 9 })
           }}
         >
-          <Image
-            disabledEffect
-            alt={`clean-${index + 1}`}
-            src={`/assets/images/home/clean/page_${index + 1}.webp`}
-          />
+          <Image disabledEffect alt={`clean-${index + 1}`} src={`/assets/images/home/clean/page_${index + 1}.webp`} />
         </Box>
       ))}
     </Box>
@@ -74,7 +68,7 @@ export default function HomeCleanInterfaces() {
     <Container
       component={MotionViewport}
       sx={{
-        py: { xs: 10, md: 15 },
+        py: { xs: 10, md: 15 }
       }}
     >
       {renderDescription}

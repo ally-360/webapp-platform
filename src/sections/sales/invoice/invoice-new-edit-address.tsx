@@ -13,12 +13,13 @@ import { _addressBooks } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 //
-import { useSelector } from 'react-redux';
 import { useAuthContext } from 'src/auth/hooks';
 import { AddressListDialog } from 'src/sections/address';
+import { Link } from 'react-router-dom';
+import { paths } from 'src/routes/paths';
+import React from 'react';
 import logoPlaceholder from '../../../../public/assets/logo-placeholder-1.png';
 // ----------------------------------------------------------------------
-
 export default function InvoiceNewEditAddress() {
   const {
     watch,
@@ -103,7 +104,7 @@ export default function InvoiceNewEditAddress() {
       />
 
       <AddressListDialog
-        title="Clientes"
+        title="Clientesss"
         open={to.value}
         onClose={to.onFalse}
         selected={(selectedId) => invoiceTo?.id === selectedId}
@@ -116,7 +117,7 @@ export default function InvoiceNewEditAddress() {
             startIcon={<Iconify icon="mingcute:add-line" />}
             sx={{ alignSelf: 'flex-end' }}
           >
-            Crear
+            <Link to={paths.dashboard.user.new}>Crear</Link>
           </Button>
         }
       />

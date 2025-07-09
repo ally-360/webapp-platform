@@ -21,9 +21,9 @@ export default function EcommerceNewProducts({ list, ...other }) {
         right: 20,
         bottom: 20,
         position: 'absolute',
-        color: 'primary.light',
-      },
-    }),
+        color: 'primary.light'
+      }
+    })
   });
 
   return (
@@ -38,7 +38,7 @@ export default function EcommerceNewProducts({ list, ...other }) {
 }
 
 EcommerceNewProducts.propTypes = {
-  list: PropTypes.array,
+  list: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -52,12 +52,10 @@ function CarouselItem({ item }) {
     <Image
       alt={name}
       src={coverUrl}
-      overlay={`linear-gradient(to bottom, ${alpha(theme.palette.grey[900], 0)} 0%, ${
-        theme.palette.grey[900]
-      } 75%)`}
+      overlay={`linear-gradient(to bottom, ${alpha(theme.palette.grey[900], 0)} 0%, ${theme.palette.grey[900]} 75%)`}
       sx={{
         width: 1,
-        height: { xs: 280, xl: 320 },
+        height: { xs: 280, xl: 320 }
       }}
     />
   );
@@ -72,7 +70,7 @@ function CarouselItem({ item }) {
           zIndex: 9,
           textAlign: 'left',
           position: 'absolute',
-          color: 'common.white',
+          color: 'common.white'
         }}
       >
         <Typography variant="overline" sx={{ opacity: 0.48 }}>
@@ -94,5 +92,5 @@ function CarouselItem({ item }) {
 }
 
 CarouselItem.propTypes = {
-  item: PropTypes.object,
+  item: PropTypes.object
 };

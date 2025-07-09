@@ -25,9 +25,7 @@ export default function useTypography(variant) {
     variant === 'h6';
 
   const getFont =
-    hasResponsive && theme.typography[variant][key]
-      ? theme.typography[variant][key]
-      : theme.typography[variant];
+    hasResponsive && theme.typography[variant][key] ? theme.typography[variant][key] : theme.typography[variant];
 
   const fontSize = remToPx(getFont.fontSize);
 

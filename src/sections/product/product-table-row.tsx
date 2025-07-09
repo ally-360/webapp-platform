@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-import { format } from 'date-fns';
 // @mui
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -21,10 +20,9 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { Popover, Tooltip, Typography } from '@mui/material';
-import { useState } from 'react';
+import { Popover, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 // ----------------------------------------------------------------------
 
 export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow }) {
@@ -32,9 +30,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
 
   const { t } = useTranslation();
 
-  console.log(quantityStock);
-
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
 
   const minQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.minQuantity + acc, 0);
   const maxQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.maxQuantity + acc, 0);

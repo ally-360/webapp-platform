@@ -32,18 +32,10 @@ export default function PaymentNewCardDialog({ onClose, ...other }) {
               InputLabelProps={{ shrink: true }}
             />
 
-            <TextField
-              label="Card Holder"
-              placeholder="JOHN DOE"
-              InputLabelProps={{ shrink: true }}
-            />
+            <TextField label="Card Holder" placeholder="JOHN DOE" InputLabelProps={{ shrink: true }} />
 
             <Stack spacing={2} direction="row">
-              <TextField
-                label="Expiration Date"
-                placeholder="MM/YY"
-                InputLabelProps={{ shrink: true }}
-              />
+              <TextField label="Expiration Date" placeholder="MM/YY" InputLabelProps={{ shrink: true }} />
               <TextField
                 label="CVV/CVC"
                 placeholder="***"
@@ -55,16 +47,12 @@ export default function PaymentNewCardDialog({ onClose, ...other }) {
                         <Iconify icon="eva:info-outline" />
                       </IconButton>
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
             </Stack>
 
-            <Stack
-              direction="row"
-              alignItems="center"
-              sx={{ typography: 'caption', color: 'text.disabled' }}
-            >
+            <Stack direction="row" alignItems="center" sx={{ typography: 'caption', color: 'text.disabled' }}>
               <Iconify icon="carbon:locked" sx={{ mr: 0.5 }} />
               Your transaction is secured with SSL encryption
             </Stack>
@@ -95,5 +83,5 @@ export default function PaymentNewCardDialog({ onClose, ...other }) {
 }
 
 PaymentNewCardDialog.propTypes = {
-  onClose: PropTypes.func,
+  onClose: PropTypes.func
 };

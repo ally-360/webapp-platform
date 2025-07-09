@@ -8,7 +8,23 @@ import { useState } from 'react';
 
 // ----------------------------------------------------------------------
 
-export default function RHFAutocomplete({ name, label, placeholder, helperText, ...other }) {
+interface RHFAutocompleteProps {
+  name: string;
+  label?: string;
+  placeholder?: string;
+  helperText?: string;
+  options: any[];
+  [key: string]: any; // Permite pasar otras propiedades adicionales
+}
+
+export default function RHFAutocomplete({
+  name,
+  label,
+  placeholder,
+  helperText,
+  options,
+  ...other
+}: RHFAutocompleteProps) {
   const { control, setValue } = useFormContext();
   const theme = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -20,6 +36,7 @@ export default function RHFAutocomplete({ name, label, placeholder, helperText, 
       render={({ field, fieldState: { error } }) => (
         <Autocomplete
           {...field}
+          options={options}
           onFocus={() => setIsFocused(true)} // Establece isFocused a true cuando se hace focus
           onBlur={() => setIsFocused(false)} // Establece isFocused a false cuando se pierde el focus
           sx={{

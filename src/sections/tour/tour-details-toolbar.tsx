@@ -33,7 +33,7 @@ export default function TourDetailsToolbar({
         direction="row"
         sx={{
           mb: { xs: 3, md: 5 },
-          ...sx,
+          ...sx
         }}
         {...other}
       >
@@ -74,12 +74,7 @@ export default function TourDetailsToolbar({
         </LoadingButton>
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="top-right"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="top-right" sx={{ width: 140 }}>
         {publishOptions.map((option) => (
           <MenuItem
             key={option.value}
@@ -106,5 +101,5 @@ TourDetailsToolbar.propTypes = {
   onChangePublish: PropTypes.func,
   publish: PropTypes.string,
   publishOptions: PropTypes.array,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

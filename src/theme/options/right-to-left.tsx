@@ -18,7 +18,7 @@ export default function RTL({ children, themeDirection }) {
     key: 'rtl',
     prepend: true,
     // https://github.com/styled-components/stylis-plugin-rtl/issues/35
-    stylisPlugins: [prefixer, rtlPlugin],
+    stylisPlugins: [prefixer, rtlPlugin]
   });
 
   if (themeDirection === 'rtl') {
@@ -30,14 +30,14 @@ export default function RTL({ children, themeDirection }) {
 
 RTL.propTypes = {
   children: PropTypes.node,
-  themeDirection: PropTypes.oneOf(['rtl', 'ltr']),
+  themeDirection: PropTypes.oneOf(['rtl', 'ltr'])
 };
 
 // ----------------------------------------------------------------------
 
 export function direction(themeDirection) {
   const theme = {
-    direction: themeDirection,
+    direction: themeDirection
   };
 
   return theme;

@@ -46,20 +46,17 @@ export default function Lightbox({
           disabledCaptions,
           disabledSlideshow,
           disabledThumbnails,
-          disabledFullscreen,
+          disabledFullscreen
         })}
         on={{
           view: ({ index }) => {
             if (onGetCurrentIndex) {
               onGetCurrentIndex(index);
             }
-          },
+          }
         }}
         toolbar={{
-          buttons: [
-            <DisplayTotal key={0} totalItems={totalItems} disabledTotal={disabledTotal} />,
-            'close',
-          ],
+          buttons: [<DisplayTotal key={0} totalItems={totalItems} disabledTotal={disabledTotal} />, 'close']
         }}
         render={{
           iconClose: () => <Iconify width={ICON_SIZE} icon="carbon:close" />,
@@ -70,7 +67,7 @@ export default function Lightbox({
           iconPrev: () => <Iconify width={ICON_SIZE + 8} icon="carbon:chevron-left" />,
           iconNext: () => <Iconify width={ICON_SIZE + 8} icon="carbon:chevron-right" />,
           iconExitFullscreen: () => <Iconify width={ICON_SIZE} icon="carbon:center-to-fit" />,
-          iconEnterFullscreen: () => <Iconify width={ICON_SIZE} icon="carbon:fit-to-screen" />,
+          iconEnterFullscreen: () => <Iconify width={ICON_SIZE} icon="carbon:fit-to-screen" />
         }}
         {...other}
       />
@@ -87,7 +84,7 @@ Lightbox.propTypes = {
   disabledVideo: PropTypes.bool,
   disabledZoom: PropTypes.bool,
   onGetCurrentIndex: PropTypes.func,
-  slides: PropTypes.array,
+  slides: PropTypes.array
 };
 
 // ----------------------------------------------------------------------
@@ -98,7 +95,7 @@ export function getPlugins({
   disabledCaptions,
   disabledSlideshow,
   disabledThumbnails,
-  disabledFullscreen,
+  disabledFullscreen
 }) {
   let plugins = [Captions, Fullscreen, Slideshow, Thumbnails, Video, Zoom];
 
@@ -141,7 +138,7 @@ export function DisplayTotal({ totalItems, disabledTotal }) {
         typography: 'body2',
         alignItems: 'center',
         display: 'inline-flex',
-        justifyContent: 'center',
+        justifyContent: 'center'
       }}
     >
       <strong> {currentIndex + 1} </strong> / {totalItems}
@@ -151,5 +148,5 @@ export function DisplayTotal({ totalItems, disabledTotal }) {
 
 DisplayTotal.propTypes = {
   disabledTotal: PropTypes.bool,
-  totalItems: PropTypes.number,
+  totalItems: PropTypes.number
 };

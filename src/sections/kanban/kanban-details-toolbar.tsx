@@ -16,14 +16,7 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export default function KanbanDetailsToolbar({
-  liked,
-  onLike,
-  taskName,
-  onDelete,
-  taskStatus,
-  onCloseDetails,
-}) {
+export default function KanbanDetailsToolbar({ liked, onLike, taskName, onDelete, taskStatus, onCloseDetails }) {
   const smUp = useResponsive('up', 'sm');
 
   const confirm = useBoolean();
@@ -46,7 +39,7 @@ export default function KanbanDetailsToolbar({
         direction="row"
         alignItems="center"
         sx={{
-          p: (theme) => theme.spacing(2.5, 1, 2.5, 2.5),
+          p: (theme) => theme.spacing(2.5, 1, 2.5, 2.5)
         }}
       >
         {!smUp && (
@@ -85,12 +78,7 @@ export default function KanbanDetailsToolbar({
         </Stack>
       </Stack>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="top-right"
-        sx={{ width: 140 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="top-right" sx={{ width: 140 }}>
         {['To Do', 'In Progress', 'Ready To Test', 'Done'].map((option) => (
           <MenuItem
             key={option}
@@ -129,5 +117,5 @@ KanbanDetailsToolbar.propTypes = {
   onDelete: PropTypes.func,
   onLike: PropTypes.func,
   taskName: PropTypes.string,
-  taskStatus: PropTypes.string,
+  taskStatus: PropTypes.string
 };

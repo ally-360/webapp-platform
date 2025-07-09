@@ -41,7 +41,7 @@ export default function AboutTestimonials() {
     <Box
       sx={{
         maxWidth: { md: 360 },
-        textAlign: { xs: 'center', md: 'unset' },
+        textAlign: { xs: 'center', md: 'unset' }
       }}
     >
       <m.div variants={varFade().inUp}>
@@ -59,18 +59,13 @@ export default function AboutTestimonials() {
 
       <m.div variants={varFade().inUp}>
         <Typography sx={{ color: 'common.white' }}>
-          Our goal is to create a product and service that you’re satisfied with and use it every
-          day. This is why we’re constantly working on our services to make it better every day and
-          really listen to what our users has to say.
+          Our goal is to create a product and service that you’re satisfied with and use it every day. This is why we’re
+          constantly working on our services to make it better every day and really listen to what our users has to say.
         </Typography>
       </m.div>
 
       {!mdUp && (
-        <Box
-          component={m.div}
-          variants={varFade().inUp}
-          sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}
-        >
+        <Box component={m.div} variants={varFade().inUp} sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
           {renderLink}
         </Box>
       )}
@@ -83,8 +78,8 @@ export default function AboutTestimonials() {
         py: { md: 10 },
         height: { md: 1 },
         ...(mdUp && {
-          ...hideScroll.y,
-        }),
+          ...hideScroll.y
+        })
       }}
     >
       <Masonry spacing={3} columns={{ xs: 1, md: 2 }} sx={{ ml: 0 }}>
@@ -102,11 +97,11 @@ export default function AboutTestimonials() {
       sx={{
         ...bgGradient({
           color: alpha(theme.palette.grey[900], 0.9),
-          imgUrl: '/assets/images/about/testimonials.jpg',
+          imgUrl: '/assets/images/about/testimonials.jpg'
         }),
         overflow: 'hidden',
         height: { md: 840 },
-        py: { xs: 10, md: 0 },
+        py: { xs: 10, md: 0 }
       }}
     >
       <Container component={MotionViewport} sx={{ position: 'relative', height: 1 }}>
@@ -127,7 +122,7 @@ export default function AboutTestimonials() {
             lg={6}
             alignItems="center"
             sx={{
-              height: 1,
+              height: 1
             }}
           >
             {renderContent}
@@ -135,11 +130,7 @@ export default function AboutTestimonials() {
         </Grid>
 
         {mdUp && (
-          <Box
-            component={m.div}
-            variants={varFade().inUp}
-            sx={{ bottom: 60, position: 'absolute' }}
-          >
+          <Box component={m.div} variants={varFade().inUp} sx={{ bottom: 60, position: 'absolute' }}>
             {renderLink}
           </Box>
         )}
@@ -161,12 +152,12 @@ function TestimonialCard({ testimonial, sx, ...other }) {
       sx={{
         ...bgBlur({
           color: theme.palette.common.white,
-          opacity: 0.08,
+          opacity: 0.08
         }),
         p: 3,
         borderRadius: 2,
         color: 'common.white',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -184,12 +175,12 @@ function TestimonialCard({ testimonial, sx, ...other }) {
           secondary={fDate(postedDate)}
           primaryTypographyProps={{
             typography: 'subtitle2',
-            mb: 0.5,
+            mb: 0.5
           }}
           secondaryTypographyProps={{
             typography: 'caption',
             color: 'inherit',
-            sx: { opacity: 0.64 },
+            sx: { opacity: 0.64 }
           }}
         />
       </Stack>
@@ -199,5 +190,5 @@ function TestimonialCard({ testimonial, sx, ...other }) {
 
 TestimonialCard.propTypes = {
   sx: PropTypes.object,
-  testimonial: PropTypes.object,
+  testimonial: PropTypes.object
 };

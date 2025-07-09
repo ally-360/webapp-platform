@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import isEqual from 'lodash/isEqual';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -33,12 +33,12 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { useDispatch, useSelector } from 'react-redux';
-import { deletePDV, getAllPDVS, getAllPDVSWhitoutLoading, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { deletePDV, getAllPDVSWhitoutLoading, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { useMediaQuery } from '@mui/material';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import PDVSTableRow from '../pdvs-table-row';
 import PDVSTableToolbar from '../pdvs-table-toolbar';
 import PDVSTableFiltersResult from '../pdvs-table-filters-result';
-import FormPDVS from '../pdv-new-edit-form';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -65,7 +65,8 @@ export default function PdvsListView() {
   // Ref component to print
   const componentRef = useRef();
 
-  const table = useTable();
+  const table = useTable(true);
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
   const settings = useSettingsContext();
 
@@ -75,9 +76,9 @@ export default function PdvsListView() {
 
   // const { products, pdvsLoading, pdvsEmpty } = useSelector((state) => state.products);
 
-  const {pdvs , pdvsLoading, pdvsEmpty} = useSelector((state) => state.pdvs);
+  const {pdvs , pdvsLoading, pdvsEmpty} = useAppSelector((state) => state.pdvs);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
 
@@ -95,7 +96,7 @@ export default function PdvsListView() {
   }, [pdvs]);
 
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
 
   useEffect(() => {
     if (pdvs.length) {
@@ -176,8 +177,7 @@ export default function PdvsListView() {
 
   // Popup create punto de venta
 
-  
-  const { openPopup } = useSelector((state) => state.pdvs);
+  const { openPopup } = useAppSelector((state) => state.pdvs);
 
 
   return (
@@ -196,9 +196,10 @@ export default function PdvsListView() {
           ]}
           action={
             <Button
-              onClick={() => dispatch(switchPopup())}
+              onClick={() => dispatch(switchPopup(false))}
               variant="contained"
               color="primary"
+              sx={isMobile && { width: '100%' }}
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
               Crear Punto De Venta

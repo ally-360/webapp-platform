@@ -1,5 +1,5 @@
 import isEqual from 'lodash/isEqual';
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -17,7 +17,7 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 // _mock
-import { _userList, _roles, USER_STATUS_OPTIONS } from 'src/_mock';
+import { _roles, USER_STATUS_OPTIONS } from 'src/_mock';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
@@ -38,8 +38,9 @@ import {
   TablePaginationCustom
 } from 'src/components/table';
 //
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllContacts } from 'src/redux/inventory/contactsSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useMediaQuery } from '@mui/material';
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import UserTableFiltersResult from '../user-table-filters-result';
@@ -66,21 +67,23 @@ const defaultFilters = {
 // ----------------------------------------------------------------------
 
 export default function UserListView() {
-  const table = useTable();
+  const table = useTable(true);
 
   const settings = useSettingsContext();
 
   const router = useRouter();
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
 
-  const dispatch = useDispatch();
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
+
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(getAllContacts());
   }, [dispatch]);
 
-  const { contacts } = useSelector((state) => state.contacts);
+  const { contacts } = useAppSelector((state) => state.contacts);
 
   const [tableData, setTableData] = useState([]);
 
@@ -174,6 +177,7 @@ export default function UserListView() {
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
+              sx={isMobile && { width: '100%' }}
             >
               Crear contacto
             </Button>
@@ -360,7 +364,7 @@ function applyFilter({ inputData, comparator, filters }) {
 
   if (Object.entries(municipio).length !== 0) {
     console.log(municipio);
-    inputData = inputData.filter((user) => user.municipio.id === municipio.id);
+    inputData = inputData.filter((user) => user.town.id === municipio.id);
   }
 
   return inputData;

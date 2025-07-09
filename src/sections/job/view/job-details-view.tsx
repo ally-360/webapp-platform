@@ -40,7 +40,7 @@ export default function JobDetailsView({ id }) {
       value={currentTab}
       onChange={handleChangeTab}
       sx={{
-        mb: { xs: 3, md: 5 },
+        mb: { xs: 3, md: 5 }
       }}
     >
       {JOB_DETAILS_TABS.map((tab) => (
@@ -49,13 +49,7 @@ export default function JobDetailsView({ id }) {
           iconPosition="end"
           value={tab.value}
           label={tab.label}
-          icon={
-            tab.value === 'candidates' ? (
-              <Label variant="filled">{currentJob?.candidates.length}</Label>
-            ) : (
-              ''
-            )
-          }
+          icon={tab.value === 'candidates' ? <Label variant="filled">{currentJob?.candidates.length}</Label> : ''}
         />
       ))}
     </Tabs>
@@ -81,5 +75,5 @@ export default function JobDetailsView({ id }) {
 }
 
 JobDetailsView.propTypes = {
-  id: PropTypes.string,
+  id: PropTypes.string
 };

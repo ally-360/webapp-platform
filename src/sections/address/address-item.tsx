@@ -21,7 +21,7 @@ export default function AddressItem({ address, action, sx, ...other }) {
       direction={{ xs: 'column', md: 'row' }}
       sx={{
         position: 'relative',
-        ...sx,
+        ...sx
       }}
       {...other}
     >
@@ -58,5 +58,5 @@ export default function AddressItem({ address, action, sx, ...other }) {
 AddressItem.propTypes = {
   action: PropTypes.node,
   address: PropTypes.object,
-  sx: PropTypes.object,
+  sx: PropTypes.object
 };

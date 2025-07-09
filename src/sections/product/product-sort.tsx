@@ -20,11 +20,7 @@ export default function ProductSort({ sort, onSort, sortOptions }) {
         disableRipple
         color="inherit"
         onClick={popover.onOpen}
-        endIcon={
-          <Iconify
-            icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-          />
-        }
+        endIcon={<Iconify icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'} />}
         sx={{ fontWeight: 'fontWeightSemiBold' }}
       >
         Sort By:
@@ -54,5 +50,5 @@ export default function ProductSort({ sort, onSort, sortOptions }) {
 ProductSort.propTypes = {
   onSort: PropTypes.func,
   sort: PropTypes.string,
-  sortOptions: PropTypes.array,
+  sortOptions: PropTypes.array
 };

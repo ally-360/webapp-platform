@@ -16,7 +16,7 @@ export default function PaymentView() {
       sx={{
         pt: 15,
         pb: 10,
-        minHeight: 1,
+        minHeight: 1
       }}
     >
       <Typography variant="h3" align="center" paragraph>
@@ -34,14 +34,14 @@ export default function PaymentView() {
             display="grid"
             gridTemplateColumns={{
               xs: 'repeat(1, 1fr)',
-              md: 'repeat(2, 1fr)',
+              md: 'repeat(2, 1fr)'
             }}
             sx={{
               p: { md: 5 },
               borderRadius: 2,
               border: (theme) => ({
-                md: `dashed 1px ${theme.palette.divider}`,
-              }),
+                md: `dashed 1px ${theme.palette.divider}`
+              })
             }}
           >
             <PaymentBillingAddress />

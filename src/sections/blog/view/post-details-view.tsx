@@ -65,7 +65,7 @@ export default function PostDetailsView({ title }) {
         </Button>
       }
       sx={{
-        py: 20,
+        py: 20
       }}
     />
   );
@@ -87,7 +87,7 @@ export default function PostDetailsView({ title }) {
         sx={{
           maxWidth: 720,
           mx: 'auto',
-          mt: { xs: 5, md: 10 },
+          mt: { xs: 5, md: 10 }
         }}
       >
         <Typography variant="subtitle1" sx={{ mb: 5 }}>
@@ -101,7 +101,7 @@ export default function PostDetailsView({ title }) {
           sx={{
             py: 3,
             borderTop: (theme) => `dashed 1px ${theme.palette.divider}`,
-            borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`,
+            borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`
           }}
         >
           <Stack direction="row" flexWrap="wrap" spacing={1}>
@@ -129,8 +129,8 @@ export default function PostDetailsView({ title }) {
               sx={{
                 [`& .${avatarGroupClasses.avatar}`]: {
                   width: 32,
-                  height: 32,
-                },
+                  height: 32
+                }
               }}
             >
               {post.favoritePerson.map((person) => (
@@ -169,5 +169,5 @@ export default function PostDetailsView({ title }) {
 }
 
 PostDetailsView.propTypes = {
-  title: PropTypes.string,
+  title: PropTypes.string
 };

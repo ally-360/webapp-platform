@@ -32,5 +32,5 @@ export default function MotionViewport({ children, disableAnimatedMobile = true,
 
 MotionViewport.propTypes = {
   children: PropTypes.node,
-  disableAnimatedMobile: PropTypes.bool,
+  disableAnimatedMobile: PropTypes.bool
 };

@@ -27,14 +27,14 @@ export default function Checkbox(theme) {
         size: 'small',
         icon: <Icon />,
         checkedIcon: <CheckedIcon />,
-        indeterminateIcon: <IndeterminateIcon />,
+        indeterminateIcon: <IndeterminateIcon />
       },
 
       styleOverrides: {
         root: {
-          padding: theme.spacing(1),
-        },
-      },
-    },
+          padding: theme.spacing(1)
+        }
+      }
+    }
   };
 }

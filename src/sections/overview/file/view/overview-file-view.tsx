@@ -36,7 +36,7 @@ const GB = 1000000000 * 24;
 const TIME_LABELS = {
   week: ['Mon', 'Tue', 'Web', 'Thu', 'Fri', 'Sat', 'Sun'],
   month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  year: ['2018', '2019', '2020', '2021', '2022'],
+  year: ['2018', '2019', '2020', '2021', '2022']
 };
 
 // ----------------------------------------------------------------------
@@ -70,7 +70,7 @@ export default function OverviewFileView() {
     (acceptedFiles) => {
       const newFiles = acceptedFiles.map((file) =>
         Object.assign(file, {
-          preview: URL.createObjectURL(file),
+          preview: URL.createObjectURL(file)
         })
       );
 
@@ -83,33 +83,33 @@ export default function OverviewFileView() {
     <FileStorageOverview
       total={GB}
       chart={{
-        series: 76,
+        series: 76
       }}
       data={[
         {
           name: 'Images',
           usedStorage: GB / 2,
           filesCount: 223,
-          icon: <Box component="img" src="/assets/icons/files/ic_img.svg" />,
+          icon: <Box component="img" src="/assets/icons/files/ic_img.svg" />
         },
         {
           name: 'Media',
           usedStorage: GB / 5,
           filesCount: 223,
-          icon: <Box component="img" src="/assets/icons/files/ic_video.svg" />,
+          icon: <Box component="img" src="/assets/icons/files/ic_video.svg" />
         },
         {
           name: 'Documents',
           usedStorage: GB / 5,
           filesCount: 223,
-          icon: <Box component="img" src="/assets/icons/files/ic_document.svg" />,
+          icon: <Box component="img" src="/assets/icons/files/ic_document.svg" />
         },
         {
           name: 'Other',
           usedStorage: GB / 10,
           filesCount: 223,
-          icon: <Box component="img" src="/assets/icons/files/ic_file.svg" />,
-        },
+          icon: <Box component="img" src="/assets/icons/files/ic_file.svg" />
+        }
       ]}
     />
   );
@@ -121,30 +121,15 @@ export default function OverviewFileView() {
           {smDown && <Grid xs={12}>{renderStorageOverview}</Grid>}
 
           <Grid xs={12} sm={6} md={4}>
-            <FileWidget
-              title="Dropbox"
-              value={GB / 10}
-              total={GB}
-              icon="/assets/icons/app/ic_dropbox.svg"
-            />
+            <FileWidget title="Dropbox" value={GB / 10} total={GB} icon="/assets/icons/app/ic_dropbox.svg" />
           </Grid>
 
           <Grid xs={12} sm={6} md={4}>
-            <FileWidget
-              title="Drive"
-              value={GB / 5}
-              total={GB}
-              icon="/assets/icons/app/ic_drive.svg"
-            />
+            <FileWidget title="Drive" value={GB / 5} total={GB} icon="/assets/icons/app/ic_drive.svg" />
           </Grid>
 
           <Grid xs={12} sm={6} md={4}>
-            <FileWidget
-              title="OneDrive"
-              value={GB / 2}
-              total={GB}
-              icon="/assets/icons/app/ic_onedrive.svg"
-            />
+            <FileWidget title="OneDrive" value={GB / 2} total={GB} icon="/assets/icons/app/ic_onedrive.svg" />
           </Grid>
 
           <Grid xs={12} md={6} lg={8}>
@@ -156,7 +141,7 @@ export default function OverviewFileView() {
                   theme.palette.primary.main,
                   theme.palette.error.main,
                   theme.palette.warning.main,
-                  theme.palette.text.disabled,
+                  theme.palette.text.disabled
                 ],
                 series: [
                   {
@@ -165,8 +150,8 @@ export default function OverviewFileView() {
                       { name: 'Images', data: [20, 34, 48, 65, 37, 48] },
                       { name: 'Media', data: [10, 34, 13, 26, 27, 28] },
                       { name: 'Documents', data: [10, 14, 13, 16, 17, 18] },
-                      { name: 'Other', data: [5, 12, 6, 7, 8, 9] },
-                    ],
+                      { name: 'Other', data: [5, 12, 6, 7, 8, 9] }
+                    ]
                   },
                   {
                     type: 'Month',
@@ -174,8 +159,8 @@ export default function OverviewFileView() {
                       { name: 'Images', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 12, 43, 34] },
                       { name: 'Media', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 12, 43, 34] },
                       { name: 'Documents', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 12, 43, 34] },
-                      { name: 'Other', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 12, 43, 34] },
-                    ],
+                      { name: 'Other', data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 12, 43, 34] }
+                    ]
                   },
                   {
                     type: 'Year',
@@ -183,10 +168,10 @@ export default function OverviewFileView() {
                       { name: 'Images', data: [10, 34, 13, 56, 77] },
                       { name: 'Media', data: [10, 34, 13, 56, 77] },
                       { name: 'Documents', data: [10, 34, 13, 56, 77] },
-                      { name: 'Other', data: [10, 34, 13, 56, 77] },
-                    ],
-                  },
-                ],
+                      { name: 'Other', data: [10, 34, 13, 56, 77] }
+                    ]
+                  }
+                ]
               }}
             />
 
@@ -207,8 +192,8 @@ export default function OverviewFileView() {
                       onDelete={() => console.info('DELETE', folder.id)}
                       sx={{
                         ...(_folders.length > 3 && {
-                          minWidth: 222,
-                        }),
+                          minWidth: 222
+                        })
                       }}
                     />
                   ))}
@@ -224,11 +209,7 @@ export default function OverviewFileView() {
 
               <Stack spacing={2}>
                 {_files.slice(0, 5).map((file) => (
-                  <FileRecentItem
-                    key={file.id}
-                    file={file}
-                    onDelete={() => console.info('DELETE', file.id)}
-                  />
+                  <FileRecentItem key={file.id} file={file} onDelete={() => console.info('DELETE', file.id)} />
                 ))}
               </Stack>
             </div>
@@ -248,7 +229,7 @@ export default function OverviewFileView() {
                 py: 2.5,
                 width: 'auto',
                 height: 'auto',
-                borderRadius: 1.5,
+                borderRadius: 1.5
               }}
             />
 

@@ -2,15 +2,10 @@ import PropTypes from 'prop-types';
 // @mui
 import { alpha, useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 // auth
-import { useAuthContext } from 'src/auth/hooks';
 // routes
-import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 // hooks
 import { useResponsive } from 'src/hooks/use-responsive';
 // theme
@@ -19,7 +14,6 @@ import { bgGradient } from 'src/theme/css';
 import Logo from 'src/components/logo';
 import { styled } from '@mui/system';
 import { Card } from '@mui/material';
-import AuthModernLayout from 'src/layouts/auth/modern';
 
 // ----------------------------------------------------------------------
 

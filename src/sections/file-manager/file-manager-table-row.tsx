@@ -62,7 +62,7 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
     click: () => {
       details.onTrue();
     },
-    doubleClick: () => console.info('DOUBLE CLICK'),
+    doubleClick: () => console.info('DOUBLE CLICK')
   });
 
   const handleCopy = useCallback(() => {
@@ -76,13 +76,13 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
     '&:first-of-type': {
       borderTopLeftRadius: 16,
       borderBottomLeftRadius: 16,
-      borderLeft: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
+      borderLeft: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`
     },
     '&:last-of-type': {
       borderTopRightRadius: 16,
       borderBottomRightRadius: 16,
-      borderRight: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`,
-    },
+      borderRight: `solid 1px ${alpha(theme.palette.grey[500], 0.16)}`
+    }
   };
 
   return (
@@ -95,29 +95,25 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
             backgroundColor: 'background.paper',
             boxShadow: theme.customShadows.z20,
             transition: theme.transitions.create(['background-color', 'box-shadow'], {
-              duration: theme.transitions.duration.shortest,
+              duration: theme.transitions.duration.shortest
             }),
             '&:hover': {
               backgroundColor: 'background.paper',
-              boxShadow: theme.customShadows.z20,
-            },
+              boxShadow: theme.customShadows.z20
+            }
           },
           [`& .${tableCellClasses.root}`]: {
-            ...defaultStyles,
+            ...defaultStyles
           },
           ...(details.value && {
             [`& .${tableCellClasses.root}`]: {
-              ...defaultStyles,
-            },
-          }),
+              ...defaultStyles
+            }
+          })
         }}
       >
         <TableCell padding="checkbox">
-          <Checkbox
-            checked={selected}
-            onDoubleClick={() => console.info('ON DOUBLE CLICK')}
-            onClick={onSelectRow}
-          />
+          <Checkbox checked={selected} onDoubleClick={() => console.info('ON DOUBLE CLICK')} onClick={onSelectRow} />
         </TableCell>
 
         <TableCell onClick={handleClick}>
@@ -130,7 +126,7 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
               sx={{
                 maxWidth: 360,
                 cursor: 'pointer',
-                ...(details.value && { fontWeight: 'fontWeightBold' }),
+                ...(details.value && { fontWeight: 'fontWeightBold' })
               }}
             >
               {name}
@@ -154,7 +150,7 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
             secondaryTypographyProps={{
               mt: 0.5,
               component: 'span',
-              typography: 'caption',
+              typography: 'caption'
             }}
           />
         </TableCell>
@@ -168,15 +164,12 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
                 width: 24,
                 height: 24,
                 '&:first-of-type': {
-                  fontSize: 12,
-                },
-              },
+                  fontSize: 12
+                }
+              }
             }}
           >
-            {shared &&
-              shared.map((person) => (
-                <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />
-              ))}
+            {shared && shared.map((person) => <Avatar key={person.id} alt={person.name} src={person.avatarUrl} />)}
           </AvatarGroup>
         </TableCell>
 
@@ -184,7 +177,7 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
           align="right"
           sx={{
             px: 1,
-            whiteSpace: 'nowrap',
+            whiteSpace: 'nowrap'
           }}
         >
           <Checkbox
@@ -202,12 +195,7 @@ export default function FileManagerTableRow({ row, selected, onSelectRow, onDele
         </TableCell>
       </TableRow>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem
           onClick={() => {
             popover.onClose();
@@ -283,5 +271,5 @@ FileManagerTableRow.propTypes = {
   onDeleteRow: PropTypes.func,
   onSelectRow: PropTypes.func,
   row: PropTypes.object,
-  selected: PropTypes.bool,
+  selected: PropTypes.bool
 };

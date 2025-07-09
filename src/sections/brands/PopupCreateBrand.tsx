@@ -13,14 +13,12 @@ import {
 } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useMemo } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
 import { LoadingButton } from '@mui/lab';
 
-import { getCategories } from 'src/redux/inventory/categoriesSlice';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useTranslation } from 'react-i18next';

@@ -20,7 +20,7 @@ const LABEL_ICONS = {
   important: 'material-symbols:label-important-rounded',
   social: 'solar:tag-horizontal-bold-duotone',
   promotions: 'solar:tag-horizontal-bold-duotone',
-  forums: 'solar:tag-horizontal-bold-duotone',
+  forums: 'solar:tag-horizontal-bold-duotone'
 };
 
 // ----------------------------------------------------------------------
@@ -39,11 +39,11 @@ export default function MailNavItem({ selected, label, onClickNavItem, ...other 
         height: 40,
         color: 'text.secondary',
         ...(selected && {
-          color: 'text.primary',
+          color: 'text.primary'
         }),
         '&:hover': {
-          bgcolor: 'transparent',
-        },
+          bgcolor: 'transparent'
+        }
       }}
       {...other}
     >
@@ -52,7 +52,7 @@ export default function MailNavItem({ selected, label, onClickNavItem, ...other 
         width={22}
         sx={{
           mr: 2,
-          color,
+          color
         }}
       />
 
@@ -60,7 +60,7 @@ export default function MailNavItem({ selected, label, onClickNavItem, ...other 
         primary={name}
         primaryTypographyProps={{
           textTransform: 'capitalize',
-          typography: selected ? 'subtitle2' : 'body2',
+          typography: selected ? 'subtitle2' : 'body2'
         }}
       />
 
@@ -72,5 +72,5 @@ export default function MailNavItem({ selected, label, onClickNavItem, ...other 
 MailNavItem.propTypes = {
   selected: PropTypes.bool,
   label: PropTypes.object,
-  onClickNavItem: PropTypes.func,
+  onClickNavItem: PropTypes.func
 };

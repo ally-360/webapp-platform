@@ -20,11 +20,7 @@ export default function ChatRoomParticipantDialog({ participant, open, onClose }
       </IconButton>
 
       <DialogContent sx={{ py: 5, px: 3, display: 'flex' }}>
-        <Avatar
-          alt={participant.name}
-          src={participant.avatarUrl}
-          sx={{ width: 96, height: 96, mr: 3 }}
-        />
+        <Avatar alt={participant.name} src={participant.avatarUrl} sx={{ width: 96, height: 96, mr: 3 }} />
 
         <Stack spacing={1}>
           <Typography variant="caption" sx={{ color: 'primary.main' }}>
@@ -34,11 +30,7 @@ export default function ChatRoomParticipantDialog({ participant, open, onClose }
           <Typography variant="subtitle1">{participant.name}</Typography>
 
           <Stack direction="row" sx={{ typography: 'caption', color: 'text.disabled' }}>
-            <Iconify
-              icon="mingcute:location-fill"
-              width={16}
-              sx={{ flexShrink: 0, mr: 0.5, mt: '2px' }}
-            />
+            <Iconify icon="mingcute:location-fill" width={16} sx={{ flexShrink: 0, mr: 0.5, mt: '2px' }} />
             {participant.address}
           </Stack>
 
@@ -50,8 +42,8 @@ export default function ChatRoomParticipantDialog({ participant, open, onClose }
                 borderRadius: 1,
                 bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
                 '&:hover': {
-                  bgcolor: (theme) => alpha(theme.palette.error.main, 0.16),
-                },
+                  bgcolor: (theme) => alpha(theme.palette.error.main, 0.16)
+                }
               }}
             >
               <Iconify width={18} icon="solar:phone-bold" />
@@ -64,8 +56,8 @@ export default function ChatRoomParticipantDialog({ participant, open, onClose }
                 borderRadius: 1,
                 bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
                 '&:hover': {
-                  bgcolor: (theme) => alpha(theme.palette.info.main, 0.16),
-                },
+                  bgcolor: (theme) => alpha(theme.palette.info.main, 0.16)
+                }
               }}
             >
               <Iconify width={18} icon="solar:chat-round-dots-bold" />
@@ -78,8 +70,8 @@ export default function ChatRoomParticipantDialog({ participant, open, onClose }
                 borderRadius: 1,
                 bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
                 '&:hover': {
-                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
-                },
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16)
+                }
               }}
             >
               <Iconify width={18} icon="fluent:mail-24-filled" />
@@ -92,8 +84,8 @@ export default function ChatRoomParticipantDialog({ participant, open, onClose }
                 borderRadius: 1,
                 bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.08),
                 '&:hover': {
-                  bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.16),
-                },
+                  bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.16)
+                }
               }}
             >
               <Iconify width={18} icon="solar:videocamera-record-bold" />
@@ -108,5 +100,5 @@ export default function ChatRoomParticipantDialog({ participant, open, onClose }
 ChatRoomParticipantDialog.propTypes = {
   onClose: PropTypes.func,
   open: PropTypes.bool,
-  participant: PropTypes.object,
+  participant: PropTypes.object
 };

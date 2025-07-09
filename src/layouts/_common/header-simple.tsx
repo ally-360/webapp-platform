@@ -32,20 +32,20 @@ export default function HeaderSimple() {
           justifyContent: 'space-between',
           height: {
             xs: HEADER.H_MOBILE,
-            md: HEADER.H_DESKTOP,
+            md: HEADER.H_DESKTOP
           },
           transition: theme.transitions.create(['height'], {
             easing: theme.transitions.easing.easeInOut,
-            duration: theme.transitions.duration.shorter,
+            duration: theme.transitions.duration.shorter
           }),
           ...(offsetTop && {
             ...bgBlur({
-              color: theme.palette.background.default,
+              color: theme.palette.background.default
             }),
             height: {
-              md: HEADER.H_DESKTOP_OFFSET,
-            },
-          }),
+              md: HEADER.H_DESKTOP_OFFSET
+            }
+          })
         }}
       >
         <Logo />
@@ -53,13 +53,8 @@ export default function HeaderSimple() {
         <Stack direction="row" alignItems="center" spacing={1}>
           <SettingsButton />
 
-          <Link
-            href={paths.faqs}
-            component={RouterLink}
-            color="inherit"
-            sx={{ typography: 'subtitle2' }}
-          >
-            Need help?
+          <Link href={paths.faqs} component={RouterLink} color="inherit" sx={{ typography: 'subtitle2' }}>
+            Ayuda
           </Link>
         </Stack>
       </Toolbar>

@@ -13,7 +13,6 @@ import { _addressBooks } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 //
-import { useSelector } from 'react-redux';
 import { useAuthContext } from 'src/auth/hooks';
 import logoPlaceholder from '../../../public/assets/logo-placeholder-1.png';
 import { AddressListDialog } from '../address';

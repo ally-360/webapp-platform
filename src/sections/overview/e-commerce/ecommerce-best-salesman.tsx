@@ -18,13 +18,7 @@ import { TableHeadCustom } from 'src/components/table';
 
 // ----------------------------------------------------------------------
 
-export default function EcommerceBestSalesman({
-  title,
-  subheader,
-  tableData,
-  tableLabels,
-  ...other
-}) {
+export default function EcommerceBestSalesman({ title, subheader, tableData, tableLabels, ...other }) {
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 3 }} />
@@ -50,7 +44,7 @@ EcommerceBestSalesman.propTypes = {
   subheader: PropTypes.string,
   tableData: PropTypes.array,
   tableLabels: PropTypes.array,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -90,5 +84,5 @@ function EcommerceBestSalesmanRow({ row }) {
 }
 
 EcommerceBestSalesmanRow.propTypes = {
-  row: PropTypes.object,
+  row: PropTypes.object
 };

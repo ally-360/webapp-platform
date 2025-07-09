@@ -35,12 +35,12 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
     color: Yup.string(),
     allDay: Yup.boolean(),
     start: Yup.mixed(),
-    end: Yup.mixed(),
+    end: Yup.mixed()
   });
 
   const methods = useForm({
     resolver: yupResolver(EventSchema),
-    defaultValues: currentEvent,
+    defaultValues: currentEvent
   });
 
   const {
@@ -48,7 +48,7 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
     watch,
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -63,7 +63,7 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
       allDay: data?.allDay,
       description: data?.description,
       end: data?.end,
-      start: data?.start,
+      start: data?.start
     };
 
     try {
@@ -118,8 +118,8 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
               format="dd/MM/yyyy hh:mm a"
               slotProps={{
                 textField: {
-                  fullWidth: true,
-                },
+                  fullWidth: true
+                }
               }}
             />
           )}
@@ -143,8 +143,8 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
                 textField: {
                   fullWidth: true,
                   error: dateError,
-                  helperText: dateError && 'End date must be later than start date',
-                },
+                  helperText: dateError && 'End date must be later than start date'
+                }
               }}
             />
           )}
@@ -178,12 +178,7 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
           Cancel
         </Button>
 
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          loading={isSubmitting}
-          disabled={dateError}
-        >
+        <LoadingButton type="submit" variant="contained" loading={isSubmitting} disabled={dateError}>
           Save Changes
         </LoadingButton>
       </DialogActions>
@@ -194,5 +189,5 @@ export default function CalendarForm({ currentEvent, colorOptions, onClose }) {
 CalendarForm.propTypes = {
   colorOptions: PropTypes.arrayOf(PropTypes.string),
   currentEvent: PropTypes.object,
-  onClose: PropTypes.func,
+  onClose: PropTypes.func
 };

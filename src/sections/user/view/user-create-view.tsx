@@ -6,7 +6,7 @@ import { paths } from 'src/routes/paths';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
-import { Icon } from '@iconify/react';
+import React from 'react';
 import UserNewEditForm from '../user-new-edit-form';
 
 // ----------------------------------------------------------------------

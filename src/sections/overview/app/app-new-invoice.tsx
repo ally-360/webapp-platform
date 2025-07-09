@@ -61,7 +61,7 @@ AppNewInvoice.propTypes = {
   subheader: PropTypes.string,
   tableData: PropTypes.array,
   tableLabels: PropTypes.array,
-  title: PropTypes.string,
+  title: PropTypes.string
 };
 
 // ----------------------------------------------------------------------
@@ -101,11 +101,7 @@ function AppNewInvoiceRow({ row }) {
         <TableCell>
           <Label
             variant="soft"
-            color={
-              (row.status === 'progress' && 'warning') ||
-              (row.status === 'out of date' && 'error') ||
-              'success'
-            }
+            color={(row.status === 'progress' && 'warning') || (row.status === 'out of date' && 'error') || 'success'}
           >
             {row.status}
           </Label>
@@ -118,12 +114,7 @@ function AppNewInvoiceRow({ row }) {
         </TableCell>
       </TableRow>
 
-      <CustomPopover
-        open={popover.open}
-        onClose={popover.onClose}
-        arrow="right-top"
-        sx={{ width: 160 }}
-      >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
         <MenuItem onClick={handleDownload}>
           <Iconify icon="eva:cloud-download-fill" />
           Download
@@ -151,5 +142,5 @@ function AppNewInvoiceRow({ row }) {
 }
 
 AppNewInvoiceRow.propTypes = {
-  row: PropTypes.object,
+  row: PropTypes.object
 };

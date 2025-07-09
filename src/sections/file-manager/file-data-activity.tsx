@@ -24,30 +24,27 @@ export default function FileDataActivity({ title, subheader, chart, ...other }) 
 
   const chartOptions = useChart({
     chart: {
-      stacked: true,
+      stacked: true
     },
     colors,
     stroke: {
-      width: 0,
+      width: 0
     },
     xaxis: {
-      categories:
-        (seriesData === 'Week' && labels.week) ||
-        (seriesData === 'Month' && labels.month) ||
-        labels.year,
+      categories: (seriesData === 'Week' && labels.week) || (seriesData === 'Month' && labels.month) || labels.year
     },
     tooltip: {
       y: {
-        formatter: (value) => fData(value),
-      },
+        formatter: (value) => fData(value)
+      }
     },
     plotOptions: {
       bar: {
         borderRadius: (seriesData === 'Week' && 8) || (seriesData === 'Month' && 6) || 10,
-        columnWidth: '20%',
-      },
+        columnWidth: '20%'
+      }
     },
-    ...options,
+    ...options
   });
 
   const handleChangeSeries = useCallback(
@@ -73,7 +70,7 @@ export default function FileDataActivity({ title, subheader, chart, ...other }) 
                 pr: 0.5,
                 borderRadius: 1,
                 typography: 'subtitle2',
-                bgcolor: 'background.neutral',
+                bgcolor: 'background.neutral'
               }}
             >
               {seriesData}
@@ -114,5 +111,5 @@ export default function FileDataActivity({ title, subheader, chart, ...other }) 
 FileDataActivity.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
-  title: PropTypes.string,
+  title: PropTypes.string
 };

@@ -15,7 +15,7 @@ function MotionLazy({ children }) {
 }
 
 MotionLazy.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };
 
 export default MotionLazy;

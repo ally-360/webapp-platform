@@ -30,7 +30,7 @@ import {
   JOB_BENEFIT_OPTIONS,
   JOB_EXPERIENCE_OPTIONS,
   JOB_EMPLOYMENT_TYPE_OPTIONS,
-  JOB_WORKING_SCHEDULE_OPTIONS,
+  JOB_WORKING_SCHEDULE_OPTIONS
 } from 'src/_mock';
 // assets
 import { countries } from 'src/assets/data';
@@ -43,7 +43,7 @@ import FormProvider, {
   RHFTextField,
   RHFRadioGroup,
   RHFAutocomplete,
-  RHFMultiCheckbox,
+  RHFMultiCheckbox
 } from 'src/components/hook-form';
 
 // ----------------------------------------------------------------------
@@ -68,9 +68,9 @@ export default function JobNewEditForm({ currentJob }) {
     salary: Yup.object().shape({
       type: Yup.string(),
       price: Yup.number().min(1, 'Price is required'),
-      negotiable: Yup.boolean(),
+      negotiable: Yup.boolean()
     }),
-    experience: Yup.string(),
+    experience: Yup.string()
   });
 
   const defaultValues = useMemo(
@@ -88,22 +88,22 @@ export default function JobNewEditForm({ currentJob }) {
       salary: currentJob?.salary || {
         type: 'Hourly',
         price: 0,
-        negotiable: false,
-      },
+        negotiable: false
+      }
     }),
     [currentJob]
   );
 
   const methods = useForm({
     resolver: yupResolver(NewJobSchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
     reset,
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   useEffect(() => {
@@ -177,12 +177,7 @@ export default function JobNewEditForm({ currentJob }) {
           <Stack spacing={3} sx={{ p: 3 }}>
             <Stack spacing={1}>
               <Typography variant="subtitle2">Employment type</Typography>
-              <RHFMultiCheckbox
-                row
-                spacing={4}
-                name="employmentTypes"
-                options={JOB_EMPLOYMENT_TYPE_OPTIONS}
-              />
+              <RHFMultiCheckbox row spacing={4} name="employmentTypes" options={JOB_EMPLOYMENT_TYPE_OPTIONS} />
             </Stack>
 
             <Stack spacing={1}>
@@ -273,9 +268,7 @@ export default function JobNewEditForm({ currentJob }) {
                 options={countries.map((option) => option.label)}
                 getOptionLabel={(option) => option}
                 renderOption={(props, option) => {
-                  const { code, label, phone } = countries.filter(
-                    (country) => country.label === option
-                  )[0];
+                  const { code, label, phone } = countries.filter((country) => country.label === option)[0];
 
                   if (!label) {
                     return null;
@@ -283,12 +276,7 @@ export default function JobNewEditForm({ currentJob }) {
 
                   return (
                     <li {...props} key={label}>
-                      <Iconify
-                        key={label}
-                        icon={`circle-flags:${code.toLowerCase()}`}
-                        width={28}
-                        sx={{ mr: 1 }}
-                      />
+                      <Iconify key={label} icon={`circle-flags:${code.toLowerCase()}`} width={28} sx={{ mr: 1 }} />
                       {label} ({code}) +{phone}
                     </li>
                   );
@@ -321,8 +309,8 @@ export default function JobNewEditForm({ currentJob }) {
                       textField: {
                         fullWidth: true,
                         error: !!error,
-                        helperText: error?.message,
-                      },
+                        helperText: error?.message
+                      }
                     }}
                   />
                 )}
@@ -340,12 +328,12 @@ export default function JobNewEditForm({ currentJob }) {
                     {[
                       {
                         label: 'Hourly',
-                        icon: <Iconify icon="solar:clock-circle-bold" width={32} sx={{ mb: 2 }} />,
+                        icon: <Iconify icon="solar:clock-circle-bold" width={32} sx={{ mb: 2 }} />
                       },
                       {
                         label: 'Custom',
-                        icon: <Iconify icon="solar:wad-of-money-bold" width={32} sx={{ mb: 2 }} />,
-                      },
+                        icon: <Iconify icon="solar:wad-of-money-bold" width={32} sx={{ mb: 2 }} />
+                      }
                     ].map((item) => (
                       <Paper
                         component={ButtonBase}
@@ -359,8 +347,8 @@ export default function JobNewEditForm({ currentJob }) {
                           flexDirection: 'column',
                           ...(item.label === field.value && {
                             borderWidth: 2,
-                            borderColor: 'text.primary',
-                          }),
+                            borderColor: 'text.primary'
+                          })
                         }}
                       >
                         {item.icon}
@@ -380,7 +368,7 @@ export default function JobNewEditForm({ currentJob }) {
                     <InputAdornment position="start">
                       <Box sx={{ typography: 'subtitle2', color: 'text.disabled' }}>$</Box>
                     </InputAdornment>
-                  ),
+                  )
                 }}
               />
               <RHFSwitch name="salary.negotiable" label="Salary is negotiable" />
@@ -393,7 +381,7 @@ export default function JobNewEditForm({ currentJob }) {
                 options={JOB_BENEFIT_OPTIONS}
                 sx={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gridTemplateColumns: 'repeat(2, 1fr)'
                 }}
               />
             </Stack>
@@ -407,19 +395,9 @@ export default function JobNewEditForm({ currentJob }) {
     <>
       {mdUp && <Grid md={4} />}
       <Grid xs={12} md={8} sx={{ display: 'flex', alignItems: 'center' }}>
-        <FormControlLabel
-          control={<Switch defaultChecked />}
-          label="Publish"
-          sx={{ flexGrow: 1, pl: 3 }}
-        />
+        <FormControlLabel control={<Switch defaultChecked />} label="Publish" sx={{ flexGrow: 1, pl: 3 }} />
 
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          size="large"
-          loading={isSubmitting}
-          sx={{ ml: 2 }}
-        >
+        <LoadingButton type="submit" variant="contained" size="large" loading={isSubmitting} sx={{ ml: 2 }}>
           {!currentJob ? 'Create Job' : 'Save Changes'}
         </LoadingButton>
       </Grid>
@@ -440,5 +418,5 @@ export default function JobNewEditForm({ currentJob }) {
 }
 
 JobNewEditForm.propTypes = {
-  currentJob: PropTypes.object,
+  currentJob: PropTypes.object
 };

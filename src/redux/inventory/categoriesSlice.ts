@@ -1,4 +1,4 @@
-import { sum, map, filter, uniqBy, reject, get } from 'lodash';
+import { reject } from 'lodash';
 // utils
 import { createSlice } from '@reduxjs/toolkit';
 import RequestService from '../../axios/services/service';

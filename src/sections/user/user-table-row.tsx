@@ -9,6 +9,7 @@ import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import ListItemText from '@mui/material/ListItemText';
+import React from 'react';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
@@ -24,9 +25,9 @@ import UserQuickEditForm from './user-quick-edit-form';
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
   const { name, lastname, avatarUrl, address, town, type, email, phoneNumber } = row;
 
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
 
-  const quickEdit = useBoolean();
+  const quickEdit = useBoolean(false);
 
   const popover = usePopover();
 
@@ -52,7 +53,10 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{address}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{town.name}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          {/* TODO: remplazar */}
+          {/* {town.name} */}
+        </TableCell>
 
         <TableCell>
           <Label

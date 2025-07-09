@@ -14,5 +14,5 @@ export default function SimpleLayout({ children }) {
 }
 
 SimpleLayout.propTypes = {
-  children: PropTypes.node,
+  children: PropTypes.node
 };

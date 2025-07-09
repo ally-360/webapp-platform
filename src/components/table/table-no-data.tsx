@@ -1,23 +1,26 @@
-import PropTypes from 'prop-types';
 // @mui
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 //
+import React from 'react';
 import EmptyContent from '../empty-content';
-
 // ----------------------------------------------------------------------
-
-export default function TableNoData({ notFound, sx, text }) {
+interface TableNoDataProps {
+  notFound: boolean;
+  sx?: object;
+  text?: string;
+}
+export default function TableNoData({ notFound, sx, text }: TableNoDataProps) {
   return (
     <TableRow>
       {notFound ? (
         <TableCell colSpan={12}>
           <EmptyContent
             filled
-            title={text? text : 'No data found'}
+            title={text || 'No data found'}
             sx={{
               py: 10,
-              ...sx,
+              ...sx
             }}
           />
         </TableCell>
@@ -27,8 +30,3 @@ export default function TableNoData({ notFound, sx, text }) {
     </TableRow>
   );
 }
-
-TableNoData.propTypes = {
-  notFound: PropTypes.bool,
-  sx: PropTypes.object,
-};

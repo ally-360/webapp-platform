@@ -20,7 +20,7 @@ export default function JobDetailsCandidates({ candidates }) {
       display="grid"
       gridTemplateColumns={{
         xs: 'repeat(1, 1fr)',
-        md: 'repeat(3, 1fr)',
+        md: 'repeat(3, 1fr)'
       }}
     >
       {candidates.map((candidate) => (
@@ -39,7 +39,7 @@ export default function JobDetailsCandidates({ candidates }) {
                 mt: 0.5,
                 component: 'span',
                 typography: 'caption',
-                color: 'text.disabled',
+                color: 'text.disabled'
               }}
             />
 
@@ -51,8 +51,8 @@ export default function JobDetailsCandidates({ candidates }) {
                   borderRadius: 1,
                   bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
                   '&:hover': {
-                    bgcolor: (theme) => alpha(theme.palette.error.main, 0.16),
-                  },
+                    bgcolor: (theme) => alpha(theme.palette.error.main, 0.16)
+                  }
                 }}
               >
                 <Iconify width={18} icon="solar:phone-bold" />
@@ -65,8 +65,8 @@ export default function JobDetailsCandidates({ candidates }) {
                   borderRadius: 1,
                   bgcolor: (theme) => alpha(theme.palette.info.main, 0.08),
                   '&:hover': {
-                    bgcolor: (theme) => alpha(theme.palette.info.main, 0.16),
-                  },
+                    bgcolor: (theme) => alpha(theme.palette.info.main, 0.16)
+                  }
                 }}
               >
                 <Iconify width={18} icon="solar:chat-round-dots-bold" />
@@ -79,8 +79,8 @@ export default function JobDetailsCandidates({ candidates }) {
                   borderRadius: 1,
                   bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
                   '&:hover': {
-                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
-                  },
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16)
+                  }
                 }}
               >
                 <Iconify width={18} icon="fluent:mail-24-filled" />
@@ -94,8 +94,8 @@ export default function JobDetailsCandidates({ candidates }) {
                     borderRadius: 1,
                     bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.08),
                     '&:hover': {
-                      bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.16),
-                    },
+                      bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.16)
+                    }
                   }}
                 >
                   <Iconify width={18} icon="eva:cloud-download-fill" />
@@ -110,5 +110,5 @@ export default function JobDetailsCandidates({ candidates }) {
 }
 
 JobDetailsCandidates.propTypes = {
-  candidates: PropTypes.array,
+  candidates: PropTypes.array
 };

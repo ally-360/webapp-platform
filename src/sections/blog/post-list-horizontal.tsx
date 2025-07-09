@@ -32,7 +32,7 @@ export default function PostListHorizontal({ posts, loading }) {
         display="grid"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          md: 'repeat(2, 1fr)',
+          md: 'repeat(2, 1fr)'
         }}
       >
         {loading ? renderSkeleton : renderList}
@@ -44,8 +44,8 @@ export default function PostListHorizontal({ posts, loading }) {
           sx={{
             mt: 8,
             [`& .${paginationClasses.ul}`]: {
-              justifyContent: 'center',
-            },
+              justifyContent: 'center'
+            }
           }}
         />
       )}
@@ -55,5 +55,5 @@ export default function PostListHorizontal({ posts, loading }) {
 
 PostListHorizontal.propTypes = {
   loading: PropTypes.bool,
-  posts: PropTypes.array,
+  posts: PropTypes.array
 };

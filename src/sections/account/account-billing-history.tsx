@@ -32,13 +32,13 @@ export default function AccountBillingHistory({ invoices }) {
               primary={invoice.invoiceNumber}
               secondary={fDate(invoice.createdAt)}
               primaryTypographyProps={{
-                typography: 'body2',
+                typography: 'body2'
               }}
               secondaryTypographyProps={{
                 mt: 0.5,
                 component: 'span',
                 typography: 'caption',
-                color: 'text.disabled',
+                color: 'text.disabled'
               }}
             />
 
@@ -59,11 +59,7 @@ export default function AccountBillingHistory({ invoices }) {
         <Button
           size="small"
           color="inherit"
-          startIcon={
-            <Iconify
-              icon={showMore.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'}
-            />
-          }
+          startIcon={<Iconify icon={showMore.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'} />}
           onClick={showMore.onToggle}
         >
           {showMore.value ? `Show Less` : `Show More`}
@@ -74,5 +70,5 @@ export default function AccountBillingHistory({ invoices }) {
 }
 
 AccountBillingHistory.propTypes = {
-  invoices: PropTypes.array,
+  invoices: PropTypes.array
 };

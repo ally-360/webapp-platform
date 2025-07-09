@@ -46,11 +46,11 @@ export default function ProductDetailsReview({ totalRatings, totalReviews, ratin
         py: 5,
         px: { xs: 3, md: 5 },
         borderLeft: (theme) => ({
-          md: `dashed 1px ${theme.palette.divider}`,
+          md: `dashed 1px ${theme.palette.divider}`
         }),
         borderRight: (theme) => ({
-          md: `dashed 1px ${theme.palette.divider}`,
-        }),
+          md: `dashed 1px ${theme.palette.divider}`
+        })
       }}
     >
       {ratings
@@ -68,7 +68,7 @@ export default function ProductDetailsReview({ totalRatings, totalReviews, ratin
               value={(rating.starCount / total) * 100}
               sx={{
                 mx: 2,
-                flexGrow: 1,
+                flexGrow: 1
               }}
             />
 
@@ -77,7 +77,7 @@ export default function ProductDetailsReview({ totalRatings, totalReviews, ratin
               component="span"
               sx={{
                 minWidth: 48,
-                color: 'text.secondary',
+                color: 'text.secondary'
               }}
             >
               {fShortenNumber(rating.reviewCount)}
@@ -107,10 +107,10 @@ export default function ProductDetailsReview({ totalRatings, totalReviews, ratin
         display="grid"
         gridTemplateColumns={{
           xs: 'repeat(1, 1fr)',
-          md: 'repeat(3, 1fr)',
+          md: 'repeat(3, 1fr)'
         }}
         sx={{
-          py: { xs: 5, md: 0 },
+          py: { xs: 5, md: 0 }
         }}
       >
         {renderSummary}
@@ -133,5 +133,5 @@ ProductDetailsReview.propTypes = {
   ratings: PropTypes.array,
   reviews: PropTypes.array,
   totalRatings: PropTypes.number,
-  totalReviews: PropTypes.number,
+  totalReviews: PropTypes.number
 };

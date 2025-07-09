@@ -82,7 +82,6 @@ export default function NavVertical({ openNav, onCloseNav }) {
             alt={user?.profile?.name}
             color={user?.profile?.photo ? 'default' : 'inherit'}
           >
-            {/* {createAvatar(user.displayName).name} */}
             {user?.profile?.name?.charAt(0)}
           </Avatar>
           <Box sx={{ ml: 2 }}>
@@ -90,7 +89,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
               {user?.profile?.name}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: 12 }}>
-              {user?.profile?.company?.name}
+              {user?.company[0]?.name}
             </Typography>
           </Box>
           {/* </Paper> */}

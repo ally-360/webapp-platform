@@ -16,7 +16,7 @@ export default function Autocomplete(theme) {
   return {
     MuiAutocomplete: {
       defaultProps: {
-        popupIcon: <Icon />,
+        popupIcon: <Icon />
       },
 
       styleOverrides: {
@@ -30,25 +30,25 @@ export default function Autocomplete(theme) {
             padding: theme.spacing(0, 0.75),
             color: theme.palette.text.secondary,
             borderRadius: theme.shape.borderRadius,
-            backgroundColor: alpha(theme.palette.grey[500], 0.16),
-          },
+            backgroundColor: alpha(theme.palette.grey[500], 0.16)
+          }
         },
         paper: {
-          ...paper({ theme, dropdown: true }),
+          ...paper({ theme, dropdown: true })
         },
         listbox: {
           padding: 0,
           [`& .${autocompleteClasses.option}`]: {
-            ...menuItem(theme),
-          },
+            ...menuItem(theme)
+          }
         },
         endAdornment: {
           [`& .${svgIconClasses.root}`]: {
             width: 18,
-            height: 18,
-          },
-        },
-      },
-    },
+            height: 18
+          }
+        }
+      }
+    }
   };
 }
