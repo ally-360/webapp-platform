@@ -10,11 +10,13 @@ interface EnvOptions extends ImportMeta {
     VITE_ASSETS_API: string;
     VITE_API_URL: string;
     VITE_API_VERSION: string;
+    VITE_MAPBOX_API: string;
   };
 }
 
 export const HOST_API = (import.meta as EnvOptions).env.VITE_HOST_API;
 export const ASSETS_API = (import.meta as EnvOptions).env.VITE_ASSETS_API;
+export const MAPBOX_API = (import.meta as EnvOptions).env.VITE_MAPBOX_API;
 
 export const JWTconfig = {
   apiUrl: (import.meta as EnvOptions).env.VITE_API_URL,
