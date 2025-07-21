@@ -55,7 +55,8 @@ export default function JwtRegisterView() {
 
   const methods = useForm({
     resolver: yupResolver(RegisterSchema),
-    defaultValues
+    defaultValues,
+    shouldFocusError: false
   });
 
   const {
@@ -114,8 +115,8 @@ export default function JwtRegisterView() {
         {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="profile.name" label="Nombre" />
-          <RHFTextField name="profile.lastname" label="Apellido" />
+          <RHFTextField name="profile.name" label="Nombre" autoComplete="given-name" />
+          <RHFTextField name="profile.lastname" label="Apellido" autoComplete="family-name" />
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -123,19 +124,21 @@ export default function JwtRegisterView() {
             name="profile.personalPhoneNumber"
             label="Teléfono"
             type="string"
+            autoComplete="tel"
             defaultCountry="co"
             onlyCountries={['co']}
             countryCodeEditable={false}
           />
-          <RHFTextField name="profile.dni" label="Cédula de ciudadania" />
+          <RHFTextField name="profile.dni" label="Cédula de ciudadania" autoComplete="cc" />
         </Stack>
 
-        <RHFTextField name="email" label="Correo electrónico" />
+        <RHFTextField name="email" label="Correo electrónico" autoComplete="email" />
 
         <RHFTextField
           name="password"
           label="Contraseña"
           type={password.value ? 'text' : 'password'}
+          autoComplete="new-password"
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
