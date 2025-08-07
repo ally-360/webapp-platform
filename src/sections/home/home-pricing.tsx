@@ -33,21 +33,10 @@ export default function HomePricing() {
 
   const renderDescription = (
     <Stack spacing={3} sx={{ mb: 10, textAlign: 'center' }}>
-      <m.div variants={varFade().inUp}>
-        <Typography component="div" variant="overline" sx={{ mb: 2, color: 'text.disabled' }}>
-          pricing plans
-        </Typography>
-      </m.div>
-
       <m.div variants={varFade().inDown}>
         <Typography variant="h2">
-          The right plan for <br /> your business
-        </Typography>
-      </m.div>
-
-      <m.div variants={varFade().inDown}>
-        <Typography sx={{ color: 'text.secondary' }}>
-          Choose the perfect plan for your needs. Always flexible to grow
+          Nuestros planes
+          <br /> para tu negocio
         </Typography>
       </m.div>
     </Stack>
@@ -122,7 +111,7 @@ export default function HomePricing() {
               color="inherit"
               size="large"
               variant="contained"
-              href="mailto:support@minimals.cc?subject=[Feedback] from Customer"
+              href="mailto:support@ally360.co?subject=[Feedback] from Customer"
             >
               Contact us
             </Button>
@@ -153,9 +142,9 @@ export default function HomePricing() {
 function PlanCard({ plan, sx, ...other }) {
   const { license, commons, options, icons } = plan;
 
-  const standard = license === 'Standard';
+  const standard = license === 'Empresario';
 
-  const plus = license === 'Standard Plus';
+  const plus = license === 'PRO';
 
   return (
     <Stack
@@ -177,7 +166,7 @@ function PlanCard({ plan, sx, ...other }) {
         </Typography>
 
         <Box sx={{ position: 'relative' }}>
-          <Typography variant="h4">{license}</Typography>
+          <Typography variant="h3">{license}</Typography>
           <Box
             sx={{
               left: 0,
@@ -194,15 +183,9 @@ function PlanCard({ plan, sx, ...other }) {
         </Box>
       </Stack>
 
-      {standard ? (
-        <Box component="img" src={icons[1]} sx={{ width: 20, height: 20 }} />
-      ) : (
-        <Stack direction="row" spacing={2}>
-          {icons.map((icon) => (
-            <Box component="img" key={icon} src={icon} sx={{ width: 20, height: 20 }} />
-          ))}
-        </Stack>
-      )}
+      <Typography variant="h5" sx={{ fontWeight: 'fontWeightSemiBold' }}>
+        {plan.description}
+      </Typography>
 
       <Stack spacing={2.5}>
         {commons.map((option) => (

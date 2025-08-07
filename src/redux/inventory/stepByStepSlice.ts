@@ -1,10 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { getCompanyResponse, getPDVResponse } from 'src/interfaces/auth/userInterfaces';
+import { GetCompanyResponse, GetPDVResponse } from 'src/interfaces/auth/userInterfaces';
 
 export interface stepByStepState {
   activeStep: number;
-  prevValuesCompany?: getCompanyResponse;
-  preValuesPDV?: getPDVResponse;
+  prevValuesCompany?: GetCompanyResponse;
+  preValuesPDV?: GetPDVResponse;
 }
 
 const initialState: stepByStepState = {
@@ -20,10 +20,11 @@ const slice = createSlice({
     setStep: (state: stepByStepState, { payload }: PayloadAction<number>) => {
       state.activeStep = payload;
     },
-    setPrevValuesCompany: (state: stepByStepState, { payload }: PayloadAction<getCompanyResponse>) => {
+    setPrevValuesCompany: (state: stepByStepState, { payload }: PayloadAction<GetCompanyResponse>) => {
+      console.log('Setting previous values for company:', payload);
       state.prevValuesCompany = payload;
     },
-    setPrevValuesPDV: (state: stepByStepState, { payload }: PayloadAction<getPDVResponse>) => {
+    setPrevValuesPDV: (state: stepByStepState, { payload }: PayloadAction<GetPDVResponse>) => {
       state.preValuesPDV = payload;
     }
   }

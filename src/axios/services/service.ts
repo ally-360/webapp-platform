@@ -11,9 +11,9 @@ import {
 import {
   configGetWithToken,
   configPostWithToken,
-  configPostWithoutToken,
   configPatchWithToken,
-  configDeleteWithToken
+  configDeleteWithToken,
+  configPostWithoutToken
 } from '../configFetch';
 import apiClient from '../axios';
 

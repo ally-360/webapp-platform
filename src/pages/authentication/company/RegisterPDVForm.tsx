@@ -65,7 +65,7 @@ export default function RegisterPDVForm() {
     address: preValuesPDV?.address ?? '',
     phoneNumber: preValuesPDV?.phoneNumber ?? '',
     main: true,
-    company: prevValuesCompany?.id
+    companyId: prevValuesCompany?.id
   };
 
   const methods = useForm<RegisterPDVFormValues>({
@@ -92,7 +92,7 @@ export default function RegisterPDVForm() {
     try {
       const databody: GetPDVResponse = {
         ...data,
-        location: { id: data.municipio.id }
+        locationId: data.municipio.id
       };
 
       delete databody.municipio;

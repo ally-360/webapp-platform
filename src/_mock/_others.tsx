@@ -146,15 +146,41 @@ export const _socials = [
 // ----------------------------------------------------------------------
 
 export const _homePlans = [...Array(3)].map((_, index) => ({
-  license: ['Standard', 'Standard Plus', 'Extended'][index],
-  commons: ['One end products', '12 months updates', '6 months of support'],
-  options: ['JavaScript version', 'TypeScript version', 'Design Resources', 'Commercial applications'],
+  license: ['Empresario', 'Avanzado', 'PRO'][index],
+  description: [
+    'Para emprendedores que inician su negocio',
+    'Para empresas que buscan crecer y optimizar sus operaciones',
+    'Para empresas que buscan una solución integral y avanzada'
+  ][index],
+  commons: [
+    'Facturación electrónica (hasta 1.000 comprobantes)',
+    '1 usuario',
+    'POS',
+    'inventario (300 items)',
+    'Soporte básico'
+  ],
+  options: ['Facturación electrónica', 'Soporte técnico', 'Actualizaciones periódicas'],
   icons: [
     '/assets/icons/platforms/ic_figma.svg',
     '/assets/icons/platforms/ic_js.svg',
     '/assets/icons/platforms/ic_ts.svg'
   ]
 }));
+
+export const _homePlansAlly = [
+  {
+    license: 'Ally',
+    description: 'Para empresas que buscan una solución integral y avanzada',
+    commons: [
+      'Facturación electrónica (hasta 1.000 comprobantes)',
+      '1 usuario',
+      'POS',
+      'inventario (300 items)',
+      'Soporte básico'
+    ],
+    options: ['Facturación electrónica', 'Soporte técnico', 'Actualizaciones periódicas']
+  }
+];
 
 // ----------------------------------------------------------------------
 

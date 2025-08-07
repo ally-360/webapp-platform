@@ -3,6 +3,7 @@ export interface tokenSchema {
   verified: boolean;
   verifyToken: unknown;
   profile: ProfileToken;
+  authId: string;
   iat: number;
   exp: number;
 }
