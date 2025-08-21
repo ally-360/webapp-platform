@@ -73,11 +73,11 @@ export default function JwtLoginView() {
   });
 
   const renderHead = (
-    <Stack spacing={2} sx={{ mb: 5 }}>
-      <Typography variant="h4">Iniciar Sesión</Typography>
+    <Stack spacing={0} sx={{ mb: 5}}>
+      <Typography variant="h4">¡Hola de nuevo!</Typography>
 
-      <Stack direction="row" spacing={0.5}>
-        <Typography variant="body2">Introduzca sus datos</Typography>
+      <Stack direction="row">
+        <Typography variant="body2">Accede a tu empresa</Typography>
       </Stack>
     </Stack>
   );
@@ -86,8 +86,7 @@ export default function JwtLoginView() {
     <Stack spacing={2.5}>
       {!!errorMsg && <Alert severity="error">{t(errorMsg)}</Alert>}
 
-      <RHFTextField name="email" label="Email address" />
-
+      <RHFTextField name="email" label="Correo Electrónico" />
       <RHFTextField
         name="password"
         label="Contraseña"

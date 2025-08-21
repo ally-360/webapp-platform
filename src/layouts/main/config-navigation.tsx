@@ -14,27 +14,25 @@ export const navConfig = [
     path: '/'
   },
   {
-    title: 'Components',
+    title: 'Planes',
     icon: <Iconify icon="solar:atom-bold-duotone" />,
-    path: paths.components
+    path: paths.pricing
   },
   {
-    title: 'Pages',
-    path: '/pages',
+    title: 'Nosotros',
+    icon: <Iconify icon="solar:users-bold-duotone" />,
+    path: paths.about
+  },
+  {
+    title: 'Contacto',
+    icon: <Iconify icon="solar:chat-bold-duotone" />,
+    path: paths.contact
+  },
+  {
+    title: 'Documentación',
+    path: '/docs',
     icon: <Iconify icon="solar:file-bold-duotone" />,
     children: [
-      {
-        subheader: 'Other',
-        items: [
-          { title: 'About us', path: paths.about },
-          { title: 'Contact us', path: paths.contact },
-          { title: 'FAQs', path: paths.faqs },
-          { title: 'Pricing', path: paths.pricing },
-          { title: 'Payment', path: paths.payment },
-          { title: 'Maintenance', path: paths.maintenance },
-          { title: 'Coming Soon', path: paths.comingSoon }
-        ]
-      },
       {
         subheader: 'Concepts',
         items: [

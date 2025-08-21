@@ -55,7 +55,7 @@ export const primaryPresets = [
     name: 'blue',
     lighter: '#D1E9FC',
     light: '#068DEE',
-    main: '#1591EA',
+    main: '#0443AA',
     dark: '#0000FF',
     darker: '#061B64',
     contrastText: '#FFFFFF'

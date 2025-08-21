@@ -42,7 +42,7 @@ const authJwt = {
     {
       path: 'register',
       element: (
-        <AuthClassicLayoutRegister title="Sistema de Contabilidad y POS para impulsar tu negocio">
+        <AuthClassicLayoutRegister title="Prueba gratuita sin tarjeta">
           <JwtRegisterPage />
         </AuthClassicLayoutRegister>
       )

@@ -60,9 +60,10 @@ export default function StepByStep() {
   const isStepOptional = (step: number) => step === 3;
   const isStepSkipped = (step: number) => skippedSteps.has(step);
 
-  // Sincroniza el paso activo si ya existe una empresa registrada
   useEffect(() => {
+    console.log('Company information:', company);
     if (company?.id) {
+      console.log('Company already registered:', company);
       dispatch(setPrevValuesCompany(company));
       dispatch(setStep(1));
     }
