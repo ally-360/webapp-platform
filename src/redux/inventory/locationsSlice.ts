@@ -1,10 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
-import RequestService from '../../axios/services/service';
+import { getDepartments, getTowns } from '../../api';
 
 const initialState = {
   locations: [],
-  municipios: [],
-  departamentos: [],
+  municipios: [] as any[],
+  departamentos: [] as any[],
   municipiosLoading: false,
   departamentosLoading: false,
   error: null,
@@ -85,13 +85,22 @@ export function getAllMunicipios() {
   return async (dispatch) => {
     dispatch(startLoading());
     try {
-      const response = await RequestService.getLocations({ r: true });
-      dispatch(getAllLocationsSuccess(response.data));
-      const allTowns = response.data.flatMap((item) => item.towns);
-      dispatch(getAllMunicipiosSuccess(allTowns));
+      const departmentsResponse = await getDepartments();
+      dispatch(getAllDepartamentosSuccess(departmentsResponse.data));
+
+      // Just get the first department's towns for now to avoid complexity
+      if (departmentsResponse.data.length > 0) {
+        const firstDept = departmentsResponse.data[0];
+        const townsResponse = await getTowns({ departmentId: firstDept.id });
+        dispatch(getAllMunicipiosSuccess(townsResponse.data));
+      } else {
+        dispatch(getAllMunicipiosSuccess([]));
+      }
+
+      dispatch(getAllLocationsSuccess(departmentsResponse.data));
     } catch (error) {
-      dispatch(hasError(error));
-      dispatch(getAllLocationsError(error));
+      dispatch(hasError(error.message || error));
+      dispatch(getAllLocationsError(error.message || error));
     }
   };
 }

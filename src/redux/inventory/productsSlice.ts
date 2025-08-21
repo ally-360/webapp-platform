@@ -2,8 +2,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { getProductResponse } from 'src/interfaces/inventory/productsInterface';
 import { Dispatch } from 'redux';
-import { POS_PRODUCTS } from 'src/_mock/pos-products';
-// import RequestService from '../../axios/services/service';
+// 🎯 Usar nueva API unificada
+import * as API from 'src/api';
 
 interface ProductsState {
   products: getProductResponse[];
@@ -96,14 +96,20 @@ export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInvento
 // Actions
 
 export const getAllProducts =
-  ({ page: _page, pageSize: _pageSize }: { page: number; pageSize: number }) =>
+  ({ page = 0, pageSize: limit = 25, companyId }: { page?: number; pageSize?: number; companyId?: string }) =>
   async (dispatch: Dispatch) => {
     try {
       dispatch(productSlice.actions.startLoading());
-      // Usar datos mockeados temporalmente
-      setTimeout(() => {
-        dispatch(productSlice.actions.getAllProductsSuccess(POS_PRODUCTS));
-      }, 500); // Simular delay de red
+
+      // 🎯 Usar nueva API unificada (funciona con mock y real API)
+      const response = await API.getProducts({
+        page,
+        limit,
+        companyId: companyId || localStorage.getItem('companyId') || undefined
+      });
+
+      const products = response.data.data;
+      dispatch(productSlice.actions.getAllProductsSuccess(products));
     } catch (error) {
       console.log(error);
       dispatch(productSlice.actions.hasError(error));
@@ -113,8 +119,11 @@ export const getAllProducts =
 export const getProductById = (id: string) => async (dispatch: Dispatch) => {
   try {
     dispatch(productSlice.actions.startLoading());
-    // Buscar producto mockeado por ID
-    const product = POS_PRODUCTS.find((p) => p.id === id);
+
+    // 🎯 Usar nueva API unificada
+    const response = await API.getProductById(id);
+    const product = response.data;
+
     if (product) {
       dispatch(productSlice.actions.getProductByIdSuccess(product));
     } else {

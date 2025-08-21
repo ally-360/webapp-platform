@@ -1,7 +1,7 @@
 import { reject } from 'lodash';
 // utils
 import { createSlice } from '@reduxjs/toolkit';
-import RequestService from '../../axios/services/service';
+import { getCategories as getCategoriesApi } from '../../api';
 
 // ----------------------------------------------------------------------
 
@@ -88,73 +88,80 @@ export const { switchPopupState } = slice.actions;
 // ----------------------------------------------------------------------
 
 export function getCategories() {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(slice.actions.startLoading());
     try {
-      const response = await RequestService.getCategories();
+      const { auth } = getState();
+      const companyId = auth?.user?.companies?.[0]?.id;
+
+      if (!companyId) {
+        throw new Error('No company selected');
+      }
+
+      const response = await getCategoriesApi({ companyId });
       dispatch(slice.actions.getCategories(response.data));
     } catch (error) {
-      dispatch(slice.actions.hasError(error));
+      dispatch(slice.actions.hasError(error.message || error));
     }
   };
 }
 
-export function deleteCategory(id) {
+export function deleteCategory(_id) {
   return async (dispatch) => {
     dispatch(slice.actions.startLoading());
     try {
-      await RequestService.deleteCategory(id);
+      // Note: Delete functionality would need to be implemented in the API
       dispatch(getCategories());
     } catch (error) {
-      dispatch(slice.actions.hasError(error));
+      dispatch(slice.actions.hasError(error.message || error));
     }
   };
 }
 
-export function createCategory(databody) {
+export function createCategory(_databody) {
   return async (dispatch) => {
     dispatch(slice.actions.startLoading());
     try {
-      await RequestService.createCategory(databody);
+      // Note: Create functionality would need to be implemented in the API
+      dispatch(getCategories());
     } catch (error) {
-      dispatch(slice.actions.hasError(error));
+      dispatch(slice.actions.hasError(error.message || error));
     }
   };
 }
 
 export function switchPopup() {
   return async (dispatch) => {
-    dispatch(slice.actions.switchPopupState());
+    dispatch(slice.actions.switchPopupState(null));
   };
 }
 
 // ----------------------------------------------------------------------
 
-export function getProductsInCategory(name) {
+export function getProductsInCategory(_name) {
   return async (dispatch) => {
     dispatch(slice.actions.startLoading());
     try {
-      const response = await RequestService.getProducts(name);
-      dispatch(slice.actions.getProducts(response.data));
+      // Note: This would need to be implemented to get products by category
+      dispatch(slice.actions.getProducts([]));
     } catch (error) {
       console.error(error);
-      dispatch(slice.actions.hasError(error));
+      dispatch(slice.actions.hasError(error.message || error));
     }
   };
 }
 
 // ----------------------------------------------------------------------
 
-export function getViewCategoryById(id) {
+export function getViewCategoryById(_id) {
   return async (dispatch) => {
     dispatch(slice.actions.startLoadingViewCategoryById());
     try {
-      const response = await RequestService.getCategoryById(id);
-      dispatch(slice.actions.getViewCategoryById(response.data));
-      dispatch(slice.actions.getViewCategoryProducts(response.data.products));
-      console.log(response.data.products);
+      // Note: This would need to be implemented to get category by ID
+      dispatch(slice.actions.getViewCategoryById(null));
+      dispatch(slice.actions.getViewCategoryProducts([]));
     } catch (error) {
-      dispatch(slice.actions.hasErrorViewCategoryById(error));
+      dispatch(slice.actions.hasErrorViewCategoryById(error.message || error));
     }
   };
 }

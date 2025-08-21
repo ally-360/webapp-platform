@@ -13,7 +13,8 @@ import {
   UpdateProfile
 } from 'src/interfaces/auth/userInterfaces';
 import { tokenSchema } from 'src/interfaces/auth/tokenInterface';
-import ApiService from 'src/axios/services/api-service';
+// 🎯 Usar nueva API unificada
+import * as API from 'src/api';
 import { AuthContext } from './auth-context';
 import { setSession, setSessionCompanyId } from './utils';
 
@@ -71,16 +72,22 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const { enqueueSnackbar } = useSnackbar();
 
   const setUserInformation = useCallback(async (accessToken: string): Promise<GetUserResponse> => {
-    const token: tokenSchema = jwtDecode(accessToken);
-    const { data: user } = await ApiService.getUserById(token.authId);
+    // 🎯 Con el sistema mock, usamos getCurrentUser en lugar de getUserById + token decode
+    const { data: authData } = await API.getCurrentUser();
 
     // TODO: Se necesita obtener el companyId del usuario y las companys que tiene
-    setSessionCompanyId(user?.company?.[0]?.id || null);
+    const user = authData.user as GetUserResponse;
+    const companies = authData.companies as GetCompanyResponse[];
 
-    if (user?.company?.length > 0) {
-      const { data: pdvForCompany } = await ApiService.getCompanyById(user.company[0].id, true);
-      dispatch({ type: 'UPDATE_COMPANY', payload: { company: user.company[0] } });
-      dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: pdvForCompany?.pdvs || null } });
+    setSessionCompanyId(companies?.[0]?.id || null);
+
+    if (companies?.length > 0) {
+      const { data: company } = await API.getCompanyById(companies[0].id);
+      // TODO: Obtener PDVs de la empresa
+      const { data: warehouses } = await API.getWarehouses({ companyId: companies[0].id });
+
+      dispatch({ type: 'UPDATE_COMPANY', payload: { company: companies[0] } });
+      dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: warehouses || null } });
     }
 
     return user;
@@ -109,17 +116,36 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   const login = useCallback(
     async ({ email, password }: AuthCredentials) => {
-      const { accessToken } = (await ApiService.authenticateUser({ email, password })).data;
-      setSession(accessToken);
-      const user = await setUserInformation(accessToken);
+      const { data: authResponse } = await API.login({ email, password });
+      const { token, user, profile, companies } = authResponse;
+
+      setSession(token);
+      setSessionCompanyId(companies?.[0]?.id || null);
+
+      // Actualizar estado local
+      const userWithProfile = { ...user, profile, company: companies } as GetUserResponse;
+
+      // Obtener PDVs de la primera empresa
+      if (companies?.length > 0) {
+        const { data: warehouses } = await API.getWarehouses({ companyId: companies[0].id });
+        dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: warehouses || null } });
+      }
+
       enqueueSnackbar('Bienvenido', { variant: 'success' });
-      dispatch({ type: 'LOGIN', payload: { user, isFirstLogin: user.firstLogin || false } });
+      dispatch({
+        type: 'LOGIN',
+        payload: {
+          user: userWithProfile,
+          company: companies?.[0] || null,
+          isFirstLogin: user?.firstLogin || false
+        }
+      });
     },
-    [setUserInformation, enqueueSnackbar]
+    [enqueueSnackbar]
   );
 
   const register = useCallback(async (data: RegisterUser) => {
-    await ApiService.registerUser(data);
+    await API.register(data);
     dispatch({ type: 'REGISTER' });
   }, []);
 
@@ -175,7 +201,13 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: response.data } });
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await API.logout();
+    } catch (error) {
+      // Ignore logout errors
+      console.warn('Logout error:', error);
+    }
     setSession(null);
     dispatch({ type: 'LOGOUT' });
   }, []);

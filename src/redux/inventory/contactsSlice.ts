@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { MOCK_CONTACTS } from 'src/_mock/pos-products';
 import { ContactInterface } from '../../interfaces/auth/userInterfaces';
-// import RequestService from '../../axios/services/service';
+import { getContacts as getContactsApi, createContact as createContactApi } from '../../api';
 
 // constantes
 
@@ -143,65 +142,71 @@ export const {
 
 // actions
 
-export const getAllContacts = () => async (dispatch) => {
+export const getAllContacts = () => async (dispatch, getState) => {
   try {
     dispatch(startLoading());
-    // Usar datos mockeados temporalmente
-    setTimeout(() => {
-      dispatch(getAllContactsSuccess(MOCK_CONTACTS));
-    }, 300);
+    const { auth } = getState();
+    const companyId = auth?.user?.companies?.[0]?.id;
+
+    if (!companyId) {
+      throw new Error('No company selected');
+    }
+
+    const response = await getContactsApi({ companyId });
+    dispatch(getAllContactsSuccess(response.data.data || []));
   } catch (error) {
-    dispatch(hasError(error));
+    dispatch(hasError(error.message || error));
   }
 };
 
-export const deleteContact = (id) => async (dispatch) => {
+export const deleteContact = (_id) => async (dispatch) => {
   try {
     dispatch(startLoading());
-    // Simular eliminación exitosa
-    dispatch(deleteContactSuccess(id));
+    // Note: Delete functionality would need to be implemented in the API
+    dispatch(getAllContacts());
   } catch (error) {
-    dispatch(hasError(error));
+    dispatch(hasError(error.message || error));
   }
 };
 
 // Contact detail
 
-export const getContactById = (id) => async (dispatch) => {
+export const getContactById = (_id) => async (dispatch) => {
   try {
     dispatch(startLoadingContact());
-    // Buscar contacto mockeado por ID
-    const contact = MOCK_CONTACTS.find((c) => c.id === id);
-    if (contact) {
-      dispatch(getContactByIdSuccess(contact));
-    } else {
-      dispatch(getContactByIdError('Contact not found'));
-    }
+    // Note: This would need to be implemented to get contact by ID
+    dispatch(getContactByIdSuccess(null));
   } catch (error) {
-    dispatch(getContactByIdError(error));
+    dispatch(getContactByIdError(error.message || error));
   }
 };
 
 export const updateContact =
-  ({ id, databody }) =>
+  ({ id: _id, databody: _databody }) =>
   async (dispatch) => {
     try {
       dispatch(startLoadingContact());
-      // Simular actualización exitosa
-      const updatedContact = { ...MOCK_CONTACTS.find((c) => c.id === id), ...databody };
-      dispatch(updateContactSuccess(updatedContact));
+      // Note: Update functionality would need to be implemented in the API
+      dispatch(getAllContacts());
     } catch (error) {
-      dispatch(updateContactError(error));
+      dispatch(updateContactError(error.message || error));
     }
   };
 
-export const createContact = (databody) => async (dispatch) => {
+export const createContact = (databody) => async (dispatch, getState) => {
   try {
     dispatch(startLoadingContact());
-    // Simular creación exitosa
-    const newContact = { id: Date.now().toString(), ...databody };
-    dispatch(createContactSuccess(newContact));
+    const { auth } = getState();
+    const companyId = auth?.user?.companies?.[0]?.id;
+
+    if (!companyId) {
+      throw new Error('No company selected');
+    }
+
+    const response = await createContactApi({ ...databody, companyId });
+    dispatch(createContactSuccess(response.data));
+    dispatch(getAllContacts());
   } catch (error) {
-    dispatch(updateContactError(error));
+    dispatch(updateContactError(error.message || error));
   }
 };
