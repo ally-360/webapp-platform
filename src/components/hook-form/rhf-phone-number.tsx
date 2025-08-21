@@ -14,6 +14,7 @@ type RHFPhoneNumberProps = {
   defaultCountry?: string;
   onlyCountries?: string[];
   countryCodeEditable?: boolean;
+  autoComplete?: string;
 };
 
 export default function RHFPhoneNumber({ name, helperText, ...other }: RHFPhoneNumberProps): JSX.Element {
@@ -39,8 +40,16 @@ export default function RHFPhoneNumber({ name, helperText, ...other }: RHFPhoneN
           error={!!error}
           helperText={error ? error?.message : helperText}
           {...other}
-          onFocus={() => setIsFocused(true)} // Establece isFocused a true cuando se hace focus
-          onBlur={() => setIsFocused(false)} // Establece isFocused a false cuando se pierde el focus
+          onFocus={(_event) => {
+            setIsFocused(true);
+          }}
+          onBlur={(_event) => {
+            setIsFocused(false);
+            field.onBlur();
+          }}
+          inputProps={{
+            autoComplete: other.autoComplete || 'tel'
+          }}
           sx={{
             '& .MuiOutlinedInput-root': {
               '& fieldset': {

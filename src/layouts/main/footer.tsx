@@ -22,14 +22,6 @@ import Iconify from 'src/components/iconify';
 
 const LINKS = [
   {
-    headline: 'Minimal',
-    children: [
-      { name: 'About us', href: paths.about },
-      { name: 'Contact us', href: paths.contact },
-      { name: 'FAQs', href: paths.faqs }
-    ]
-  },
-  {
     headline: 'Legal',
     children: [
       { name: 'Terms and Condition', href: '#' },
@@ -38,7 +30,7 @@ const LINKS = [
   },
   {
     headline: 'Contact',
-    children: [{ name: 'support@minimals.cc', href: '#' }]
+    children: [{ name: 'Ally360', href: '#' }]
   }
 ];
 
@@ -65,7 +57,9 @@ export default function Footer() {
         <Typography variant="caption" component="div">
           © All rights reserved
           <br /> made by
-          <Link href="https://minimals.cc/"> minimals.cc </Link>
+          <Link href="https://ally360.co" target="_blank" rel="noopener">
+            {' Ally360 '}
+          </Link>
         </Typography>
       </Container>
     </Box>

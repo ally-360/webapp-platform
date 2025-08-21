@@ -55,7 +55,7 @@ export const RegisterPDVSchema = object().shape({
   address: yup.string().required('Dirección requerida'),
   phoneNumber: yup.string().required('Teléfono requerido'),
   main: yup.boolean().default(true),
-  company: yup.string().nullable().required('La empresa es requerida')
+  companyId: yup.string().nullable().required('La empresa es requerida')
 });
 
 export const ChangePassWordSchema = object().shape({

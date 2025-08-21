@@ -17,6 +17,7 @@ export interface GetUserResponse {
   id: string;
   verified: boolean;
   email: string;
+  authId: string;
   verifyToken: unknown;
   resetPasswordToken: unknown;
   firstLogin: boolean;

@@ -34,14 +34,14 @@ export default function RegisterSummary() {
 
   const handleFinish = useCallback(async () => {
     try {
-      await updateProfile(user.id, { firstLogin: false });
+      await updateProfile(user.authId, { firstLogin: false });
       enqueueSnackbar('Registro completado', { variant: 'success' });
       navigate(paths.dashboard.root);
     } catch (error) {
       console.error(error);
       enqueueSnackbar('Error al registrar', { variant: 'error' });
     }
-  }, [updateProfile, user.id, enqueueSnackbar, navigate]);
+  }, [updateProfile, user.authId, enqueueSnackbar, navigate]);
 
   const handleBack = () => {
     dispatch(setStep(1));

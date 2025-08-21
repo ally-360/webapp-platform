@@ -12,7 +12,7 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterCompanySchema } from 'src/interfaces/auth/yupSchemas';
 import { RegisterCompany } from 'src/interfaces/auth/userInterfaces';
 import { useDispatch } from 'react-redux';
-import { setPrevValuesCompany, setStep } from 'src/redux/inventory/stepByStepSlice';
+import { setPrevValuesCompany } from 'src/redux/inventory/stepByStepSlice';
 import { useAppSelector } from 'src/hooks/store';
 import RequestService from '../../../axios/services/service';
 import { economicActivityOptions, quantityEmployeesOptions } from './optionsCommon';
@@ -36,7 +36,8 @@ export default function RegisterCompanyForm() {
 
   const methods = useForm({
     resolver: yupResolver(RegisterCompanySchema),
-    defaultValues
+    defaultValues,
+    shouldFocusError: false
   });
 
   const {
@@ -48,7 +49,7 @@ export default function RegisterCompanyForm() {
 
   const onSubmit = handleSubmit(async (data: RegisterCompany) => {
     try {
-      console.log(prevValuesCompany);
+      console.log(`Aqui registra la empresa ${prevValuesCompany}`);
       if (prevValuesCompany?.id) {
         await RequestService.updateCompany({ databody: data, id: prevValuesCompany.id });
         enqueueSnackbar('Actualización de la empresa completado', {
@@ -60,6 +61,8 @@ export default function RegisterCompanyForm() {
           )
         });
         // agregar el id
+        console.log('Previous values company:', prevValuesCompany);
+        console.log('Data submitted:', data);
         dispatch(setPrevValuesCompany({ ...data, id: prevValuesCompany.id }));
       } else {
         await createCompany(data);
@@ -72,7 +75,6 @@ export default function RegisterCompanyForm() {
           )
         });
       }
-      dispatch(setStep(1));
     } catch (error: any) {
       console.error(error);
       setErrorMsg(typeof error === 'string' ? error : error.message);
@@ -96,9 +98,10 @@ export default function RegisterCompanyForm() {
             label="Teléfono"
             name="phoneNumber"
             type="string"
+            autoComplete="tel"
             defaultCountry="co"
-            countryCodeEditable={false}
             onlyCountries={['co']}
+            countryCodeEditable={false}
           />
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

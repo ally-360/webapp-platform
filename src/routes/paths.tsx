@@ -21,30 +21,9 @@ export const paths = {
   comingSoon: '/coming-soon',
   maintenance: '/maintenance',
   select_business: ROOTS.SELECT_BUSINESS,
-  pricing: '/pricing',
-  payment: '/payment',
-  about: '/about-us',
-  contact: '/contact-us',
-  faqs: '/faqs',
   page403: '/403',
   page404: '/404',
   page500: '/500',
-  components: '/components',
-  product: {
-    root: `/product`,
-    checkout: `/product/checkout`,
-    details: (id: string) => `/product/${id}`,
-    demo: {
-      details: `/product/${MOCK_ID}`
-    }
-  },
-  post: {
-    root: `/post`,
-    details: (title: string) => `/post/${paramCase(title)}`,
-    demo: {
-      details: `/post/${paramCase(MOCK_TITLE)}`
-    }
-  },
   // AUTH
   auth: {
     jwt: {

@@ -42,6 +42,9 @@ import { SettingsProvider, SettingsDrawer } from 'src/components/settings';
 import { CheckoutProvider } from 'src/sections/checkout/context';
 // auth
 import { AuthProvider, AuthConsumer } from 'src/auth/context/jwt';
+// error handling
+import { ErrorHandlerProvider } from 'src/contexts/ErrorHandlerContext';
+import AxiosErrorSetup from 'src/components/error-handler/AxiosErrorSetup';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Provider } from 'react-redux';
 import { store } from 'src/redux/store';
@@ -52,32 +55,35 @@ export default function App() {
   return (
     <AuthProvider>
       <Provider store={store}>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <SettingsProvider
-            defaultSettings={{
-              themeMode: 'light', // 'light' | 'dark'
-              themeDirection: 'ltr', //  'rtl' | 'ltr'
-              themeContrast: 'bold', // 'default' | 'bold'
-              themeLayout: 'vertical', // 'vertical' | 'horizontal' | 'mini'
-              themeColorPresets: 'blue', // 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red'
-              themeStretch: false
-            }}
-          >
-            <ThemeProvider>
-              <MotionLazy>
-                <SnackbarProvider>
-                  <CheckoutProvider>
-                    <SettingsDrawer />
-                    <ProgressBar />
-                    <AuthConsumer>
-                      <Router />
-                    </AuthConsumer>
-                  </CheckoutProvider>
-                </SnackbarProvider>
-              </MotionLazy>
-            </ThemeProvider>
-          </SettingsProvider>
-        </LocalizationProvider>
+        <ErrorHandlerProvider>
+          <AxiosErrorSetup />
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <SettingsProvider
+              defaultSettings={{
+                themeMode: 'light', // 'light' | 'dark'
+                themeDirection: 'ltr', //  'rtl' | 'ltr'
+                themeContrast: 'bold', // 'default' | 'bold'
+                themeLayout: 'vertical', // 'vertical' | 'horizontal' | 'mini'
+                themeColorPresets: 'blue', // 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red'
+                themeStretch: false
+              }}
+            >
+              <ThemeProvider>
+                <MotionLazy>
+                  <SnackbarProvider>
+                    <CheckoutProvider>
+                        <SettingsDrawer />
+                        <ProgressBar />
+                        <AuthConsumer>
+                          <Router />
+                        </AuthConsumer>
+                    </CheckoutProvider>
+                  </SnackbarProvider>
+                </MotionLazy>
+              </ThemeProvider>
+            </SettingsProvider>
+          </LocalizationProvider>
+        </ErrorHandlerProvider>
       </Provider>
     </AuthProvider>
   );

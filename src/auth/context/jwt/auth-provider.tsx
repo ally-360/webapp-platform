@@ -13,9 +13,9 @@ import {
   UpdateProfile
 } from 'src/interfaces/auth/userInterfaces';
 import { tokenSchema } from 'src/interfaces/auth/tokenInterface';
+import ApiService from 'src/axios/services/api-service';
 import { AuthContext } from './auth-context';
 import { setSession, setSessionCompanyId } from './utils';
-import RequestService from '../../../axios/services/service';
 
 interface InitialState {
   user: GetUserResponse | null;
@@ -49,6 +49,8 @@ const reducer = (state: InitialState, action: ReducerAction): InitialState => {
     case 'REGISTER':
       return { ...state, isAuthenticated: false };
     case 'UPDATE_COMPANY':
+      console.log('Updating company in reducer:', action.payload?.company);
+      return { ...state, company: action.payload?.company || state.company };
     case 'UPDATE_PDV':
       return { ...state, ...action.payload };
     case 'LOGOUT':
@@ -70,12 +72,13 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   const setUserInformation = useCallback(async (accessToken: string): Promise<GetUserResponse> => {
     const token: tokenSchema = jwtDecode(accessToken);
-    const { data: user } = await RequestService.fetchGetUserById(token.id);
+    const { data: user } = await ApiService.getUserById(token.authId);
 
-    setSessionCompanyId(user?.company[0]?.id);
+    // TODO: Se necesita obtener el companyId del usuario y las companys que tiene
+    setSessionCompanyId(user?.company?.[0]?.id || null);
 
-    if (user?.company.length > 0) {
-      const { data: pdvForCompany } = await RequestService.getCompanyById(user.company[0].id, true);
+    if (user?.company?.length > 0) {
+      const { data: pdvForCompany } = await ApiService.getCompanyById(user.company[0].id, true);
       dispatch({ type: 'UPDATE_COMPANY', payload: { company: user.company[0] } });
       dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: pdvForCompany?.pdvs || null } });
     }
@@ -87,10 +90,10 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     try {
       const accessToken = window.localStorage.getItem(STORAGE_KEY);
       if (!accessToken) throw new Error('No hay token disponible');
-
       setSession(accessToken);
       const user = await setUserInformation(accessToken);
-      dispatch({ type: 'INITIAL', payload: { user, isAuthenticated: true, isFirstLogin: user.firstLogin } });
+      console.log('User information set:', user);
+      dispatch({ type: 'INITIAL', payload: { user, isAuthenticated: true, isFirstLogin: user.firstLogin || true } });
     } catch (error) {
       enqueueSnackbar('No hay token disponible', { variant: 'error' });
       dispatch({
@@ -106,61 +109,69 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   const login = useCallback(
     async ({ email, password }: AuthCredentials) => {
-      const { data } = (await RequestService.fetchLoginUser({ email, password })).data;
-      setSession(data.accessToken);
-      const user = await setUserInformation(data.accessToken);
+      const { accessToken } = (await ApiService.authenticateUser({ email, password })).data;
+      setSession(accessToken);
+      const user = await setUserInformation(accessToken);
       enqueueSnackbar('Bienvenido', { variant: 'success' });
-      dispatch({ type: 'LOGIN', payload: { user, isFirstLogin: user.firstLogin } });
+      dispatch({ type: 'LOGIN', payload: { user, isFirstLogin: user.firstLogin || true } });
     },
     [setUserInformation, enqueueSnackbar]
   );
 
   const register = useCallback(async (data: RegisterUser) => {
-    await RequestService.fetchRegisterUser(data);
+    await ApiService.registerUser(data);
     dispatch({ type: 'REGISTER' });
   }, []);
 
   const updateCompany = useCallback(
     async (databody: UpdateProfile) => {
-      const { data } = await RequestService.updateCompany({ databody, id: state.company?.id });
+      if (!state.company) {
+        throw new Error('No company information available');
+      }
+      const { data } = await ApiService.updateCompany({ id: state.company.id, databody });
       dispatch({ type: 'UPDATE_COMPANY', payload: { company: data } });
     },
     [state.company]
   );
 
   const updatePDV = useCallback(async (id: string, databody: any) => {
-    await RequestService.editPDV({ id, databody });
+    await ApiService.updatePointOfSale({ id, databody });
     dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: databody } });
   }, []);
 
+  /**
+   * Crea un nuevo punto de venta y lo asocia a la empresa en el estado del contexto.
+   * @param databody
+   */
   const createCompany = useCallback(
     async (databody: RegisterCompany) => {
       const accessToken = window.localStorage.getItem(STORAGE_KEY);
       if (!accessToken) return;
 
       const token: tokenSchema = jwtDecode(accessToken);
-      const { data } = await RequestService.createCompany(databody);
-      await RequestService.updateCompanyToUser({ companyId: data.id, userId: token.id });
+      const { data } = await ApiService.createCompany(databody);
+      await ApiService.assignCompanyToUser({ companyId: data.id, userId: token.authId });
       await setUserInformation(accessToken);
+      console.log('Company created:', data);
       dispatch({ type: 'UPDATE_COMPANY', payload: { company: data } });
     },
     [setUserInformation]
   );
 
   const updateProfile = useCallback(async (id: string, databody: any) => {
-    await RequestService.updateUser({ id, databody });
-    const user = (await RequestService.fetchGetUserById(id)).data;
+    await ApiService.updateUser({ id, databody });
+    const user = (await ApiService.getUserById(id)).data;
     dispatch({ type: 'LOGIN', payload: { isFirstLogin: user.firstLogin, user } });
   }, []);
 
   const updateProfileInfo = useCallback(async (id: string, databody: any) => {
-    await RequestService.updateProfile({ id, databody });
-    const user = (await RequestService.fetchGetUserById(id)).data;
+    await ApiService.updateUserProfile({ id, databody });
+    const user = (await ApiService.getUserById(id)).data;
     dispatch({ type: 'LOGIN', payload: { isFirstLogin: user.firstLogin, user } });
   }, []);
 
   const createPDV = useCallback(async (databody: any) => {
-    const response = await RequestService.createPDV(databody);
+    const response = await ApiService.createPointOfSale(databody);
     dispatch({ type: 'UPDATE_PDV', payload: { pdvCompany: response.data } });
   }, []);
 
