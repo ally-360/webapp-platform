@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { MOCK_CONTACTS } from 'src/_mock/pos-products';
 import { ContactInterface } from '../../interfaces/auth/userInterfaces';
-import RequestService from '../../axios/services/service';
+// import RequestService from '../../axios/services/service';
 
 // constantes
 
@@ -50,11 +51,11 @@ const contactsSlice = createSlice({
       state.contactsEmpty = true;
     },
     getAllContactsSuccess(state, action) {
-      state.contacts = action.payload;
+      state.contacts = action.payload || [];
       state.contactsLoading = false;
       state.error = null;
       state.success = true;
-      state.contactsEmpty = action.payload.length === 0;
+      state.contactsEmpty = (action.payload || []).length === 0;
     },
     getAllContactsError(state, action) {
       state.contacts = [];
@@ -145,8 +146,10 @@ export const {
 export const getAllContacts = () => async (dispatch) => {
   try {
     dispatch(startLoading());
-    const response = await RequestService.getContacts();
-    dispatch(getAllContactsSuccess(response.data.data));
+    // Usar datos mockeados temporalmente
+    setTimeout(() => {
+      dispatch(getAllContactsSuccess(MOCK_CONTACTS));
+    }, 300);
   } catch (error) {
     dispatch(hasError(error));
   }
@@ -155,7 +158,7 @@ export const getAllContacts = () => async (dispatch) => {
 export const deleteContact = (id) => async (dispatch) => {
   try {
     dispatch(startLoading());
-    await RequestService.deleteContact(id);
+    // Simular eliminación exitosa
     dispatch(deleteContactSuccess(id));
   } catch (error) {
     dispatch(hasError(error));
@@ -167,8 +170,13 @@ export const deleteContact = (id) => async (dispatch) => {
 export const getContactById = (id) => async (dispatch) => {
   try {
     dispatch(startLoadingContact());
-    const response = await RequestService.getContactById(id);
-    dispatch(getContactByIdSuccess(response.data));
+    // Buscar contacto mockeado por ID
+    const contact = MOCK_CONTACTS.find((c) => c.id === id);
+    if (contact) {
+      dispatch(getContactByIdSuccess(contact));
+    } else {
+      dispatch(getContactByIdError('Contact not found'));
+    }
   } catch (error) {
     dispatch(getContactByIdError(error));
   }
@@ -179,8 +187,9 @@ export const updateContact =
   async (dispatch) => {
     try {
       dispatch(startLoadingContact());
-      const response = await RequestService.updateContact({ id, databody });
-      dispatch(updateContactSuccess(response.data));
+      // Simular actualización exitosa
+      const updatedContact = { ...MOCK_CONTACTS.find((c) => c.id === id), ...databody };
+      dispatch(updateContactSuccess(updatedContact));
     } catch (error) {
       dispatch(updateContactError(error));
     }
@@ -189,8 +198,9 @@ export const updateContact =
 export const createContact = (databody) => async (dispatch) => {
   try {
     dispatch(startLoadingContact());
-    const response = await RequestService.createContact(databody);
-    dispatch(createContactSuccess(response.data));
+    // Simular creación exitosa
+    const newContact = { id: Date.now().toString(), ...databody };
+    dispatch(createContactSuccess(newContact));
   } catch (error) {
     dispatch(updateContactError(error));
   }

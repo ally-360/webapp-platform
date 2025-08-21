@@ -252,7 +252,7 @@ export default function FormPDVS() {
       onClose={() => dispatch(handleClose())}
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
-        <DialogTitle id="scroll-dialog-title" boxShadow={2} sx={{ padding: '23px  40px 18px 40px!important' }}>
+        <DialogTitle id="scroll-dialog-title" sx={{ padding: '23px  40px 18px 40px!important', boxShadow: 2 }}>
           <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
             <Icon icon="ic:round-store" width={24} height={24} />
             {editId && seePDV ? pdvEdit.name : editId ? t('Editar Punto De Venta') : t('Crear Punto De Venta')}
@@ -398,7 +398,7 @@ export default function FormPDVS() {
                   countryCodeEditable={false}
                 />
                 <RHFTextField
-                  visible={false}
+                  style={{ display: 'none' }}
                   sx={{ display: 'none' }}
                   disabled={editDisabled}
                   name="phoneNumber"

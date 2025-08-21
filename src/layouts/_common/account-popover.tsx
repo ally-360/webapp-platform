@@ -105,7 +105,7 @@ export default function AccountPopover() {
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {user?.company[0]?.name}
+            {user?.company?.name}
           </Typography>
         </Box>
 

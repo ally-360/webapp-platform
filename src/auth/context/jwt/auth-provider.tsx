@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       setSession(accessToken);
       const user = await setUserInformation(accessToken);
       console.log('User information set:', user);
-      dispatch({ type: 'INITIAL', payload: { user, isAuthenticated: true, isFirstLogin: user.firstLogin || true } });
+      dispatch({ type: 'INITIAL', payload: { user, isAuthenticated: true, isFirstLogin: user.firstLogin || false } });
     } catch (error) {
       enqueueSnackbar('No hay token disponible', { variant: 'error' });
       dispatch({
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       setSession(accessToken);
       const user = await setUserInformation(accessToken);
       enqueueSnackbar('Bienvenido', { variant: 'success' });
-      dispatch({ type: 'LOGIN', payload: { user, isFirstLogin: user.firstLogin || true } });
+      dispatch({ type: 'LOGIN', payload: { user, isFirstLogin: user.firstLogin || false } });
     },
     [setUserInformation, enqueueSnackbar]
   );

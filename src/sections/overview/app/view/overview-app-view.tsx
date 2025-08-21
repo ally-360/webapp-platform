@@ -33,6 +33,8 @@ export default function OverviewAppView() {
 
   const settings = useSettingsContext();
 
+  console.log('User in OverviewAppView:', user);
+
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Grid container spacing={3}>

@@ -2,7 +2,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { getProductResponse } from 'src/interfaces/inventory/productsInterface';
 import { Dispatch } from 'redux';
-import RequestService from '../../axios/services/service';
+import { POS_PRODUCTS } from 'src/_mock/pos-products';
+// import RequestService from '../../axios/services/service';
 
 interface ProductsState {
   products: getProductResponse[];
@@ -95,12 +96,14 @@ export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInvento
 // Actions
 
 export const getAllProducts =
-  ({ page, pageSize }) =>
+  ({ page: _page, pageSize: _pageSize }: { page: number; pageSize: number }) =>
   async (dispatch: Dispatch) => {
     try {
       dispatch(productSlice.actions.startLoading());
-      const resp = await RequestService.getProducts(page, pageSize);
-      dispatch(productSlice.actions.getAllProductsSuccess(resp.data));
+      // Usar datos mockeados temporalmente
+      setTimeout(() => {
+        dispatch(productSlice.actions.getAllProductsSuccess(POS_PRODUCTS));
+      }, 500); // Simular delay de red
     } catch (error) {
       console.log(error);
       dispatch(productSlice.actions.hasError(error));
@@ -109,10 +112,14 @@ export const getAllProducts =
 
 export const getProductById = (id: string) => async (dispatch: Dispatch) => {
   try {
-    // quitar el producto anterior
     dispatch(productSlice.actions.startLoading());
-    const resp = await RequestService.getProductById(id);
-    dispatch(productSlice.actions.getProductByIdSuccess(resp.data));
+    // Buscar producto mockeado por ID
+    const product = POS_PRODUCTS.find((p) => p.id === id);
+    if (product) {
+      dispatch(productSlice.actions.getProductByIdSuccess(product));
+    } else {
+      dispatch(productSlice.actions.hasError('Product not found'));
+    }
   } catch (error) {
     console.log(error);
     dispatch(productSlice.actions.hasError(error));
@@ -122,7 +129,7 @@ export const getProductById = (id: string) => async (dispatch: Dispatch) => {
 export const deleteProduct = (id: string) => async (dispatch: Dispatch) => {
   try {
     dispatch(productSlice.actions.startLoading());
-    await RequestService.deleteProduct(id);
+    // Simular eliminación exitosa
     dispatch(productSlice.actions.deleteProductSuccess(id));
   } catch (error) {
     console.log(error);
@@ -131,11 +138,11 @@ export const deleteProduct = (id: string) => async (dispatch: Dispatch) => {
 };
 
 export const UpdateProduct =
-  ({ id, databody }: { id: string; databody: object }) =>
+  ({ id, databody: _databody }: { id: string; databody: object }) =>
   async (dispatch: Dispatch) => {
     try {
       dispatch(productSlice.actions.startLoading());
-      await RequestService.updateProduct({ id, databody });
+      // Simular actualización exitosa
       dispatch(getProductById(id) as any);
     } catch (error) {
       console.log(error);

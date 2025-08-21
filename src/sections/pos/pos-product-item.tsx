@@ -5,8 +5,6 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
-// routes
-import { paths } from 'src/routes/paths';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 // components
@@ -16,37 +14,38 @@ import Iconify from 'src/components/iconify';
 //
 import { Typography } from '@mui/material';
 import React from 'react';
-import { useCheckoutContext } from '../checkout/context';
+// import { useCheckoutContext } from '../checkout/context'; // Comentado temporalmente
 
 // ----------------------------------------------------------------------
 
 export default function PosProductItem({ product }) {
-  const { onAddToCart } = useCheckoutContext();
+  // Verificar que el producto existe y tiene las propiedades necesarias
+  if (!product || typeof product !== 'object') {
+    return null;
+  }
 
-  // const { id, name, images[0], price, colors, available, sizes, priceSale, newLabel, saleLabel } = product;
-  const { id, name, images, priceSale, sku, quantityStock } = product;
+  const { id, name, images = [], priceSale = 0, sku = '', quantityStock = 0 } = product;
 
   const colors = ['red', 'blue'];
-  const available = true;
+  const available = quantityStock > 0;
   const sizes = ['S', 'M', 'L'];
   const saleLabel = { enabled: true, content: 'Sale' };
-
-  const linkTo = paths.dashboard.product.details(id);
 
   const handleAddCart = async () => {
     const newProduct = {
       id,
-      name,
-      images,
+      name: name || 'Producto sin nombre',
+      images: images || ['/assets/placeholder.svg'],
       available,
-      priceSale,
-      colors: [colors[0]],
-      size: sizes[0],
+      price: priceSale || 0, // El contexto espera 'price', no 'priceSale'
+      priceSale: priceSale || 0,
+      colors: [colors[0] || 'default'],
+      size: sizes[0] || 'default',
       quantity: 1
     };
     try {
-      console.log('newProduct', newProduct);
-      onAddToCart(newProduct);
+      console.log('Producto agregado al carrito (mockeado):', newProduct);
+      // onAddToCart(newProduct); // Comentado temporalmente mientras se resuelve el contexto
     } catch (error) {
       console.error(error);
     }
@@ -93,8 +92,8 @@ export default function PosProductItem({ product }) {
 
       <Tooltip title={!quantityStock && 'Out of stock'} placement="bottom-end">
         <Image
-          alt={name}
-          src={images[0]}
+          alt={name || 'Producto'}
+          src={images && images.length > 0 ? images[0] : '/assets/placeholder.svg'}
           ratio="1/1"
           sx={{
             borderRadius: 1.5,
@@ -110,13 +109,15 @@ export default function PosProductItem({ product }) {
 
   const renderContent = (
     <Stack spacing={0.5} sx={{ p: 2, pt: 0.6 }}>
-      {name}
+      <Typography variant="subtitle2" noWrap>
+        {name || 'Producto sin nombre'}
+      </Typography>
       <Typography variant="subtitle2" color="GrayText" sx={{ fontSize: 11 }} noWrap>
-        <strong>SKU:</strong> {sku}
+        <strong>SKU:</strong> {sku || 'N/A'}
       </Typography>
 
       <Stack direction="row" justifyContent="right" spacing={0.5} sx={{ typography: 'subtitle1' }}>
-        <Box component="span">{fCurrency(priceSale)}</Box>
+        <Box component="span">{fCurrency(priceSale || 0)}</Box>
       </Stack>
     </Stack>
   );

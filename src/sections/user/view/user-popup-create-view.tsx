@@ -161,7 +161,7 @@ function UserNewEditFormPopup({ currentUser }) {
   useEffect(() => {
     // Remove department
     const { departamento, ...rest } = values;
-    console.log('rest', rest);
+    // console.log('rest', rest); // Comentado para evitar spam en consola
   }, [values]);
 
   // ----------------------------------------------------------------------

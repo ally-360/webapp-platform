@@ -22,9 +22,9 @@ export default function PosProductList({ products, loading, ...other }) {
 
   const renderList = (
     <>
-      {products.map((product) => (
-        <PosProductItem key={product.id} product={product} />
-      ))}
+      {products && products.length > 0
+        ? products.map((product, index) => <PosProductItem key={product?.id || index} product={product} />)
+        : null}
     </>
   );
 
