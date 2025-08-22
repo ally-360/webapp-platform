@@ -12,8 +12,8 @@ import StepGuard from 'src/auth/guard/step-guard';
 
 // POS
 
-const PosListView = lazy(() => import('src/pages/dashboard/pos/list'));
-const PosContainerView = lazy(() => import('src/pages/dashboard/pos/details'));
+const PosListView = lazy(() => import('src/pages/pos/list'));
+const PosContainerView = lazy(() => import('src/pages/pos/details'));
 // ----------------------------------------------------------------------
 
 export const posRoutes = [
@@ -30,6 +30,9 @@ export const posRoutes = [
         </StepGuard>
       </AuthGuard>
     ),
-    children: [{ element: <PosContainerView />, index: true }]
+    children: [
+      { element: <PosContainerView />, index: true },
+      { path: 'list', element: <PosListView /> }
+    ]
   }
 ];

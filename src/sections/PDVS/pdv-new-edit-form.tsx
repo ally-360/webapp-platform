@@ -20,7 +20,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   IconButton,
   Slide,
@@ -287,7 +286,7 @@ export default function FormPDVS() {
           }}
           dividers={scroll === 'paper'}
         >
-          <DialogContentText id="alert-dialog-slide-description" ref={descriptionElementRef} tabIndex={-1}>
+          <Box id="alert-dialog-slide-description" ref={descriptionElementRef} tabIndex={-1}>
             <Grid container spacing={3}>
               <Stack spacing={2} mt={1} sx={{ p: 3, width: '100%' }}>
                 <RHFTextField
@@ -407,16 +406,16 @@ export default function FormPDVS() {
                 />
               </Stack>
             </Grid>
-          </DialogContentText>
+          </Box>
         </DialogContent>
 
         <DialogActions
-          boxShadow={2}
           sx={{
             padding: '20px 35px 15px 40px!important',
             display: 'flex',
             flexWrap: isMobile ? 'wrap' : 'nowrap',
             flexDirection: isMobile ? 'column' : 'row',
+            boxShadow: 2,
             '& > button': {
               flexGrow: isMobile ? 1 : 0,
               minWidth: isMobile ? '100%' : 'auto',

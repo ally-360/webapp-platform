@@ -7,7 +7,7 @@ import brandsReducer from './inventory/brandsSlice';
 import userReducer from './inventory/user';
 import contactsReducer from './inventory/contactsSlice';
 import stepByStepReducer from './inventory/stepByStepSlice';
-import posReducer from './pos/posIndex';
+import posReducer from './pos/posSlice';
 
 export const store = configureStore({
   reducer: {

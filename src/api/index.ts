@@ -65,6 +65,24 @@ export const getInvoiceById = USE_MOCK ? mockApi.getInvoiceById : realApi.getInv
 export const createInvoice = USE_MOCK ? mockApi.createInvoice : realApi.createInvoice;
 
 // ========================================
+// 🏪 POS SPECIFIC EXPORTS
+// ========================================
+// Funciones que solo existen en posRealApi, usar mock genérico si es necesario
+// export const openShift = USE_MOCK ? mockApi.createInvoice : posRealApi.openShift; // Placeholder temporal
+// export const getActiveShift = USE_MOCK ? mockApi.getInvoices : posRealApi.getActiveShift; // Placeholder temporal
+// export const closeShift = USE_MOCK ? mockApi.createInvoice : posRealApi.closeShift; // Placeholder temporal
+// export const searchProducts = USE_MOCK ? mockApi.getProducts : posRealApi.searchProducts;
+// export const createSale = USE_MOCK ? mockApi.createInvoice : posRealApi.createSale; // Placeholder temporal
+// export const addPayment = USE_MOCK ? mockApi.createInvoice : posRealApi.addPayment; // Placeholder temporal
+// export const getSales = USE_MOCK ? mockApi.getInvoices : posRealApi.getSales;
+// export const getSaleById = USE_MOCK ? mockApi.getInvoiceById : posRealApi.getSaleById;
+
+/**
+ * Función de compatibilidad para verificar si el sistema POS está en modo mock
+ */
+export const isPOSMockMode = () => USE_MOCK;
+
+// ========================================
 // 📊 API METADATA
 // ========================================
 export const API_INFO = {

@@ -59,11 +59,6 @@ const BillInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/bill/invoi
 
 const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
 
-// POS
-
-const PosListView = lazy(() => import('src/pages/dashboard/pos/list'));
-const PosContainerView = lazy(() => import('src/pages/dashboard/pos/details'));
-
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
 const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
@@ -135,10 +130,6 @@ export const dashboardRoutes = [
       { path: 'banking', element: <OverviewBankingPage /> },
       { path: 'booking', element: <OverviewBookingPage /> },
       { path: 'file', element: <OverviewFilePage /> },
-      {
-        path: 'pos',
-        element: <PosContainerView />
-      },
       {
         path: 'inventory',
         children: [
