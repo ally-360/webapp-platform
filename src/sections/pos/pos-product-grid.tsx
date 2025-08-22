@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable no-nested-ternary */
+import React, { useState, useMemo, useEffect } from 'react';
 // @mui
 import {
   Grid,
@@ -11,33 +12,155 @@ import {
   Box,
   Avatar,
   Chip,
-  InputAdornment
+  InputAdornment,
+  Stack
 } from '@mui/material';
-import { Stack } from '@mui/system';
 import { Icon } from '@iconify/react';
 
 // utils
 import { formatCurrency } from 'src/redux/pos/posUtils';
 import type { Product } from 'src/redux/pos/posSlice';
 
+// components
+import PosProductGridSkeleton from './pos-product-grid-skeleton';
+import PosProductFiltersDrawer, { type ProductFilters } from './pos-product-filters-new';
+import PosProductSort from './pos-product-sort';
+
 interface Props {
   products: Product[];
   onAddProduct: (product: Product) => void;
+  loading?: boolean;
 }
 
-export default function PosProductGrid({ products, onAddProduct }: Props) {
+export default function PosProductGrid({ products, onAddProduct, loading = false }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [openFiltersDrawer, setOpenFiltersDrawer] = useState(false);
+  const [filters, setFilters] = useState<ProductFilters>({
+    categories: [],
+    priceRange: [0, 100000],
+    minStock: undefined,
+    inStockOnly: false,
+    sortBy: 'name',
+    sortOrder: 'asc',
+    searchTerm: ''
+  });
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Update search term from filters
+  useEffect(() => {
+    setSearchTerm(filters.searchTerm);
+  }, [filters.searchTerm]);
+
+  const filteredAndSortedProducts = useMemo(() => {
+    const filtered = products.filter((product) => {
+      // Text search
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchLower) ||
+        product.sku.toLowerCase().includes(searchLower) ||
+        (product.category && product.category.toLowerCase().includes(searchLower));
+
+      if (!matchesSearch) return false;
+
+      // Category filter
+      if (filters.categories.length > 0 && product.category) {
+        if (!filters.categories.includes(product.category)) return false;
+      }
+
+      // Price range filter
+      if (product.price < filters.priceRange[0] || product.price > filters.priceRange[1]) {
+        return false;
+      }
+
+      // Stock filter
+      if (filters.inStockOnly && product.stock !== undefined && product.stock <= 0) {
+        return false;
+      }
+
+      if (filters.minStock !== undefined && product.stock !== undefined && product.stock < filters.minStock) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Sort products
+    filtered.sort((a, b) => {
+      let comparison = 0;
+
+      switch (filters.sortBy) {
+        case 'name':
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case 'price':
+          comparison = a.price - b.price;
+          break;
+        case 'stock':
+          comparison = (a.stock || 0) - (b.stock || 0);
+          break;
+        case 'category':
+          comparison = (a.category || '').localeCompare(b.category || '');
+          break;
+        default:
+          break;
+      }
+
+      return filters.sortOrder === 'desc' ? -comparison : comparison;
+    });
+
+    return filtered;
+  }, [products, searchTerm, filters]);
 
   const handleAddProduct = (product: Product) => {
     onAddProduct({ ...product, quantity: 1 });
   };
+
+  const handleFilters = (field: keyof ProductFilters, value: any) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleResetFilters = () => {
+    const priceRange = products.reduce(
+      (acc, product) => [Math.min(acc[0], product.price), Math.max(acc[1], product.price)],
+      [Infinity, -Infinity]
+    );
+
+    setFilters({
+      categories: [],
+      priceRange: [priceRange[0], priceRange[1]],
+      minStock: undefined,
+      inStockOnly: false,
+      sortBy: 'name',
+      sortOrder: 'asc',
+      searchTerm: ''
+    });
+    setSearchTerm('');
+  };
+
+  const canReset =
+    filters.categories.length > 0 ||
+    filters.inStockOnly ||
+    (filters.minStock && filters.minStock > 0) ||
+    filters.searchTerm !== '' ||
+    filters.sortBy !== 'name' ||
+    filters.sortOrder !== 'asc';
+
+  const sortOptions = [
+    { value: 'name', label: 'Nombre' },
+    { value: 'price', label: 'Precio' },
+    { value: 'stock', label: 'Stock' },
+    { value: 'category', label: 'Categoría' }
+  ];
+
+  if (loading) {
+    return <PosProductGridSkeleton count={12} />;
+  }
+
+  if (loading) {
+    return <PosProductGridSkeleton count={12} />;
+  }
 
   const getCategoryColor = (category?: string) => {
     const colors = {
@@ -56,27 +179,44 @@ export default function PosProductGrid({ products, onAddProduct }: Props) {
 
   return (
     <Box sx={{ p: 2 }}>
-      {/* Search Bar */}
+      {/* Search Bar with Filter Button and Sort */}
       <Box sx={{ mb: 3 }}>
-        <TextField
-          fullWidth
-          placeholder="Buscar productos por nombre, código o categoría..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Icon icon="mdi:magnify" />
-              </InputAdornment>
-            )
-          }}
-          size="small"
-        />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <TextField
+            fullWidth
+            placeholder="Buscar productos por nombre, código o categoría..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Icon icon="mdi:magnify" />
+                </InputAdornment>
+              )
+            }}
+            size="small"
+          />
+          <PosProductFiltersDrawer
+            open={openFiltersDrawer}
+            onOpen={() => setOpenFiltersDrawer(true)}
+            onClose={() => setOpenFiltersDrawer(false)}
+            filters={filters}
+            onFilters={handleFilters}
+            canReset={canReset}
+            onResetFilters={handleResetFilters}
+            products={products}
+          />
+          <PosProductSort
+            sort={filters.sortBy}
+            onSort={(sortBy) => handleFilters('sortBy', sortBy)}
+            sortOptions={sortOptions}
+          />
+        </Stack>
       </Box>
 
       {/* Products Grid */}
       <Grid container spacing={2}>
-        {filteredProducts.map((product) => (
+        {filteredAndSortedProducts.map((product) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
             <Card
               sx={{
@@ -184,7 +324,7 @@ export default function PosProductGrid({ products, onAddProduct }: Props) {
       </Grid>
 
       {/* No results message */}
-      {filteredProducts.length === 0 && (
+      {filteredAndSortedProducts.length === 0 && (
         <Box
           sx={{
             display: 'flex',

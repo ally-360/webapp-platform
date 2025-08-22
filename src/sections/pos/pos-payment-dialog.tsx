@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // @mui
 import {
   Dialog,
@@ -14,7 +14,8 @@ import {
   Typography,
   Box,
   InputAdornment,
-  Alert
+  Alert,
+  Divider
 } from '@mui/material';
 import { Stack } from '@mui/system';
 import { Icon } from '@iconify/react';
@@ -26,7 +27,7 @@ import type { PaymentMethod } from 'src/redux/pos/posSlice';
 interface Props {
   open: boolean;
   onClose: () => void;
-  onAddPayment: (payment: PaymentMethod) => void;
+  onAddPayment: (payment: PaymentMethod, openCashDrawer?: boolean) => void;
   remainingAmount: number;
   paymentMethods: Array<{
     id: string;
@@ -41,6 +42,13 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
   const [amount, setAmount] = useState(remainingAmount.toString());
   const [reference, setReference] = useState('');
   const [error, setError] = useState('');
+
+  // Update amount when remaining amount changes and dialog opens
+  useEffect(() => {
+    if (open) {
+      setAmount(remainingAmount.toString());
+    }
+  }, [open, remainingAmount]);
 
   const handleClose = () => {
     setSelectedMethod('');
@@ -64,8 +72,8 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
       return;
     }
 
-    if (paymentAmount > remainingAmount + 1) {
-      // +1 for floating point precision
+    // For non-cash payments, don't allow overpayment
+    if (selectedMethod !== 'cash' && paymentAmount > remainingAmount + 1) {
       setError('El monto no puede ser mayor al pendiente');
       return;
     }
@@ -77,13 +85,20 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
       reference: reference || undefined
     };
 
-    onAddPayment(payment);
+    // Check if we need to open cash drawer (cash payment with change)
+    const shouldOpenCashDrawer = selectedMethod === 'cash' && paymentAmount > remainingAmount;
+
+    onAddPayment(payment, shouldOpenCashDrawer);
     handleClose();
   };
 
   const handleSetFullAmount = () => {
     setAmount(remainingAmount.toString());
   };
+
+  const paymentAmount = parseFloat(amount) || 0;
+  const changeAmount =
+    selectedMethod === 'cash' && paymentAmount > remainingAmount ? paymentAmount - remainingAmount : 0;
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -190,12 +205,40 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
               <Typography variant="subtitle2" color="success.dark">
                 Pago: {getPaymentMethodName(selectedMethod)} - {formatCurrency(parseFloat(amount))}
               </Typography>
-              {parseFloat(amount) > remainingAmount && (
-                <Typography variant="caption" color="success.dark">
-                  Cambio: {formatCurrency(parseFloat(amount) - remainingAmount)}
-                </Typography>
+              {changeAmount > 0 && (
+                <>
+                  <Divider sx={{ my: 1 }} />
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      bgcolor: 'warning.lighter',
+                      borderRadius: 1,
+                      border: '1px solid',
+                      borderColor: 'warning.light'
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Icon icon="mdi:cash-refund" style={{ color: '#ed6c02' }} />
+                        <Typography variant="subtitle1" fontWeight="bold" color="warning.dark">
+                          Cambio a entregar:
+                        </Typography>
+                      </Stack>
+                      <Typography variant="h6" fontWeight="bold" color="warning.dark">
+                        {formatCurrency(changeAmount)}
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </>
               )}
             </Box>
+          )}
+
+          {/* Cash Drawer Notice */}
+          {selectedMethod === 'cash' && changeAmount > 0 && (
+            <Alert severity="info" icon={<Icon icon="mdi:cash-register" />}>
+              Se abrirá el cajón automáticamente para entregar el cambio.
+            </Alert>
           )}
         </Stack>
       </DialogContent>
@@ -206,8 +249,15 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
           variant="contained"
           onClick={handleAddPayment}
           disabled={!selectedMethod || !amount || parseFloat(amount) <= 0}
+          startIcon={
+            selectedMethod === 'cash' && changeAmount > 0 ? (
+              <Icon icon="mdi:cash-register" />
+            ) : (
+              <Icon icon="mdi:credit-card-plus" />
+            )
+          }
         >
-          Agregar Pago
+          {selectedMethod === 'cash' && changeAmount > 0 ? 'Pagar y Abrir Cajón' : 'Agregar Pago'}
         </Button>
       </DialogActions>
     </Dialog>

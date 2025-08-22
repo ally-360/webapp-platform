@@ -76,6 +76,11 @@ interface CompletedSale {
   invoice_number?: string;
   pos_type: 'simple' | 'electronic';
   notes?: string;
+  seller_id?: string;
+  seller_name?: string;
+  sale_date?: string;
+  discount_percentage?: number;
+  discount_amount?: number;
 }
 
 interface POSState {
@@ -291,7 +296,13 @@ const posSlice = createSlice({
 
       window.payments = window.payments.filter((p) => p.id !== action.payload.paymentId);
       const totalPaid = window.payments.reduce((sum, p) => sum + p.amount, 0);
-      window.status = totalPaid >= window.total ? 'paid' : window.payments.length > 0 ? 'pending_payment' : 'draft';
+      if (totalPaid >= window.total) {
+        window.status = 'paid';
+      } else if (window.payments.length > 0) {
+        window.status = 'pending_payment';
+      } else {
+        window.status = 'draft';
+      }
     },
 
     // ===== DISCOUNTS =====
@@ -348,6 +359,13 @@ const posSlice = createSlice({
         windowId: number;
         pos_type: 'simple' | 'electronic';
         invoice_number?: string;
+        seller_id?: string;
+        seller_name?: string;
+        sale_date?: string; // Cambiar a string para serialización
+        tax_rate?: number;
+        discount_percentage?: number;
+        discount_amount?: number;
+        notes?: string;
       }>
     ) {
       const windowIndex = state.salesWindows.findIndex((w) => w.id === action.payload.windowId);
@@ -355,6 +373,31 @@ const posSlice = createSlice({
 
       const window = state.salesWindows[windowIndex];
       if (window.status !== 'paid') return;
+
+      // Apply final updates to window before completing
+      if (action.payload.discount_percentage !== undefined) {
+        window.discount_percentage = action.payload.discount_percentage;
+      }
+      if (action.payload.discount_amount !== undefined) {
+        window.discount_amount = action.payload.discount_amount;
+      }
+      if (action.payload.notes !== undefined) {
+        window.notes = action.payload.notes;
+      }
+
+      // Recalculate totals if tax rate changed
+      if (action.payload.tax_rate !== undefined) {
+        const subtotal = window.products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+
+        const discountAmount = window.discount_amount || 0;
+        const subtotalAfterDiscount = subtotal - discountAmount;
+        const tax_amount = (subtotalAfterDiscount * action.payload.tax_rate) / 100;
+        const total = subtotalAfterDiscount + tax_amount;
+
+        window.subtotal = subtotal;
+        window.tax_amount = tax_amount;
+        window.total = Math.max(0, total);
+      }
 
       // Create completed sale
       const completedSale: CompletedSale = {
@@ -367,10 +410,15 @@ const posSlice = createSlice({
         subtotal: window.subtotal,
         tax_amount: window.tax_amount,
         total: window.total,
-        created_at: new Date().toISOString(),
+        created_at: action.payload.sale_date || new Date().toISOString(),
         pos_type: action.payload.pos_type,
         invoice_number: action.payload.invoice_number,
-        notes: window.notes
+        notes: action.payload.notes || window.notes,
+        seller_id: action.payload.seller_id,
+        seller_name: action.payload.seller_name,
+        sale_date: action.payload.sale_date,
+        discount_percentage: window.discount_percentage,
+        discount_amount: window.discount_amount
       };
 
       state.completedSales.push(completedSale);
@@ -383,6 +431,23 @@ const posSlice = createSlice({
 
       // Remove completed window
       state.salesWindows.splice(windowIndex, 1);
+
+      // Auto-create new sale window if no windows left
+      if (state.salesWindows.length === 0) {
+        const newWindow: SaleWindow = {
+          id: Date.now(),
+          name: `Venta ${state.salesWindows.length + 1}`,
+          products: [],
+          customer: null,
+          payments: [],
+          subtotal: 0,
+          tax_amount: 0,
+          total: 0,
+          status: 'draft',
+          created_at: new Date().toISOString()
+        };
+        state.salesWindows.push(newWindow);
+      }
     },
 
     // ===== DATA PERSISTENCE =====

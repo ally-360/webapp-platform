@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useState, useEffect } from 'react';
 // @mui
 import {
@@ -53,6 +54,8 @@ import { mockProducts, mockCustomers, defaultCustomer } from 'src/redux/pos/mock
 // components
 import PosProductGrid from '../pos-product-grid';
 import PosPaymentDialog from '../pos-payment-dialog';
+import PosSaleConfirmDialog from '../pos-sale-confirm-dialog';
+import PosCartIcon from '../pos-cart-icon';
 
 interface Props {
   sale: SaleWindow;
@@ -63,10 +66,11 @@ interface Props {
 export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props) {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { availablePaymentMethods } = useAppSelector((state) => state.pos);
-
+  const { availablePaymentMethods, currentRegister } = useAppSelector((state) => state.pos);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
+  const [openSaleConfirmDialog, setOpenSaleConfirmDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(sale.customer);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   const drawerWidthLg = '30vw';
   const drawerWidth = '500px';
@@ -78,6 +82,14 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
       dispatch(setCustomerToSaleWindow({ windowId: sale.id, customer: selectedCustomer }));
     }
   }, [selectedCustomer, sale.customer, sale.id, dispatch]);
+
+  // Simulate loading for products (in a real app, this would be actual API loading)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setProductsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAddProduct = (product: Product) => {
     dispatch(addProductToSaleWindow({ windowId: sale.id, product }));
@@ -91,23 +103,100 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
     dispatch(updateProductQuantity({ windowId: sale.id, productId, quantity }));
   };
 
-  const handleAddPayment = (payment: PaymentMethod) => {
+  const handleAddPayment = (payment: PaymentMethod, openCashDrawer?: boolean) => {
     dispatch(addPaymentToSaleWindow({ windowId: sale.id, payment }));
     setOpenPaymentDialog(false);
+
+    // Show cash drawer simulation for demo
+    if (openCashDrawer) {
+      // eslint-disable-next-line no-alert
+      alert('🔓 Cajón abierto automáticamente para entregar el cambio');
+    }
   };
 
   const handleRemovePayment = (paymentId: string) => {
     dispatch(removePaymentFromSaleWindow({ windowId: sale.id, paymentId }));
   };
 
-  const handleCompleteSale = () => {
+  const handleInitiateCompleteSale = () => {
     if (canCloseSaleWindow(sale)) {
-      dispatch(
-        completeSale({
-          windowId: sale.id,
-          pos_type: selectedCustomer && selectedCustomer.document ? 'electronic' : 'simple'
-        })
-      );
+      setOpenSaleConfirmDialog(true);
+    }
+  };
+
+  const handleConfirmSale = (saleData: {
+    seller_id?: string;
+    seller_name: string;
+    sale_date: Date;
+    tax_rate: number;
+    discount_percentage?: number;
+    discount_amount?: number;
+    notes?: string;
+  }) => {
+    // Convertir sale_date a string para Redux serialization
+    const posType: 'electronic' | 'simple' = selectedCustomer && selectedCustomer.document ? 'electronic' : 'simple';
+    const saleDataForRedux = {
+      windowId: sale.id,
+      pos_type: posType,
+      seller_id: saleData.seller_id,
+      seller_name: saleData.seller_name,
+      sale_date: saleData.sale_date.toISOString(), // Convertir a string para Redux
+      tax_rate: saleData.tax_rate,
+      discount_percentage: saleData.discount_percentage,
+      discount_amount: saleData.discount_amount,
+      notes: saleData.notes
+    };
+
+    const saleCompleted = dispatch(completeSale(saleDataForRedux));
+
+    setOpenSaleConfirmDialog(false);
+
+    // Print receipt after successful completion
+    if (saleCompleted) {
+      setTimeout(() => {
+        // Import dynamically to avoid circular dependencies
+        import('../pos-print-receipt')
+          .then(({ printReceipt }) => {
+            const completedSale = {
+              id: `sale_${Date.now()}`,
+              sale_window_id: sale.id,
+              register_id: currentRegister?.id || 'unknown',
+              customer: selectedCustomer,
+              products: sale.products,
+              payments: sale.payments,
+              subtotal: sale.subtotal,
+              tax_amount: sale.tax_amount,
+              total: sale.total,
+              created_at: new Date().toISOString(),
+              pos_type: selectedCustomer && selectedCustomer.document ? 'electronic' : 'simple',
+              notes: saleData.notes,
+              seller_id: saleData.seller_id,
+              seller_name: saleData.seller_name,
+              sale_date: saleData.sale_date.toISOString(),
+              discount_percentage: saleData.discount_percentage,
+              discount_amount: saleData.discount_amount
+            } as any;
+
+            // Por el momento, SIEMPRE imprimir ticket independientemente del tipo
+            const shouldPrintTicket = true; // Forzar impresión siempre //TODO: cuando se implemente el POS electrónico, cambiar a false
+
+            if (shouldPrintTicket) {
+              console.log('Imprimiendo ticket para venta:', completedSale.id);
+              printReceipt({
+                sale: completedSale,
+                registerInfo: {
+                  pdv_name: currentRegister?.pdv_name || 'PDV Principal',
+                  user_name: saleData.seller_name || 'Usuario'
+                }
+              });
+            } else {
+              console.log('Venta electrónica - no se imprime ticket físico');
+            }
+          })
+          .catch((error) => {
+            console.error('Error al importar el módulo de impresión:', error);
+          });
+      }, 500);
     }
   };
 
@@ -120,11 +209,12 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
         item
         xs={12}
         sx={{
-          width: openDrawer
-            ? isLargeScreen
+          width: (() => {
+            if (!openDrawer) return '100%';
+            return isLargeScreen
               ? `calc(100% - ${drawerWidthLg}) !important`
-              : `calc(100% - ${drawerWidth}) !important`
-            : '100%',
+              : `calc(100% - ${drawerWidth}) !important`;
+          })(),
           transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen
@@ -132,9 +222,13 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
         }}
       >
         {/* Product Grid */}
-        <PosProductGrid products={mockProducts} onAddProduct={handleAddProduct} />
+        <PosProductGrid products={mockProducts} onAddProduct={handleAddProduct} loading={productsLoading} />
       </Grid>
-
+      <PosCartIcon
+        onClick={hiddenDrawer}
+        rightDrawer={isLargeScreen ? (openDrawer ? drawerWidthLg : 0) : openDrawer ? drawerWidth : 0}
+        totalItems={sale.products.length}
+      />
       {/* Right Drawer - Cart & Checkout */}
       <Drawer
         anchor="right"
@@ -158,9 +252,11 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
                   <Chip
                     size="small"
                     label={sale.status}
-                    color={
-                      sale.status === 'paid' ? 'success' : sale.status === 'pending_payment' ? 'warning' : 'default'
-                    }
+                    color={(() => {
+                      if (sale.status === 'paid') return 'success';
+                      if (sale.status === 'pending_payment') return 'warning';
+                      return 'default';
+                    })()}
                     sx={{ ml: 1 }}
                   />
                 </Typography>
@@ -180,9 +276,9 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
               </Typography>
               <Autocomplete
                 size="small"
-                options={[defaultCustomer, ...mockCustomers]}
+                options={[defaultCustomer, ...mockCustomers] as any}
                 getOptionLabel={(option) => option.name}
-                value={selectedCustomer}
+                value={selectedCustomer as any}
                 onChange={(_, newValue) => setSelectedCustomer(newValue)}
                 renderInput={(params) => (
                   <TextField
@@ -357,7 +453,7 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
                   size="large"
                   fullWidth
                   disabled={!canComplete}
-                  onClick={handleCompleteSale}
+                  onClick={handleInitiateCompleteSale}
                   startIcon={<Icon icon="mdi:check" />}
                 >
                   {canComplete ? 'Completar Venta' : 'Faltan Productos o Pagos'}
@@ -390,6 +486,14 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
         onAddPayment={handleAddPayment}
         remainingAmount={remainingAmount}
         paymentMethods={availablePaymentMethods}
+      />
+
+      {/* Sale Confirmation Dialog */}
+      <PosSaleConfirmDialog
+        open={openSaleConfirmDialog}
+        onClose={() => setOpenSaleConfirmDialog(false)}
+        onConfirm={handleConfirmSale}
+        saleWindow={sale}
       />
     </>
   );

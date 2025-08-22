@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import React, { useEffect, useState } from 'react';
 // @mui
 import Container from '@mui/material/Container';
@@ -18,13 +19,15 @@ import { paths } from 'src/routes/paths';
 import type { POSRegister } from 'src/redux/pos/posSlice';
 
 // views
-import PosWindowView from './pos-window-view';
+import PosWindowView from './pos-window-view-new';
+import PosRegisterOpenDialog from '../pos-register-open-dialog';
+import PosSettingsDrawer from '../pos-settings-drawer';
 //
 // ----------------------------------------------------------------------
 
 export default function PosContainerView() {
   const dispatch = useAppDispatch();
-  const { currentRegister, salesWindows, error } = useAppSelector((state) => state.pos);
+  const { currentRegister, salesWindows, completedSales, error } = useAppSelector((state) => state.pos);
 
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl'));
@@ -33,6 +36,7 @@ export default function PosContainerView() {
   const [openDrawer, setOpenDrawer] = useState(true);
   const [openTab, setOpenTab] = useState(0);
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
 
   const drawerWidthLg = '30vw';
   const drawerWidth = '500px';
@@ -85,6 +89,20 @@ export default function PosContainerView() {
     }
   }, [currentRegister, salesWindows, openTab]);
 
+  // Handle post-sale window selection
+  // When a sale is completed and windows count changes, select the first available window
+  useEffect(() => {
+    const previousCount = salesWindows.length;
+    if (previousCount > 0) {
+      // If current tab doesn't exist anymore (was completed), select the first available
+      const currentWindowExists = salesWindows.some((window) => window.id === openTab);
+      if (!currentWindowExists && salesWindows.length > 0) {
+        setOpenTab(salesWindows[0].id);
+      }
+      // If no windows left after completion, the Redux slice automatically creates a new one
+    }
+  }, [salesWindows, openTab]);
+
   const hiddenDrawer = () => {
     setOpenDrawer(!openDrawer);
   };
@@ -103,15 +121,16 @@ export default function PosContainerView() {
   };
 
   const handleRegisterOpen = (registerData: {
-    user_name: string;
     pdv_name: string;
     opening_amount: number;
+    opening_date: Date;
+    operator_name: string;
     notes?: string;
   }) => {
     dispatch(
       openRegister({
         user_id: 'mock_user_id', // En producción, obtener del contexto de auth
-        user_name: registerData.user_name,
+        user_name: registerData.operator_name,
         pdv_id: 'mock_pdv_id', // En producción, obtener del contexto
         pdv_name: registerData.pdv_name,
         opening_amount: registerData.opening_amount,
@@ -143,9 +162,10 @@ export default function PosContainerView() {
             startIcon={<Icon icon="mdi:cash-multiple" />}
             onClick={() =>
               handleRegisterOpen({
-                user_name: 'Usuario Demo',
+                operator_name: 'Usuario Demo',
                 pdv_name: 'PDV Principal - Palmira',
                 opening_amount: 50000,
+                opening_date: new Date(),
                 notes: 'Apertura automática para demo'
               })
             }
@@ -158,143 +178,155 @@ export default function PosContainerView() {
   }
 
   return (
-    <Container maxWidth={false} sx={{ pt: 12 }}>
-      {/* Header Bar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          background: theme.palette.background.paper,
-          left: 0,
-          width: openDrawer
-            ? isLargeScreen
-              ? `calc(100% - ${drawerWidthLg})`
-              : `calc(100% - ${drawerWidth})`
-            : '100%',
-          boxShadow: theme.shadows[1],
-          zIndex: 99999,
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen
-          })
-        }}
-      >
-        <CardHeader
-          avatar={
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <IconButton href={paths.dashboard.root}>
-                <Iconify icon="eva:arrow-ios-back-fill" />
-              </IconButton>
-              <img src="/logo/faviconBackgroundTransparent.svg" alt="logo" width="30" />
-            </Stack>
-          }
-          title={
-            <Typography sx={{ color: theme.palette.text.primary }} variant="h6">
-              Venta POS
-              <Typography component="span" sx={{ color: 'text.secondary' }}>
-                &nbsp;({currentRegister?.pdv_name || 'Sin PDV'})
-              </Typography>
-            </Typography>
-          }
-          sx={{ p: 2 }}
-          action={
-            <Stack direction="row" spacing={1}>
-              {currentRegister && (
-                <Typography variant="body2" color="text.secondary">
-                  Caja: {currentRegister.user_name}
+    <>
+      <Container maxWidth={false} sx={{ pt: 12 }}>
+        {/* Header Bar */}
+        <AppBar
+          position="fixed"
+          sx={{
+            background: theme.palette.background.paper,
+            left: 0,
+            width: openDrawer
+              ? isLargeScreen
+                ? `calc(100% - ${drawerWidthLg})`
+                : `calc(100% - ${drawerWidth})`
+              : '100%',
+            boxShadow: theme.shadows[1],
+            zIndex: 99,
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.easeOut,
+              duration: theme.transitions.duration.enteringScreen
+            })
+          }}
+        >
+          <CardHeader
+            avatar={
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <IconButton href={paths.dashboard.root}>
+                  <Iconify icon="eva:arrow-ios-back-fill" />
+                </IconButton>
+                <img src="/logo/faviconBackgroundTransparent.svg" alt="logo" width="30" />
+              </Stack>
+            }
+            title={
+              <Typography sx={{ color: theme.palette.text.primary }} variant="h6">
+                Venta POS
+                <Typography component="span" sx={{ color: 'text.secondary' }}>
+                  &nbsp;({currentRegister?.pdv_name || 'Sin PDV'})
                 </Typography>
-              )}
-              <IconButton>
-                <Icon icon="ic:round-settings" />
-              </IconButton>
-            </Stack>
-          }
-        />
-      </AppBar>
-
-      {/* Error Alert */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      {/* Sales Windows */}
-      <Grid container spacing={3}>
-        {salesWindows.map(
-          (sale) =>
-            openTab === sale.id && (
-              <PosWindowView key={sale.id} openDrawer={openDrawer} hiddenDrawer={hiddenDrawer} sale={sale} />
-            )
-        )}
-
-        {/* No windows message */}
-        {salesWindows.length === 0 && (
-          <Grid xs={12}>
-            <Stack spacing={2} alignItems="center" sx={{ py: 8 }}>
-              <Icon icon="mdi:cart-outline" style={{ fontSize: '48px', color: theme.palette.text.disabled }} />
-              <Typography variant="h6" color="text.secondary">
-                No hay ventanas de venta abiertas
               </Typography>
-              <Button variant="contained" onClick={handleAddTab} startIcon={<Icon icon="mdi:plus" />}>
-                Crear Primera Venta
-              </Button>
-            </Stack>
-          </Grid>
-        )}
-      </Grid>
+            }
+            sx={{ p: 2 }}
+            action={
+              <Stack direction="row" spacing={1} alignItems="center">
+                {currentRegister && (
+                  <Typography variant="body2" color="text.secondary">
+                    Caja: {currentRegister.user_name}
+                  </Typography>
+                )}
+                <IconButton onClick={() => setShowSettingsDrawer(true)}>
+                  <Icon icon="ic:round-settings" />
+                </IconButton>
+              </Stack>
+            }
+          />
+        </AppBar>
 
-      {/* Bottom Tab Bar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          background: theme.palette.background.paper,
-          left: 0,
-          bottom: 0,
-          top: 'auto',
-          boxShadow: theme.shadows[1],
-          width: openDrawer
-            ? isLargeScreen
-              ? `calc(100% - ${drawerWidthLg})`
-              : `calc(100% - ${drawerWidth})`
-            : '100%',
-          zIndex: 99999,
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen
-          })
-        }}
-      >
-        <CardHeader
-          title={
-            <Stack flexDirection="row" alignItems="center" p={0} gap={2}>
-              {salesWindows.map((tab) => (
-                <Button
-                  key={tab.id}
-                  variant={openTab === tab.id ? 'contained' : 'outlined'}
-                  startIcon={<Icon icon="mdi:cart" />}
-                  onClick={() => handleChangeTab(tab.id)}
-                  size="small"
-                >
-                  {tab.name}
-                  {tab.products.length > 0 && (
-                    <Typography component="span" sx={{ ml: 0.5, opacity: 0.7 }}>
-                      ({tab.products.length})
-                    </Typography>
-                  )}
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Sales Windows */}
+        <Grid container spacing={3}>
+          {salesWindows.map(
+            (sale) =>
+              openTab === sale.id && (
+                <PosWindowView key={sale.id} openDrawer={openDrawer} hiddenDrawer={hiddenDrawer} sale={sale} />
+              )
+          )}
+
+          {/* No windows message */}
+          {salesWindows.length === 0 && (
+            <Grid xs={12}>
+              <Stack spacing={2} alignItems="center" sx={{ py: 8 }}>
+                <Icon icon="mdi:cart-outline" style={{ fontSize: '48px', color: theme.palette.text.disabled }} />
+                <Typography variant="h6" color="text.secondary">
+                  No hay ventanas de venta abiertas
+                </Typography>
+                <Button variant="contained" onClick={handleAddTab} startIcon={<Icon icon="mdi:plus" />}>
+                  Crear Primera Venta
                 </Button>
-              ))}
-              <IconButton
-                onClick={handleAddTab}
-                color="primary"
-                disabled={!currentRegister || currentRegister.status !== 'open'}
-              >
-                <Icon icon="mdi:plus" />
-              </IconButton>
-            </Stack>
-          }
-          sx={{ p: 1.5 }}
-        />
-      </AppBar>
-    </Container>
+              </Stack>
+            </Grid>
+          )}
+        </Grid>
+
+        {/* Bottom Tab Bar */}
+        <AppBar
+          position="fixed"
+          sx={{
+            background: theme.palette.background.paper,
+            left: 0,
+            bottom: 0,
+            top: 'auto',
+            boxShadow: theme.shadows[1],
+            width: openDrawer
+              ? isLargeScreen
+                ? `calc(100% - ${drawerWidthLg})`
+                : `calc(100% - ${drawerWidth})`
+              : '100%',
+            zIndex: 99,
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.easeOut,
+              duration: theme.transitions.duration.enteringScreen
+            })
+          }}
+        >
+          <CardHeader
+            title={
+              <Stack flexDirection="row" alignItems="center" p={0} gap={2}>
+                {salesWindows.map((tab) => (
+                  <Button
+                    key={tab.id}
+                    variant={openTab === tab.id ? 'contained' : 'outlined'}
+                    startIcon={<Icon icon="mdi:cart" />}
+                    onClick={() => handleChangeTab(tab.id)}
+                    size="small"
+                  >
+                    {tab.name}
+                    {tab.products.length > 0 && (
+                      <Typography component="span" sx={{ ml: 0.5, opacity: 0.7 }}>
+                        ({tab.products.length})
+                      </Typography>
+                    )}
+                  </Button>
+                ))}
+                <IconButton
+                  onClick={handleAddTab}
+                  color="primary"
+                  disabled={!currentRegister || currentRegister.status !== 'open'}
+                >
+                  <Icon icon="mdi:plus" />
+                </IconButton>
+              </Stack>
+            }
+            sx={{ p: 1.5 }}
+          />
+        </AppBar>
+      </Container>
+
+      {/* Register Opening Dialog */}
+      <PosRegisterOpenDialog
+        open={showRegisterDialog && (!currentRegister || currentRegister.status !== 'open')}
+        onClose={() => setShowRegisterDialog(false)}
+        onConfirm={handleRegisterOpen}
+      />
+
+      {/* Settings Drawer */}
+      <PosSettingsDrawer open={showSettingsDrawer} onClose={() => setShowSettingsDrawer(false)} />
+    </>
   );
 }
