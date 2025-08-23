@@ -38,10 +38,12 @@ export default function OverviewAppView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'}>
       <Grid container spacing={3}>
-        <Grid xs={3} md={3}>
+        {/* Welcome Cards - Stack on mobile, side by side on larger screens */}
+        <Grid xs={12} sm={12} md={4} lg={3}>
           <AppWelcome
             title={`Bienvenido 👋 \n ${user?.profile?.name}`}
             description=""
+            img={null}
             action={
               <Button variant="contained" color="primary">
                 Explorar
@@ -49,7 +51,8 @@ export default function OverviewAppView() {
             }
           />
         </Grid>
-        <Grid xs={9} md={9}>
+        
+        <Grid xs={12} sm={12} md={8} lg={9}>
           <AppWelcomeStep
             title={`Bienvenido 👋 \n ${user?.profile?.name}`}
             description="Bienvenidos al sistema de facturación de la empresa. \n En este sistema podrás realizar las siguientes acciones:"
@@ -61,7 +64,9 @@ export default function OverviewAppView() {
             }
           />
         </Grid>
-        <Grid xs={12} md={4}>
+
+        {/* Widget Summary Cards - Full width on mobile */}
+        <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
             title="Total ventas"
             percent={2.6}
@@ -73,7 +78,7 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={4}>
+        <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
             title="Total facturas"
             percent={0.2}
@@ -86,7 +91,7 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={4}>
+        <Grid xs={12} sm={12} md={4}>
           <AppWidgetSummary
             title="Total clientes"
             sx={{}}
@@ -99,7 +104,8 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
+        {/* Charts - Stack on mobile and tablet */}
+        <Grid xs={12} sm={12} md={6} lg={4}>
           <AppCurrentDownload
             title="Productos más vendidos"
             subheader="(+43%) más que el mes pasado"
@@ -115,7 +121,7 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
+        <Grid xs={12} sm={12} md={6} lg={8}>
           <AppAreaInstalled
             title="Ventas por Punto de Venta"
             subheader="(+43%) más que el mes pasado"
@@ -154,6 +160,7 @@ export default function OverviewAppView() {
           />
         </Grid>
 
+        {/* Table - Full width on mobile and tablet */}
         <Grid xs={12} lg={8}>
           <AppNewInvoice
             title="Ultimas Facturas"
@@ -169,24 +176,30 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppTopRelated title="Top Related Applications" list={_appRelated} />
+        {/* Side widgets - Stack on mobile */}
+        <Grid xs={12} sm={6} lg={4}>
+          <AppTopRelated title="Top Related Applications" subheader="Aplicaciones relacionadas" list={_appRelated} />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppTopInstalledCountries title="Top Installed Countries" list={_appInstalled} />
+        <Grid xs={12} sm={6} lg={4}>
+          <AppTopInstalledCountries
+            title="Top Installed Countries"
+            subheader="Países principales"
+            list={_appInstalled}
+          />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AppTopAuthors title="Top Authors" list={_appAuthors} />
+        <Grid xs={12} sm={6} lg={4}>
+          <AppTopAuthors title="Top Authors" subheader="Autores destacados" list={_appAuthors} />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
+        <Grid xs={12} sm={6} lg={4}>
           <Stack spacing={3}>
             <AppWidget
               title="Conversion"
               total={38566}
               icon="solar:user-rounded-bold"
+              sx={{}}
               chart={{
                 series: 48
               }}
@@ -197,6 +210,7 @@ export default function OverviewAppView() {
               total={55566}
               icon="fluent:mail-24-filled"
               color="info"
+              sx={{}}
               chart={{
                 series: 75
               }}

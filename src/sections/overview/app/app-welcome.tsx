@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
+import { Typography, Stack, Box, useMediaQuery } from '@mui/material';
 // theme
 import { bgGradient } from 'src/theme/css';
 
@@ -18,18 +17,20 @@ export default function AppWelcome({ title, description, action, img, ...other }
 
   return (
     <Stack
-      flexDirection={{ xs: 'column', md: 'row' }}
+      flexDirection={{ xs: 'column', sm: 'column', md: 'row' }}
       sx={{
-        ...bgGradient({
-          direction: '135deg',
-          startColor: alpha(theme.palette.primary.light, 0.4),
-          endColor: alpha(theme.palette.primary.main, 0.7)
-        }),
-        height: { md: 1 },
+        height: { xs: 'auto', sm: 'auto', md: 1 },
+        minHeight: { xs: 200, sm: 250, md: 'auto' },
         borderRadius: 2,
         position: 'relative',
         color: 'primary.darker',
-        backgroundColor: 'common.white'
+        overflow: 'hidden',
+        ...bgGradient({
+          direction: '135deg',
+          startColor: alpha(theme.palette.primary.dark, 0.99),
+          endColor: alpha(theme.palette.primary.dark, 0.92),
+          imgUrl: '/assets/background/shape-square.svg'
+        })
       }}
       {...other}
     >
@@ -39,38 +40,63 @@ export default function AppWelcome({ title, description, action, img, ...other }
         alignItems={{ xs: 'center', md: 'flex-start' }}
         sx={{
           p: {
-            xs: theme.spacing(5, 3, 0, 3),
-            md: theme.spacing(5)
+            xs: theme.spacing(2, 2, 1, 2),
+            sm: theme.spacing(3, 3, 2, 3),
+            md: theme.spacing(4)
           },
           textAlign: { xs: 'center', md: 'left' }
         }}
       >
-        <Typography paragraph variant="h4" sx={{ whiteSpace: 'pre-line' }}>
+        <Typography
+          paragraph
+          variant="h4"
+          sx={{
+            whiteSpace: 'pre-line', 
+            color: '#04A5D1',
+            fontSize: {
+              xs: '1.25rem',
+              sm: '1.5rem',
+              md: '2.125rem'
+            },
+            mb: { xs: 1, sm: 2, md: 3 }
+          }}
+        >
           {title}
         </Typography>
 
-        <Typography
-          variant="body2"
-          sx={{
-            opacity: 0.8,
-            maxWidth: 360,
-            mb: { xs: 3, xl: 5 }
-          }}
-        >
-          {description}
-        </Typography>
+        {description && (
+          <Typography
+            variant="body2"
+            sx={{
+              opacity: 0.8,
+              maxWidth: { xs: '100%', sm: 300, md: 360 },
+              mb: { xs: 2, sm: 2.5, md: 3, xl: 5 },
+              fontSize: {
+                xs: '0.75rem',
+                sm: '0.875rem',
+                md: '0.875rem'
+              }
+            }}
+          >
+            {description}
+          </Typography>
+        )}
 
-        {action && action}
+        {action && (
+          <Stack sx={{ '& .MuiButton-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } } }}>{action}</Stack>
+        )}
       </Stack>
 
       {img && (
         <Stack
           component="span"
           justifyContent="center"
+          alignItems="center"
           sx={{
-            p: { xs: 5, md: 3 },
-            maxWidth: 360,
-            mx: 'auto'
+            p: { xs: 2, sm: 3, md: 3 },
+            maxWidth: { xs: '100%', sm: 280, md: 360 },
+            mx: 'auto',
+            display: { xs: 'none', sm: 'flex' } // Ocultar imagen en móviles para ahorrar espacio
           }}
         >
           {img}

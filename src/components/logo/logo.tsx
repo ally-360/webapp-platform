@@ -9,18 +9,17 @@ import { paths } from 'src/routes/paths';
 
 interface LogoProps {
   disabledLink?: boolean;
+  dark?: boolean;
   sx?: object;
 }
 
-const Logo = ({ disabledLink = false, sx }: LogoProps) => {
+const Logo = ({ disabledLink = false, dark = false, sx }: LogoProps) => {
   // OR using local (public folder)
   // -------------------------------------------------------
-  const logo = (
-    <Box
-      component="img"
-      src="/logo/logoFondoTransparentesvg.svg"
-      sx={{ width: 190, height: 52, cursor: 'pointer', ...sx }}
-    />
+  const logo = dark ? (
+    <Box component="img" src="/logo/logo-fondo-oscuro.svg" sx={{ width: 240, cursor: 'pointer', ...sx }} />
+  ) : (
+    <Box component="img" src="/logo/logoFondoTransparentesvg.svg" sx={{ width: 190, cursor: 'pointer', ...sx }} />
   );
 
   if (disabledLink) {
