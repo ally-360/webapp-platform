@@ -36,42 +36,42 @@ export default function OverviewAppView() {
   console.log('User in OverviewAppView:', user);
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'xl'}>
-      <Grid container spacing={3}>
+    <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ py: { xs: 2, sm: 3 } }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Welcome Cards - Stack on mobile, side by side on larger screens */}
-        <Grid xs={12} sm={12} md={4} lg={3}>
+        <Grid xs={12} sm={12} md={5} lg={4}>
           <AppWelcome
             title={`Bienvenido 👋 \n ${user?.profile?.name}`}
             description=""
             img={null}
             action={
-              <Button variant="contained" color="primary">
-                Explorar
-              </Button>
-            }
-          />
-        </Grid>
-        
-        <Grid xs={12} sm={12} md={8} lg={9}>
-          <AppWelcomeStep
-            title={`Bienvenido 👋 \n ${user?.profile?.name}`}
-            description="Bienvenidos al sistema de facturación de la empresa. \n En este sistema podrás realizar las siguientes acciones:"
-            img={<SeoIllustration />}
-            action={
-              <Button variant="contained" color="primary">
+              <Button variant="contained" color="primary" size="small">
                 Explorar
               </Button>
             }
           />
         </Grid>
 
-        {/* Widget Summary Cards - Full width on mobile */}
+        <Grid xs={12} sm={12} md={7} lg={8}>
+          <AppWelcomeStep
+            title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+            description="Bienvenidos al sistema de facturación de la empresa. \n En este sistema podrás realizar las siguientes acciones:"
+            img={<SeoIllustration />}
+            action={
+              <Button variant="contained" color="primary" size="small">
+                Explorar
+              </Button>
+            }
+          />
+        </Grid>
+
+        {/* Widget Summary Cards - Full width on mobile, 2 columns on tablet, 3 on desktop */}
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
             title="Total ventas"
             percent={2.6}
             total={18765}
-            sx={{}}
+            sx={{ height: { xs: 'auto', sm: '100%' } }}
             chart={{
               series: [5, 18, 12, 51, 68, 11, 39, 37, 27, 20]
             }}
@@ -82,7 +82,7 @@ export default function OverviewAppView() {
           <AppWidgetSummary
             title="Total facturas"
             percent={0.2}
-            sx={{}}
+            sx={{ height: { xs: 'auto', sm: '100%' } }}
             total={4876}
             chart={{
               colors: [theme.palette.info.light, theme.palette.info.main],
@@ -94,7 +94,7 @@ export default function OverviewAppView() {
         <Grid xs={12} sm={12} md={4}>
           <AppWidgetSummary
             title="Total clientes"
-            sx={{}}
+            sx={{ height: { xs: 'auto', sm: '100%' } }}
             percent={-0.1}
             total={678}
             chart={{
@@ -105,11 +105,11 @@ export default function OverviewAppView() {
         </Grid>
 
         {/* Charts - Stack on mobile and tablet */}
-        <Grid xs={12} sm={12} md={6} lg={4}>
+        <Grid xs={12} sm={12} md={6} lg={5}>
           <AppCurrentDownload
             title="Productos más vendidos"
             subheader="(+43%) más que el mes pasado"
-            sx={{}}
+            sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
               series: [
                 { label: 'Otros', value: 12244 },
@@ -121,11 +121,11 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} sm={12} md={6} lg={8}>
+        <Grid xs={12} sm={12} md={6} lg={7}>
           <AppAreaInstalled
             title="Ventas por Punto de Venta"
             subheader="(+43%) más que el mes pasado"
-            sx={{}}
+            sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
               categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
               series: [
@@ -176,12 +176,12 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        {/* Side widgets - Stack on mobile */}
-        <Grid xs={12} sm={6} lg={4}>
+        {/* Side widgets - Better distribution on mobile and tablet */}
+        <Grid xs={12} sm={6} md={4} lg={4}>
           <AppTopRelated title="Top Related Applications" subheader="Aplicaciones relacionadas" list={_appRelated} />
         </Grid>
 
-        <Grid xs={12} sm={6} lg={4}>
+        <Grid xs={12} sm={6} md={4} lg={4}>
           <AppTopInstalledCountries
             title="Top Installed Countries"
             subheader="Países principales"
@@ -189,17 +189,17 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        <Grid xs={12} sm={6} lg={4}>
+        <Grid xs={12} sm={6} md={4} lg={4}>
           <AppTopAuthors title="Top Authors" subheader="Autores destacados" list={_appAuthors} />
         </Grid>
 
-        <Grid xs={12} sm={6} lg={4}>
-          <Stack spacing={3}>
+        <Grid xs={12} sm={6} md={12} lg={12}>
+          <Stack spacing={{ xs: 2, sm: 3 }} direction={{ xs: 'column', sm: 'row' }}>
             <AppWidget
               title="Conversion"
               total={38566}
               icon="solar:user-rounded-bold"
-              sx={{}}
+              sx={{ flex: 1 }}
               chart={{
                 series: 48
               }}
@@ -210,7 +210,7 @@ export default function OverviewAppView() {
               total={55566}
               icon="fluent:mail-24-filled"
               color="info"
-              sx={{}}
+              sx={{ flex: 1 }}
               chart={{
                 series: 75
               }}

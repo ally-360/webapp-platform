@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
+import React from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
-import { Typography, Stack, Box, useMediaQuery } from '@mui/material';
+import { Typography, Stack } from '@mui/material';
 // theme
 import { bgGradient } from 'src/theme/css';
 
@@ -10,7 +10,7 @@ interface AppWelcomeProps {
   title: string;
   description: string;
   action: React.ReactNode;
-  img: React.ReactNode;
+  img?: React.ReactNode;
 }
 export default function AppWelcome({ title, description, action, img, ...other }: AppWelcomeProps) {
   const theme = useTheme();
@@ -20,8 +20,8 @@ export default function AppWelcome({ title, description, action, img, ...other }
       flexDirection={{ xs: 'column', sm: 'column', md: 'row' }}
       sx={{
         height: { xs: 'auto', sm: 'auto', md: 1 },
-        minHeight: { xs: 200, sm: 250, md: 'auto' },
-        borderRadius: 2,
+        minHeight: { xs: 160, sm: 200, md: 'auto' },
+        borderRadius: { xs: 1.5, sm: 2 },
         position: 'relative',
         color: 'primary.darker',
         overflow: 'hidden',
@@ -40,8 +40,8 @@ export default function AppWelcome({ title, description, action, img, ...other }
         alignItems={{ xs: 'center', md: 'flex-start' }}
         sx={{
           p: {
-            xs: theme.spacing(2, 2, 1, 2),
-            sm: theme.spacing(3, 3, 2, 3),
+            xs: theme.spacing(1.5, 2, 1, 2),
+            sm: theme.spacing(2.5, 3, 1.5, 3),
             md: theme.spacing(4)
           },
           textAlign: { xs: 'center', md: 'left' }
@@ -51,14 +51,16 @@ export default function AppWelcome({ title, description, action, img, ...other }
           paragraph
           variant="h4"
           sx={{
-            whiteSpace: 'pre-line', 
-            color: '#04A5D1',
+            whiteSpace: 'pre-line',
+            color: 'primary.contrastText',
             fontSize: {
-              xs: '1.25rem',
-              sm: '1.5rem',
-              md: '2.125rem'
+              xs: '1.1rem',
+              sm: '1.3rem',
+              md: '2rem'
             },
-            mb: { xs: 1, sm: 2, md: 3 }
+            lineHeight: { xs: 1.3, sm: 1.4, md: 1.2 },
+            mb: { xs: 0.5, sm: 1.5, md: 2 },
+            fontWeight: { xs: 600, md: 'normal' }
           }}
         >
           {title}
@@ -70,12 +72,13 @@ export default function AppWelcome({ title, description, action, img, ...other }
             sx={{
               opacity: 0.8,
               maxWidth: { xs: '100%', sm: 300, md: 360 },
-              mb: { xs: 2, sm: 2.5, md: 3, xl: 5 },
+              mb: { xs: 1.5, sm: 2, md: 3, xl: 5 },
               fontSize: {
-                xs: '0.75rem',
-                sm: '0.875rem',
+                xs: '0.7rem',
+                sm: '0.8rem',
                 md: '0.875rem'
-              }
+              },
+              display: { xs: description ? 'block' : 'none', sm: 'block' }
             }}
           >
             {description}
@@ -83,7 +86,18 @@ export default function AppWelcome({ title, description, action, img, ...other }
         )}
 
         {action && (
-          <Stack sx={{ '& .MuiButton-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } } }}>{action}</Stack>
+          <Stack
+            sx={{
+              '& .MuiButton-root': {
+                fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
+                py: { xs: 0.8, sm: 1, md: 1.2 },
+                px: { xs: 2, sm: 2.5, md: 3 },
+                minHeight: { xs: 32, sm: 36, md: 40 }
+              }
+            }}
+          >
+            {action}
+          </Stack>
         )}
       </Stack>
 

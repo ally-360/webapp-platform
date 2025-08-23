@@ -53,11 +53,11 @@ export const primaryPresets = [
   // BLUE
   {
     name: 'blue',
-    lighter: '#D1E9FC',
-    light: '#068DEE',
-    main: '#0563D0', // 0563D0
-    dark: '#0442A8',
-    darker: '#061B64',
+    lighter: '#BBE1FF', // tono suave para fondos o estados hover
+    light: '#1E90FF', // Dodger Blue – llamativo, buen contraste
+    main: '#0563D0', // Material Blue 500 – estable, legible
+    dark: '#1976D2', // Material Blue 700 – para énfasis y hover
+    darker: '#0D47A1', // Material Blue 900 – profundidad seria
     contrastText: '#FFFFFF'
   },
   // ORANGE
@@ -66,7 +66,7 @@ export const primaryPresets = [
     lighter: '#FEF4D4',
     light: '#FED680',
     main: '#fda92d',
-    dark: '#B66816',
+    dark: '#0563D0', // 0563D0
     darker: '#793908',
     contrastText: palette.grey[800]
   },

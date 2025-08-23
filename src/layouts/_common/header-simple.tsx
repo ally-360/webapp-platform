@@ -44,7 +44,7 @@ export default function HeaderSimple() {
           })
         }}
       >
-        <Logo />
+        <Logo dark />
 
         <Stack direction="row" alignItems="center" spacing={1}>
           {/* <Link href={paths.faqs} component={RouterLink} color="white" sx={{ typography: 'subtitle2' }}>

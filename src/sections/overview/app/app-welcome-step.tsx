@@ -61,11 +61,12 @@ export default function AppWelcomeStep({
   return (
     <Box
       sx={{
-        p: { xs: 2, sm: 3, md: 3 },
+        p: { xs: 1.5, sm: 2.5, md: 3 },
         bgcolor: 'background.paper',
-        borderRadius: 2,
+        borderRadius: { xs: 1.5, sm: 2 },
         boxShadow: 2,
-        minHeight: { xs: 300, sm: 350, md: 400 }
+        minHeight: { xs: 280, sm: 320, md: 400 },
+        height: 'fit-content'
       }}
       {...other}
     >
@@ -75,10 +76,18 @@ export default function AppWelcomeStep({
         alternativeLabel={!isMobile}
         orientation={isMobile ? 'vertical' : 'horizontal'}
         sx={{
-          mb: { xs: 3, sm: 4 },
+          mb: { xs: 2, sm: 3, md: 4 },
           '& .MuiStepLabel-label': {
-            fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+            fontSize: { xs: '0.65rem', sm: '0.75rem', md: '0.875rem' },
             fontWeight: 500
+          },
+          '& .MuiStepLabel-root': {
+            '& .Mui-completed': {
+              color: theme.palette.primary.main
+            },
+            '& .Mui-active': {
+              color: theme.palette.primary.main
+            }
           }
         }}
       >
@@ -88,8 +97,8 @@ export default function AppWelcomeStep({
               icon={
                 <Box
                   sx={{
-                    width: { xs: 32, sm: 38, md: 42 },
-                    height: { xs: 32, sm: 38, md: 42 },
+                    width: { xs: 28, sm: 34, md: 42 },
+                    height: { xs: 28, sm: 34, md: 42 },
                     borderRadius: '50%',
                     bgcolor:
                       activeStep === index || activeStep > index ? theme.palette.primary.main : theme.palette.grey[500],
@@ -98,7 +107,7 @@ export default function AppWelcomeStep({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: { xs: 14, sm: 16, md: 20 },
+                    fontSize: { xs: 12, sm: 14, md: 20 },
                     fontWeight: 'bold',
                     transition: 'all 0.3s ease'
                   }}
@@ -110,9 +119,10 @@ export default function AppWelcomeStep({
               <Typography
                 variant="subtitle2"
                 sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.875rem' },
+                  fontSize: { xs: '0.65rem', sm: '0.75rem', md: '0.875rem' },
                   textAlign: { xs: 'left', sm: 'center' },
-                  mt: { xs: 0, sm: 1 }
+                  mt: { xs: 0, sm: 1 },
+                  lineHeight: { xs: 1.2, sm: 1.4 }
                 }}
               >
                 {step.title}
@@ -127,17 +137,18 @@ export default function AppWelcomeStep({
           display="flex"
           flexDirection={{ xs: 'column', sm: 'row' }}
           alignItems={{ xs: 'center', sm: 'flex-start' }}
-          gap={{ xs: 2, sm: 3 }}
+          gap={{ xs: 1.5, sm: 2, md: 3 }}
         >
           <Box
             component="img"
             src={steps[activeStep].img}
             alt={steps[activeStep].title}
             sx={{
-              width: { xs: 80, sm: 90, md: 100 },
-              height: { xs: 80, sm: 90, md: 100 },
+              width: { xs: 60, sm: 80, md: 100 },
+              height: { xs: 60, sm: 80, md: 100 },
               flexShrink: 0,
-              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
+              filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
+              borderRadius: 1
             }}
           />
 
@@ -145,10 +156,11 @@ export default function AppWelcomeStep({
             <Typography
               variant="h6"
               sx={{
-                fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
+                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.25rem' },
                 fontWeight: 600,
-                mb: { xs: 1, sm: 1.5 },
-                color: 'text.primary'
+                mb: { xs: 0.8, sm: 1, md: 1.5 },
+                color: 'text.primary',
+                lineHeight: { xs: 1.3, sm: 1.4 }
               }}
             >
               {steps[activeStep].title}
@@ -158,10 +170,10 @@ export default function AppWelcomeStep({
               variant="body2"
               color="text.secondary"
               sx={{
-                mb: { xs: 2, sm: 3 },
-                fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.875rem' },
-                lineHeight: 1.6,
-                maxWidth: { xs: '100%', sm: 400, md: 450 }
+                mb: { xs: 1.5, sm: 2, md: 3 },
+                fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
+                lineHeight: { xs: 1.4, sm: 1.5, md: 1.6 },
+                maxWidth: { xs: '100%', sm: 380, md: 450 }
               }}
             >
               {steps[activeStep].description}
@@ -170,7 +182,7 @@ export default function AppWelcomeStep({
             <Box
               display="flex"
               flexDirection={{ xs: 'column', sm: 'row' }}
-              gap={{ xs: 1.5, sm: 2 }}
+              gap={{ xs: 1, sm: 1.5, md: 2 }}
               alignItems={{ xs: 'stretch', sm: 'center' }}
             >
               <Button
@@ -180,61 +192,77 @@ export default function AppWelcomeStep({
                   console.log(`Navigating to: ${steps[activeStep].url}`);
                 }}
                 sx={{
-                  fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                  py: { xs: 1, sm: 1.2 },
-                  px: { xs: 2, sm: 3 },
+                  fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
+                  py: { xs: 0.8, sm: 1, md: 1.2 },
+                  px: { xs: 2, sm: 2.5, md: 3 },
                   borderRadius: 2,
                   textTransform: 'none',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  minHeight: { xs: 32, sm: 36, md: 40 }
                 }}
               >
                 {steps[activeStep].action}
               </Button>
 
-              {activeStep < steps.length - 1 && (
-                <Button
-                  variant="outlined"
-                  onClick={() => setActiveStep((prev) => prev + 1)}
-                  sx={{
-                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                    py: { xs: 1, sm: 1.2 },
-                    px: { xs: 2, sm: 3 },
-                    borderRadius: 2,
-                    textTransform: 'none'
-                  }}
-                >
-                  Siguiente paso
-                </Button>
-              )}
+              <Box
+                display="flex"
+                gap={{ xs: 1, sm: 1.5 }}
+                flexDirection={{ xs: 'row', sm: 'row' }}
+                justifyContent={{ xs: 'center', sm: 'flex-start' }}
+              >
+                {activeStep > 0 && (
+                  <Button
+                    variant="text"
+                    onClick={() => setActiveStep((prev) => prev - 1)}
+                    sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.875rem' },
+                      py: { xs: 0.5, sm: 0.8, md: 1 },
+                      px: { xs: 1, sm: 1.5, md: 2 },
+                      textTransform: 'none',
+                      color: 'text.secondary',
+                      minHeight: { xs: 28, sm: 32, md: 36 }
+                    }}
+                  >
+                    ← Anterior
+                  </Button>
+                )}
 
-              {activeStep > 0 && (
-                <Button
-                  variant="text"
-                  onClick={() => setActiveStep((prev) => prev - 1)}
-                  sx={{
-                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                    py: { xs: 0.5, sm: 1 },
-                    px: { xs: 1, sm: 2 },
-                    textTransform: 'none',
-                    color: 'text.secondary'
-                  }}
-                >
-                  Anterior
-                </Button>
-              )}
+                {activeStep < steps.length - 1 && (
+                  <Button
+                    variant="outlined"
+                    onClick={() => setActiveStep((prev) => prev + 1)}
+                    sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.875rem' },
+                      py: { xs: 0.5, sm: 0.8, md: 1 },
+                      px: { xs: 1.5, sm: 2, md: 2.5 },
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      minHeight: { xs: 28, sm: 32, md: 36 }
+                    }}
+                  >
+                    Siguiente →
+                  </Button>
+                )}
+              </Box>
             </Box>
           </Box>
         </Box>
 
         <Box
           sx={{
-            mt: { xs: 3, sm: 4 },
-            pt: { xs: 2, sm: 3 },
+            mt: { xs: 2, sm: 3, md: 4 },
+            pt: { xs: 1.5, sm: 2, md: 3 },
             borderTop: `1px solid ${theme.palette.divider}`,
             textAlign: 'center'
           }}
         >
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.65rem', sm: '0.7rem', md: '0.75rem' }
+            }}
+          >
             Paso {activeStep + 1} de {steps.length}
           </Typography>
         </Box>
