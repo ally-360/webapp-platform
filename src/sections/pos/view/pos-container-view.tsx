@@ -27,7 +27,7 @@ import PosSettingsDrawer from '../pos-settings-drawer';
 
 export default function PosContainerView() {
   const dispatch = useAppDispatch();
-  const { currentRegister, salesWindows, completedSales, error } = useAppSelector((state) => state.pos);
+  const { currentRegister, salesWindows, error } = useAppSelector((state) => state.pos);
 
   const theme = useTheme();
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl'));
@@ -37,6 +37,8 @@ export default function PosContainerView() {
   const [openTab, setOpenTab] = useState(0);
   const [showRegisterDialog, setShowRegisterDialog] = useState(false);
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+  // Controls the modal visibility for opening register
+  const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
 
   const drawerWidthLg = '30vw';
   const drawerWidth = '500px';
@@ -79,7 +81,7 @@ export default function PosContainerView() {
   // Check if register is open
   useEffect(() => {
     if (!currentRegister || currentRegister.status !== 'open') {
-      setShowRegisterDialog(true);
+      setShowRegisterDialog(true); // show lock screen prompting to open register
     } else {
       setShowRegisterDialog(false);
       // Set active tab if we have windows
@@ -114,6 +116,7 @@ export default function PosContainerView() {
   const handleAddTab = () => {
     if (!currentRegister || currentRegister.status !== 'open') {
       setShowRegisterDialog(true);
+      setOpenRegisterDialog(true); // open the dialog directly when trying to add without register
       return;
     }
     dispatch(addSaleWindow());
@@ -138,9 +141,10 @@ export default function PosContainerView() {
       })
     );
     setShowRegisterDialog(false);
+    setOpenRegisterDialog(false);
   };
 
-  // Si no hay registro abierto, mostrar dialog
+  // Si no hay registro abierto, mostrar pantalla con botón para abrir modal
   if (showRegisterDialog && (!currentRegister || currentRegister.status !== 'open')) {
     return (
       <Container
@@ -160,18 +164,24 @@ export default function PosContainerView() {
             variant="contained"
             size="large"
             startIcon={<Icon icon="mdi:cash-multiple" />}
-            onClick={() =>
-              handleRegisterOpen({
-                operator_name: 'Usuario Demo',
-                pdv_name: 'PDV Principal - Palmira',
-                opening_amount: 50000,
-                opening_date: new Date(),
-                notes: 'Apertura automática para demo'
-              })
-            }
+            onClick={() => setOpenRegisterDialog(true)}
           >
-            Abrir Caja (Demo)
+            Abrir Caja
           </Button>
+
+          {/* Modal de Apertura de Caja */}
+          <PosRegisterOpenDialog
+            open={openRegisterDialog}
+            onClose={() => setOpenRegisterDialog(false)}
+            onConfirm={handleRegisterOpen}
+            defaultValues={{
+              operator_name: 'Usuario Demo',
+              pdv_name: 'PDV Principal - Palmira',
+              opening_amount: 50000,
+              opening_date: new Date(),
+              notes: 'Apertura automática para demo'
+            }}
+          />
         </Stack>
       </Container>
     );
@@ -186,11 +196,12 @@ export default function PosContainerView() {
           sx={{
             background: theme.palette.background.paper,
             left: 0,
-            width: openDrawer
-              ? isLargeScreen
-                ? `calc(100% - ${drawerWidthLg})`
-                : `calc(100% - ${drawerWidth})`
-              : '100%',
+            width:
+              openDrawer && salesWindows.length > 0
+                ? isLargeScreen
+                  ? `calc(100% - ${drawerWidthLg})`
+                  : `calc(100% - ${drawerWidth})`
+                : '100%',
             boxShadow: theme.shadows[1],
             zIndex: 99,
             transition: theme.transitions.create('width', {
@@ -219,10 +230,21 @@ export default function PosContainerView() {
             sx={{ p: 2 }}
             action={
               <Stack direction="row" spacing={1} alignItems="center">
-                {currentRegister && (
-                  <Typography variant="body2" color="text.secondary">
-                    Caja: {currentRegister.user_name}
-                  </Typography>
+                {!currentRegister || currentRegister.status !== 'open' ? (
+                  <Button
+                    size="small"
+                    variant="contained"
+                    startIcon={<Icon icon="mdi:cash-multiple" />}
+                    onClick={() => setOpenRegisterDialog(true)}
+                  >
+                    Abrir Caja
+                  </Button>
+                ) : (
+                  currentRegister && (
+                    <Typography variant="body2" color="text.secondary">
+                      Caja: {currentRegister.user_name}
+                    </Typography>
+                  )
                 )}
                 <IconButton onClick={() => setShowSettingsDrawer(true)}>
                   <Icon icon="ic:round-settings" />
@@ -273,11 +295,12 @@ export default function PosContainerView() {
             bottom: 0,
             top: 'auto',
             boxShadow: theme.shadows[1],
-            width: openDrawer
-              ? isLargeScreen
-                ? `calc(100% - ${drawerWidthLg})`
-                : `calc(100% - ${drawerWidth})`
-              : '100%',
+            width:
+              openDrawer && salesWindows.length > 0
+                ? isLargeScreen
+                  ? `calc(100% - ${drawerWidthLg})`
+                  : `calc(100% - ${drawerWidth})`
+                : '100%',
             zIndex: 99,
             transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.easeOut,
@@ -318,11 +341,18 @@ export default function PosContainerView() {
         </AppBar>
       </Container>
 
-      {/* Register Opening Dialog */}
+      {/* Register Opening Dialog (also available in main view) */}
       <PosRegisterOpenDialog
-        open={showRegisterDialog && (!currentRegister || currentRegister.status !== 'open')}
-        onClose={() => setShowRegisterDialog(false)}
+        open={openRegisterDialog}
+        onClose={() => setOpenRegisterDialog(false)}
         onConfirm={handleRegisterOpen}
+        defaultValues={{
+          operator_name: 'Usuario Demo',
+          pdv_name: 'PDV Principal - Palmira',
+          opening_amount: 50000,
+          opening_date: new Date(),
+          notes: 'Apertura automática para demo'
+        }}
       />
 
       {/* Settings Drawer */}

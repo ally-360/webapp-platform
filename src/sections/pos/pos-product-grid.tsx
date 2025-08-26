@@ -180,10 +180,19 @@ export default function PosProductGrid({ products, onAddProduct, loading = false
   return (
     <Box sx={{ p: 2 }}>
       {/* Search Bar with Filter Button and Sort */}
-      <Box sx={{ mb: 3 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
+      <Box
+        sx={{
+          mb: 3,
+          mr: 1,
+          display: 'flex',
+          justifyContent: 'flex-start',
+          alignItems: 'center'
+        }}
+      >
+        <Stack direction="row" width="100%" spacing={2} alignItems="center" flexWrap="wrap">
           <TextField
             fullWidth
+            sx={{ minWidth: 240, maxWidth: 480 }}
             placeholder="Buscar productos por nombre, código o categoría..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

@@ -21,10 +21,10 @@ export default function PosProductSort({ sort, onSort, sortOptions }) {
         color="inherit"
         onClick={popover.onOpen}
         endIcon={<Iconify icon={popover.open ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'} />}
-        sx={{ fontWeight: 'fontWeightSemiBold' }}
+        sx={{ fontWeight: 'fontWeightSemiBold', width: 'fit-content' }}
       >
-        Sort By:
-        <Box component="span" sx={{ ml: 0.5, fontWeight: 'fontWeightBold' }}>
+        Ordernar:
+        <Box component="span" sx={{ ml: 1, fontWeight: 'fontWeightBold' }}>
           {sortLabel}
         </Box>
       </Button>

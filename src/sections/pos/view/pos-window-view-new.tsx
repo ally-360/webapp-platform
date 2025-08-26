@@ -6,7 +6,7 @@ import {
   Card,
   CardHeader,
   Divider,
-  Drawer,
+  // Drawer, // replaced by responsive wrapper
   Grid,
   IconButton,
   Typography,
@@ -56,6 +56,7 @@ import PosProductGrid from '../pos-product-grid';
 import PosPaymentDialog from '../pos-payment-dialog';
 import PosSaleConfirmDialog from '../pos-sale-confirm-dialog';
 import PosCartIcon from '../pos-cart-icon';
+import PosResponsiveDrawer from '../components/pos-responsive-drawer';
 
 interface Props {
   sale: SaleWindow;
@@ -72,9 +73,26 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(sale.customer);
   const [productsLoading, setProductsLoading] = useState(true);
 
-  const drawerWidthLg = '30vw';
-  const drawerWidth = '500px';
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl'));
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
+  const isXlUp = useMediaQuery(theme.breakpoints.up('xl'));
+
+  // Compute drawer width responsive (must match PosResponsiveDrawer default)
+  const drawerWidth = {
+    xs: '100vw',
+    sm: '92vw',
+    md: 480,
+    lg: '36vw',
+    xl: '30vw'
+  } as const;
+
+  const currentDrawerWidth = isXlUp
+    ? drawerWidth.xl
+    : isLgUp
+    ? drawerWidth.lg
+    : isMdUp
+    ? drawerWidth.md
+    : drawerWidth.xs;
 
   // Update customer in Redux when selected
   useEffect(() => {
@@ -210,10 +228,11 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
         xs={12}
         sx={{
           width: (() => {
-            if (!openDrawer) return '100%';
-            return isLargeScreen
-              ? `calc(100% - ${drawerWidthLg}) !important`
-              : `calc(100% - ${drawerWidth}) !important`;
+            if (!openDrawer || !isMdUp) return '100%';
+            // When persistent (md+), reduce width by drawer size
+            return `calc(100% - ${
+              typeof currentDrawerWidth === 'number' ? `${currentDrawerWidth}px` : currentDrawerWidth
+            }) !important`;
           })(),
           transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.easeOut,
@@ -224,25 +243,24 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
         {/* Product Grid */}
         <PosProductGrid products={mockProducts} onAddProduct={handleAddProduct} loading={productsLoading} />
       </Grid>
+
+      {/* Cart Icon positioned relative to drawer width */}
       <PosCartIcon
         onClick={hiddenDrawer}
-        rightDrawer={isLargeScreen ? (openDrawer ? drawerWidthLg : 0) : openDrawer ? drawerWidth : 0}
+        rightDrawer={
+          isMdUp
+            ? openDrawer
+              ? typeof currentDrawerWidth === 'number'
+                ? `${currentDrawerWidth}px`
+                : currentDrawerWidth
+              : 0
+            : 0
+        }
         totalItems={sale.products.length}
       />
+
       {/* Right Drawer - Cart & Checkout */}
-      <Drawer
-        anchor="right"
-        open={openDrawer}
-        variant="persistent"
-        PaperProps={{
-          sx: {
-            width: isLargeScreen ? drawerWidthLg : drawerWidth,
-            borderLeft: `1px solid ${theme.palette.divider}`,
-            top: 0,
-            height: '100%'
-          }
-        }}
-      >
+      <PosResponsiveDrawer open={openDrawer} onClose={hiddenDrawer}>
         <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <CardHeader
             title={
@@ -477,7 +495,7 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
             </Box>
           </Box>
         </Card>
-      </Drawer>
+      </PosResponsiveDrawer>
 
       {/* Payment Dialog */}
       <PosPaymentDialog

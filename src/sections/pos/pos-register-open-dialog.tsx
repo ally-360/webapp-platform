@@ -35,11 +35,19 @@ interface Props {
     operator_name: string;
     notes?: string;
   }) => void;
+  // New optional default values to prefill the dialog when opened (mock data for now)
+  defaultValues?: {
+    pdv_name?: string;
+    opening_amount?: number;
+    opening_date?: Date;
+    operator_name?: string;
+    notes?: string;
+  };
 }
 
 const SUGGESTED_AMOUNTS = [50000, 100000, 200000, 500000];
 
-export default function PosRegisterOpenDialog({ open, onClose, onConfirm }: Props) {
+export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaultValues }: Props) {
   const [pdvName, setPdvName] = useState('');
   const [openingAmount, setOpeningAmount] = useState(0);
   const [openingDate, setOpeningDate] = useState<Date>(new Date());
@@ -49,14 +57,14 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm }: Prop
   // Initialize values when dialog opens
   React.useEffect(() => {
     if (open) {
-      // Reset form
-      setPdvName(`PDV-${Date.now().toString().slice(-4)}`);
-      setOpeningAmount(0);
-      setOpeningDate(new Date());
-      setOperatorName('');
-      setNotes('');
+      // Reset form with defaults if provided
+      setPdvName(defaultValues?.pdv_name ?? `PDV-${Date.now().toString().slice(-4)}`);
+      setOpeningAmount(defaultValues?.opening_amount ?? 0);
+      setOpeningDate(defaultValues?.opening_date ?? new Date());
+      setOperatorName(defaultValues?.operator_name ?? '');
+      setNotes(defaultValues?.notes ?? '');
     }
-  }, [open]);
+  }, [open, defaultValues]);
 
   const handleClose = () => {
     onClose();
