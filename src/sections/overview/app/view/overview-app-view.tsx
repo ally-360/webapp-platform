@@ -68,38 +68,38 @@ export default function OverviewAppView() {
         {/* Widget Summary Cards - Full width on mobile, 2 columns on tablet, 3 on desktop */}
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
-            title="Total ventas"
-            percent={2.6}
-            total={18765}
+            title="Ventas del Mes"
+            percent={15.8}
+            total={2847650}
             sx={{ height: { xs: 'auto', sm: '100%' } }}
             chart={{
-              series: [5, 18, 12, 51, 68, 11, 39, 37, 27, 20]
+              series: [45, 32, 68, 55, 89, 45, 72, 83, 67, 91]
             }}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
-            title="Total facturas"
-            percent={0.2}
+            title="Facturas Emitidas"
+            percent={8.2}
             sx={{ height: { xs: 'auto', sm: '100%' } }}
-            total={4876}
+            total={1247}
             chart={{
               colors: [theme.palette.info.light, theme.palette.info.main],
-              series: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26]
+              series: [28, 45, 72, 38, 52, 67, 84, 59, 73, 42]
             }}
           />
         </Grid>
 
         <Grid xs={12} sm={12} md={4}>
           <AppWidgetSummary
-            title="Total clientes"
+            title="Clientes Activos"
             sx={{ height: { xs: 'auto', sm: '100%' } }}
-            percent={-0.1}
-            total={678}
+            percent={3.7}
+            total={892}
             chart={{
-              colors: [theme.palette.warning.light, theme.palette.warning.main],
-              series: [8, 9, 31, 8, 16, 37, 8, 33, 46, 31]
+              colors: [theme.palette.success.light, theme.palette.success.main],
+              series: [15, 28, 45, 22, 38, 55, 29, 47, 68, 35]
             }}
           />
         </Grid>
@@ -107,15 +107,16 @@ export default function OverviewAppView() {
         {/* Charts - Stack on mobile and tablet */}
         <Grid xs={12} sm={12} md={6} lg={5}>
           <AppCurrentDownload
-            title="Productos más vendidos"
-            subheader="(+43%) más que el mes pasado"
+            title="Productos Más Vendidos"
+            subheader="(+15.8%) más que el mes anterior"
             sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
               series: [
-                { label: 'Otros', value: 12244 },
-                { label: 'Iphone 12 pro max', value: 53345 },
-                { label: 'Samsung Galaxy s23', value: 44313 },
-                { label: 'Xiaomi T13 Pro', value: 78343 }
+                { label: 'Laptops HP', value: 234567 },
+                { label: 'Mouse Inalámbrico', value: 189234 },
+                { label: 'Teclado Mecánico', value: 145678 },
+                { label: 'Monitor 24"', value: 98345 },
+                { label: 'Otros Productos', value: 67890 }
               ]
             }}
           />
@@ -124,21 +125,25 @@ export default function OverviewAppView() {
         <Grid xs={12} sm={12} md={6} lg={7}>
           <AppAreaInstalled
             title="Ventas por Punto de Venta"
-            subheader="(+43%) más que el mes pasado"
+            subheader="(+12.3%) más que el mes anterior"
             sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec'],
               series: [
                 {
                   year: '2024',
                   data: [
                     {
-                      name: 'Asia',
-                      data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 35, 51, 49]
+                      name: 'Sede Principal',
+                      data: [320, 441, 385, 551, 649, 762, 869, 891, 948, 735, 851, 949]
                     },
                     {
-                      name: 'America',
-                      data: [10, 34, 13, 56, 77, 88, 99, 77, 45, 13, 56, 77]
+                      name: 'Sucursal Norte',
+                      data: [210, 334, 413, 356, 477, 588, 699, 577, 645, 413, 556, 677]
+                    },
+                    {
+                      name: 'Sucursal Sur',
+                      data: [180, 267, 298, 445, 389, 456, 523, 398, 467, 298, 445, 389]
                     }
                   ]
                 },
@@ -146,12 +151,16 @@ export default function OverviewAppView() {
                   year: '2025',
                   data: [
                     {
-                      name: 'Asia',
-                      data: [51, 35, 41, 10, 91, 69, 62, 148, 91, 69, 62, 49]
+                      name: 'Sede Principal',
+                      data: [851, 735, 841, 610, 991, 869, 762, 1048, 891, 869, 762, 849]
                     },
                     {
-                      name: 'America',
-                      data: [56, 13, 34, 10, 77, 99, 88, 45, 77, 99, 88, 77]
+                      name: 'Sucursal Norte',
+                      data: [556, 413, 634, 410, 677, 699, 588, 545, 577, 699, 588, 677]
+                    },
+                    {
+                      name: 'Sucursal Sur',
+                      data: [445, 298, 467, 310, 489, 523, 456, 367, 398, 523, 456, 489]
                     }
                   ]
                 }
@@ -163,13 +172,13 @@ export default function OverviewAppView() {
         {/* Table - Full width on mobile and tablet */}
         <Grid xs={12} lg={8}>
           <AppNewInvoice
-            title="Ultimas Facturas"
-            subheader="(+43%) más que el mes pasado"
+            title="Últimas Facturas"
+            subheader="(+12.3%) más que el mes anterior"
             tableData={_appInvoices}
             tableLabels={[
-              { id: 'id', label: 'SKU' },
-              { id: 'category', label: 'Categoria' },
-              { id: 'price', label: 'Precio' },
+              { id: 'invoiceNumber', label: 'N° Factura' },
+              { id: 'category', label: 'Categoría' },
+              { id: 'price', label: 'Valor Total' },
               { id: 'status', label: 'Estado' },
               { id: '' }
             ]}
@@ -178,41 +187,63 @@ export default function OverviewAppView() {
 
         {/* Side widgets - Better distribution on mobile and tablet */}
         <Grid xs={12} sm={6} md={4} lg={4}>
-          <AppTopRelated title="Top Related Applications" subheader="Aplicaciones relacionadas" list={_appRelated} />
+          <AppTopRelated title="Productos Relacionados" subheader="Productos con mayor rotación" list={_appRelated} />
         </Grid>
 
         <Grid xs={12} sm={6} md={4} lg={4}>
           <AppTopInstalledCountries
-            title="Top Installed Countries"
-            subheader="Países principales"
+            title="Sucursales por Región"
+            subheader="Distribución geográfica"
             list={_appInstalled}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={4} lg={4}>
-          <AppTopAuthors title="Top Authors" subheader="Autores destacados" list={_appAuthors} />
+          <AppTopAuthors title="Mejores Vendedores" subheader="Top de ventas del mes" list={_appAuthors} />
         </Grid>
 
         <Grid xs={12} sm={6} md={12} lg={12}>
           <Stack spacing={{ xs: 2, sm: 3 }} direction={{ xs: 'column', sm: 'row' }}>
             <AppWidget
-              title="Conversion"
-              total={38566}
-              icon="solar:user-rounded-bold"
+              title="Tasa de Conversión"
+              total={73}
+              icon="solar:chart-square-bold"
               sx={{ flex: 1 }}
               chart={{
-                series: 48
+                series: 73
               }}
             />
 
             <AppWidget
-              title="Applications"
-              total={55566}
-              icon="fluent:mail-24-filled"
+              title="Órdenes Pendientes"
+              total={42}
+              icon="solar:bell-bing-bold"
+              color="warning"
+              sx={{ flex: 1 }}
+              chart={{
+                series: 42
+              }}
+            />
+
+            <AppWidget
+              title="Productos Activos"
+              total={856}
+              icon="solar:box-bold"
               color="info"
               sx={{ flex: 1 }}
               chart={{
-                series: 75
+                series: 85
+              }}
+            />
+
+            <AppWidget
+              title="Satisfacción Cliente"
+              total={94}
+              icon="solar:heart-bold"
+              color="success"
+              sx={{ flex: 1 }}
+              chart={{
+                series: 94
               }}
             />
           </Stack>

@@ -42,17 +42,36 @@ export const _appAuthors = [...Array(3)].map((_, index) => ({
   totalFavorites: _mock.number.nativeL(index)
 }));
 
-export const _appInvoices = [...Array(5)].map((_, index) => {
-  const category = ['Android', 'Mac', 'Windows', 'Android', 'Mac'][index];
-
-  const status = ['paid', 'out of date', 'progress', 'paid', 'paid'][index];
+export const _appInvoices = [...Array(8)].map((_, index) => {
+  const categories = [
+    'Electrónicos',
+    'Oficina',
+    'Computadores',
+    'Accesorios',
+    'Software',
+    'Mobiliario',
+    'Papelería',
+    'Impresoras'
+  ][index];
+  const statuses = ['Pagada', 'Pendiente', 'Vencida', 'Pagada', 'Pagada', 'Pendiente', 'Pagada', 'Vencida'][index];
+  const invoiceNumbers = [
+    `FAC-2025-${1234 + index}`,
+    `FAC-2025-${1250 + index}`,
+    `FAC-2025-${1300 + index}`,
+    `FAC-2025-${1400 + index}`,
+    `FAC-2025-${1500 + index}`,
+    `FAC-2025-${1600 + index}`,
+    `FAC-2025-${1700 + index}`,
+    `FAC-2025-${1800 + index}`
+  ][index];
+  const prices = [1250000, 890000, 2340000, 450000, 890000, 1560000, 234000, 3450000][index];
 
   return {
     id: _mock.id(index),
-    invoiceNumber: `INV-199${index}`,
-    price: _mock.number.price(index),
-    category,
-    status
+    invoiceNumber: invoiceNumbers,
+    price: prices,
+    category: categories,
+    status: statuses
   };
 });
 
