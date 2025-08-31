@@ -147,6 +147,19 @@ export const paths = {
         details: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}`,
         edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`
       }
+    },
+    accounting: {
+      root: `${ROOTS.DASHBOARD}/accounting`,
+      chartOfAccounts: `${ROOTS.DASHBOARD}/accounting/chart-of-accounts`,
+      mappings: `${ROOTS.DASHBOARD}/accounting/chart-of-accounts/mappings`,
+      import: `${ROOTS.DASHBOARD}/accounting/chart-of-accounts/import`,
+      journal: {
+        root: `${ROOTS.DASHBOARD}/accounting/journal`,
+        new: `${ROOTS.DASHBOARD}/accounting/journal/new`,
+        details: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}`,
+        edit: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}/edit`,
+        reversal: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}/reversal`
+      }
     }
   }
 };

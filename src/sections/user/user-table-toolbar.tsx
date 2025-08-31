@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
@@ -11,19 +11,18 @@ import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import { Autocomplete, FormControl } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+
 // ----------------------------------------------------------------------
 
 export default function UserTableToolbar({
   filters,
   onFilters,
   //
-  roleOptions
+  roleOptions: _roleOptions
 }) {
   const popover = usePopover();
   const dispatch = useAppDispatch();
-  const theme = useTheme();
 
   const handleFilterName = useCallback(
     (event) => {
@@ -34,42 +33,21 @@ export default function UserTableToolbar({
 
   const handleFilterMunicipio = useCallback(
     (event, value) => {
-      console.log(value);
-      onFilters('municipio', value || '');
+      onFilters('municipio', value || null);
     },
     [onFilters]
   );
-  useEffect(() => {
+
+  React.useEffect(() => {
     dispatch(getAllMunicipios());
   }, [dispatch]);
-  const { locations } = useAppSelector((state) => state.locations);
 
-  const [municipios, setMunicipios] = useState([]);
+  // Use precomputed municipios from the store to avoid flattening undefined towns
+  const municipios = useAppSelector((state) => state.locations.municipios || []);
 
-  useEffect(() => {
-    // Set towns in locations
-    const towns = locations.flatMap((department) =>
-      department.towns.map((town) => ({
-        name: town.name,
-        id: town.id
-      }))
-    );
-    setMunicipios(towns);
-  }, [locations]);
-
-  const [searchQueryMunicipio, setSearchQueryMunicipio] = useState('');
-
-  const handleInputMunicipioChange = (event, value) => {
-    setSearchQueryMunicipio(value ? value.name : '');
-    console.log(value);
-    handleFilterMunicipio(event, value);
-  };
-
-  const isOptionEqualToValue = (option, value = '') => {
-    if (option && value) {
-      return option.id === value.id && option.name === value.name;
-    }
-    return false;
+  const isOptionEqualToValue = (option, value) => {
+    if (!option || !value) return false;
+    return option.id === value.id;
   };
 
   return (
@@ -113,13 +91,10 @@ export default function UserTableToolbar({
         >
           <Autocomplete
             fullWidth
-            // onInputChange={handleInputMunicipioChange}
-            onChange={(event, value) => {
-              handleInputMunicipioChange(event, value);
-            }}
-            value={filters.municipio || ''}
+            onChange={(event, value) => handleFilterMunicipio(event, value)}
+            value={filters.municipio || null}
             isOptionEqualToValue={isOptionEqualToValue}
-            getOptionLabel={(option) => (option.name ? option.name : '')}
+            getOptionLabel={(option) => (option && option.name ? option.name : '')}
             options={municipios}
             renderInput={(params) => <TextField {...params} label="Municipio" margin="none" />}
           />

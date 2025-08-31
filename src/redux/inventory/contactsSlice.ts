@@ -7,8 +7,8 @@ import { getContacts as getContactsApi, createContact as createContactApi } from
 interface ContactsState {
   contacts: ContactInterface[];
   contactsLoading: boolean;
-  error: any;
-  success: any;
+  error: string | null;
+  success: boolean | null;
   contactsEmpty: boolean;
 
   contactsPopup: boolean;
@@ -16,8 +16,8 @@ interface ContactsState {
   // Contact detail
   contact: ContactInterface | null;
   contactLoading: boolean;
-  contactError: any;
-  contactSuccess: any;
+  contactError: string | null;
+  contactSuccess: boolean | null;
 }
 
 const initialState: ContactsState = {
@@ -45,7 +45,7 @@ const contactsSlice = createSlice({
     },
     hasError(state, action) {
       state.contactsLoading = false;
-      state.error = action.payload;
+      state.error = action.payload as string;
       state.success = false;
       state.contactsEmpty = true;
     },
@@ -59,7 +59,7 @@ const contactsSlice = createSlice({
     getAllContactsError(state, action) {
       state.contacts = [];
       state.contactsLoading = false;
-      state.error = action.payload;
+      state.error = action.payload as string;
       state.success = false;
       state.contactsEmpty = true;
     },
@@ -74,10 +74,12 @@ const contactsSlice = createSlice({
     // Contact detail
     startLoadingContact(state) {
       state.contactLoading = true;
+      state.contactError = null;
+      state.contactSuccess = null;
     },
     hasErrorContact(state, action) {
       state.contactLoading = false;
-      state.contactError = action.payload;
+      state.contactError = action.payload as string;
       state.contactSuccess = false;
     },
     getContactByIdSuccess(state, action) {
@@ -89,7 +91,7 @@ const contactsSlice = createSlice({
     getContactByIdError(state, action) {
       state.contact = null;
       state.contactLoading = false;
-      state.contactError = action.payload;
+      state.contactError = action.payload as string;
       state.contactSuccess = false;
     },
     updateContactSuccess(state, action) {
@@ -100,7 +102,7 @@ const contactsSlice = createSlice({
     },
     updateContactError(state, action) {
       state.contactLoading = false;
-      state.contactError = action.payload;
+      state.contactError = action.payload as string;
       state.contactSuccess = false;
     },
     createContactSuccess(state, action) {
@@ -117,6 +119,12 @@ const contactsSlice = createSlice({
     },
     togglePopup(state) {
       state.contactsPopup = !state.contactsPopup;
+    },
+    openPopup(state) {
+      state.contactsPopup = true;
+    },
+    closePopup(state) {
+      state.contactsPopup = false;
     }
   }
 });
@@ -137,7 +145,9 @@ export const {
   updateContactError,
   createContactSuccess,
   resetContact,
-  togglePopup
+  togglePopup,
+  openPopup,
+  closePopup
 } = contactsSlice.actions;
 
 // actions
@@ -153,9 +163,11 @@ export const getAllContacts = () => async (dispatch, getState) => {
     }
 
     const response = await getContactsApi({ companyId });
-    dispatch(getAllContactsSuccess(response.data.data || []));
-  } catch (error) {
-    dispatch(hasError(error.message || error));
+    const list = (response as any)?.data?.data ?? (response as any)?.data ?? response ?? [];
+    dispatch(getAllContactsSuccess(list));
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(hasError(message));
   }
 };
 
@@ -164,8 +176,9 @@ export const deleteContact = (_id) => async (dispatch) => {
     dispatch(startLoading());
     // Note: Delete functionality would need to be implemented in the API
     dispatch(getAllContacts());
-  } catch (error) {
-    dispatch(hasError(error.message || error));
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(hasError(message));
   }
 };
 
@@ -176,8 +189,9 @@ export const getContactById = (_id) => async (dispatch) => {
     dispatch(startLoadingContact());
     // Note: This would need to be implemented to get contact by ID
     dispatch(getContactByIdSuccess(null));
-  } catch (error) {
-    dispatch(getContactByIdError(error.message || error));
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(getContactByIdError(message));
   }
 };
 
@@ -188,8 +202,9 @@ export const updateContact =
       dispatch(startLoadingContact());
       // Note: Update functionality would need to be implemented in the API
       dispatch(getAllContacts());
-    } catch (error) {
-      dispatch(updateContactError(error.message || error));
+    } catch (error: any) {
+      const message = error?.message ? String(error.message) : String(error);
+      dispatch(updateContactError(message));
     }
   };
 
@@ -204,9 +219,13 @@ export const createContact = (databody) => async (dispatch, getState) => {
     }
 
     const response = await createContactApi({ ...databody, companyId });
-    dispatch(createContactSuccess(response.data));
+    const created = (response as any)?.data?.data ?? (response as any)?.data ?? response;
+    dispatch(createContactSuccess(created));
     dispatch(getAllContacts());
-  } catch (error) {
-    dispatch(updateContactError(error.message || error));
+    return created;
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(updateContactError(message));
+    return null;
   }
 };

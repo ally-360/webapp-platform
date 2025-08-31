@@ -14,7 +14,6 @@ import {
   IconButton,
   Switch,
   FormControlLabel,
-  Alert,
   Chip
 } from '@mui/material';
 import { Icon } from '@iconify/react';
@@ -106,7 +105,7 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
         }
       }}
     >
-      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
         {/* Header */}
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
@@ -118,77 +117,10 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
         </Stack>
 
         <Divider sx={{ mb: 2 }} />
-
-        {/* Notice */}
-        <Alert severity="info" sx={{ mb: 3 }}>
-          Las opciones mostradas son plantillas para futuras funcionalidades.
-        </Alert>
-
         {/* Settings Content */}
         <Stack spacing={3} sx={{ flex: 1, overflow: 'auto' }}>
-          {/* General Settings */}
-          <Box>
-            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-              Configuraciones Generales
-            </Typography>
-
-            <Stack spacing={2}>
-              <FormControlLabel control={<Switch defaultChecked />} label="Impresión automática de tickets" />
-              <FormControlLabel control={<Switch />} label="Sonidos de notificación" />
-              <FormControlLabel control={<Switch defaultChecked />} label="Confirmación antes de eliminar" />
-            </Stack>
-          </Box>
-
-          <Divider />
-
-          {/* Quick Actions */}
-          <Box>
-            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-              Acciones Rápidas
-            </Typography>
-
-            <List sx={{ p: 0 }}>
-              {settingsOptions.map((option) => (
-                <ListItem key={option.id} disablePadding sx={{ mb: 1 }}>
-                  <ListItemButton
-                    onClick={option.action}
-                    sx={{
-                      borderRadius: 1,
-                      '&:hover': {
-                        bgcolor: 'action.hover'
-                      }
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 40 }}>
-                      <Icon icon={option.icon} width={24} height={24} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={option.title}
-                      secondary={option.description}
-                      primaryTypographyProps={{
-                        variant: 'subtitle2',
-                        fontWeight: 500
-                      }}
-                      secondaryTypographyProps={{
-                        variant: 'caption',
-                        color: 'text.secondary'
-                      }}
-                    />
-                    <Icon icon="mdi:chevron-right" width={16} height={16} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-
-          <Divider />
-
           {/* Important Actions */}
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-              Acciones Importantes
-            </Typography>
-
             <List sx={{ p: 0 }}>
               {dangerOptions.map((option) => (
                 <ListItem key={option.id} disablePadding sx={{ mb: 1 }}>
@@ -229,6 +161,57 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
                 </ListItem>
               ))}
             </List>
+          </Box>
+          <Divider />
+          {/* Quick Actions */}
+          <Box>
+            <List sx={{ p: 0 }}>
+              {settingsOptions.map((option) => (
+                <ListItem key={option.id} disablePadding sx={{ mb: 1 }}>
+                  <ListItemButton
+                    onClick={option.action}
+                    sx={{
+                      borderRadius: 1,
+                      '&:hover': {
+                        bgcolor: 'action.hover'
+                      }
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40 }}>
+                      <Icon icon={option.icon} width={24} height={24} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={option.title}
+                      secondary={option.description}
+                      primaryTypographyProps={{
+                        variant: 'subtitle2',
+                        fontWeight: 500
+                      }}
+                      secondaryTypographyProps={{
+                        variant: 'caption',
+                        color: 'text.secondary'
+                      }}
+                    />
+                    <Icon icon="mdi:chevron-right" width={16} height={16} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+
+          <Divider />
+
+          {/* General Settings */}
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+              Configuraciones Generales
+            </Typography>
+
+            <Stack spacing={2}>
+              <FormControlLabel control={<Switch defaultChecked />} label="Impresión automática de tickets" />
+              <FormControlLabel control={<Switch />} label="Sonidos de notificación" />
+              <FormControlLabel control={<Switch defaultChecked />} label="Confirmación antes de eliminar" />
+            </Stack>
           </Box>
         </Stack>
 

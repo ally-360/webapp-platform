@@ -15,6 +15,8 @@ type RHFPhoneNumberProps = {
   onlyCountries?: string[];
   countryCodeEditable?: boolean;
   autoComplete?: string;
+  placeholder?: string;
+  fullWidth?: boolean;
 };
 
 export default function RHFPhoneNumber({ name, helperText, ...other }: RHFPhoneNumberProps): JSX.Element {
@@ -48,7 +50,8 @@ export default function RHFPhoneNumber({ name, helperText, ...other }: RHFPhoneN
             field.onBlur();
           }}
           inputProps={{
-            autoComplete: other.autoComplete || 'tel'
+            autoComplete: other.autoComplete || 'tel',
+            placeholder: other.placeholder
           }}
           sx={{
             '& .MuiOutlinedInput-root': {

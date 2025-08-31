@@ -27,6 +27,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 // @mui
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { es } from 'date-fns/locale';
 // routes
 import Router from 'src/routes/sections';
 // theme
@@ -57,7 +58,7 @@ export default function App() {
       <Provider store={store}>
         <ErrorHandlerProvider>
           <AxiosErrorSetup />
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
             <SettingsProvider
               defaultSettings={{
                 themeMode: 'light', // 'light' | 'dark'

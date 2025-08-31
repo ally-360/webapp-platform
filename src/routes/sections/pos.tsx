@@ -14,6 +14,7 @@ import StepGuard from 'src/auth/guard/step-guard';
 
 const PosListView = lazy(() => import('src/pages/pos/list'));
 const PosContainerView = lazy(() => import('src/pages/pos/details'));
+const PosSalesHistoryPage = lazy(() => import('src/pages/pos/history'));
 // ----------------------------------------------------------------------
 
 export const posRoutes = [
@@ -32,7 +33,8 @@ export const posRoutes = [
     ),
     children: [
       { element: <PosContainerView />, index: true },
-      { path: 'list', element: <PosListView /> }
+      { path: 'list', element: <PosListView /> },
+      { path: 'history', element: <PosSalesHistoryPage /> }
     ]
   }
 ];

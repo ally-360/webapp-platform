@@ -1,7 +1,5 @@
-import { reject } from 'lodash';
-// utils
 import { createSlice } from '@reduxjs/toolkit';
-import { getCategories as getCategoriesApi } from '../../api';
+import { getCategories as getCategoriesApi, isMockMode } from '../../api';
 
 // ----------------------------------------------------------------------
 
@@ -49,16 +47,28 @@ const slice = createSlice({
     },
     deleteCategory(state, action) {
       state.isLoading = false;
-      state.categories = reject(state.categories, { id: action.payload });
+      state.categories = (state.categories || []).filter((c: any) => c.id !== action.payload);
     },
     switchPopupState(state, action) {
+      const { payload } = action;
+      // Deterministic open/close
+      if (typeof payload === 'boolean') {
+        state.openPopup = payload;
+        state.seeCategory = false;
+        state.categoryEdit = null;
+        return;
+      }
+      // Open in edit mode with provided category object
+      if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+        state.categoryEdit = payload;
+        state.openPopup = true;
+        state.seeCategory = false;
+        return;
+      }
+      // Default: toggle
       state.openPopup = !state.openPopup;
       state.seeCategory = false;
-      if (action.payload) {
-        state.categoryEdit = action.payload;
-      } else {
-        state.categoryEdit = null;
-      }
+      state.categoryEdit = null;
     },
 
     // Detail category
@@ -101,31 +111,70 @@ export function getCategories() {
       const response = await getCategoriesApi({ companyId });
       dispatch(slice.actions.getCategories(response.data));
     } catch (error) {
-      dispatch(slice.actions.hasError(error.message || error));
+      dispatch(slice.actions.hasError(error?.message || String(error)));
     }
   };
 }
 
 export function deleteCategory(_id) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     dispatch(slice.actions.startLoading());
     try {
+      if (isMockMode()) {
+        const { categories } = getState().categories;
+        const id = typeof _id === 'object' ? _id?.id : _id;
+        dispatch(slice.actions.getCategories((categories || []).filter((c: any) => c.id !== id)));
+        return;
+      }
       // Note: Delete functionality would need to be implemented in the API
       dispatch(getCategories());
     } catch (error) {
-      dispatch(slice.actions.hasError(error.message || error));
+      dispatch(slice.actions.hasError(error?.message || String(error)));
     }
   };
 }
 
-export function createCategory(_databody) {
-  return async (dispatch) => {
+export function createCategory(databody) {
+  return async (dispatch, getState) => {
     dispatch(slice.actions.startLoading());
     try {
+      if (isMockMode()) {
+        const state = getState();
+        const companyId = state?.auth?.user?.companies?.[0]?.id || 'mock-company';
+        const current = state.categories.categories || [];
+        const newCategory = {
+          id: `mock-category-${Date.now()}`,
+          name: databody?.name || 'Nueva categoría',
+          description: databody?.description || '',
+          categoryMainCategory: databody?.categoryMainCategory || null,
+          companyId
+        };
+        dispatch(slice.actions.getCategories([...current, newCategory]));
+        return;
+      }
       // Note: Create functionality would need to be implemented in the API
       dispatch(getCategories());
     } catch (error) {
-      dispatch(slice.actions.hasError(error.message || error));
+      dispatch(slice.actions.hasError(error?.message || String(error)));
+    }
+  };
+}
+
+export function editCategory({ id, databody }) {
+  return async (dispatch, getState) => {
+    dispatch(slice.actions.startLoading());
+    try {
+      if (isMockMode()) {
+        const state = getState();
+        const current = state.categories.categories || [];
+        const updated = (current || []).map((c: any) => (c.id === id ? { ...c, ...databody } : c));
+        dispatch(slice.actions.getCategories(updated));
+        return;
+      }
+      // Note: Edit functionality would need to be implemented in the API
+      dispatch(getCategories());
+    } catch (error) {
+      dispatch(slice.actions.hasError(error?.message || String(error)));
     }
   };
 }
@@ -146,22 +195,29 @@ export function getProductsInCategory(_name) {
       dispatch(slice.actions.getProducts([]));
     } catch (error) {
       console.error(error);
-      dispatch(slice.actions.hasError(error.message || error));
+      dispatch(slice.actions.hasError(error?.message || String(error)));
     }
   };
 }
 
 // ----------------------------------------------------------------------
 
-export function getViewCategoryById(_id) {
-  return async (dispatch) => {
+export function getViewCategoryById(id) {
+  return async (dispatch, getState) => {
     dispatch(slice.actions.startLoadingViewCategoryById());
     try {
+      if (isMockMode()) {
+        const { categories } = getState().categories;
+        const category = (categories || []).find((c: any) => c.id === id) || null;
+        dispatch(slice.actions.getViewCategoryById(category));
+        dispatch(slice.actions.getViewCategoryProducts([]));
+        return;
+      }
       // Note: This would need to be implemented to get category by ID
       dispatch(slice.actions.getViewCategoryById(null));
       dispatch(slice.actions.getViewCategoryProducts([]));
     } catch (error) {
-      dispatch(slice.actions.hasErrorViewCategoryById(error.message || error));
+      dispatch(slice.actions.hasErrorViewCategoryById(error?.message || String(error)));
     }
   };
 }

@@ -94,18 +94,16 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
     ? drawerWidth.md
     : drawerWidth.xs;
 
-  // Update customer in Redux when selected
   useEffect(() => {
     if (selectedCustomer !== sale.customer) {
       dispatch(setCustomerToSaleWindow({ windowId: sale.id, customer: selectedCustomer }));
     }
   }, [selectedCustomer, sale.customer, sale.id, dispatch]);
 
-  // Simulate loading for products (in a real app, this would be actual API loading)
   useEffect(() => {
     const timer = setTimeout(() => {
       setProductsLoading(false);
-    }, 1500);
+    }, 400);
     return () => clearTimeout(timer);
   }, []);
 

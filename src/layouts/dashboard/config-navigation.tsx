@@ -8,12 +8,16 @@ import SvgColor from 'src/components/svg-color';
 import { useDispatch } from 'react-redux';
 import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
+import { togglePopup as toggleContactsPopup } from 'src/redux/inventory/contactsSlice';
 import { useNavigate } from 'react-router';
+
+// Cast SvgColor to any locally to avoid TS prop inference issues
+const SvgColorAny: any = SvgColor;
 
 // ----------------------------------------------------------------------
 
 const icon = (name) => (
-  <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
+  <SvgColorAny src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
   // OR
   // <Iconify icon="fluent:mail-24-filled" />
   // https://icon-sets.iconify.design/solar/
@@ -130,6 +134,10 @@ export function useNavData() {
               {
                 title: t('Caja'),
                 path: paths.dashboard.pos
+              },
+              {
+                title: t('Historial de ventas'),
+                path: '/pos/history'
               }
             ]
           },
@@ -160,6 +168,15 @@ export function useNavData() {
             ]
           },
           {
+            title: t('Contabilidad'),
+            path: paths.dashboard.accounting.root,
+            icon: ICONS.invoice,
+            children: [
+              { title: t('Catálogo de cuentas'), path: paths.dashboard.accounting.chartOfAccounts },
+              { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
+            ]
+          },
+          {
             title: t('orden de compra'),
             path: paths.dashboard.order.root,
             icon: ICONS.order,
@@ -169,7 +186,10 @@ export function useNavData() {
           {
             title: t('Contactos'),
             path: paths.dashboard.user.list,
-            icon: ICONS.user
+            icon: ICONS.user,
+            openPopup() {
+              dispatch(toggleContactsPopup());
+            }
             // children: [
             //   // { title: t('profile'), path: paths.dashboard.user.root },
             //   // { title: t('cards'), path: paths.dashboard.user.cards },

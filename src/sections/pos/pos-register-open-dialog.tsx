@@ -12,9 +12,10 @@ import {
   InputAdornment,
   Grid,
   Stack,
-  Card,
   Alert,
-  Chip
+  Chip,
+  Tooltip,
+  IconButton
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -92,29 +93,45 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 3,
-            minHeight: '60vh'
+            borderRadius: 3
           }
         }}
       >
-        {/* Enhanced Header */}
         <DialogTitle
           sx={{
-            pb: 2,
-            background: (theme) =>
-              `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-            color: 'success.contrastText',
-            '& .MuiTypography-root': {
-              color: 'inherit'
-            }
+            pb: 2
           }}
         >
           <Stack direction="row" alignItems="center" spacing={2}>
             <Icon icon="mdi:cash-register" width={32} height={32} />
             <Box>
-              <Typography variant="h5" component="div">
-                Apertura de Caja
-              </Typography>
+              {/* Title with tooltip info icon */}
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Typography variant="h5" component="div">
+                  Apertura de Caja
+                </Typography>
+                <Tooltip
+                  arrow
+                  title={
+                    <Box>
+                      <Typography variant="subtitle2">
+                        <strong>Apertura de Caja:</strong>
+                      </Typography>
+                      <Typography variant="body2" component="div">
+                        Este proceso debe realizarse al inicio del día o cuando se inicia operaciones en un nuevo punto
+                        de venta.
+                      </Typography>
+                      <Typography variant="body2" component="div">
+                        Registre el dinero inicial en la caja registradora.
+                      </Typography>
+                    </Box>
+                  }
+                >
+                  <IconButton size="small" color="info" aria-label="Información de apertura de caja" sx={{ p: 0.5 }}>
+                    <Icon icon="mdi:information-outline" width={18} height={18} />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
                 Configuración inicial del punto de venta
               </Typography>
@@ -122,118 +139,13 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
           </Stack>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 3 }}>
-          <Alert severity="info" sx={{ mb: 3 }}>
-            <Typography variant="body2">
-              <strong>Apertura de Caja:</strong> Este proceso debe realizarse al inicio del día o cuando se inicia
-              operaciones en un nuevo punto de venta. Registre el dinero inicial en la caja registradora.
-            </Typography>
-          </Alert>
-
+        <DialogContent sx={{ p: 3, mt: 2 }}>
           <Grid container spacing={3}>
             {/* Left Column - Basic Info */}
-            <Grid item xs={12} md={6}>
-              <Stack spacing={3}>
-                {/* PDV Name */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="mdi:point-of-sale" />
-                    Punto de Venta (PDV)
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    label="Nombre del PDV"
-                    value={pdvName}
-                    onChange={(e) => setPdvName(e.target.value)}
-                    placeholder="Ej: PDV-001, Caja Principal, etc."
-                    sx={{ bgcolor: 'background.paper' }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Icon icon="mdi:store" />
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Card>
-
-                {/* Operator Info */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="mdi:account-tie" />
-                    Operador Responsable
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    label="Nombre del Operador"
-                    value={operatorName}
-                    onChange={(e) => setOperatorName(e.target.value)}
-                    placeholder="Nombre completo del cajero/operador"
-                    sx={{ bgcolor: 'background.paper' }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Icon icon="mdi:account" />
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                </Card>
-
-                {/* Opening Date */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="mdi:calendar-clock" />
-                    Fecha y Hora de Apertura
-                  </Typography>
-                  <DateTimePicker
-                    label="Fecha y Hora de Apertura"
-                    value={openingDate}
-                    onChange={(newValue) => setOpeningDate(newValue || new Date())}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        sx: { bgcolor: 'background.paper' },
-                        InputProps: {
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Icon icon="mdi:calendar" />
-                            </InputAdornment>
-                          )
-                        }
-                      }
-                    }}
-                  />
-                </Card>
-              </Stack>
-            </Grid>
-
-            {/* Right Column - Opening Amount */}
-            <Grid item xs={12} md={6}>
-              <Stack spacing={3}>
-                {/* Opening Amount */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="mdi:cash-multiple" />
-                    Dinero Inicial en Caja
-                  </Typography>
-
+            <Grid item xs={12} mb={4} md={12}>
+              {/* Dividir en 2 columnas */}
+              <Grid mt={0.1} pl={0.5} container spacing={2}>
+                <Grid item xs={12} md={8}>
                   <TextField
                     fullWidth
                     label="Monto de Apertura"
@@ -253,8 +165,6 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                       step: 1000
                     }}
                   />
-
-                  {/* Suggested Amounts */}
                   <Box>
                     <Typography variant="caption" color="text.secondary" gutterBottom display="block">
                       Montos sugeridos:
@@ -273,28 +183,29 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                       ))}
                     </Stack>
                   </Box>
-                </Card>
-
-                {/* Current Amount Display */}
-                <Card
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  md={4}
+                  display="flex"
+                  flexDirection="column"
+                  flex={1}
+                  alignItems="center"
+                  justifyContent="center"
                   sx={{
-                    p: 3,
-                    border: '2px solid',
-                    borderColor: 'success.main',
-                    background: (theme) =>
-                      `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.success.light} 100%)`
+                    padding: '0px !important'
                   }}
                 >
                   <Typography
                     variant="subtitle2"
-                    color="success.main"
+                    color="primary.main"
                     gutterBottom
                     sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                   >
-                    <Icon icon="mdi:cash" />
                     Monto de Apertura
                   </Typography>
-                  <Typography variant="h4" color="success.main" fontWeight="bold">
+                  <Typography variant="h4" color="primary.main" fontWeight="bold">
                     {formatCurrency(openingAmount)}
                   </Typography>
                   {openingAmount === 0 && (
@@ -302,29 +213,78 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                       Ingrese el dinero inicial disponible en la caja
                     </Typography>
                   )}
-                </Card>
+                </Grid>
+              </Grid>
+            </Grid>
 
+            <Grid item xs={12} md={6}>
+              <Stack spacing={3}>
+                <TextField
+                  fullWidth
+                  label="Punto de venta"
+                  value={pdvName}
+                  onChange={(e) => setPdvName(e.target.value)}
+                  placeholder="Ej: PDV-001, Caja Principal, etc."
+                  sx={{ bgcolor: 'background.paper' }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Icon icon="mdi:store" />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="Nombre del vendedor"
+                  value={operatorName}
+                  onChange={(e) => setOperatorName(e.target.value)}
+                  placeholder="Nombre completo del cajero/operador"
+                  sx={{ bgcolor: 'background.paper' }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Icon icon="mdi:account" />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Stack>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Stack spacing={3}>
                 {/* Notes */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="mdi:note-text" />
-                    Observaciones
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Notas sobre la apertura de caja, denominaciones de billetes, etc..."
-                    variant="outlined"
-                    sx={{ bgcolor: 'background.paper' }}
-                  />
-                </Card>
+
+                <DateTimePicker
+                  label="Fecha y Hora de Apertura"
+                  value={openingDate}
+                  onChange={(newValue) => setOpeningDate(newValue || new Date())}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      sx: { bgcolor: 'background.paper' },
+                      InputProps: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Icon icon="mdi:calendar" />
+                          </InputAdornment>
+                        )
+                      }
+                    }
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Notas sobre la apertura de caja, denominaciones de billetes, etc..."
+                  variant="outlined"
+                  sx={{ bgcolor: 'background.paper' }}
+                />
               </Stack>
             </Grid>
           </Grid>
@@ -340,14 +300,8 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
           )}
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, bgcolor: 'background.neutral', gap: 2 }}>
-          <Button
-            onClick={handleClose}
-            variant="outlined"
-            size="large"
-            startIcon={<Icon icon="mdi:close" />}
-            sx={{ minWidth: 120 }}
-          >
+        <DialogActions sx={{ p: 3, gap: 2 }}>
+          <Button onClick={handleClose} variant="outlined" size="large" startIcon={<Icon icon="mdi:close" />}>
             Cancelar
           </Button>
           <Button
@@ -356,15 +310,6 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
             disabled={!canConfirm}
             size="large"
             startIcon={<Icon icon="mdi:check" />}
-            sx={{
-              minWidth: 160,
-              background: (theme) =>
-                `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-              '&:hover': {
-                background: (theme) =>
-                  `linear-gradient(135deg, ${theme.palette.success.dark} 0%, ${theme.palette.success.main} 100%)`
-              }
-            }}
           >
             Abrir Caja
           </Button>

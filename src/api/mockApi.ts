@@ -27,7 +27,10 @@ import {
   StockFilters,
   CreateInvoicePayload,
   ApiSuccessResponse,
-  PaginatedResponse
+  PaginatedResponse,
+  // POS types
+  PosSaleHistoryItem,
+  GetPosSalesHistoryFilters
 } from './types';
 
 import {
@@ -540,7 +543,8 @@ export const createInvoice = async (
   const invoiceItems: SalesInvoiceItem[] = [];
   let subtotal = 0;
 
-  for (const item of items) {
+  // Reemplazar for..of por forEach para evitar necesidad de regenerator-runtime
+  items.forEach((item) => {
     const product = products.find((p) => p.id === item.productId);
     if (!product) {
       throw new Error(`Producto ${item.productId} no encontrado`);
@@ -562,7 +566,7 @@ export const createInvoice = async (
 
     invoiceItems.push(invoiceItem);
     subtotal += itemTotal;
-  }
+  });
 
   const totalTaxes = Math.round(subtotal * 0.19);
   const totalAmount = subtotal + totalTaxes + shipping;
@@ -596,4 +600,179 @@ export const createInvoice = async (
   salesInvoiceItems.push(...invoiceItems);
 
   return createSuccessResponse({ invoice: newInvoice, items: invoiceItems });
+};
+
+// ========================================
+// 🏪 POS SALES HISTORY (MOCK)
+// ========================================
+
+// In-memory POS sales cache to support optimistic updates between calls
+let posSalesCache: PosSaleHistoryItem[] | null = null;
+
+function seedPosSalesCache(): PosSaleHistoryItem[] {
+  if (posSalesCache) return posSalesCache;
+
+  const now = new Date();
+  const base: PosSaleHistoryItem[] = [];
+
+  // A couple of static rows
+  base.push({
+    id: 'pos-sale-001',
+    invoice_number: 'TECH-001',
+    created_at: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 12).toISOString(),
+    customer: { name: 'Carlos Martínez' },
+    seller_name: 'Juan Carlos',
+    products: [{ id: 'prod-tech-001', name: 'Samsung Galaxy S24', quantity: 1, price: 3300000 }],
+    payments: [{ method: 'card', amount: 3477000 }],
+    subtotal: 3300000,
+    tax_amount: 177000,
+    total: 3477000,
+    pos_type: 'simple',
+    status: 'paid'
+  });
+
+  base.push({
+    id: 'pos-sale-002',
+    invoice_number: 'DORADO-001',
+    created_at: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 13).toISOString(),
+    customer: { name: 'Luis García' },
+    seller_name: 'María Elena',
+    products: [
+      { id: 'prod-dorado-001', name: 'Camiseta Nike Dri-FIT', quantity: 2, price: 120000 },
+      { id: 'prod-dorado-003', name: 'Zapatillas Nike Air Max 270', quantity: 1, price: 550000 }
+    ],
+    payments: [{ method: 'cash', amount: 1021000 }],
+    subtotal: 910000,
+    tax_amount: 111000,
+    total: 1021000,
+    pos_type: 'electronic',
+    status: 'paid'
+  });
+
+  // Synthetic recent rows (last 14 days)
+  for (let i = 0; i < 14; i += 1) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const isElectronic = i % 2 === 0;
+    const id = `pos-sale-synth-${i.toString().padStart(2, '0')}`;
+
+    let items: { id: string; name: string; quantity: number; price: number }[];
+    if (i % 3 === 0) {
+      items = [{ id: 'prod-tech-005', name: 'Logitech MX Master 3S', quantity: 1, price: 380000 }];
+    } else {
+      items = [
+        { id: 'prod-dorado-001', name: 'Camiseta Nike Dri-FIT', quantity: 1 + (i % 2), price: 120000 },
+        { id: 'prod-dorado-003', name: 'Zapatillas Nike Air Max 270', quantity: 1, price: 550000 }
+      ];
+    }
+
+    const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0);
+    const tax = Math.round(subtotal * 0.19);
+    const total = subtotal + tax;
+
+    base.push({
+      id,
+      invoice_number: isElectronic ? `E-10${i}` : `S-20${i}`,
+      created_at: d.toISOString(),
+      customer: { name: i % 2 === 0 ? 'Cliente Demo' : 'Empresa TechCorp SAS' },
+      seller_name: i % 2 === 0 ? 'Juan Carlos' : 'María Elena',
+      products: items,
+      payments: [{ method: isElectronic ? 'card' : 'cash', amount: total }],
+      subtotal,
+      tax_amount: tax,
+      total,
+      pos_type: isElectronic ? 'electronic' : 'simple',
+      status: 'paid'
+    });
+  }
+
+  posSalesCache = base.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  return posSalesCache;
+}
+
+function applyPosFilters(data: PosSaleHistoryItem[], filters: GetPosSalesHistoryFilters): PosSaleHistoryItem[] {
+  let out = [...data];
+
+  if (filters.query) {
+    const q = filters.query.toLowerCase();
+    out = out.filter(
+      (row) =>
+        (row.invoice_number || '').toLowerCase().includes(q) ||
+        (row.customer?.name || '').toLowerCase().includes(q) ||
+        (row.seller_name || '').toLowerCase().includes(q)
+    );
+  }
+
+  if (filters.pos_type && filters.pos_type !== 'all') {
+    out = out.filter((row) => row.pos_type === filters.pos_type);
+  }
+
+  if (filters.dateFrom && filters.dateTo) {
+    const start = new Date(filters.dateFrom);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(filters.dateTo);
+    end.setHours(23, 59, 59, 999);
+    const s = start.getTime();
+    const e = end.getTime();
+    out = out.filter((row) => {
+      const t = new Date(row.created_at).getTime();
+      return t >= s && t <= e;
+    });
+  }
+
+  return out;
+}
+
+export const getPosSalesHistory = async (
+  filters: GetPosSalesHistoryFilters = {}
+): Promise<ApiSuccessResponse<PaginatedResponse<PosSaleHistoryItem>>> => {
+  await delay(200);
+  const all = seedPosSalesCache();
+  const filtered = applyPosFilters(all, filters);
+
+  const page = filters.page ?? 0;
+  const limit = filters.limit ?? 50;
+  const start = page * limit;
+  const end = start + limit;
+  const pageData = filtered.slice(start, end);
+
+  return createSuccessResponse({
+    data: pageData,
+    total: filtered.length,
+    page,
+    limit,
+    hasNext: end < filtered.length,
+    hasPrev: page > 0
+  });
+};
+
+export const downloadSalePDF = async (saleId: string): Promise<ApiSuccessResponse<{ url: string }>> => {
+  await delay(150);
+  const url = `https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf#sale=${encodeURIComponent(
+    saleId
+  )}`;
+  return createSuccessResponse({ url });
+};
+
+export const cancelSale = async (saleId: string): Promise<ApiSuccessResponse<{ id: string; status: 'cancelled' }>> => {
+  await delay(200);
+  const all = seedPosSalesCache();
+  const idx = all.findIndex((s) => s.id === saleId);
+  if (idx === -1) throw new Error('Venta no encontrada');
+  all[idx] = { ...all[idx], status: 'cancelled' };
+  posSalesCache = [...all];
+  return createSuccessResponse({ id: saleId, status: 'cancelled' });
+};
+
+export const createCreditNote = async (
+  saleId: string,
+  _payload: { reason?: string }
+): Promise<ApiSuccessResponse<{ id: string; status: 'refunded'; creditNoteId: string }>> => {
+  await delay(220);
+  const all = seedPosSalesCache();
+  const idx = all.findIndex((s) => s.id === saleId);
+  if (idx === -1) throw new Error('Venta no encontrada');
+  all[idx] = { ...all[idx], status: 'refunded' };
+  posSalesCache = [...all];
+  return createSuccessResponse({ id: saleId, status: 'refunded', creditNoteId: `CN-${Date.now()}` });
 };

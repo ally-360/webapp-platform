@@ -11,7 +11,7 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
+import { TransitionProps } from '@mui/material/transitions';
 
 import React, { useEffect, useMemo } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -25,33 +25,38 @@ import { useTranslation } from 'react-i18next';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { RHFTextField } from 'src/components/hook-form';
 import { Icon } from '@iconify/react';
-import { getBrands, switchPopupState } from 'src/redux/inventory/brandsSlice';
-import RequestService from '../../axios/services/service';
+import {
+  getBrands,
+  switchPopupState,
+  createBrand as createBrandThunk,
+  editBrand as editBrandThunk
+} from 'src/redux/inventory/brandsSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
-const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
+const Transition = React.forwardRef<unknown, TransitionProps & { children: React.ReactElement<any, any> }>(
+  (props, ref) => <Slide direction="up" ref={ref} {...props} />
+);
 
 function PopupCreateBrand() {
   const { enqueueSnackbar } = useSnackbar();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const theme = useTheme();
-  const { brandEdit } = useSelector((state) => state.brands);
+  const { brandEdit, openPopup } = useAppSelector((state) => state.brands);
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
 
   useEffect(() => {
-    console.log(brandEdit);
+    // console.log(brandEdit);
   }, [brandEdit]);
-  // create category schema
-  const createBrandSchema = Yup.object().shape(
-    {
-      name: Yup.string().required('Nombre requerido')
-    }[brandEdit]
-  );
+  // create brand schema (fixed)
+  const createBrandSchema = Yup.object().shape({
+    name: Yup.string().required('Nombre requerido')
+  });
 
   const defaultValues = useMemo(
     () => ({
-      name: brandEdit ? brandEdit.name : ''
+      name: brandEdit ? (brandEdit as any).name : ''
     }),
     [brandEdit]
   );
@@ -68,39 +73,27 @@ function PopupCreateBrand() {
   } = methods;
 
   useEffect(() => {
-    if (brandEdit) {
-      reset(defaultValues);
-    }
+    reset(defaultValues);
   }, [brandEdit, defaultValues, reset]);
-
-  useEffect(() => {
-    if (!brandEdit) {
-      reset(defaultValues);
-    }
-  }, [brandEdit, defaultValues, reset]);
-
-  const open = useSelector((state) => state.brands.openPopup);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (brandEdit) {
-        await RequestService.editBrand({ id: brandEdit.id, databody: data });
+        await dispatch(editBrandThunk({ id: (brandEdit as any).id, databody: data }) as any);
       } else {
-        await RequestService.createBrand(data);
+        await dispatch(createBrandThunk(data) as any);
       }
-      dispatch(getBrands());
+      dispatch(getBrands() as any);
       reset();
-      enqueueSnackbar(
-        brandEdit ? t(`Categoria ${data.name} editado correctamente`) : t(`Categoria ${data.name} Creado`),
-        {
-          variant: 'success'
-        }
-      );
-      dispatch(switchPopupState());
+      enqueueSnackbar(brandEdit ? t(`Marca ${data.name} editada correctamente`) : t(`Marca ${data.name} creada`), {
+        variant: 'success'
+      });
+      dispatch(switchPopupState(null));
     } catch (error) {
-      enqueueSnackbar(t('No se ha podido crear la categoria, verifica los datos nuevamente'), {
+      enqueueSnackbar(t('No se ha podido crear la marca, verifica los datos nuevamente'), {
         variant: 'error'
       });
+      // eslint-disable-next-line no-console
       console.log(error);
     }
   });
@@ -109,19 +102,19 @@ function PopupCreateBrand() {
     <Dialog
       fullWidth
       maxWidth="sm"
-      open={open}
-      onClose={switchPopupState}
+      open={openPopup as boolean}
+      onClose={() => dispatch(switchPopupState(null))}
       aria-labelledby="draggable-dialog-title"
       TransitionComponent={Transition}
     >
-      <DialogTitle id="scroll-dialog-title" boxShadow={2} sx={{ padding: '23px  40px 18px 40px!important' }}>
+      <DialogTitle id="scroll-dialog-title" sx={{ padding: '23px  40px 18px 40px!important' }}>
         <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
           <Icon icon="ic:round-store" width={24} height={24} />
           <Box sx={{ fontSize: 18, fontWeight: 500 }}>Crear Marca</Box>
         </Box>
         <IconButton
           aria-label="close"
-          onClick={() => dispatch(switchPopupState())}
+          onClick={() => dispatch(switchPopupState(null))}
           sx={{
             position: 'absolute',
             right: 10,
@@ -139,8 +132,8 @@ function PopupCreateBrand() {
           </Stack>
         </DialogContent>
         <DialogActions
-          boxShadow={2}
           sx={{
+            boxShadow: 2,
             padding: '20px 35px 15px 40px!important',
             display: 'flex',
             flexWrap: isMobile ? 'wrap' : 'nowrap',
@@ -156,7 +149,7 @@ function PopupCreateBrand() {
           <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
             {brandEdit ? 'Confirmar edición' : 'Crear Marca'}
           </LoadingButton>
-          <Button color="primary" variant="outlined" onClick={() => dispatch(switchPopupState())}>
+          <Button color="primary" variant="outlined" onClick={() => dispatch(switchPopupState(null))}>
             Cancelar
           </Button>
         </DialogActions>

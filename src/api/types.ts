@@ -293,3 +293,43 @@ export interface CreateInvoicePayload {
   method?: string;
   paymentTerm?: string;
 }
+
+// ========================================
+// 🏪 POS SALES HISTORY TYPES
+// ========================================
+export interface PosSalePayment {
+  method: 'cash' | 'card' | 'nequi' | 'transfer' | 'credit';
+  amount: number; // unidades monetarias (no centavos)
+  reference?: string;
+}
+
+export interface PosSaleProduct {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number; // unidades monetarias (no centavos)
+}
+
+export interface PosSaleHistoryItem {
+  id: string;
+  invoice_number?: string;
+  created_at: string; // ISO
+  customer?: { id?: string | number; name: string } | null;
+  seller_name?: string;
+  products: PosSaleProduct[];
+  payments: PosSalePayment[];
+  subtotal: number;
+  tax_amount: number;
+  total: number;
+  pos_type: 'simple' | 'electronic';
+  status?: 'paid' | 'cancelled' | 'refunded';
+}
+
+export interface GetPosSalesHistoryFilters {
+  query?: string;
+  pos_type?: 'all' | 'simple' | 'electronic';
+  dateFrom?: string; // yyyy-MM-dd
+  dateTo?: string; // yyyy-MM-dd
+  page?: number;
+  limit?: number;
+}
