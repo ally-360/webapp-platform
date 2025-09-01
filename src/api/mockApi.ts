@@ -776,3 +776,262 @@ export const createCreditNote = async (
   posSalesCache = [...all];
   return createSuccessResponse({ id: saleId, status: 'refunded', creditNoteId: `CN-${Date.now()}` });
 };
+
+// ----------------------------------------
+// 🔒 POS: Cerrar Caja (mock)
+// ----------------------------------------
+export const closePosRegister = async (
+  payload: any
+): Promise<ApiSuccessResponse<{ id: string; closedAt: string; summary: any }>> => {
+  await delay(250);
+  return createSuccessResponse({ id: `close-${Date.now()}`, closedAt: new Date().toISOString(), summary: payload });
+};
+
+// ----------------------------------------
+// ⬇️ POS: Descargar reporte de cierre (mock)
+// ----------------------------------------
+export const downloadRegisterReport = async (
+  format: 'pdf' | 'excel',
+  params: { dateFrom?: string; dateTo?: string }
+): Promise<ApiSuccessResponse<{ url: string; format: string; params: any }>> => {
+  await delay(150);
+  const q = new URLSearchParams({ ...(params as any), format }).toString();
+  const url =
+    format === 'pdf'
+      ? `https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf?${q}`
+      : `https://raw.githubusercontent.com/cs109/2014_data/master/countries.csv?${q}`;
+  return createSuccessResponse({ url, format, params });
+};
+
+// ----------------------------------------
+// 🕒 POS: Turnos (mock)
+// ----------------------------------------
+
+type ShiftStatus = 'open' | 'closed' | 'error';
+
+type ShiftSummary = {
+  salesTotal: number;
+  byMethod: Record<string, number>;
+  topProducts: Array<{ id: string; name: string; qty: number; total: number }>;
+  expectedCash: number; // efectivo de ventas
+  openingCash: number; // fondo inicial
+  cashInDrawer: number; // openingCash + expectedCash
+};
+
+type ShiftItem = {
+  id: string;
+  user: { id: string; name: string };
+  pos: { id: string; name: string };
+  openedAt: string; // ISO
+  closedAt?: string | null;
+  status: ShiftStatus;
+  notes?: string;
+  countedCash?: number | null;
+  summary: ShiftSummary;
+  difference?: number | null; // countedCash - cashInDrawer
+};
+
+let shiftsCache: ShiftItem[] = [];
+let currentShiftCache: ShiftItem | null = null;
+
+function formatYMD(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function computeDaySummary(dateYMD: string, openingCash = 0): ShiftSummary {
+  const all = seedPosSalesCache();
+  const [y, m, d] = dateYMD.split('-').map((n) => Number(n));
+  const start = new Date(y, m - 1, d, 0, 0, 0, 0);
+  const end = new Date(y, m - 1, d, 23, 59, 59, 999);
+  const s = start.getTime();
+  const e = end.getTime();
+  const daySales = all.filter((row) => {
+    const t = new Date(row.created_at).getTime();
+    return t >= s && t <= e;
+  });
+
+  const byMethod: Record<string, number> = {};
+  let salesTotal = 0;
+  const productMap = new Map<string, { id: string; name: string; qty: number; total: number }>();
+
+  daySales.forEach((row) => {
+    salesTotal += row.total || 0;
+    (row.payments || []).forEach((p: any) => {
+      byMethod[p.method] = (byMethod[p.method] || 0) + (p.amount || 0);
+    });
+    (row.products || []).forEach((p: any) => {
+      const key = p.id || p.name;
+      const prev = productMap.get(key) || { id: key, name: p.name, qty: 0, total: 0 };
+      prev.qty += p.quantity || 0;
+      prev.total += (p.price || 0) * (p.quantity || 0);
+      productMap.set(key, prev);
+    });
+  });
+
+  const topProducts = Array.from(productMap.values())
+    .sort((a, b) => b.qty - a.qty)
+    .slice(0, 5);
+
+  const expectedCash = byMethod.cash || 0;
+  const cashInDrawer = openingCash + expectedCash;
+
+  return { salesTotal, byMethod, topProducts, expectedCash, openingCash, cashInDrawer };
+}
+
+function seedShifts() {
+  if (shiftsCache.length) return shiftsCache;
+  const today = new Date();
+  // Generate last 10 days of closed shifts
+  for (let i = 10; i >= 1; i -= 1) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const ymd = formatYMD(d);
+    const openingCash = Math.round(50000 + Math.random() * 100000);
+    const summary = computeDaySummary(ymd, openingCash);
+    const countedCash = Math.round(summary.cashInDrawer + (Math.random() * 20000 - 10000));
+    const difference = countedCash - summary.cashInDrawer;
+    shiftsCache.push({
+      id: `shift-${ymd}`,
+      user: { id: 'u-1', name: 'Cajero Demo' },
+      pos: { id: 'pos-1', name: 'Caja 1' },
+      openedAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 8, 0, 0).toISOString(),
+      closedAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 20, 0, 0).toISOString(),
+      status: 'closed',
+      notes: difference === 0 ? undefined : 'Ajuste en conteo',
+      countedCash,
+      summary,
+      difference
+    });
+  }
+  return shiftsCache;
+}
+
+function seedCurrentShift() {
+  if (currentShiftCache) return currentShiftCache;
+  const today = new Date();
+  const ymd = formatYMD(today);
+  const openingCash = 80000;
+  const summary = computeDaySummary(ymd, openingCash);
+  currentShiftCache = {
+    id: `shift-${ymd}-current`,
+    user: { id: 'u-1', name: 'Cajero Demo' },
+    pos: { id: 'pos-1', name: 'Caja 1' },
+    openedAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0, 0).toISOString(),
+    closedAt: null,
+    status: 'open',
+    summary,
+    countedCash: null,
+    difference: null
+  };
+  return currentShiftCache;
+}
+
+export const getCurrentShiftStatus = async (): Promise<ApiSuccessResponse<ShiftItem>> => {
+  await delay(150);
+  seedShifts();
+  const curr = seedCurrentShift();
+  // Recompute live summary on each call
+  const ymd = formatYMD(new Date());
+  const opening = curr.summary.openingCash;
+  const summary = computeDaySummary(ymd, opening);
+  currentShiftCache = { ...curr, summary };
+  return createSuccessResponse(currentShiftCache);
+};
+
+export const closeCurrentShift = async (
+  payload: {
+    countedCash: number;
+    notes?: string;
+  }
+): Promise<ApiSuccessResponse<ShiftItem>> => {
+  await delay(250);
+  const curr = seedCurrentShift();
+  const now = new Date();
+  const summary = computeDaySummary(formatYMD(now), curr.summary.openingCash);
+  const difference = payload.countedCash - summary.cashInDrawer;
+  const closed: ShiftItem = {
+    ...curr,
+    closedAt: now.toISOString(),
+    status: 'closed',
+    countedCash: payload.countedCash,
+    notes: payload.notes,
+    summary,
+    difference
+  };
+  // Save and clear current
+  shiftsCache = [...seedShifts(), closed];
+  currentShiftCache = null;
+  return createSuccessResponse(closed);
+};
+
+export const getShiftHistory = async (
+  filters: { dateFrom?: string; dateTo?: string; userId?: string; posId?: string; page?: number; limit?: number } = {}
+): Promise<ApiSuccessResponse<PaginatedResponse<ShiftItem>>> => {
+  await delay(180);
+  const all = [...seedShifts()];
+  // Include open current shift as first row with live summary
+  if (seedCurrentShift()) {
+    const curr = await getCurrentShiftStatus();
+    if (curr.data.status === 'open') {
+      all.unshift(curr.data);
+    }
+  }
+
+  let out = all;
+  if (filters.dateFrom && filters.dateTo) {
+    const s = new Date(filters.dateFrom);
+    s.setHours(0, 0, 0, 0);
+    const e = new Date(filters.dateTo);
+    e.setHours(23, 59, 59, 999);
+    const sMs = s.getTime();
+    const eMs = e.getTime();
+    out = out.filter((sh) => {
+      const t = new Date(sh.openedAt).getTime();
+      return t >= sMs && t <= eMs;
+    });
+  }
+  if (filters.userId) out = out.filter((sh) => sh.user.id === filters.userId);
+  if (filters.posId) out = out.filter((sh) => sh.pos.id === filters.posId);
+
+  const page = filters.page ?? 0;
+  const limit = filters.limit ?? 20;
+  const start = page * limit;
+  const end = start + limit;
+  const pageData = out.slice(start, end);
+
+  return createSuccessResponse({
+    data: pageData,
+    total: out.length,
+    page,
+    limit,
+    hasNext: end < out.length,
+    hasPrev: page > 0
+  });
+};
+
+export const getShiftById = async (id: string): Promise<ApiSuccessResponse<ShiftItem>> => {
+  await delay(120);
+  if (currentShiftCache && currentShiftCache.id === id) {
+    return createSuccessResponse(currentShiftCache);
+  }
+  const all = seedShifts();
+  const found = all.find((s) => s.id === id);
+  if (!found) throw new Error('Turno no encontrado');
+  return createSuccessResponse(found);
+};
+
+export const downloadShiftReport = async (
+  format: 'pdf' | 'excel',
+  params: { id?: string; dateFrom?: string; dateTo?: string }
+): Promise<ApiSuccessResponse<{ url: string; format: string; params: any }>> => {
+  await delay(150);
+  const q = new URLSearchParams({ ...(params as any), format }).toString();
+  const url =
+    format === 'pdf'
+      ? `https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf?${q}`
+      : `https://raw.githubusercontent.com/cs109/2014_data/master/countries.csv?${q}`;
+  return createSuccessResponse({ url, format, params });
+};

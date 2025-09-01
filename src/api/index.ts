@@ -67,7 +67,21 @@ const {
 // 🏪 POS SPECIFIC EXPORTS
 // ========================================
 // Forzar mock para historial POS y acciones mientras el backend se integra
-const { getPosSalesHistory, downloadSalePDF, cancelSale, createCreditNote } = mockApi;
+const {
+  getPosSalesHistory,
+  downloadSalePDF,
+  cancelSale,
+  createCreditNote,
+  // nuevos endpoints mock para cierre de caja y reporte
+  closePosRegister,
+  downloadRegisterReport,
+  // turnos (shift)
+  getCurrentShiftStatus,
+  closeCurrentShift,
+  getShiftHistory,
+  getShiftById,
+  downloadShiftReport
+} = mockApi;
 
 /**
  * Función de compatibilidad para verificar si el sistema POS está en modo mock
@@ -170,5 +184,13 @@ export {
   getPosSalesHistory,
   downloadSalePDF,
   cancelSale,
-  createCreditNote
+  createCreditNote,
+  closePosRegister,
+  downloadRegisterReport,
+  // Shifts (mock)
+  getCurrentShiftStatus,
+  closeCurrentShift,
+  getShiftHistory,
+  getShiftById,
+  downloadShiftReport
 };
