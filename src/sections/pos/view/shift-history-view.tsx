@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Box,
   Button,
   Card,
   Container,
@@ -29,9 +28,12 @@ import CustomDateRangePicker from 'src/components/custom-date-range-picker';
 import Scrollbar from 'src/components/scrollbar';
 
 export default function ShiftHistoryView() {
-  const [filters, setFilters] = useState<{ start?: string | null; end?: string | null; userId?: string; posId?: string }>(
-    { start: null, end: null }
-  );
+  const [filters, setFilters] = useState<{
+    start?: string | null;
+    end?: string | null;
+    userId?: string;
+    posId?: string;
+  }>({ start: null, end: null });
   const [openPicker, setOpenPicker] = useState(false);
 
   const [rows, setRows] = useState<any[]>([]);
@@ -101,7 +103,11 @@ export default function ShiftHistoryView() {
             <Button variant="outlined" onClick={() => handleExport('excel')} startIcon={<Iconify icon="mdi:table" />}>
               Exportar Excel
             </Button>
-            <Button variant="outlined" onClick={() => handleExport('pdf')} startIcon={<Iconify icon="mdi:file-pdf-box" />}>
+            <Button
+              variant="outlined"
+              onClick={() => handleExport('pdf')}
+              startIcon={<Iconify icon="mdi:file-pdf-box" />}
+            >
               Exportar PDF
             </Button>
           </Stack>
@@ -119,12 +125,24 @@ export default function ShiftHistoryView() {
             sx={{ width: { xs: 1, md: 260 } }}
           />
 
-          <TextField label="Usuario" select value={filters.userId || ''} onChange={(e) => setFilters((p) => ({ ...p, userId: e.target.value || undefined }))} sx={{ width: { xs: 1, md: 220 } }}>
+          <TextField
+            label="Usuario"
+            select
+            value={filters.userId || ''}
+            onChange={(e) => setFilters((p) => ({ ...p, userId: e.target.value || undefined }))}
+            sx={{ width: { xs: 1, md: 220 } }}
+          >
             <MenuItem value="">Todos</MenuItem>
             <MenuItem value="u-1">Cajero Demo</MenuItem>
           </TextField>
 
-          <TextField label="PDV" select value={filters.posId || ''} onChange={(e) => setFilters((p) => ({ ...p, posId: e.target.value || undefined }))} sx={{ width: { xs: 1, md: 220 } }}>
+          <TextField
+            label="PDV"
+            select
+            value={filters.posId || ''}
+            onChange={(e) => setFilters((p) => ({ ...p, posId: e.target.value || undefined }))}
+            sx={{ width: { xs: 1, md: 220 } }}
+          >
             <MenuItem value="">Todos</MenuItem>
             <MenuItem value="pos-1">Caja 1</MenuItem>
           </TextField>
@@ -139,36 +157,51 @@ export default function ShiftHistoryView() {
                     <TableCell colSpan={8}>Cargando...</TableCell>
                   </TableRow>
                 )}
-                {!loading && rows.map((row) => {
-                  const expected = row.summary.cashInDrawer;
-                  const counted = row.countedCash ?? null;
-                  const diff = row.difference ?? (counted != null ? counted - expected : null);
-                  const diffColor = diff == null ? 'text.secondary' : diff === 0 ? 'text.primary' : diff > 0 ? 'success.main' : 'error.main';
-                  const statusLabel = row.status === 'open' ? 'Abierto' : row.status === 'closed' ? 'Cerrado' : 'Error';
-                  return (
-                    <TableRow key={row.id} hover>
-                      <TableCell sx={{ width: 200 }}>{fDateTime(row.openedAt, 'dd MMM yyyy HH:mm')}</TableCell>
-                      <TableCell sx={{ width: 200 }}>{row.user?.name}</TableCell>
-                      <TableCell sx={{ width: 160 }}>{row.pos?.name}</TableCell>
-                      <TableCell sx={{ width: 160 }}>{fCurrency(row.summary.salesTotal)}</TableCell>
-                      <TableCell sx={{ width: 200 }}>{fCurrency(expected)}</TableCell>
-                      <TableCell sx={{ width: 200 }}>{counted != null ? fCurrency(counted) : '-'}</TableCell>
-                      <TableCell sx={{ width: 160 }}>
-                        <Typography variant="body2" color={diffColor as any}>
-                          {diff != null ? fCurrency(diff) : '-'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ width: 120 }}>{statusLabel}</TableCell>
-                      <TableCell align="right" sx={{ width: 220 }}>
-                        <Stack direction="row" spacing={1} justifyContent="flex-end">
-                          <Button size="small" onClick={() => handleOpenDetail(row.id)}>Ver detalle</Button>
-                          <Button size="small" onClick={() => handleExport('pdf', row)}>PDF</Button>
-                          <Button size="small" onClick={() => handleExport('excel', row)}>Excel</Button>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {!loading &&
+                  rows.map((row) => {
+                    const expected = row.summary.cashInDrawer;
+                    const counted = row.countedCash ?? null;
+                    const diff = row.difference ?? (counted != null ? counted - expected : null);
+                    const diffColor =
+                      diff == null
+                        ? 'text.secondary'
+                        : diff === 0
+                        ? 'text.primary'
+                        : diff > 0
+                        ? 'success.main'
+                        : 'error.main';
+                    const statusLabel =
+                      row.status === 'open' ? 'Abierto' : row.status === 'closed' ? 'Cerrado' : 'Error';
+                    return (
+                      <TableRow key={row.id} hover>
+                        <TableCell sx={{ width: 200 }}>{fDateTime(row.openedAt, 'dd MMM yyyy HH:mm')}</TableCell>
+                        <TableCell sx={{ width: 200 }}>{row.user?.name}</TableCell>
+                        <TableCell sx={{ width: 160 }}>{row.pos?.name}</TableCell>
+                        <TableCell sx={{ width: 160 }}>{fCurrency(row.summary.salesTotal)}</TableCell>
+                        <TableCell sx={{ width: 200 }}>{fCurrency(expected)}</TableCell>
+                        <TableCell sx={{ width: 200 }}>{counted != null ? fCurrency(counted) : '-'}</TableCell>
+                        <TableCell sx={{ width: 160 }}>
+                          <Typography variant="body2" color={diffColor as any}>
+                            {diff != null ? fCurrency(diff) : '-'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ width: 120 }}>{statusLabel}</TableCell>
+                        <TableCell align="right" sx={{ width: 220 }}>
+                          <Stack direction="row" spacing={1} justifyContent="flex-end">
+                            <Button size="small" onClick={() => handleOpenDetail(row.id)}>
+                              Ver detalle
+                            </Button>
+                            <Button size="small" onClick={() => handleExport('pdf', row)}>
+                              PDF
+                            </Button>
+                            <Button size="small" onClick={() => handleExport('excel', row)}>
+                              Excel
+                            </Button>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
               </TableBody>
             </Table>
           </ScrollbarAny>
@@ -182,7 +215,9 @@ export default function ShiftHistoryView() {
             <Stack spacing={2}>
               <Stack spacing={0.5}>
                 <Row label="Fecha apertura" value={fDateTime(detail.openedAt, 'dd MMM yyyy HH:mm')} />
-                {detail.closedAt && <Row label="Fecha cierre" value={fDateTime(detail.closedAt, 'dd MMM yyyy HH:mm')} />}
+                {detail.closedAt && (
+                  <Row label="Fecha cierre" value={fDateTime(detail.closedAt, 'dd MMM yyyy HH:mm')} />
+                )}
                 <Row label="Usuario" value={detail.user?.name} />
                 <Row label="PDV" value={detail.pos?.name} />
               </Stack>
@@ -196,7 +231,19 @@ export default function ShiftHistoryView() {
               {detail.difference != null && (
                 <Row
                   label="Diferencia"
-                  value={<Typography color={(detail.difference || 0) === 0 ? 'text.primary' : detail.difference > 0 ? 'success.main' : 'error.main'}>{fCurrency(detail.difference)}</Typography>}
+                  value={
+                    <Typography
+                      color={
+                        (detail.difference || 0) === 0
+                          ? 'text.primary'
+                          : detail.difference > 0
+                          ? 'success.main'
+                          : 'error.main'
+                      }
+                    >
+                      {fCurrency(detail.difference)}
+                    </Typography>
+                  }
                 />
               )}
               {detail.notes && <Row label="Notas" value={detail.notes} />}
@@ -215,7 +262,9 @@ export default function ShiftHistoryView() {
         title="Seleccionar rango"
         startDate={filters.start ? new Date(filters.start) : null}
         endDate={filters.end ? new Date(filters.end) : null}
-        onChangeStartDate={(d) => setFilters((p) => ({ ...p, start: d ? new Date(d).toISOString().slice(0, 10) : null }))}
+        onChangeStartDate={(d) =>
+          setFilters((p) => ({ ...p, start: d ? new Date(d).toISOString().slice(0, 10) : null }))
+        }
         onChangeEndDate={(d) => setFilters((p) => ({ ...p, end: d ? new Date(d).toISOString().slice(0, 10) : null }))}
         error={dateError}
       />

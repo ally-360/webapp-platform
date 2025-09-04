@@ -280,7 +280,7 @@ export function calculateNitDv(nit: string): number {
   const weights = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
   let sum = 0;
 
-  for (let i = 0; i < nit.length; i++) {
+  for (let i = 0; i < nit.length; i += 1) {
     const digit = parseInt(nit[nit.length - 1 - i], 10);
     sum += digit * weights[i];
   }

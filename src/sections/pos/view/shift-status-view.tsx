@@ -6,8 +6,8 @@ import { paths } from 'src/routes/paths';
 import { fCurrency } from 'src/utils/format-number';
 import { fDateTime } from 'src/utils/format-time';
 import { getCurrentShiftStatus, closeCurrentShift, downloadShiftReport } from 'src/api';
-import { PAYMENT_LABEL } from '../components/sales-history/utils';
 import { useRouter } from 'src/routes/hook/use-router';
+import { PAYMENT_LABEL } from '../components/sales-history/utils';
 
 export default function ShiftStatusView() {
   const [loading, setLoading] = useState(false);

@@ -73,11 +73,11 @@ export default function App() {
                 <MotionLazy>
                   <SnackbarProvider>
                     <CheckoutProvider>
-                        <SettingsDrawer />
-                        <ProgressBar />
-                        <AuthConsumer>
-                          <Router />
-                        </AuthConsumer>
+                      <SettingsDrawer />
+                      <ProgressBar />
+                      <AuthConsumer>
+                        <Router />
+                      </AuthConsumer>
                     </CheckoutProvider>
                   </SnackbarProvider>
                 </MotionLazy>

@@ -941,12 +941,10 @@ export const getCurrentShiftStatus = async (): Promise<ApiSuccessResponse<ShiftI
   return createSuccessResponse(currentShiftCache);
 };
 
-export const closeCurrentShift = async (
-  payload: {
-    countedCash: number;
-    notes?: string;
-  }
-): Promise<ApiSuccessResponse<ShiftItem>> => {
+export const closeCurrentShift = async (payload: {
+  countedCash: number;
+  notes?: string;
+}): Promise<ApiSuccessResponse<ShiftItem>> => {
   await delay(250);
   const curr = seedCurrentShift();
   const now = new Date();
