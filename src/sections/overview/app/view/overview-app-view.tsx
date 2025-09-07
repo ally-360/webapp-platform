@@ -14,6 +14,7 @@ import { SeoIllustration } from 'src/assets/illustrations';
 //
 import React from 'react';
 import { useAuthContext } from 'src/auth/hooks';
+import AIChatbot, { AICapabilitiesBanner, AIStatsWidget } from 'src/components/ai-chatbot';
 import AppWidget from '../app-widget';
 import AppWelcome from '../app-welcome';
 import AppNewInvoice from '../app-new-invoice';
@@ -102,6 +103,41 @@ export default function OverviewAppView() {
               series: [15, 28, 45, 22, 38, 55, 29, 47, 68, 35]
             }}
           />
+        </Grid>
+
+        {/* AI Capabilities Banner - Prominent Section */}
+        <Grid xs={12}>
+          <AICapabilitiesBanner />
+        </Grid>
+
+        {/* AI Stats Widget */}
+        <Grid xs={12} lg={6}>
+          <AIStatsWidget />
+        </Grid>
+
+        {/* Space for future AI features */}
+        <Grid xs={12} lg={6}>
+          <Stack spacing={{ xs: 2, sm: 3 }} direction={{ xs: 'column', sm: 'row' }}>
+            <AppWidget
+              title="Precisión de IA"
+              total={97}
+              icon="material-symbols:psychology"
+              sx={{ flex: 1 }}
+              chart={{
+                series: 97
+              }}
+            />
+            <AppWidget
+              title="Consultas por Día"
+              total={156}
+              icon="material-symbols:chat"
+              color="info"
+              sx={{ flex: 1 }}
+              chart={{
+                series: 78
+              }}
+            />
+          </Stack>
         </Grid>
 
         {/* Charts - Stack on mobile and tablet */}
@@ -249,6 +285,9 @@ export default function OverviewAppView() {
           </Stack>
         </Grid>
       </Grid>
+      
+      {/* AI Chatbot - Floating Component */}
+      <AIChatbot />
     </Container>
   );
 }
