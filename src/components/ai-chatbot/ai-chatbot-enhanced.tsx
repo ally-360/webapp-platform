@@ -454,13 +454,23 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
     <Card
       sx={{
         position: 'fixed',
+        // Posicionamiento
         bottom: (isFullscreen || isMobile) ? 0 : 100,
-        right: (isFullscreen || isMobile) ? 0 : 24,
+        right: isMobile ? 0 : (isFullscreen ? '50%' : 24),
         top: (isFullscreen || isMobile) ? 0 : 'auto',
-        left: (isFullscreen || isMobile) ? 0 : 'auto',
-        width: (isFullscreen || isMobile) ? '100vw' : 400,
+        left: isMobile ? 0 : (isFullscreen ? '50%' : 'auto'),
+        
+        // Dimensiones
+        width: isMobile ? '100vw' : (isFullscreen ? '90vw' : 400),
         height: (isFullscreen || isMobile) ? '100vh' : 600,
+        maxWidth: isMobile ? 'none' : (isFullscreen ? '1200px' : '400px'),
         maxHeight: (isFullscreen || isMobile) ? '100vh' : '80vh',
+        
+        // Transform para centrar en fullscreen desktop
+        ...(isFullscreen && !isMobile && {
+          transform: 'translateX(-50%)',
+        }),
+        
         background: (theme) => theme.palette.mode === 'dark' 
           ? '#1e293b'  // Dark solid background
           : '#f8fafc', // Light solid background más claro
