@@ -20,7 +20,6 @@ export default function CssBaseline(theme) {
           width: '100%',
           height: '100%',
 
-          scrollbarColor: '#6b6b6b #2b2b2b',
           '&::-webkit-scrollbar, & *::-webkit-scrollbar': {
             backgroundColor: 'transparent',
             width: 8

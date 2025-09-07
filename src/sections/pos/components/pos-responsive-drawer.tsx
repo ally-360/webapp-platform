@@ -1,27 +1,19 @@
 import React from 'react';
 import Drawer, { DrawerProps } from '@mui/material/Drawer';
 import { SxProps, Theme, useMediaQuery, useTheme } from '@mui/material';
+import { useDrawerWidth, DRAWER_WIDTH_CONFIG, DrawerBreakpoint, DrawerWidthConfig } from '../hooks/useDrawerWidth';
 
-export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type WidthConfig = Partial<Record<Breakpoint, number | string>>;
+export type { DrawerBreakpoint, DrawerWidthConfig } from '../hooks/useDrawerWidth';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   anchor?: DrawerProps['anchor'];
   children: React.ReactNode;
-  persistentBreakpoint?: Exclude<Breakpoint, 'xs'>; // desde este breakpoint será 'persistent'
-  width?: WidthConfig; // configuración de ancho por breakpoint
+  persistentBreakpoint?: Exclude<DrawerBreakpoint, 'xs'>; // desde este breakpoint será 'persistent'
+  width?: DrawerWidthConfig; // configuración de ancho por breakpoint
   paperSx?: SxProps<Theme>; // estilos extra para el Paper
 }
-
-const defaultWidth: WidthConfig = {
-  xs: '100vw',
-  sm: '92vw',
-  md: 480,
-  lg: '36vw',
-  xl: '30vw'
-};
 
 export default function PosResponsiveDrawer({
   open,
@@ -29,34 +21,21 @@ export default function PosResponsiveDrawer({
   anchor = 'right',
   children,
   persistentBreakpoint = 'md',
-  width = defaultWidth,
+  width,
   paperSx
 }: Props) {
   const theme = useTheme();
-
-  // Determinar si el drawer debe ser persistente o temporal según breakpoint
-  const isPersistent = useMediaQuery(theme.breakpoints.up(persistentBreakpoint));
-
-  // Construir objeto de width con breakpoints de MUI
-  const widthSx: SxProps<Theme> = {
-    width: {
-      xs: width.xs ?? defaultWidth.xs,
-      sm: width.sm ?? defaultWidth.sm,
-      md: width.md ?? defaultWidth.md,
-      lg: width.lg ?? defaultWidth.lg,
-      xl: width.xl ?? defaultWidth.xl
-    }
-  };
+  const { drawerWidth, isDrawerPersistent } = useDrawerWidth(persistentBreakpoint, width);
 
   return (
     <Drawer
       anchor={anchor}
       open={open}
       onClose={onClose}
-      variant={isPersistent ? 'persistent' : 'temporary'}
+      variant={isDrawerPersistent ? 'persistent' : 'temporary'}
       PaperProps={{
         sx: {
-          ...widthSx,
+          width: drawerWidth,
           top: 0,
           height: '100%',
           borderLeft: (t: Theme) => `1px solid ${t.palette.divider}`,

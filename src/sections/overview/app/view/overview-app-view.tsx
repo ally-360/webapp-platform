@@ -14,7 +14,7 @@ import { SeoIllustration } from 'src/assets/illustrations';
 //
 import React from 'react';
 import { useAuthContext } from 'src/auth/hooks';
-import { AICapabilitiesBannerEnhanced, AIStatsWidget } from 'src/components/ai-chatbot';
+import { AICapabilitiesBannerEnhanced } from 'src/components/ai-chatbot';
 import AppWidget from '../app-widget';
 import AppWelcome from '../app-welcome';
 import AppNewInvoice from '../app-new-invoice';

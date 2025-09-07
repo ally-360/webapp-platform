@@ -27,6 +27,7 @@ import { Icon } from '@iconify/react';
 
 // components
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useDrawerWidth } from '../hooks/useDrawerWidth';
 
 // redux & utils
 import {
@@ -68,31 +69,17 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const { availablePaymentMethods, currentRegister } = useAppSelector((state) => state.pos);
+  const { computeContentWidth, isDrawerPersistent, drawerWidth } = useDrawerWidth();
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const [openSaleConfirmDialog, setOpenSaleConfirmDialog] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(sale.customer);
   const [productsLoading, setProductsLoading] = useState(true);
 
-  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
-  const isLgUp = useMediaQuery(theme.breakpoints.up('lg'));
-  const isXlUp = useMediaQuery(theme.breakpoints.up('xl'));
-
-  // Compute drawer width responsive (must match PosResponsiveDrawer default)
-  const drawerWidth = {
-    xs: '100vw',
-    sm: '92vw',
-    md: 480,
-    lg: '36vw',
-    xl: '30vw'
-  } as const;
-
-  const currentDrawerWidth = isXlUp
-    ? drawerWidth.xl
-    : isLgUp
-    ? drawerWidth.lg
-    : isMdUp
-    ? drawerWidth.md
-    : drawerWidth.xs;
+  // Calculate drawer width for cart icon positioning
+  const calculateDrawerWidthForIcon = () => {
+    if (!openDrawer || !isDrawerPersistent) return 0;
+    return typeof drawerWidth === 'number' ? `${drawerWidth}px` : drawerWidth;
+  };
 
   useEffect(() => {
     if (selectedCustomer !== sale.customer) {
@@ -225,13 +212,7 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
         item
         xs={12}
         sx={{
-          width: (() => {
-            if (!openDrawer || !isMdUp) return '100%';
-            // When persistent (md+), reduce width by drawer size
-            return `calc(100% - ${
-              typeof currentDrawerWidth === 'number' ? `${currentDrawerWidth}px` : currentDrawerWidth
-            }) !important`;
-          })(),
+          width: computeContentWidth(openDrawer),
           transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.easeOut,
             duration: theme.transitions.duration.enteringScreen
@@ -245,15 +226,7 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
       {/* Cart Icon positioned relative to drawer width */}
       <PosCartIcon
         onClick={hiddenDrawer}
-        rightDrawer={
-          isMdUp
-            ? openDrawer
-              ? typeof currentDrawerWidth === 'number'
-                ? `${currentDrawerWidth}px`
-                : currentDrawerWidth
-              : 0
-            : 0
-        }
+        rightDrawer={calculateDrawerWidthForIcon()}
         totalItems={sale.products.length}
       />
 

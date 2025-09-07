@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 // @mui
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
-import { AppBar, Button, CardHeader, IconButton, Typography, useMediaQuery, Alert } from '@mui/material';
+import { AppBar, Button, Alert, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Icon } from '@iconify/react';
 import { Stack } from '@mui/system';
@@ -14,10 +14,14 @@ import { addSaleWindow, openRegister, initializeFromStorage } from 'src/redux/po
 import { POSStorageKeys, loadFromLocalStorage, saveToLocalStorage } from 'src/redux/pos/posUtils';
 import type { POSRegister } from 'src/redux/pos/posSlice';
 
+// hooks
+import { useDrawerWidth } from '../hooks/useDrawerWidth';
+
 // views
 import PosWindowView from './pos-window-view-new';
 import PosRegisterOpenDialog from '../pos-register-open-dialog';
 import PosSettingsDrawer from '../pos-settings-drawer';
+import PosBottomTabBar from '../components/pos-bottom-tab-bar';
 //
 // ----------------------------------------------------------------------
 
@@ -26,7 +30,7 @@ export default function PosContainerView() {
   const { currentRegister, salesWindows, error } = useAppSelector((state) => state.pos);
 
   const theme = useTheme();
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl'));
+  const { computeContentWidth } = useDrawerWidth();
 
   const [addingNewSale, setAddingNewSale] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(true);
@@ -35,9 +39,6 @@ export default function PosContainerView() {
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
   // Controls the modal visibility for opening register
   const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
-
-  const drawerWidthLg = '30vw';
-  const drawerWidth = '500px';
 
   // Initialize POS data from localStorage
   useEffect(() => {
@@ -228,7 +229,7 @@ export default function PosContainerView() {
         </Grid>
       </Container>
 
-      {/* Bottom Tab Bar - unaffected */}
+      {/* Bottom Tab Bar */}
       <AppBar
         position="fixed"
         sx={{
@@ -237,12 +238,7 @@ export default function PosContainerView() {
           bottom: 0,
           top: 'auto',
           boxShadow: theme.shadows[1],
-          width:
-            openDrawer && salesWindows.length > 0
-              ? isLargeScreen
-                ? `calc(100% - ${drawerWidthLg})`
-                : `calc(100% - ${drawerWidth})`
-              : '100%',
+          width: openDrawer && salesWindows.length > 0 ? computeContentWidth(openDrawer) : '100%',
           zIndex: 99,
           transition: theme.transitions.create('width', {
             easing: theme.transitions.easing.easeOut,
@@ -250,35 +246,12 @@ export default function PosContainerView() {
           })
         }}
       >
-        <CardHeader
-          title={
-            <Stack flexDirection="row" alignItems="center" p={0} gap={2}>
-              {salesWindows.map((tab) => (
-                <Button
-                  key={tab.id}
-                  variant={openTab === tab.id ? 'contained' : 'outlined'}
-                  startIcon={<Icon icon="mdi:cart" />}
-                  onClick={() => handleChangeTab(tab.id)}
-                  size="small"
-                >
-                  {tab.name}
-                  {tab.products.length > 0 && (
-                    <Typography component="span" sx={{ ml: 0.5, opacity: 0.7 }}>
-                      ({tab.products.length})
-                    </Typography>
-                  )}
-                </Button>
-              ))}
-              <IconButton
-                onClick={handleAddTab}
-                color="primary"
-                disabled={!currentRegister || currentRegister.status !== 'open'}
-              >
-                <Icon icon="mdi:plus" />
-              </IconButton>
-            </Stack>
-          }
-          sx={{ p: 1.5 }}
+        <PosBottomTabBar
+          salesWindows={salesWindows}
+          openTab={openTab}
+          onChangeTab={handleChangeTab}
+          onAddTab={handleAddTab}
+          disabled={!currentRegister || currentRegister.status !== 'open'}
         />
       </AppBar>
 

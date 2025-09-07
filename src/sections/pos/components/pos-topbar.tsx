@@ -6,6 +6,7 @@ import { paths } from 'src/routes/paths';
 import { useAppSelector } from 'src/hooks/store';
 import { Icon } from '@iconify/react';
 import { useLocation } from 'react-router-dom';
+import { useDrawerWidth } from '../hooks/useDrawerWidth';
 
 export interface PosTopbarProps {
   title?: string;
@@ -16,8 +17,8 @@ export interface PosTopbarProps {
 export default function PosTopbar({ title = 'Venta POS', rightActions, onOpenSettings }: PosTopbarProps) {
   const theme = useTheme();
   const location = useLocation();
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl'));
   const { currentRegister, salesWindows } = useAppSelector((state) => state.pos);
+  const { computeContentWidth } = useDrawerWidth();
 
   // Bridge UI state from container via localStorage + custom event
   const [openDrawer, setOpenDrawer] = useState<boolean>(() => {
@@ -42,17 +43,16 @@ export default function PosTopbar({ title = 'Venta POS', rightActions, onOpenSet
     return () => window.removeEventListener('pos:open-drawer-changed', handleChange);
   }, []);
 
-  const drawerWidthLg = '30vw';
-  const drawerWidth = '500px';
-
   const isMainPosRoute = useMemo(() => location.pathname === paths.dashboard.pos, [location.pathname]);
 
   const computedWidth = useMemo(() => {
-    if (isMainPosRoute && openDrawer && (salesWindows?.length || 0) > 0) {
-      return isLargeScreen ? `calc(100% - ${drawerWidthLg})` : `calc(100% - ${drawerWidth})`;
+    // Solo aplicar ancho reducido si estamos en la ruta principal del POS 
+    // y hay ventanas de venta activas
+    if (isMainPosRoute && (salesWindows?.length || 0) > 0) {
+      return computeContentWidth(openDrawer);
     }
     return '100%';
-  }, [isMainPosRoute, openDrawer, salesWindows, isLargeScreen]);
+  }, [isMainPosRoute, openDrawer, salesWindows, computeContentWidth]);
 
   return (
     <AppBar

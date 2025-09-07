@@ -14,7 +14,6 @@ import {
   IconButton,
   Switch,
   FormControlLabel,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -24,10 +23,11 @@ import {
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useRouter } from 'src/routes/hook/use-router';
-import { paths } from 'src/routes/paths';
 import { getPosSalesHistory, closePosRegister, downloadRegisterReport } from 'src/api';
 import { fCurrency } from 'src/utils/format-number';
 import { PAYMENT_LABEL } from './components/sales-history/utils';
+// Constants
+import { createSettingsOptions, createShiftOptions, GENERAL_SETTINGS, APP_INFO } from './constants';
 
 interface Props {
   open: boolean;
@@ -160,115 +160,31 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
     URL.revokeObjectURL(url);
   }, [summary, todayStr]);
 
-  const handleNavigate = (href: string) => {
-    router.push(href);
-    onClose?.();
-  };
-
-  const handleMenuAction = (action: string) => {
-    // eslint-disable-next-line no-alert
-    alert(`Acción: ${action} - Esta funcionalidad estará disponible próximamente`);
-  };
+  const handleNavigate = useCallback(
+    (href: string) => {
+      router.push(href);
+      onClose?.();
+    },
+    [router, onClose]
+  );
 
   // ---------------------------------------
   // Turnos POS - Navegación
   // ---------------------------------------
   const [shiftIdInput, setShiftIdInput] = useState('');
 
-  const shiftOptions = [
-    {
-      id: 'shift-status',
-      title: 'Turno actual',
-      description: 'Estado y resumen del turno',
-      icon: 'mdi:clock-outline',
-      action: () => handleNavigate('/pos/shift/status')
-    },
-    {
-      id: 'shift-history',
-      title: 'Historial de turnos',
-      description: 'Listado de turnos anteriores',
-      icon: 'mdi:history',
-      action: () => handleNavigate('/pos/shift/history')
-    },
-    {
-      id: 'shift-close',
-      title: 'Cierre de turno (vista)',
-      description: 'Ir a la pantalla de cierre',
-      icon: 'mdi:lock-check-outline',
-      action: () => handleNavigate('/pos/shift/close')
-    }
-  ];
+  // Usar las constantes importadas para las opciones de turno
+  const shiftOptions = useMemo(() => createShiftOptions(handleNavigate), [handleNavigate]);
 
-  const settingsOptions = [
-    {
-      id: 'sales-history',
-      title: 'Historial de Ventas',
-      description: 'Ver ventas realizadas',
-      icon: 'mdi:receipt',
-      action: () => handleNavigate('/pos/history')
-    },
-    {
-      id: 'returns',
-      title: 'Devoluciones',
-      description: 'Registrar devoluciones',
-      icon: 'mdi:swap-horizontal',
-      action: () => handleNavigate('/pos/return')
-    },
-    {
-      id: 'daily-report',
-      title: 'Reporte Diario',
-      description: 'Generar reporte del día',
-      icon: 'mdi:chart-line',
-      action: () => handleNavigate('/pos/daily-report')
-    },
-    {
-      id: 'inventory',
-      title: 'Inventario',
-      description: 'Gestionar productos',
-      icon: 'mdi:package-variant',
-      action: () => handleNavigate(paths.dashboard.inventory.list)
-    },
-    {
-      id: 'customers',
-      title: 'Clientes',
-      description: 'Administrar clientes',
-      icon: 'mdi:account-group',
-      action: () => handleNavigate(paths.dashboard.user.list)
-    },
-    {
-      id: 'users',
-      title: 'Usuarios',
-      description: 'Gestionar usuarios',
-      icon: 'mdi:account-multiple',
-      action: () => handleNavigate(paths.dashboard.user.list)
-    },
-    {
-      id: 'printer-config',
-      title: 'Configurar Impresora',
-      description: 'Ajustes de impresión',
-      icon: 'mdi:printer',
-      action: () => handleNavigate(paths.dashboard.pos)
-    }
-  ];
-
-  const dangerOptions = [
-    {
-      id: 'close-register',
-      title: 'Cerrar Caja',
-      description: 'Finalizar jornada',
-      icon: 'mdi:cash-register',
-      color: 'warning',
-      action: () => handleOpenCloseDialog()
-    },
-    {
-      id: 'backup',
-      title: 'Respaldo de Datos',
-      description: 'Crear copia de seguridad',
-      icon: 'mdi:backup-restore',
-      color: 'info',
-      action: () => handleMenuAction('Respaldo de Datos')
-    }
-  ];
+  // Usar las constantes importadas para las opciones de configuración
+  const settingsOptions = useMemo(
+    () =>
+      createSettingsOptions({
+        handleOpenCloseDialog,
+        handleNavigate
+      }),
+    [handleNavigate]
+  );
 
   return (
     <Drawer
@@ -282,9 +198,18 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
         }
       }}
     >
-      <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
+      <Box
+        sx={{
+          p: 3,
+          pr: 1.75,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          backgroundColor: 'background.paper'
+        }}
+      >
         {/* Header */}
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3, pr: 1.25 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Configuración
           </Typography>
@@ -293,9 +218,46 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
           </IconButton>
         </Stack>
 
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ mb: 2, mr: 1.25 }} />
         {/* Settings Content */}
-        <Stack spacing={3} sx={{ flex: 1, overflow: 'auto' }}>
+        <Stack spacing={3} sx={{ flex: 1, overflow: 'auto', pr: 1.25 }}>
+          <Box>
+            <List sx={{ p: 0 }}>
+              {settingsOptions.map((option) => (
+                <ListItem key={option.id} disablePadding sx={{ mb: 1 }}>
+                  <ListItemButton
+                    onClick={option.action}
+                    sx={{
+                      borderRadius: 1,
+                      '&:hover': {
+                        bgcolor: 'action.hover'
+                      }
+                    }}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40 }}>
+                      <Icon icon={option.icon} width={24} height={24} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={option.title}
+                      secondary={option.description}
+                      primaryTypographyProps={{
+                        variant: 'subtitle2',
+                        fontWeight: 500
+                      }}
+                      secondaryTypographyProps={{
+                        variant: 'caption',
+                        color: 'text.secondary'
+                      }}
+                    />
+                    <Icon icon="mdi:chevron-right" width={16} height={16} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+
+          <Divider />
+
           {/* Turnos POS */}
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
@@ -355,87 +317,6 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
           </Box>
 
           <Divider />
-          {/* Important Actions */}
-          <Box>
-            <List sx={{ p: 0 }}>
-              {dangerOptions.map((option) => (
-                <ListItem key={option.id} disablePadding sx={{ mb: 1 }}>
-                  <ListItemButton
-                    onClick={option.action}
-                    sx={{
-                      borderRadius: 1,
-                      '&:hover': {
-                        bgcolor: 'action.hover'
-                      }
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 40 }}>
-                      <Icon icon={option.icon} width={24} height={24} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Typography variant="subtitle2" fontWeight={500}>
-                            {option.title}
-                          </Typography>
-                          <Chip
-                            label={option.color === 'warning' ? 'Importante' : 'Proceso'}
-                            size="small"
-                            color={option.color as any}
-                            variant="outlined"
-                          />
-                        </Stack>
-                      }
-                      secondary={option.description}
-                      secondaryTypographyProps={{
-                        variant: 'caption',
-                        color: 'text.secondary'
-                      }}
-                    />
-                    <Icon icon="mdi:chevron-right" width={16} height={16} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-          <Divider />
-          {/* Quick Actions */}
-          <Box>
-            <List sx={{ p: 0 }}>
-              {settingsOptions.map((option) => (
-                <ListItem key={option.id} disablePadding sx={{ mb: 1 }}>
-                  <ListItemButton
-                    onClick={option.action}
-                    sx={{
-                      borderRadius: 1,
-                      '&:hover': {
-                        bgcolor: 'action.hover'
-                      }
-                    }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 40 }}>
-                      <Icon icon={option.icon} width={24} height={24} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={option.title}
-                      secondary={option.description}
-                      primaryTypographyProps={{
-                        variant: 'subtitle2',
-                        fontWeight: 500
-                      }}
-                      secondaryTypographyProps={{
-                        variant: 'caption',
-                        color: 'text.secondary'
-                      }}
-                    />
-                    <Icon icon="mdi:chevron-right" width={16} height={16} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-
-          <Divider />
 
           {/* General Settings */}
           <Box>
@@ -444,20 +325,25 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
             </Typography>
 
             <Stack spacing={2}>
-              <FormControlLabel control={<Switch defaultChecked />} label="Impresión automática de tickets" />
-              <FormControlLabel control={<Switch />} label="Sonidos de notificación" />
-              <FormControlLabel control={<Switch defaultChecked />} label="Confirmación antes de eliminar" />
+              {GENERAL_SETTINGS.map((setting) => (
+                <FormControlLabel
+                  key={setting.id}
+                  control={<Switch defaultChecked={setting.defaultValue} />}
+                  label={setting.label}
+                />
+              ))}
             </Stack>
           </Box>
         </Stack>
 
-        {/* Footer Info */}
-        <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+        <Divider sx={{ pt: 2, mr: 1.25 }} />
+
+        <Box sx={{ mt: 3, pr: 1.25 }}>
           <Typography variant="caption" color="text.secondary" align="center" display="block">
-            POS System v1.0
+            {APP_INFO.name} v{APP_INFO.version}
           </Typography>
           <Typography variant="caption" color="text.secondary" align="center" display="block">
-            © 2024 - Sistema de Punto de Venta
+            {APP_INFO.copyright} - {APP_INFO.description}
           </Typography>
         </Box>
       </Box>
