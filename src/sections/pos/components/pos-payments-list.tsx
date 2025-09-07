@@ -27,7 +27,7 @@ interface Props {
 }
 
 const PosPaymentsList = memo(({ payments, remainingAmount, canAddPayment, onAddPayment, onRemovePayment }: Props) => (
-  <Box sx={{ p: 2 }}>
+  <Box sx={{ p: 2, maxHeight: 200, overflow: 'auto' }}>
     <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
       <Typography variant="subtitle2">Pagos</Typography>
       <Button
@@ -42,9 +42,9 @@ const PosPaymentsList = memo(({ payments, remainingAmount, canAddPayment, onAddP
     </Stack>
 
     {payments.length > 0 && (
-      <List dense>
+      <List dense sx={{ py: 0 }}>
         {payments.map((payment) => (
-          <ListItem key={payment.id} sx={{ px: 0 }}>
+          <ListItem key={payment.id} sx={{ px: 0, py: 0.5 }}>
             <ListItemText
               primary={
                 <Stack direction="row" alignItems="center" spacing={1}>

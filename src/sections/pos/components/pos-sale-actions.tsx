@@ -9,8 +9,13 @@ interface Props {
 }
 
 const PosSaleActions = memo(({ canComplete, onCompleteSale }: Props) => (
-  <Box sx={{ p: 2 }}>
-    <Stack spacing={1}>
+  <Box
+    sx={{
+      p: 2,
+      bgcolor: 'background.paper'
+    }}
+  >
+    <Stack spacing={1.5}>
       <Button
         variant="contained"
         size="large"
@@ -18,15 +23,20 @@ const PosSaleActions = memo(({ canComplete, onCompleteSale }: Props) => (
         disabled={!canComplete}
         onClick={onCompleteSale}
         startIcon={<Icon icon="mdi:check" />}
+        sx={{
+          py: 1.5,
+          fontSize: '1rem',
+          fontWeight: 600
+        }}
       >
         {canComplete ? 'Completar Venta' : 'Faltan Productos o Pagos'}
       </Button>
 
       <Stack direction="row" spacing={1}>
-        <Button variant="outlined" size="small" fullWidth startIcon={<Icon icon="mdi:content-save" />}>
+        <Button variant="outlined" size="medium" fullWidth startIcon={<Icon icon="mdi:content-save" />}>
           Guardar
         </Button>
-        <Button variant="outlined" size="small" fullWidth color="error" startIcon={<Icon icon="mdi:cancel" />}>
+        <Button variant="outlined" size="medium" fullWidth color="error" startIcon={<Icon icon="mdi:cancel" />}>
           Cancelar
         </Button>
       </Stack>

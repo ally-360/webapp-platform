@@ -26,7 +26,7 @@ export default function GlobalModals() {
         {brandOpen && <PopupCreateBrand />}
         {pdvOpen && <FormPDVS />}
       </Suspense>
-      
+
       {/* AI Chatbot - Disponible en todas las páginas del dashboard excepto POS */}
       {shouldShowChatbot && <AIChatbotEnhanced />}
     </>

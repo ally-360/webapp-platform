@@ -1,7 +1,7 @@
 import React from 'react';
 import Drawer, { DrawerProps } from '@mui/material/Drawer';
-import { SxProps, Theme, useMediaQuery, useTheme } from '@mui/material';
-import { useDrawerWidth, DRAWER_WIDTH_CONFIG, DrawerBreakpoint, DrawerWidthConfig } from '../hooks/useDrawerWidth';
+import { SxProps, Theme, useTheme } from '@mui/material';
+import { useDrawerWidth, DrawerBreakpoint, DrawerWidthConfig } from '../hooks/useDrawerWidth';
 
 export type { DrawerBreakpoint, DrawerWidthConfig } from '../hooks/useDrawerWidth';
 

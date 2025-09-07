@@ -16,36 +16,39 @@ export default function AIStatsWidget() {
       value: '1,247',
       growth: '+23%',
       icon: 'material-symbols:chat',
-      color: theme.palette.primary.main,
+      color: theme.palette.primary.main
     },
     {
       label: 'Insights Generados',
       value: '89',
       growth: '+15%',
       icon: 'material-symbols:lightbulb',
-      color: theme.palette.info.main,
+      color: theme.palette.info.main
     },
     {
       label: 'Decisiones Optimizadas',
       value: '34',
       growth: '+41%',
       icon: 'material-symbols:trending-up',
-      color: theme.palette.success.main,
+      color: theme.palette.success.main
     },
     {
       label: 'Tiempo Ahorrado',
       value: '127h',
       growth: '+28%',
       icon: 'material-symbols:schedule',
-      color: theme.palette.warning.main,
-    },
+      color: theme.palette.warning.main
+    }
   ];
 
   return (
     <Card
       sx={{
         p: 3,
-        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(theme.palette.info.main, 0.05)})`,
+        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)}, ${alpha(
+          theme.palette.info.main,
+          0.05
+        )})`,
         border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
         borderRadius: 4,
         position: 'relative',
@@ -58,8 +61,8 @@ export default function AIStatsWidget() {
           width: 60,
           height: 60,
           background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.1)}, transparent)`,
-          borderRadius: '50%',
-        },
+          borderRadius: '50%'
+        }
       }}
     >
       <Stack spacing={3}>
@@ -70,7 +73,7 @@ export default function AIStatsWidget() {
               width: 48,
               height: 48,
               background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.info.main})`,
-              color: 'common.white',
+              color: 'common.white'
             }}
           >
             <Iconify icon="hugeicons:ai-brain-04" width={24} />
@@ -91,9 +94,9 @@ export default function AIStatsWidget() {
             display: 'grid',
             gridTemplateColumns: {
               xs: '1fr 1fr',
-              sm: '1fr 1fr 1fr 1fr',
+              sm: '1fr 1fr 1fr 1fr'
             },
-            gap: 2,
+            gap: 2
           }}
         >
           {aiStats.map((stat, index) => (
@@ -110,8 +113,8 @@ export default function AIStatsWidget() {
                 transition: 'all 0.3s ease',
                 '&:hover': {
                   transform: 'translateY(-2px)',
-                  boxShadow: `0 8px 24px ${alpha(stat.color, 0.2)}`,
-                },
+                  boxShadow: `0 8px 24px ${alpha(stat.color, 0.2)}`
+                }
               }}
             >
               <Avatar
@@ -121,7 +124,7 @@ export default function AIStatsWidget() {
                   backgroundColor: alpha(stat.color, 0.2),
                   color: stat.color,
                   mb: 1,
-                  mx: 'auto',
+                  mx: 'auto'
                 }}
               >
                 <Iconify icon={stat.icon} width={20} />
@@ -158,8 +161,8 @@ export default function AIStatsWidget() {
               backgroundColor: alpha(theme.palette.primary.main, 0.1),
               '& .MuiLinearProgress-bar': {
                 background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.info.main})`,
-                borderRadius: 4,
-              },
+                borderRadius: 4
+              }
             }}
           />
         </Box>
@@ -171,7 +174,7 @@ export default function AIStatsWidget() {
             backgroundColor: alpha(theme.palette.info.main, 0.1),
             borderRadius: 2,
             border: `1px dashed ${alpha(theme.palette.info.main, 0.3)}`,
-            textAlign: 'center',
+            textAlign: 'center'
           }}
         >
           <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>

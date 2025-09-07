@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AppBar, CardHeader, IconButton, Typography, useTheme, Button, useMediaQuery } from '@mui/material';
+import { AppBar, CardHeader, IconButton, Typography, useTheme, Button } from '@mui/material';
 import { Stack } from '@mui/system';
 import Iconify from 'src/components/iconify';
 import { paths } from 'src/routes/paths';
@@ -46,7 +46,7 @@ export default function PosTopbar({ title = 'Venta POS', rightActions, onOpenSet
   const isMainPosRoute = useMemo(() => location.pathname === paths.dashboard.pos, [location.pathname]);
 
   const computedWidth = useMemo(() => {
-    // Solo aplicar ancho reducido si estamos en la ruta principal del POS 
+    // Solo aplicar ancho reducido si estamos en la ruta principal del POS
     // y hay ventanas de venta activas
     if (isMainPosRoute && (salesWindows?.length || 0) > 0) {
       return computeContentWidth(openDrawer);

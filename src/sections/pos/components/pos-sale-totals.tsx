@@ -11,34 +11,50 @@ interface Props {
 }
 
 const PosSaleTotals = memo(({ sale }: Props) => (
-  <Box sx={{ p: 2 }}>
-    <Stack spacing={1}>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography variant="body2">Subtotal:</Typography>
-        <Typography variant="body2">{formatCurrency(sale.subtotal)}</Typography>
+  <Box
+    sx={{
+      p: 2,
+      bgcolor: 'grey.50',
+      borderRadius: 0
+    }}
+  >
+    <Stack spacing={1.5}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary">
+          Subtotal:
+        </Typography>
+        <Typography variant="body2" fontWeight="500">
+          {formatCurrency(sale.subtotal)}
+        </Typography>
       </Stack>
 
-      <Stack direction="row" justifyContent="space-between">
-        <Typography variant="body2">IVA:</Typography>
-        <Typography variant="body2">{formatCurrency(sale.tax_amount)}</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="body2" color="text.secondary">
+          IVA:
+        </Typography>
+        <Typography variant="body2" fontWeight="500">
+          {formatCurrency(sale.tax_amount)}
+        </Typography>
       </Stack>
 
-      {sale.discount_amount && (
-        <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body2" color="success.main">
+      {sale.discount_amount && sale.discount_amount > 0 && (
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="body2" color="text.secondary">
             Descuento:
           </Typography>
-          <Typography variant="body2" color="success.main">
+          <Typography variant="body2" color="success.main" fontWeight="500">
             -{formatCurrency(sale.discount_amount)}
           </Typography>
         </Stack>
       )}
 
-      <Divider />
+      <Divider sx={{ my: 0.5 }} />
 
-      <Stack direction="row" justifyContent="space-between">
-        <Typography variant="h6">Total:</Typography>
-        <Typography variant="h6" color="primary">
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="h6" fontWeight="600">
+          Total:
+        </Typography>
+        <Typography variant="h6" color="primary" fontWeight="700">
           {formatCurrency(sale.total)}
         </Typography>
       </Stack>

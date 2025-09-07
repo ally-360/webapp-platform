@@ -7,13 +7,11 @@ import {
   Stack,
   Paper,
   Avatar,
-  Divider,
   TextField,
   Typography,
   IconButton,
   useTheme,
   useMediaQuery,
-  Slide,
   Backdrop,
   InputAdornment,
   Badge,
@@ -21,10 +19,9 @@ import {
   Zoom,
   Grow,
   Chip,
-  Collapse,
-  Button,
+  Collapse
 } from '@mui/material';
-import { alpha, keyframes } from '@mui/material/styles';
+import { keyframes } from '@mui/material/styles';
 // icons
 import Iconify from '../iconify';
 
@@ -174,22 +171,22 @@ const mockMessages: Message[] = [
       '📊 Análisis de ventas del mes',
       '🎯 Productos con mayor potencial',
       '💰 Predicción de ingresos',
-      '🔍 Comportamiento de clientes',
-    ],
-  },
+      '🔍 Comportamiento de clientes'
+    ]
+  }
 ];
 
 const quickSuggestions = [
   '💎 Dashboard inteligente',
   '🚀 Métricas en tiempo real',
   '🎨 Reportes visuales',
-  '⚡ Alertas automáticas',
+  '⚡ Alertas automáticas'
 ];
 
 export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -197,7 +194,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -240,7 +237,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
       id: Date.now().toString(),
       text,
       isBot: false,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -259,8 +256,8 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
           '📈 Detalles del análisis',
           '🎯 Recomendaciones específicas',
           '📋 Plan de acción',
-          '💡 Próximos pasos',
-        ],
+          '💡 Próximos pasos'
+        ]
       };
       setMessages((prev) => [...prev, botMessage]);
       setIsTyping(false);
@@ -279,9 +276,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
           display: 'flex',
           justifyContent: message.isBot ? 'flex-start' : 'flex-end',
           mb: 2,
-          animation: message.isBot
-            ? `${botMessageAppear} 0.6s ease-out`
-            : `${messageAppear} 0.5s ease-out`,
+          animation: message.isBot ? `${botMessageAppear} 0.6s ease-out` : `${messageAppear} 0.5s ease-out`
         }}
       >
         <Stack direction="row" spacing={1} alignItems="flex-end" maxWidth="85%">
@@ -292,42 +287,50 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                 height: 32,
                 background: 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)',
                 mr: 2,
-                mt: 0.5,
+                mt: 0.5
               }}
             >
               <Iconify icon="ph:robot-duotone" width={18} sx={{ color: 'white' }} />
             </Avatar>
           )}
-          
+
           <Paper
             sx={{
               px: 2,
               py: 1.5,
               borderRadius: message.isBot ? '20px 20px 20px 5px' : '20px 20px 5px 20px',
-              background: (theme) => message.isBot
-                ? (theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9') // Bot messages - más claro en modo diurno
-                : 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)', // User messages
-              border: (theme) => message.isBot
-                ? (theme.palette.mode === 'dark' 
-                    ? '1px solid rgba(71, 85, 105, 0.5)' 
-                    : '1px solid rgba(148, 163, 184, 0.3)') // Borde más visible en modo diurno
-                : 'none',
-              boxShadow: (theme) => message.isBot
-                ? (theme.palette.mode === 'dark'
+              background: (theme) =>
+                message.isBot
+                  ? theme.palette.mode === 'dark'
+                    ? '#334155'
+                    : '#f1f5f9' // Bot messages - más claro en modo diurno
+                  : 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)', // User messages
+              border: (theme) =>
+                message.isBot
+                  ? theme.palette.mode === 'dark'
+                    ? '1px solid rgba(71, 85, 105, 0.5)'
+                    : '1px solid rgba(148, 163, 184, 0.3)' // Borde más visible en modo diurno
+                  : 'none',
+              boxShadow: (theme) =>
+                message.isBot
+                  ? theme.palette.mode === 'dark'
                     ? '0 4px 12px rgba(0, 0, 0, 0.3)'
-                    : '0 2px 8px rgba(0, 0, 0, 0.08)') // Sombra más sutil en modo diurno
-                : '0 4px 12px rgba(0, 176, 240, 0.3)',
-              position: 'relative',
+                    : '0 2px 8px rgba(0, 0, 0, 0.08)' // Sombra más sutil en modo diurno
+                  : '0 4px 12px rgba(0, 176, 240, 0.3)',
+              position: 'relative'
             }}
           >
             <Typography
               variant="body2"
               sx={{
-                color: (theme) => message.isBot
-                  ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.9)' : '#334155') // Texto más oscuro en modo diurno
-                  : 'white',
+                color: (theme) =>
+                  message.isBot
+                    ? theme.palette.mode === 'dark'
+                      ? 'rgba(255,255,255,0.9)'
+                      : '#334155' // Texto más oscuro en modo diurno
+                    : 'white',
                 fontWeight: 500,
-                lineHeight: 1.6,
+                lineHeight: 1.6
               }}
             >
               {message.text}
@@ -339,7 +342,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
               sx={{
                 width: 32,
                 height: 32,
-                background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)',
+                background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)'
               }}
             >
               <Iconify icon="ph:user-duotone" width={18} sx={{ color: 'white' }} />
@@ -360,22 +363,23 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
               height: 32,
               background: 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)',
               mr: 2,
-              mt: 0.5,
+              mt: 0.5
             }}
           >
             <Iconify icon="ph:robot-duotone" width={18} sx={{ color: 'white' }} />
           </Avatar>
-          
+
           <Paper
             sx={{
               px: 2,
               py: 1.5,
               borderRadius: '20px 20px 20px 5px',
-              background: (theme) => theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9',
-              border: (theme) => theme.palette.mode === 'dark'
-                ? '1px solid rgba(71, 85, 105, 0.5)'
-                : '1px solid rgba(148, 163, 184, 0.3)',
-              minWidth: 80,
+              background: (theme) => (theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9'),
+              border: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? '1px solid rgba(71, 85, 105, 0.5)'
+                  : '1px solid rgba(148, 163, 184, 0.3)',
+              minWidth: 80
             }}
           >
             <Stack direction="row" spacing={0.5} alignItems="center">
@@ -388,16 +392,17 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                     borderRadius: '50%',
                     bgcolor: 'primary.main',
                     animation: `${typingBounce} 1.4s ease-in-out infinite`,
-                    animationDelay: `${index * 0.2}s`,
+                    animationDelay: `${index * 0.2}s`
                   }}
                 />
               ))}
-              <Typography variant="body2" sx={{ 
-                ml: 1, 
-                color: (theme) => theme.palette.mode === 'dark' 
-                  ? 'rgba(255,255,255,0.7)' 
-                  : '#64748b'
-              }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  ml: 1,
+                  color: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : '#64748b')
+                }}
+              >
                 Pensando...
               </Typography>
             </Stack>
@@ -411,12 +416,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
     <Collapse in={showSuggestions && !isTyping}>
       <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
         {suggestions.map((suggestion, index) => (
-          <Grow
-            in
-            key={suggestion}
-            timeout={400}
-            style={{ transitionDelay: `${index * 100}ms` }}
-          >
+          <Grow in key={suggestion} timeout={400} style={{ transitionDelay: `${index * 100}ms` }}>
             <Chip
               label={suggestion}
               onClick={() => handleSuggestionClick(suggestion)}
@@ -437,11 +437,11 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                     rgba(0, 176, 240, 0.2) 0%,
                     rgba(0, 150, 220, 0.3) 100%)`,
                   transform: 'translateY(-2px) scale(1.05)',
-                  boxShadow: '0 8px 25px rgba(0, 176, 240, 0.3)',
+                  boxShadow: '0 8px 25px rgba(0, 176, 240, 0.3)'
                 },
                 '&:active': {
-                  transform: 'translateY(0px) scale(0.98)',
-                },
+                  transform: 'translateY(0px) scale(0.98)'
+                }
               }}
             />
           </Grow>
@@ -455,54 +455,56 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
       sx={{
         position: 'fixed',
         // Posicionamiento
-        bottom: (isFullscreen || isMobile) ? 0 : 100,
-        right: isMobile ? 0 : (isFullscreen ? '50%' : 24),
-        top: (isFullscreen || isMobile) ? 0 : 'auto',
-        left: isMobile ? 0 : (isFullscreen ? '50%' : 'auto'),
-        
+        bottom: isFullscreen || isMobile ? 0 : 100,
+        right: isMobile ? 0 : isFullscreen ? '50%' : 24,
+        top: isFullscreen || isMobile ? 0 : 'auto',
+        left: isMobile ? 0 : isFullscreen ? '50%' : 'auto',
+
         // Dimensiones
-        width: isMobile ? '100vw' : (isFullscreen ? '90vw' : 400),
-        height: (isFullscreen || isMobile) ? '100vh' : 600,
-        maxWidth: isMobile ? 'none' : (isFullscreen ? '1200px' : '400px'),
-        maxHeight: (isFullscreen || isMobile) ? '100vh' : '80vh',
-        
+        width: isMobile ? '100vw' : isFullscreen ? '90vw' : 400,
+        height: isFullscreen || isMobile ? '100vh' : 600,
+        maxWidth: isMobile ? 'none' : isFullscreen ? '1200px' : '400px',
+        maxHeight: isFullscreen || isMobile ? '100vh' : '80vh',
+
         // Transform para centrar en fullscreen desktop
-        ...(isFullscreen && !isMobile && {
-          transform: 'translateX(-50%)',
-        }),
-        
-        background: (theme) => theme.palette.mode === 'dark' 
-          ? '#1e293b'  // Dark solid background
-          : '#f8fafc', // Light solid background más claro
-        border: (theme) => theme.palette.mode === 'dark'
-          ? '1px solid rgba(71, 85, 105, 0.5)'
-          : '1px solid rgba(0, 0, 0, 0.08)',
-        borderRadius: (isFullscreen || isMobile) ? 0 : 3,
-        boxShadow: (theme) => theme.palette.mode === 'dark'
-          ? '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
-          : '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+        ...(isFullscreen &&
+          !isMobile && {
+            transform: 'translateX(-50%)'
+          }),
+
+        background: (theme) =>
+          theme.palette.mode === 'dark'
+            ? '#1e293b' // Dark solid background
+            : '#f8fafc', // Light solid background más claro
+        border: (theme) =>
+          theme.palette.mode === 'dark' ? '1px solid rgba(71, 85, 105, 0.5)' : '1px solid rgba(0, 0, 0, 0.08)',
+        borderRadius: isFullscreen || isMobile ? 0 : 3,
+        boxShadow: (theme) =>
+          theme.palette.mode === 'dark'
+            ? '0 25px 50px -12px rgba(0, 0, 0, 0.6)'
+            : '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
         zIndex: theme.zIndex.modal,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        animation: isClosing 
+        animation: isClosing
           ? `${slideOutToBottom} 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards`
           : `${slideInFromBottom} 0.5s cubic-bezier(0.4, 0, 0.2, 1)`,
-        transformOrigin: (isFullscreen || isMobile) ? 'center center' : 'bottom right',
+        transformOrigin: isFullscreen || isMobile ? 'center center' : 'bottom right'
       }}
     >
       {/* Header */}
       <Box
         sx={{
           p: 2,
-          background: (theme) => theme.palette.mode === 'dark'
-            ? 'linear-gradient(135deg, #334155 0%, #1e293b 100%)'
-            : 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)',
-          borderBottom: (theme) => theme.palette.mode === 'dark'
-            ? '1px solid rgba(71, 85, 105, 0.3)'
-            : '1px solid rgba(0, 76, 151, 0.2)',
+          background: (theme) =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, #334155 0%, #1e293b 100%)'
+              : 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)',
+          borderBottom: (theme) =>
+            theme.palette.mode === 'dark' ? '1px solid rgba(71, 85, 105, 0.3)' : '1px solid rgba(0, 76, 151, 0.2)',
           position: 'relative',
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -518,7 +520,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                     borderRadius: '50%',
                     bgcolor: '#4CAF50',
                     border: '2px solid white',
-                    animation: `${pulseGlow} 2s ease-in-out infinite`,
+                    animation: `${pulseGlow} 2s ease-in-out infinite`
                   }}
                 />
               }
@@ -532,23 +534,29 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                     rgba(0, 150, 220, 0.6) 100%)`,
                   backdropFilter: 'blur(20px)',
                   border: '2px solid rgba(255, 255, 255, 0.3)',
-                  animation: `${floatMagic} 8s ease-in-out infinite`,
+                  animation: `${floatMagic} 8s ease-in-out infinite`
                 }}
               >
                 <Iconify icon="ph:robot-duotone" width={28} sx={{ color: 'white' }} />
               </Avatar>
             </Badge>
-            
+
             <Box>
-              <Typography variant="h6" sx={{ 
-                fontWeight: 700, 
-                color: (theme) => theme.palette.mode === 'dark' ? '#ffffff' : '#ffffff'
-              }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#ffffff' : '#ffffff')
+                }}
+              >
                 Ally IA
               </Typography>
-              <Typography variant="caption" sx={{ 
-                color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.9)'
-              }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.9)')
+                }}
+              >
                 🚀 Asistente Inteligente • En línea
               </Typography>
             </Box>
@@ -566,15 +574,12 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                   color: 'white',
                   '&:hover': {
                     background: 'rgba(255, 255, 255, 0.2)',
-                    transform: 'scale(1.05)',
+                    transform: 'scale(1.05)'
                   },
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-                <Iconify 
-                  icon={isFullscreen ? "eva:minimize-fill" : "eva:expand-fill"} 
-                  width={20} 
-                />
+                <Iconify icon={isFullscreen ? 'eva:minimize-fill' : 'eva:expand-fill'} width={20} />
               </IconButton>
             )}
 
@@ -587,9 +592,9 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                 color: 'white',
                 '&:hover': {
                   background: 'rgba(255, 255, 255, 0.2)',
-                  transform: 'rotate(90deg)',
+                  transform: 'rotate(90deg)'
                 },
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               <Iconify icon="eva:close-fill" width={20} />
@@ -604,33 +609,31 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
           flex: 1,
           overflowY: 'auto',
           p: 2,
-          background: (theme) => theme.palette.mode === 'dark'
-            ? '#0f172a'  // Dark messages background
-            : '#ffffff', // Light messages background - más claro
+          background: (theme) =>
+            theme.palette.mode === 'dark'
+              ? '#0f172a' // Dark messages background
+              : '#ffffff', // Light messages background - más claro
           '&::-webkit-scrollbar': {
-            width: 6,
+            width: 6
           },
           '&::-webkit-scrollbar-track': {
-            background: (theme) => theme.palette.mode === 'dark'
-              ? 'rgba(71, 85, 105, 0.2)'
-              : 'rgba(0, 0, 0, 0.05)',
+            background: (theme) => (theme.palette.mode === 'dark' ? 'rgba(71, 85, 105, 0.2)' : 'rgba(0, 0, 0, 0.05)')
           },
           '&::-webkit-scrollbar-thumb': {
-            background: (theme) => theme.palette.mode === 'dark'
-              ? 'rgba(71, 85, 105, 0.5)'
-              : 'rgba(0, 0, 0, 0.2)',
-            borderRadius: 3,
-          },
+            background: (theme) => (theme.palette.mode === 'dark' ? 'rgba(71, 85, 105, 0.5)' : 'rgba(0, 0, 0, 0.2)'),
+            borderRadius: 3
+          }
         }}
       >
         {messages.map((message, index) => renderMessage(message, index))}
         {isTyping && renderTypingIndicator()}
-        
+
         {/* Show suggestions from last bot message */}
-        {messages.length > 0 && messages[messages.length - 1]?.isBot && messages[messages.length - 1]?.suggestions && 
-          renderSuggestions(messages[messages.length - 1].suggestions || [])
-        }
-        
+        {messages.length > 0 &&
+          messages[messages.length - 1]?.isBot &&
+          messages[messages.length - 1]?.suggestions &&
+          renderSuggestions(messages[messages.length - 1].suggestions || [])}
+
         <Box ref={messagesEndRef} />
       </Box>
 
@@ -658,8 +661,8 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                     background: `linear-gradient(135deg, 
                       rgba(0, 176, 240, 0.2) 0%,
                       rgba(0, 150, 220, 0.25) 100%)`,
-                    transform: 'translateY(-1px)',
-                  },
+                    transform: 'translateY(-1px)'
+                  }
                 }}
               />
             ))}
@@ -671,12 +674,9 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
       <Box
         sx={{
           p: 2,
-          background: (theme) => theme.palette.mode === 'dark'
-            ? '#334155'
-            : '#f8fafc', // Más claro en modo diurno
-          borderTop: (theme) => theme.palette.mode === 'dark'
-            ? '1px solid rgba(71, 85, 105, 0.3)'
-            : '1px solid rgba(148, 163, 184, 0.2)', // Borde más visible
+          background: (theme) => (theme.palette.mode === 'dark' ? '#334155' : '#f8fafc'), // Más claro en modo diurno
+          borderTop: (theme) =>
+            theme.palette.mode === 'dark' ? '1px solid rgba(71, 85, 105, 0.3)' : '1px solid rgba(148, 163, 184, 0.2)' // Borde más visible
         }}
       >
         <TextField
@@ -692,39 +692,34 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: 3,
-              background: (theme) => theme.palette.mode === 'dark'
-                ? '#475569'
-                : '#ffffff', // Blanco puro en modo diurno
-              border: (theme) => theme.palette.mode === 'dark'
-                ? '1px solid rgba(71, 85, 105, 0.5)'
-                : '2px solid #e2e8f0', // Borde más claro pero visible
+              background: (theme) => (theme.palette.mode === 'dark' ? '#475569' : '#ffffff'), // Blanco puro en modo diurno
+              border: (theme) =>
+                theme.palette.mode === 'dark' ? '1px solid rgba(71, 85, 105, 0.5)' : '2px solid #e2e8f0', // Borde más claro pero visible
               pr: 1,
               '& fieldset': {
-                border: 'none',
+                border: 'none'
               },
               '&:hover': {
-                background: (theme) => theme.palette.mode === 'dark'
-                  ? '#64748b'
-                  : '#ffffff',
-                border: (theme) => theme.palette.mode === 'dark'
-                  ? '1px solid rgba(71, 85, 105, 0.7)'
-                  : '2px solid #cbd5e1', // Borde más oscuro en hover
+                background: (theme) => (theme.palette.mode === 'dark' ? '#64748b' : '#ffffff'),
+                border: (theme) =>
+                  theme.palette.mode === 'dark' ? '1px solid rgba(71, 85, 105, 0.7)' : '2px solid #cbd5e1' // Borde más oscuro en hover
               },
               '&.Mui-focused': {
                 boxShadow: '0 0 0 2px rgba(0, 176, 240, 0.3)',
-                border: (theme) => theme.palette.mode === 'dark'
-                  ? '1px solid rgba(0, 176, 240, 0.5)'
-                  : '2px solid rgba(0, 176, 240, 0.4)',
-              },
+                border: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? '1px solid rgba(0, 176, 240, 0.5)'
+                    : '2px solid rgba(0, 176, 240, 0.4)'
+              }
             },
             '& .MuiInputBase-input': {
-              color: (theme) => theme.palette.mode === 'dark' ? '#ffffff' : '#334155',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#ffffff' : '#334155'),
               fontWeight: 500,
               '&::placeholder': {
-                color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : '#64748b',
-                opacity: 1,
-              },
-            },
+                color: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : '#64748b'),
+                opacity: 1
+              }
+            }
           }}
           InputProps={{
             endAdornment: (
@@ -737,44 +732,46 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                       color: 'primary.main',
                       '&:hover': {
                         background: 'rgba(156, 39, 176, 0.2)',
-                        transform: 'scale(1.1)',
+                        transform: 'scale(1.1)'
                       },
-                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   >
                     <Iconify icon="ph:microphone-duotone" width={16} />
                   </IconButton>
-                  
+
                   <IconButton
                     size="small"
                     onClick={() => handleSendMessage(inputValue)}
                     disabled={!inputValue.trim() || isTyping}
                     sx={{
-                      background: inputValue.trim() && !isTyping
-                        ? `linear-gradient(135deg, 
+                      background:
+                        inputValue.trim() && !isTyping
+                          ? `linear-gradient(135deg, 
                             rgba(0, 176, 240, 0.8) 0%,
                             rgba(0, 150, 220, 0.9) 100%)`
-                        : 'rgba(255, 255, 255, 0.1)',
+                          : 'rgba(255, 255, 255, 0.1)',
                       color: inputValue.trim() && !isTyping ? 'white' : 'text.disabled',
                       '&:hover': {
-                        background: inputValue.trim() && !isTyping
-                          ? `linear-gradient(135deg, 
+                        background:
+                          inputValue.trim() && !isTyping
+                            ? `linear-gradient(135deg, 
                               rgba(0, 176, 240, 0.9) 0%,
                               rgba(0, 150, 220, 1) 100%)`
-                          : 'rgba(255, 255, 255, 0.15)',
-                        transform: inputValue.trim() && !isTyping ? 'scale(1.1)' : 'none',
+                            : 'rgba(255, 255, 255, 0.15)',
+                        transform: inputValue.trim() && !isTyping ? 'scale(1.1)' : 'none'
                       },
                       '&:disabled': {
-                        opacity: 0.5,
+                        opacity: 0.5
                       },
-                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                   >
                     <Iconify icon="ph:paper-plane-tilt-duotone" width={16} />
                   </IconButton>
                 </Stack>
               </InputAdornment>
-            ),
+            )
           }}
         />
       </Box>
@@ -805,23 +802,23 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
               background: `linear-gradient(135deg, 
                 rgba(0, 176, 240, 1) 0%,
                 rgba(0, 130, 200, 1) 100%)`,
-              transform: 'scale(1.1) rotate(10deg)',
+              transform: 'scale(1.1) rotate(10deg)'
             },
             '&:active': {
-              transform: 'scale(0.95)',
+              transform: 'scale(0.95)'
             },
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            ...sx,
+            ...sx
           }}
           {...other}
         >
-          <Iconify 
-            icon="ph:robot-duotone" 
-            width={32} 
-            sx={{ 
+          <Iconify
+            icon="ph:robot-duotone"
+            width={32}
+            sx={{
               color: 'white',
-              filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-            }} 
+              filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))'
+            }}
           />
         </Fab>
       </Zoom>
@@ -836,10 +833,10 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
             sx={{
               zIndex: theme.zIndex.modal - 1,
               background: 'rgba(0, 0, 0, 0.3)',
-              backdropFilter: 'blur(8px)',
+              backdropFilter: 'blur(8px)'
             }}
           />
-          
+
           {/* Backdrop invisible para desktop en modo ventana - para cerrar al hacer click fuera */}
           {!isFullscreen && !isMobile && (
             <Box
@@ -851,11 +848,11 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
                 right: 0,
                 bottom: 0,
                 zIndex: theme.zIndex.modal - 1,
-                background: 'transparent',
+                background: 'transparent'
               }}
             />
           )}
-          
+
           {chatWindow}
         </>
       )}

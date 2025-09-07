@@ -12,7 +12,10 @@ import { aiCapabilities } from 'src/components/ai-chatbot/mock-data';
 const StyledCard = styled(Card)(({ theme }) => ({
   position: 'relative',
   padding: theme.spacing(3),
-  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)}, ${alpha(theme.palette.info.main, 0.1)})`,
+  background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)}, ${alpha(
+    theme.palette.info.main,
+    0.1
+  )})`,
   border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
   borderRadius: 20,
   overflow: 'hidden',
@@ -23,8 +26,11 @@ const StyledCard = styled(Card)(({ theme }) => ({
     left: 0,
     right: 0,
     bottom: 0,
-    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.03)}, ${alpha(theme.palette.info.main, 0.03)})`,
-    zIndex: 0,
+    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.03)}, ${alpha(
+      theme.palette.info.main,
+      0.03
+    )})`,
+    zIndex: 0
   },
   '&::after': {
     content: '""',
@@ -35,8 +41,8 @@ const StyledCard = styled(Card)(({ theme }) => ({
     height: 100,
     background: `radial-gradient(circle, ${alpha(theme.palette.primary.main, 0.1)}, transparent)`,
     borderRadius: '50%',
-    zIndex: 0,
-  },
+    zIndex: 0
+  }
 }));
 
 const CapabilityItem = styled(Box)(({ theme }) => ({
@@ -54,8 +60,8 @@ const CapabilityItem = styled(Box)(({ theme }) => ({
     backgroundColor: alpha(theme.palette.primary.main, 0.05),
     borderColor: alpha(theme.palette.primary.main, 0.3),
     transform: 'translateY(-2px)',
-    boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`,
-  },
+    boxShadow: `0 8px 24px ${alpha(theme.palette.primary.main, 0.15)}`
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -73,7 +79,7 @@ export default function AICapabilitiesBanner() {
               width: 56,
               height: 56,
               background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.info.main})`,
-              color: 'common.white',
+              color: 'common.white'
             }}
           >
             <Iconify icon="hugeicons:ai-brain-04" width={32} />
@@ -96,9 +102,9 @@ export default function AICapabilitiesBanner() {
               xs: '1fr',
               sm: '1fr 1fr',
               md: '1fr 1fr',
-              lg: '1fr 1fr 1fr 1fr',
+              lg: '1fr 1fr 1fr 1fr'
             },
-            gap: 2,
+            gap: 2
           }}
         >
           {aiCapabilities.map((capability, index) => (
@@ -108,7 +114,7 @@ export default function AICapabilitiesBanner() {
                   width: 40,
                   height: 40,
                   backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                  color: 'primary.main',
+                  color: 'primary.main'
                 }}
               >
                 <Iconify icon={capability.icon} width={24} />
@@ -132,7 +138,7 @@ export default function AICapabilitiesBanner() {
             p: 2,
             backgroundColor: alpha(theme.palette.primary.main, 0.05),
             borderRadius: 2,
-            border: `1px dashed ${alpha(theme.palette.primary.main, 0.3)}`,
+            border: `1px dashed ${alpha(theme.palette.primary.main, 0.3)}`
           }}
         >
           <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>

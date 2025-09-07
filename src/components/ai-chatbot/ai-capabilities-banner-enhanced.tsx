@@ -1,16 +1,6 @@
 import React from 'react';
 // @mui
-import {
-  Box,
-  Card,
-  Stack,
-  Typography,
-  Avatar,
-  Chip,
-  Button,
-  useTheme,
-  alpha,
-} from '@mui/material';
+import { Box, Card, Stack, Typography, Avatar, Button, useTheme } from '@mui/material';
 import { keyframes } from '@mui/material/styles';
 // components
 import Iconify from '../iconify';
@@ -70,35 +60,33 @@ const aiCapabilities = [
     icon: 'ph:chart-line-up-duotone',
     title: 'Análisis Predictivo',
     description: 'Predice tendencias y patrones de tu negocio',
-    color: '#FF6B6B',
+    color: '#FF6B6B'
   },
   {
     icon: 'ph:robot-duotone',
     title: 'Asistente Inteligente',
     description: 'Respuestas instantáneas a tus consultas',
-    color: '#4ECDC4',
+    color: '#4ECDC4'
   },
   {
     icon: 'ph:lightbulb-duotone',
     title: 'Insights Automáticos',
     description: 'Recomendaciones personalizadas en tiempo real',
-    color: '#45B7D1',
+    color: '#45B7D1'
   },
   {
     icon: 'ph:brain-duotone',
     title: 'Machine Learning',
     description: 'Aprendizaje continuo de tus datos',
-    color: '#96CEB4',
-  },
+    color: '#96CEB4'
+  }
 ];
 
 interface AICapabilitiesBannerEnhancedProps {
   onChatClick?: () => void;
 }
 
-export default function AICapabilitiesBannerEnhanced({
-  onChatClick,
-}: AICapabilitiesBannerEnhancedProps) {
+export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabilitiesBannerEnhancedProps) {
   const theme = useTheme();
 
   return (
@@ -126,8 +114,8 @@ export default function AICapabilitiesBannerEnhanced({
             transparent 30%, 
             rgba(255, 255, 255, 0.05) 50%, 
             transparent 70%)`,
-          animation: `${shimmerEffect} 4s ease-in-out infinite`,
-        },
+          animation: `${shimmerEffect} 4s ease-in-out infinite`
+        }
       }}
     >
       {/* Decorative elements */}
@@ -143,10 +131,10 @@ export default function AICapabilitiesBannerEnhanced({
             rgba(0, 176, 240, 0.1) 0%,
             rgba(0, 150, 220, 0.2) 100%)`,
           filter: 'blur(20px)',
-          animation: `${floatGently} 6s ease-in-out infinite`,
+          animation: `${floatGently} 6s ease-in-out infinite`
         }}
       />
-      
+
       <Box
         sx={{
           position: 'absolute',
@@ -159,7 +147,7 @@ export default function AICapabilitiesBannerEnhanced({
             rgba(156, 39, 176, 0.1) 0%,
             rgba(123, 31, 162, 0.2) 100%)`,
           filter: 'blur(15px)',
-          animation: `${floatGently} 8s ease-in-out infinite reverse`,
+          animation: `${floatGently} 8s ease-in-out infinite reverse`
         }}
       />
 
@@ -188,8 +176,8 @@ export default function AICapabilitiesBannerEnhanced({
                 borderRadius: '50%',
                 background: '#4CAF50',
                 border: '3px solid white',
-                animation: `${sparkle} 2s ease-in-out infinite`,
-              },
+                animation: `${sparkle} 2s ease-in-out infinite`
+              }
             }}
           >
             <Iconify icon="ph:sparkle-duotone" width={32} sx={{ color: 'white' }} />
@@ -206,7 +194,7 @@ export default function AICapabilitiesBannerEnhanced({
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 color: 'transparent',
-                mb: 0.5,
+                mb: 0.5
               }}
             >
               🚀 Potencia tu negocio con IA
@@ -216,7 +204,7 @@ export default function AICapabilitiesBannerEnhanced({
               sx={{
                 color: 'text.secondary',
                 fontWeight: 500,
-                opacity: 0.8,
+                opacity: 0.8
               }}
             >
               Descubre las capacidades avanzadas de inteligencia artificial
@@ -231,9 +219,9 @@ export default function AICapabilitiesBannerEnhanced({
             gridTemplateColumns: {
               xs: '1fr',
               sm: 'repeat(2, 1fr)',
-              md: 'repeat(4, 1fr)',
+              md: 'repeat(4, 1fr)'
             },
-            gap: 2,
+            gap: 2
           }}
         >
           {aiCapabilities.map((capability, index) => (
@@ -259,8 +247,8 @@ export default function AICapabilitiesBannerEnhanced({
                     rgba(255, 255, 255, 0.08) 100%)`,
                   boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
                   '&::before': {
-                    opacity: 1,
-                  },
+                    opacity: 1
+                  }
                 },
                 '&::before': {
                   content: '""',
@@ -273,8 +261,8 @@ export default function AICapabilitiesBannerEnhanced({
                     ${capability.color}15 0%,
                     ${capability.color}25 100%)`,
                   opacity: 0,
-                  transition: 'opacity 0.3s ease',
-                },
+                  transition: 'opacity 0.3s ease'
+                }
               }}
             >
               <Stack spacing={1.5} position="relative" zIndex={1}>
@@ -286,7 +274,7 @@ export default function AICapabilitiesBannerEnhanced({
                       ${capability.color}20 0%,
                       ${capability.color}40 100%)`,
                     border: `2px solid ${capability.color}30`,
-                    backdropFilter: 'blur(10px)',
+                    backdropFilter: 'blur(10px)'
                   }}
                 >
                   <Iconify icon={capability.icon} width={24} sx={{ color: capability.color }} />
@@ -298,7 +286,7 @@ export default function AICapabilitiesBannerEnhanced({
                     sx={{
                       fontWeight: 700,
                       color: 'text.primary',
-                      mb: 0.5,
+                      mb: 0.5
                     }}
                   >
                     {capability.title}
@@ -308,7 +296,7 @@ export default function AICapabilitiesBannerEnhanced({
                     sx={{
                       color: 'text.secondary',
                       lineHeight: 1.4,
-                      fontSize: '0.75rem',
+                      fontSize: '0.75rem'
                     }}
                   >
                     {capability.description}
@@ -332,7 +320,7 @@ export default function AICapabilitiesBannerEnhanced({
               rgba(0, 176, 240, 0.1) 0%,
               rgba(0, 150, 220, 0.15) 100%)`,
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(0, 176, 240, 0.2)',
+            border: '1px solid rgba(0, 176, 240, 0.2)'
           }}
         >
           <Box flex={1}>
@@ -341,7 +329,7 @@ export default function AICapabilitiesBannerEnhanced({
               sx={{
                 fontWeight: 700,
                 color: 'text.primary',
-                mb: 0.5,
+                mb: 0.5
               }}
             >
               💬 ¡Comienza a chatear ahora!
@@ -350,7 +338,7 @@ export default function AICapabilitiesBannerEnhanced({
               variant="body2"
               sx={{
                 color: 'text.secondary',
-                opacity: 0.8,
+                opacity: 0.8
               }}
             >
               Haz tu primera consulta y descubre el poder de la IA
@@ -362,12 +350,12 @@ export default function AICapabilitiesBannerEnhanced({
             size="large"
             onClick={onChatClick}
             startIcon={
-              <Iconify 
-                icon="ph:chat-circle-duotone" 
-                width={20} 
-                sx={{ 
-                  animation: `${sparkle} 2s ease-in-out infinite`,
-                }} 
+              <Iconify
+                icon="ph:chat-circle-duotone"
+                width={20}
+                sx={{
+                  animation: `${sparkle} 2s ease-in-out infinite`
+                }}
               />
             }
             sx={{
@@ -390,10 +378,10 @@ export default function AICapabilitiesBannerEnhanced({
                   rgba(0, 176, 240, 1) 0%,
                   rgba(0, 130, 200, 1) 100%)`,
                 transform: 'translateY(-2px)',
-                boxShadow: '0 12px 40px rgba(0, 176, 240, 0.4)',
+                boxShadow: '0 12px 40px rgba(0, 176, 240, 0.4)'
               },
               '&:active': {
-                transform: 'translateY(0px)',
+                transform: 'translateY(0px)'
               },
               '&::before': {
                 content: '""',
@@ -406,8 +394,8 @@ export default function AICapabilitiesBannerEnhanced({
                   transparent 0%,
                   rgba(255, 255, 255, 0.2) 50%,
                   transparent 100%)`,
-                animation: `${shimmerEffect} 3s ease-in-out infinite`,
-              },
+                animation: `${shimmerEffect} 3s ease-in-out infinite`
+              }
             }}
           >
             Empezar Chat

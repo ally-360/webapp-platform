@@ -90,14 +90,10 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
           {(plan.subscription === 'ally-supreme' || plan.subscription === 'premium') && <PlanPremiumIcon />}
         </Box>
 
-        <Box sx={{ typography: 'subtitle2', mt: 2, mb: 0.5 }}>
-          {plan.name || plan.subscription}
-        </Box>
+        <Box sx={{ typography: 'subtitle2', mt: 2, mb: 0.5 }}>{plan.name || plan.subscription}</Box>
 
         {plan.description && (
-          <Box sx={{ typography: 'caption', color: 'text.secondary', mb: 1 }}>
-            {plan.description}
-          </Box>
+          <Box sx={{ typography: 'caption', color: 'text.secondary', mb: 1 }}>{plan.description}</Box>
         )}
 
         <Stack direction="row" alignItems="center" sx={{ typography: 'h4' }}>
@@ -128,7 +124,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
               Plan
             </Grid>
             <Grid xs={12} md={8} sx={{ typography: 'subtitle2' }}>
-              {plans.find(p => p.subscription === selectedPlan)?.name || selectedPlan || '-'}
+              {plans.find((p) => p.subscription === selectedPlan)?.name || selectedPlan || '-'}
             </Grid>
           </Grid>
 

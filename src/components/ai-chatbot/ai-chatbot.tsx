@@ -16,13 +16,13 @@ import {
   Slide,
   Backdrop,
   InputAdornment,
-  Badge,
+  Badge
 } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 // icons
+import { useAuthContext } from 'src/auth/hooks';
 import Iconify from '../iconify';
 // hooks
-import { useAuthContext } from 'src/auth/hooks';
 // mock data
 import { aiChatMessages, aiSuggestions } from './mock-data';
 
@@ -39,7 +39,7 @@ const StyledFab = styled(Fab)(({ theme }) => ({
   '&:hover': {
     background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.info.dark})`,
     boxShadow: `0 12px 40px ${alpha(theme.palette.primary.main, 0.6)}`,
-    transform: 'scale(1.05)',
+    transform: 'scale(1.05)'
   },
   '&::before': {
     content: '""',
@@ -51,19 +51,19 @@ const StyledFab = styled(Fab)(({ theme }) => ({
     background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.info.main}, ${theme.palette.success.main})`,
     borderRadius: '50%',
     zIndex: -1,
-    animation: 'pulse 2s ease-in-out infinite',
+    animation: 'pulse 2s ease-in-out infinite'
   },
   '@keyframes pulse': {
     '0%': {
-      opacity: 1,
+      opacity: 1
     },
     '50%': {
-      opacity: 0.3,
+      opacity: 0.3
     },
     '100%': {
-      opacity: 1,
-    },
-  },
+      opacity: 1
+    }
+  }
 }));
 
 const ChatContainer = styled(Card)(({ theme }) => ({
@@ -73,13 +73,16 @@ const ChatContainer = styled(Card)(({ theme }) => ({
   width: 400,
   height: 600,
   zIndex: theme.zIndex.modal,
-  background: `linear-gradient(145deg, ${alpha(theme.palette.background.paper, 0.95)}, ${alpha(theme.palette.background.default, 0.95)})`,
+  background: `linear-gradient(145deg, ${alpha(theme.palette.background.paper, 0.95)}, ${alpha(
+    theme.palette.background.default,
+    0.95
+  )})`,
   backdropFilter: 'blur(20px)',
   border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
   borderRadius: 20,
   overflow: 'hidden',
   boxShadow: `0 20px 60px ${alpha(theme.palette.common.black, 0.3)}`,
-  
+
   [theme.breakpoints.down('sm')]: {
     top: 0,
     left: 0,
@@ -87,8 +90,8 @@ const ChatContainer = styled(Card)(({ theme }) => ({
     bottom: 0,
     width: '100%',
     height: '100%',
-    borderRadius: 0,
-  },
+    borderRadius: 0
+  }
 }));
 
 const MaximizedChatContainer = styled(Card)(({ theme }) => ({
@@ -98,16 +101,19 @@ const MaximizedChatContainer = styled(Card)(({ theme }) => ({
   right: 24,
   bottom: 24,
   zIndex: theme.zIndex.modal,
-  background: `linear-gradient(145deg, ${alpha(theme.palette.background.paper, 0.95)}, ${alpha(theme.palette.background.default, 0.95)})`,
+  background: `linear-gradient(145deg, ${alpha(theme.palette.background.paper, 0.95)}, ${alpha(
+    theme.palette.background.default,
+    0.95
+  )})`,
   backdropFilter: 'blur(20px)',
   border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
   borderRadius: 20,
   overflow: 'hidden',
-  boxShadow: `0 20px 60px ${alpha(theme.palette.common.black, 0.3)}`,
+  boxShadow: `0 20px 60px ${alpha(theme.palette.common.black, 0.3)}`
 }));
 
 const MessageBubble = styled(Paper, {
-  shouldForwardProp: (prop) => prop !== 'isBot',
+  shouldForwardProp: (prop) => prop !== 'isBot'
 })<{ isBot?: boolean }>(({ theme, isBot }) => ({
   padding: theme.spacing(1.5, 2),
   marginBottom: theme.spacing(1),
@@ -117,14 +123,14 @@ const MessageBubble = styled(Paper, {
     ? {
         backgroundColor: alpha(theme.palette.primary.main, 0.1),
         border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-        alignSelf: 'flex-start',
+        alignSelf: 'flex-start'
       }
     : {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
         alignSelf: 'flex-end',
-        marginLeft: 'auto',
-      }),
+        marginLeft: 'auto'
+      })
 }));
 
 const SuggestionChip = styled(Paper)(({ theme }) => ({
@@ -140,8 +146,8 @@ const SuggestionChip = styled(Paper)(({ theme }) => ({
   '&:hover': {
     backgroundColor: alpha(theme.palette.info.main, 0.2),
     transform: 'translateY(-2px)',
-    boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.3)}`,
-  },
+    boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.3)}`
+  }
 }));
 
 // ----------------------------------------------------------------------
@@ -183,7 +189,7 @@ export default function AIChatbot() {
       id: Date.now().toString(),
       text: text.trim(),
       isBot: false,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     setMessages((prev) => [...prev, newMessage]);
@@ -198,12 +204,12 @@ export default function AIChatbot() {
         text: aiResponse.text,
         isBot: true,
         timestamp: new Date(),
-        suggestions: aiResponse.suggestions,
+        suggestions: aiResponse.suggestions
       };
 
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);
-      
+
       if (!isOpen) {
         setHasNewMessage(true);
       }
@@ -212,38 +218,42 @@ export default function AIChatbot() {
 
   const generateAIResponse = (userMessage: string): { text: string; suggestions?: string[] } => {
     const lowerMessage = userMessage.toLowerCase();
-    
+
     if (lowerMessage.includes('producto') && lowerMessage.includes('más')) {
       return {
         text: "Tu producto más vendido ayer fue 'Camiseta Polo Azul' con 15 unidades vendidas, generando $450.000 en ingresos.",
-        suggestions: ["¿Qué productos rotan más lento?", "Mostrar inventario actual", "Comparar ventas del mes"]
+        suggestions: ['¿Qué productos rotan más lento?', 'Mostrar inventario actual', 'Comparar ventas del mes']
       };
     }
-    
+
     if (lowerMessage.includes('inventario')) {
       return {
-        text: "Actualmente tienes 1,247 productos en inventario. Los productos con mayor stock son: Camisetas (156 unidades), Pantalones (98 unidades), Zapatos (87 unidades).",
-        suggestions: ["¿Cuáles están por agotarse?", "Productos con menor rotación", "Valor total del inventario"]
+        text: 'Actualmente tienes 1,247 productos en inventario. Los productos con mayor stock son: Camisetas (156 unidades), Pantalones (98 unidades), Zapatos (87 unidades).',
+        suggestions: ['¿Cuáles están por agotarse?', 'Productos con menor rotación', 'Valor total del inventario']
       };
     }
-    
+
     if (lowerMessage.includes('cliente') && lowerMessage.includes('debe')) {
       return {
         text: "El cliente que más te debe actualmente es 'Distribuidora del Norte S.A.S' con un saldo pendiente de $2.850.000 correspondiente a 3 facturas vencidas.",
-        suggestions: ["Enviar recordatorio de pago", "Ver todas las cuentas por cobrar", "Generar reporte de cartera"]
+        suggestions: ['Enviar recordatorio de pago', 'Ver todas las cuentas por cobrar', 'Generar reporte de cartera']
       };
     }
-    
+
     if (lowerMessage.includes('rotan') && lowerMessage.includes('lento')) {
       return {
-        text: "Los productos con menor rotación son: Chaqueta de Invierno (45 días sin venta) y Zapatos Formales (30 días). Te recomiendo crear una promoción del 20% para acelerar la rotación.",
-        suggestions: ["Crear promoción automática", "Ver análisis de temporada", "Sugerir descuentos"]
+        text: 'Los productos con menor rotación son: Chaqueta de Invierno (45 días sin venta) y Zapatos Formales (30 días). Te recomiendo crear una promoción del 20% para acelerar la rotación.',
+        suggestions: ['Crear promoción automática', 'Ver análisis de temporada', 'Sugerir descuentos']
       };
     }
-    
+
     return {
-      text: "¡Hola! Soy Ally IA, tu asistente virtual. Puedo ayudarte con consultas sobre ventas, inventario, clientes y generar análisis inteligentes para tu negocio. ¿En qué puedo ayudarte hoy?",
-      suggestions: ["¿Cuál fue mi mejor producto ayer?", "¿Qué productos están por agotarse?", "Mostrar resumen de ventas"]
+      text: '¡Hola! Soy Ally IA, tu asistente virtual. Puedo ayudarte con consultas sobre ventas, inventario, clientes y generar análisis inteligentes para tu negocio. ¿En qué puedo ayudarte hoy?',
+      suggestions: [
+        '¿Cuál fue mi mejor producto ayer?',
+        '¿Qué productos están por agotarse?',
+        'Mostrar resumen de ventas'
+      ]
     };
   };
 
@@ -268,14 +278,17 @@ export default function AIChatbot() {
         color: 'common.white',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'space-between'
       }}
     >
       <Stack direction="row" alignItems="center" spacing={1.5}>
         <Avatar
           sx={{
-            background: `linear-gradient(135deg, ${theme.palette.common.white}, ${alpha(theme.palette.primary.light, 0.8)})`,
-            color: 'primary.main',
+            background: `linear-gradient(135deg, ${theme.palette.common.white}, ${alpha(
+              theme.palette.primary.light,
+              0.8
+            )})`,
+            color: 'primary.main'
           }}
         >
           <Iconify icon="hugeicons:ai-brain-04" width={24} />
@@ -291,17 +304,11 @@ export default function AIChatbot() {
       </Stack>
       <Stack direction="row" spacing={1}>
         {!isMobile && (
-          <IconButton
-            onClick={handleMaximize}
-            sx={{ color: 'inherit' }}
-          >
-            <Iconify icon={isMaximized ? "material-symbols:fullscreen-exit" : "material-symbols:fullscreen"} />
+          <IconButton onClick={handleMaximize} sx={{ color: 'inherit' }}>
+            <Iconify icon={isMaximized ? 'material-symbols:fullscreen-exit' : 'material-symbols:fullscreen'} />
           </IconButton>
         )}
-        <IconButton
-          onClick={() => setIsOpen(false)}
-          sx={{ color: 'inherit' }}
-        >
+        <IconButton onClick={() => setIsOpen(false)} sx={{ color: 'inherit' }}>
           <Iconify icon="material-symbols:close" />
         </IconButton>
       </Stack>
@@ -322,22 +329,22 @@ export default function AIChatbot() {
           borderRadius: '50%',
           animation: 'typing 1.4s infinite ease-in-out',
           '&:nth-of-type(2)': {
-            animationDelay: '0.2s',
+            animationDelay: '0.2s'
           },
           '&:nth-of-type(3)': {
-            animationDelay: '0.4s',
-          },
+            animationDelay: '0.4s'
+          }
         },
         '@keyframes typing': {
           '0%, 60%, 100%': {
             transform: 'scale(0.8)',
-            opacity: 0.5,
+            opacity: 0.5
           },
           '30%': {
             transform: 'scale(1)',
-            opacity: 1,
-          },
-        },
+            opacity: 1
+          }
+        }
       }}
     >
       <Typography variant="body2" sx={{ mr: 1 }}>
@@ -361,19 +368,19 @@ export default function AIChatbot() {
           p: 2,
           overflow: 'auto',
           '&::-webkit-scrollbar': {
-            width: 6,
+            width: 6
           },
           '&::-webkit-scrollbar-track': {
             backgroundColor: alpha(theme.palette.grey[500], 0.1),
-            borderRadius: 3,
+            borderRadius: 3
           },
           '&::-webkit-scrollbar-thumb': {
             backgroundColor: alpha(theme.palette.grey[500], 0.3),
             borderRadius: 3,
             '&:hover': {
-              backgroundColor: alpha(theme.palette.grey[500], 0.5),
-            },
-          },
+              backgroundColor: alpha(theme.palette.grey[500], 0.5)
+            }
+          }
         }}
         spacing={1}
       >
@@ -390,20 +397,13 @@ export default function AIChatbot() {
                   </Typography>
                 </Stack>
               )}
-              <Typography variant="body2">
-                {message.text}
-              </Typography>
+              <Typography variant="body2">{message.text}</Typography>
               {message.suggestions && (
                 <Box sx={{ mt: 1.5 }}>
                   <Stack direction="row" spacing={0.5} flexWrap="wrap">
                     {message.suggestions.map((suggestion, index) => (
-                      <SuggestionChip
-                        key={index}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                      >
-                        <Typography variant="caption">
-                          {suggestion}
-                        </Typography>
+                      <SuggestionChip key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                        <Typography variant="caption">{suggestion}</Typography>
                       </SuggestionChip>
                     ))}
                   </Stack>
@@ -452,14 +452,14 @@ export default function AIChatbot() {
               borderRadius: 3,
               backgroundColor: alpha(theme.palette.background.default, 0.5),
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: alpha(theme.palette.primary.main, 0.3),
+                borderColor: alpha(theme.palette.primary.main, 0.3)
               },
               '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: alpha(theme.palette.primary.main, 0.5),
+                borderColor: alpha(theme.palette.primary.main, 0.5)
               },
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: theme.palette.primary.main,
-              },
+                borderColor: theme.palette.primary.main
+              }
             },
             endAdornment: (
               <InputAdornment position="end">
@@ -469,14 +469,14 @@ export default function AIChatbot() {
                   sx={{
                     color: theme.palette.primary.main,
                     '&:disabled': {
-                      color: theme.palette.text.disabled,
-                    },
+                      color: theme.palette.text.disabled
+                    }
                   }}
                 >
                   <Iconify icon="material-symbols:send" />
                 </IconButton>
               </InputAdornment>
-            ),
+            )
           }}
         />
 
@@ -484,13 +484,8 @@ export default function AIChatbot() {
         <Box sx={{ mt: 1 }}>
           <Stack direction="row" spacing={0.5} flexWrap="wrap">
             {aiSuggestions.map((suggestion, index) => (
-              <SuggestionChip
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                <Typography variant="caption">
-                  {suggestion}
-                </Typography>
+              <SuggestionChip key={index} onClick={() => handleSuggestionClick(suggestion)}>
+                <Typography variant="caption">{suggestion}</Typography>
               </SuggestionChip>
             ))}
           </Stack>
@@ -503,11 +498,11 @@ export default function AIChatbot() {
     <>
       {/* Floating Action Button */}
       <Badge
-        badgeContent={hasNewMessage ? "!" : null}
+        badgeContent={hasNewMessage ? '!' : null}
         color="error"
         anchorOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'left'
         }}
       >
         <StyledFab onClick={handleToggleChat}>
@@ -521,19 +516,15 @@ export default function AIChatbot() {
         onClick={() => setIsOpen(false)}
         sx={{
           zIndex: (theme) => theme.zIndex.modal - 1,
-          backgroundColor: alpha(theme.palette.common.black, 0.3),
+          backgroundColor: alpha(theme.palette.common.black, 0.3)
         }}
       />
 
       <Slide direction="up" in={isOpen} mountOnEnter unmountOnExit>
         {isMaximized && !isMobile ? (
-          <MaximizedChatContainer onClick={(e) => e.stopPropagation()}>
-            {ChatContent}
-          </MaximizedChatContainer>
+          <MaximizedChatContainer onClick={(e) => e.stopPropagation()}>{ChatContent}</MaximizedChatContainer>
         ) : (
-          <ChatContainer onClick={(e) => e.stopPropagation()}>
-            {ChatContent}
-          </ChatContainer>
+          <ChatContainer onClick={(e) => e.stopPropagation()}>{ChatContent}</ChatContainer>
         )}
       </Slide>
     </>

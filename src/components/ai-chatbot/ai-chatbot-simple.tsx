@@ -15,19 +15,16 @@ import {
   useMediaQuery,
   Slide,
   Backdrop,
-  InputAdornment,
   Badge,
   Fade,
   Zoom,
-  Grow,
-  Chip,
-  Collapse,
+  Grow
 } from '@mui/material';
 import { alpha, keyframes } from '@mui/material/styles';
 // icons
+import { useAuthContext } from 'src/auth/hooks';
 import Iconify from '../iconify';
 // hooks
-import { useAuthContext } from 'src/auth/hooks';
 
 // Mock data
 const mockAIChatData = {
@@ -36,15 +33,10 @@ const mockAIChatData = {
       id: 1,
       type: 'bot',
       content: '¡Hola! Soy tu asistente de IA de Ally360. ¿En qué puedo ayudarte hoy?',
-      timestamp: new Date(),
-    },
+      timestamp: new Date()
+    }
   ],
-  suggestions: [
-    'Mostrar métricas de ventas',
-    'Análizar rendimiento',
-    'Generar reporte',
-    'Configurar alertas',
-  ],
+  suggestions: ['Mostrar métricas de ventas', 'Análizar rendimiento', 'Generar reporte', 'Configurar alertas']
 };
 
 // Enhanced keyframes for smoother animations
@@ -178,9 +170,9 @@ const aiChatMessages = [
       '¿Cuál fue mi producto más vendido ayer?',
       'Mostrar inventario actual',
       '¿Qué clientes me deben dinero?',
-      'Análisis de productos con baja rotación',
-    ],
-  },
+      'Análisis de productos con baja rotación'
+    ]
+  }
 ];
 
 const aiSuggestions = [
@@ -189,7 +181,7 @@ const aiSuggestions = [
   'Inventario bajo',
   'Clientes morosos',
   'Reporte mensual',
-  'Productos lentos',
+  'Productos lentos'
 ];
 
 // ----------------------------------------------------------------------
@@ -231,7 +223,7 @@ export default function AIChatbot() {
       id: Date.now().toString(),
       text: text.trim(),
       isBot: false,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     setMessages((prev) => [...prev, newMessage]);
@@ -246,12 +238,12 @@ export default function AIChatbot() {
         text: aiResponse.text,
         isBot: true,
         timestamp: new Date(),
-        suggestions: aiResponse.suggestions,
+        suggestions: aiResponse.suggestions
       };
 
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);
-      
+
       if (!isOpen) {
         setHasNewMessage(true);
       }
@@ -260,38 +252,42 @@ export default function AIChatbot() {
 
   const generateAIResponse = (userMessage: string): { text: string; suggestions?: string[] } => {
     const lowerMessage = userMessage.toLowerCase();
-    
+
     if (lowerMessage.includes('producto') && lowerMessage.includes('más')) {
       return {
         text: "Tu producto más vendido ayer fue 'Camiseta Polo Azul' con 15 unidades vendidas, generando $450.000 en ingresos.",
-        suggestions: ["¿Qué productos rotan más lento?", "Mostrar inventario actual", "Comparar ventas del mes"]
+        suggestions: ['¿Qué productos rotan más lento?', 'Mostrar inventario actual', 'Comparar ventas del mes']
       };
     }
-    
+
     if (lowerMessage.includes('inventario')) {
       return {
-        text: "Actualmente tienes 1,247 productos en inventario. Los productos con mayor stock son: Camisetas (156 unidades), Pantalones (98 unidades), Zapatos (87 unidades).",
-        suggestions: ["¿Cuáles están por agotarse?", "Productos con menor rotación", "Valor total del inventario"]
+        text: 'Actualmente tienes 1,247 productos en inventario. Los productos con mayor stock son: Camisetas (156 unidades), Pantalones (98 unidades), Zapatos (87 unidades).',
+        suggestions: ['¿Cuáles están por agotarse?', 'Productos con menor rotación', 'Valor total del inventario']
       };
     }
-    
+
     if (lowerMessage.includes('cliente') && lowerMessage.includes('debe')) {
       return {
         text: "El cliente que más te debe actualmente es 'Distribuidora del Norte S.A.S' con un saldo pendiente de $2.850.000 correspondiente a 3 facturas vencidas.",
-        suggestions: ["Enviar recordatorio de pago", "Ver todas las cuentas por cobrar", "Generar reporte de cartera"]
+        suggestions: ['Enviar recordatorio de pago', 'Ver todas las cuentas por cobrar', 'Generar reporte de cartera']
       };
     }
-    
+
     if (lowerMessage.includes('rotan') && lowerMessage.includes('lento')) {
       return {
-        text: "Los productos con menor rotación son: Chaqueta de Invierno (45 días sin venta) y Zapatos Formales (30 días). Te recomiendo crear una promoción del 20% para acelerar la rotación.",
-        suggestions: ["Crear promoción automática", "Ver análisis de temporada", "Sugerir descuentos"]
+        text: 'Los productos con menor rotación son: Chaqueta de Invierno (45 días sin venta) y Zapatos Formales (30 días). Te recomiendo crear una promoción del 20% para acelerar la rotación.',
+        suggestions: ['Crear promoción automática', 'Ver análisis de temporada', 'Sugerir descuentos']
       };
     }
-    
+
     return {
-      text: "¡Hola! Soy Ally IA, tu asistente virtual. Puedo ayudarte con consultas sobre ventas, inventario, clientes y generar análisis inteligentes para tu negocio. ¿En qué puedo ayudarte hoy?",
-      suggestions: ["¿Cuál fue mi mejor producto ayer?", "¿Qué productos están por agotarse?", "Mostrar resumen de ventas"]
+      text: '¡Hola! Soy Ally IA, tu asistente virtual. Puedo ayudarte con consultas sobre ventas, inventario, clientes y generar análisis inteligentes para tu negocio. ¿En qué puedo ayudarte hoy?',
+      suggestions: [
+        '¿Cuál fue mi mejor producto ayer?',
+        '¿Qué productos están por agotarse?',
+        'Mostrar resumen de ventas'
+      ]
     };
   };
 
@@ -329,8 +325,8 @@ export default function AIChatbot() {
             bottom: 0,
             background: 'linear-gradient(135deg, rgba(0, 176, 240, 0.1) 0%, rgba(0, 76, 151, 0.1) 100%)',
             borderRadius: '0 0 20px 20px',
-            zIndex: 0,
-          },
+            zIndex: 0
+          }
         }}
       >
         <Stack direction="row" alignItems="center" spacing={2} sx={{ zIndex: 1 }}>
@@ -343,7 +339,7 @@ export default function AIChatbot() {
                 color: 'common.white',
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(255, 255, 255, 0.3)',
-                animation: `${floatAnimation} 3s ease-in-out infinite`,
+                animation: `${floatAnimation} 3s ease-in-out infinite`
               }}
             >
               <Iconify icon="hugeicons:ai-brain-04" width={24} />
@@ -367,7 +363,7 @@ export default function AIChatbot() {
                   height: 8,
                   borderRadius: '50%',
                   backgroundColor: '#4CAF50',
-                  animation: `${pulseAnimation} 2s infinite`,
+                  animation: `${pulseAnimation} 2s infinite`
                 }}
               />
             </Stack>
@@ -378,29 +374,29 @@ export default function AIChatbot() {
             <Fade in={isOpen} timeout={1200}>
               <IconButton
                 onClick={handleMaximize}
-                sx={{ 
+                sx={{
                   color: 'inherit',
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    transform: 'scale(1.1)',
+                    transform: 'scale(1.1)'
                   },
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.3s ease'
                 }}
               >
-                <Iconify icon={isMaximized ? "material-symbols:fullscreen-exit" : "material-symbols:fullscreen"} />
+                <Iconify icon={isMaximized ? 'material-symbols:fullscreen-exit' : 'material-symbols:fullscreen'} />
               </IconButton>
             </Fade>
           )}
           <Fade in={isOpen} timeout={1400}>
             <IconButton
               onClick={() => setIsOpen(false)}
-              sx={{ 
+              sx={{
                 color: 'inherit',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  transform: 'scale(1.1)',
+                  transform: 'scale(1.1)'
                 },
-                transition: 'all 0.3s ease',
+                transition: 'all 0.3s ease'
               }}
             >
               <Iconify icon="material-symbols:close" />
@@ -417,26 +413,26 @@ export default function AIChatbot() {
           overflow: 'auto',
           background: 'linear-gradient(180deg, rgba(248, 249, 250, 0.5) 0%, rgba(233, 236, 239, 0.5) 100%)',
           '&::-webkit-scrollbar': {
-            width: 8,
+            width: 8
           },
           '&::-webkit-scrollbar-track': {
             backgroundColor: alpha(theme.palette.grey[500], 0.1),
-            borderRadius: 4,
+            borderRadius: 4
           },
           '&::-webkit-scrollbar-thumb': {
             backgroundColor: alpha(theme.palette.primary.main, 0.3),
             borderRadius: 4,
             '&:hover': {
-              backgroundColor: alpha(theme.palette.primary.main, 0.5),
-            },
-          },
+              backgroundColor: alpha(theme.palette.primary.main, 0.5)
+            }
+          }
         }}
         spacing={3}
       >
         {messages.map((message, index) => (
           <Grow
             key={message.id}
-            in={true}
+            in
             timeout={500 + index * 100}
             style={{ transformOrigin: message.isBot ? 'left center' : 'right center' }}
           >
@@ -464,13 +460,13 @@ export default function AIChatbot() {
                         width: 0,
                         height: 0,
                         borderLeft: '8px solid transparent',
-                        borderTop: '8px solid #00B0F0',
+                        borderTop: '8px solid #00B0F0'
                       },
                       '&:hover': {
                         transform: 'translateY(-2px)',
                         boxShadow: '0 8px 25px rgba(0, 176, 240, 0.4)',
-                        transition: 'all 0.3s ease',
-                      },
+                        transition: 'all 0.3s ease'
+                      }
                     }}
                   >
                     <Typography variant="body1" sx={{ fontSize: '0.95rem', lineHeight: 1.5 }}>
@@ -484,7 +480,7 @@ export default function AIChatbot() {
               {message.isBot && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', maxWidth: '85%' }}>
-                    <Zoom in={true} timeout={300}>
+                    <Zoom in timeout={300}>
                       <Avatar
                         sx={{
                           width: 40,
@@ -494,7 +490,7 @@ export default function AIChatbot() {
                           mt: 0.5,
                           flexShrink: 0,
                           animation: `${floatAnimation} 4s ease-in-out infinite`,
-                          boxShadow: '0 4px 15px rgba(0, 176, 240, 0.3)',
+                          boxShadow: '0 4px 15px rgba(0, 176, 240, 0.3)'
                         }}
                       >
                         <Iconify icon="hugeicons:ai-brain-04" width={20} />
@@ -521,23 +517,26 @@ export default function AIChatbot() {
                           borderRight: '8px solid rgba(255, 255, 255, 0.95)',
                           borderTop: '8px solid rgba(255, 255, 255, 0.95)',
                           borderLeft: '8px solid transparent',
-                          borderBottom: '8px solid transparent',
+                          borderBottom: '8px solid transparent'
                         },
                         '&:hover': {
                           transform: 'translateY(-2px)',
                           boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
-                          transition: 'all 0.3s ease',
-                        },
+                          transition: 'all 0.3s ease'
+                        }
                       }}
                     >
                       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-                        <Typography variant="caption" sx={{ 
-                          fontWeight: 600, 
-                          color: '#00B0F0',
-                          fontSize: '0.75rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                        }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontWeight: 600,
+                            color: '#00B0F0',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }}
+                        >
                           Ally IA
                         </Typography>
                         <Box
@@ -546,43 +545,50 @@ export default function AIChatbot() {
                             height: 6,
                             borderRadius: '50%',
                             backgroundColor: '#4CAF50',
-                            animation: `${pulseAnimation} 2s infinite`,
+                            animation: `${pulseAnimation} 2s infinite`
                           }}
                         />
                       </Stack>
-                      <Typography variant="body1" sx={{ 
-                        fontSize: '0.95rem', 
-                        lineHeight: 1.6, 
-                        color: '#333',
-                        mb: message.suggestions ? 2 : 0,
-                      }}>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontSize: '0.95rem',
+                          lineHeight: 1.6,
+                          color: '#333',
+                          mb: message.suggestions ? 2 : 0
+                        }}
+                      >
                         {message.text}
                       </Typography>
-                      
+
                       {/* Suggestions */}
                       {message.suggestions && (
                         <Box>
                           <Divider sx={{ my: 2, borderColor: 'rgba(0, 176, 240, 0.1)' }} />
-                          <Typography variant="caption" sx={{ 
-                            color: '#00B0F0', 
-                            fontWeight: 600,
-                            fontSize: '0.7rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                            mb: 1,
-                            display: 'block',
-                          }}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: '#00B0F0',
+                              fontWeight: 600,
+                              fontSize: '0.7rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px',
+                              mb: 1,
+                              display: 'block'
+                            }}
+                          >
                             Sugerencias rápidas
                           </Typography>
                           <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
                             {message.suggestions.map((suggestion, index) => (
-                              <Fade key={index} in={true} timeout={800 + index * 200}>
+                              <Fade key={index} in timeout={800 + index * 200}>
                                 <Paper
                                   onClick={() => handleSuggestionClick(suggestion)}
                                   sx={{
                                     px: 2,
                                     py: 1,
-                                    background: 'linear-gradient(135deg, rgba(0, 176, 240, 0.1) 0%, rgba(0, 76, 151, 0.1) 100%)',
+                                    background:
+                                      'linear-gradient(135deg, rgba(0, 176, 240, 0.1) 0%, rgba(0, 76, 151, 0.1) 100%)',
                                     border: '1px solid rgba(0, 176, 240, 0.2)',
                                     borderRadius: 20,
                                     cursor: 'pointer',
@@ -591,14 +597,15 @@ export default function AIChatbot() {
                                     fontWeight: 500,
                                     transition: 'all 0.3s ease',
                                     '&:hover': {
-                                      background: 'linear-gradient(135deg, rgba(0, 176, 240, 0.2) 0%, rgba(0, 76, 151, 0.2) 100%)',
+                                      background:
+                                        'linear-gradient(135deg, rgba(0, 176, 240, 0.2) 0%, rgba(0, 76, 151, 0.2) 100%)',
                                       transform: 'translateY(-2px) scale(1.02)',
                                       boxShadow: '0 4px 15px rgba(0, 176, 240, 0.3)',
-                                      borderColor: 'rgba(0, 176, 240, 0.4)',
+                                      borderColor: 'rgba(0, 176, 240, 0.4)'
                                     },
                                     '&:active': {
-                                      transform: 'translateY(0) scale(0.98)',
-                                    },
+                                      transform: 'translateY(0) scale(0.98)'
+                                    }
                                   }}
                                 >
                                   <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
@@ -631,7 +638,7 @@ export default function AIChatbot() {
                     mr: 2,
                     mt: 0.5,
                     flexShrink: 0,
-                    animation: `${pulseAnimation} 1s infinite`,
+                    animation: `${pulseAnimation} 1s infinite`
                   }}
                 >
                   <Iconify icon="hugeicons:ai-brain-04" width={20} />
@@ -656,18 +663,21 @@ export default function AIChatbot() {
                       borderRight: '8px solid rgba(255, 255, 255, 0.95)',
                       borderTop: '8px solid rgba(255, 255, 255, 0.95)',
                       borderLeft: '8px solid transparent',
-                      borderBottom: '8px solid transparent',
-                    },
+                      borderBottom: '8px solid transparent'
+                    }
                   }}
                 >
                   <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
-                    <Typography variant="caption" sx={{ 
-                      fontWeight: 600, 
-                      color: '#00B0F0',
-                      fontSize: '0.75rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                    }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 600,
+                        color: '#00B0F0',
+                        fontSize: '0.75rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}
+                    >
                       Ally IA
                     </Typography>
                     <Box
@@ -676,7 +686,7 @@ export default function AIChatbot() {
                         height: 6,
                         borderRadius: '50%',
                         backgroundColor: '#4CAF50',
-                        animation: `${pulseAnimation} 2s infinite`,
+                        animation: `${pulseAnimation} 2s infinite`
                       }}
                     />
                   </Stack>
@@ -684,7 +694,7 @@ export default function AIChatbot() {
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 1,
+                      gap: 1
                     }}
                   >
                     <Typography variant="body2" sx={{ mr: 1, color: '#666' }}>
@@ -701,12 +711,12 @@ export default function AIChatbot() {
                           borderRadius: '50%',
                           animation: `${typingAnimation} 1.4s infinite ease-in-out`,
                           '&:nth-of-type(2)': {
-                            animationDelay: '0.2s',
+                            animationDelay: '0.2s'
                           },
                           '&:nth-of-type(3)': {
-                            animationDelay: '0.4s',
-                          },
-                        },
+                            animationDelay: '0.4s'
+                          }
+                        }
                       }}
                     >
                       <Box className="dot" />
@@ -726,11 +736,13 @@ export default function AIChatbot() {
       <Divider sx={{ borderColor: 'rgba(0, 176, 240, 0.1)' }} />
 
       {/* Input Section */}
-      <Box sx={{ 
-        p: 3, 
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-      }}>
+      <Box
+        sx={{
+          p: 3,
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)'
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -744,8 +756,8 @@ export default function AIChatbot() {
             '&:focus-within': {
               borderColor: 'rgba(0, 176, 240, 0.4)',
               boxShadow: '0 0 20px rgba(0, 176, 240, 0.2)',
-              transform: 'translateY(-2px)',
-            },
+              transform: 'translateY(-2px)'
+            }
           }}
         >
           <TextField
@@ -768,47 +780,47 @@ export default function AIChatbot() {
                 fontSize: '1rem',
                 '& input::placeholder': {
                   color: '#aaa',
-                  opacity: 1,
-                },
-              },
+                  opacity: 1
+                }
+              }
             }}
           />
           <Stack direction="row" spacing={1} sx={{ ml: 1 }}>
-            <Zoom in={true} timeout={600}>
+            <Zoom in timeout={600}>
               <IconButton
                 sx={{
                   color: '#666',
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     color: '#00B0F0',
-                    transform: 'scale(1.1)',
-                  },
+                    transform: 'scale(1.1)'
+                  }
                 }}
               >
                 <Iconify icon="material-symbols:mic" />
               </IconButton>
             </Zoom>
-            <Zoom in={true} timeout={800}>
+            <Zoom in timeout={800}>
               <IconButton
                 onClick={() => handleSendMessage()}
                 disabled={!inputValue.trim()}
                 sx={{
-                  background: inputValue.trim() 
+                  background: inputValue.trim()
                     ? 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)'
                     : 'rgba(0, 0, 0, 0.1)',
                   color: inputValue.trim() ? '#fff' : '#aaa',
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    background: inputValue.trim() 
+                    background: inputValue.trim()
                       ? 'linear-gradient(135deg, #00B0F0 0%, #003d7a 100%)'
                       : 'rgba(0, 0, 0, 0.15)',
                     transform: 'scale(1.1)',
-                    boxShadow: inputValue.trim() ? '0 4px 15px rgba(0, 176, 240, 0.4)' : 'none',
+                    boxShadow: inputValue.trim() ? '0 4px 15px rgba(0, 176, 240, 0.4)' : 'none'
                   },
                   '&:disabled': {
                     background: 'rgba(0, 0, 0, 0.05)',
-                    color: '#ccc',
-                  },
+                    color: '#ccc'
+                  }
                 }}
               >
                 <Iconify icon="material-symbols:send" />
@@ -819,15 +831,18 @@ export default function AIChatbot() {
 
         {/* Quick Suggestions */}
         <Box sx={{ mt: 2 }}>
-          <Typography variant="caption" sx={{ 
-            color: '#00B0F0', 
-            fontWeight: 600,
-            fontSize: '0.7rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            mb: 1,
-            display: 'block',
-          }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#00B0F0',
+              fontWeight: 600,
+              fontSize: '0.7rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              mb: 1,
+              display: 'block'
+            }}
+          >
             Consultas rápidas
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
@@ -850,11 +865,11 @@ export default function AIChatbot() {
                       background: 'linear-gradient(135deg, rgba(0, 176, 240, 0.15) 0%, rgba(0, 76, 151, 0.15) 100%)',
                       transform: 'translateY(-2px) scale(1.02)',
                       boxShadow: '0 4px 15px rgba(0, 176, 240, 0.2)',
-                      borderColor: 'rgba(0, 176, 240, 0.3)',
+                      borderColor: 'rgba(0, 176, 240, 0.3)'
                     },
                     '&:active': {
-                      transform: 'translateY(0) scale(0.98)',
-                    },
+                      transform: 'translateY(0) scale(0.98)'
+                    }
                   }}
                 >
                   <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
@@ -873,14 +888,14 @@ export default function AIChatbot() {
     <>
       {/* Floating Action Button */}
       <Badge
-        badgeContent={hasNewMessage ? "!" : null}
+        badgeContent={hasNewMessage ? '!' : null}
         color="error"
         anchorOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'left'
         }}
       >
-        <Zoom in={true} timeout={1000}>
+        <Zoom in timeout={1000}>
           <Fab
             onClick={handleToggleChat}
             sx={{
@@ -898,13 +913,13 @@ export default function AIChatbot() {
                 bottom: 80,
                 right: 16,
                 width: 56,
-                height: 56,
+                height: 56
               }),
               '&:hover': {
                 background: 'linear-gradient(135deg, #00B0F0 0%, #003d7a 100%)',
                 boxShadow: '0 12px 40px rgba(0, 176, 240, 0.6)',
                 transform: 'scale(1.1) translateY(-5px)',
-                animation: 'none',
+                animation: 'none'
               },
               '&::before': {
                 content: '""',
@@ -917,7 +932,7 @@ export default function AIChatbot() {
                 borderRadius: '50%',
                 zIndex: -1,
                 animation: `${glowAnimation} 3s ease-in-out infinite`,
-                opacity: 0.7,
+                opacity: 0.7
               },
               '&::after': {
                 content: '""',
@@ -930,9 +945,9 @@ export default function AIChatbot() {
                 background: 'radial-gradient(circle, rgba(0, 176, 240, 0.3) 0%, transparent 70%)',
                 transform: 'translate(-50%, -50%)',
                 zIndex: -2,
-                animation: `${pulseAnimation} 2s ease-in-out infinite`,
+                animation: `${pulseAnimation} 2s ease-in-out infinite`
               },
-              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             <Iconify icon="hugeicons:ai-brain-04" width={32} />
@@ -947,7 +962,7 @@ export default function AIChatbot() {
         sx={{
           zIndex: (theme) => theme.zIndex.modal - 1,
           backgroundColor: alpha(theme.palette.common.black, 0.5),
-          backdropFilter: 'blur(4px)',
+          backdropFilter: 'blur(4px)'
         }}
       />
 
@@ -962,7 +977,7 @@ export default function AIChatbot() {
                     top: 24,
                     left: 24,
                     right: 24,
-                    bottom: 24,
+                    bottom: 24
                   }
                 : {
                     bottom: 100,
@@ -976,8 +991,8 @@ export default function AIChatbot() {
                       bottom: 0,
                       width: '100%',
                       height: '100%',
-                      borderRadius: 0,
-                    }),
+                      borderRadius: 0
+                    })
                   }),
               zIndex: theme.zIndex.modal,
               background: 'rgba(255, 255, 255, 0.05)',
@@ -994,8 +1009,8 @@ export default function AIChatbot() {
                 right: 0,
                 bottom: 0,
                 background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-                zIndex: -1,
-              },
+                zIndex: -1
+              }
             }}
           >
             {ChatContent}
