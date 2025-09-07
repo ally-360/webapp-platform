@@ -120,19 +120,52 @@ export const _userInvoices = [...Array(10)].map((_, index) => ({
 
 export const _userPlans = [
   {
-    subscription: 'basic',
-    price: 0,
-    primary: false
+    subscription: 'ally-kickstart',
+    price: 50000,
+    primary: false,
+    name: 'Ally Kickstart',
+    description: 'Ideal para microempresas que apenas comienzan en la digitalización',
+    features: [
+      'Límite de 200 facturas electrónicas al mes',
+      '2 usuarios incluidos (Administrador y Contador)',
+      'Inventario básico (1 bodega)',
+      'Terminal POS para ventas simples',
+      'Soporte vía chat estándar'
+    ]
   },
   {
-    subscription: 'starter',
-    price: 4.99,
-    primary: true
+    subscription: 'ally-boost',
+    price: 75000,
+    primary: true,
+    name: 'Ally Boost',
+    description: 'Para pequeñas empresas en crecimiento (Recomendado)',
+    features: [
+      'Límite de 600 facturas electrónicas al mes',
+      'Hasta 5 usuarios incluidos (todos los roles)',
+      'Hasta 3 bodegas + traslados de inventario',
+      'POS avanzado',
+      'Chatbot IA Ally',
+      'Soporte prioritario',
+      'Envío de facturas por WhatsApp',
+      'Almacenamiento ampliado'
+    ]
   },
   {
-    subscription: 'premium',
-    price: 9.99,
-    primary: false
+    subscription: 'ally-supreme',
+    price: 116000,
+    primary: false,
+    name: 'Ally Supreme',
+    description: 'Para empresas medianas o en expansión con operaciones complejas',
+    features: [
+      'Facturación electrónica ilimitada',
+      'Hasta 10 usuarios incluidos (todos los roles)',
+      'Hasta 10 bodegas, traslados entre ellas',
+      'Terminal POS completo',
+      'Chatbot IA',
+      'Envío masivo de facturas por WhatsApp',
+      'Almacenamiento de mayor capacidad',
+      'Soporte personalizado + onboarding'
+    ]
   }
 ];
 

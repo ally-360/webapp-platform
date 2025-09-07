@@ -59,10 +59,10 @@ export default function PaymentCardListDialog({ open, list, onClose, selected, o
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 3, pr: 1.5 }}>
-        <Typography variant="h6"> Cards </Typography>
+        <Typography variant="h6"> Tarjetas </Typography>
 
         <Button size="small" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ alignSelf: 'flex-end' }}>
-          New
+          Nueva
         </Button>
       </Stack>
 
@@ -70,7 +70,7 @@ export default function PaymentCardListDialog({ open, list, onClose, selected, o
         <TextField
           value={searchCard}
           onChange={handleSearchAddress}
-          placeholder="Search..."
+          placeholder="Buscar tarjeta..."
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">

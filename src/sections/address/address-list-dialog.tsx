@@ -17,7 +17,7 @@ import { getAllContacts } from 'src/redux/inventory/contactsSlice';
 // ----------------------------------------------------------------------
 
 export default function AddressListDialog({
-  title = 'Address Book',
+  title = 'Directorio de Direcciones',
   list,
   action,
   //
@@ -121,7 +121,7 @@ export default function AddressListDialog({
         <TextField
           value={searchAddress}
           onChange={handleSearchAddress}
-          placeholder="Search..."
+          placeholder="Buscar dirección..."
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
