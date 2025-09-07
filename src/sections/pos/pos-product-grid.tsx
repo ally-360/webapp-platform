@@ -31,6 +31,20 @@ export default function PosProductGrid({ products, onAddProduct, loading = false
     onAddProduct({ ...product, quantity: 1 });
   };
 
+  const handleBarcodeDetected = (barcode: string) => {
+    // Find product by barcode/sku
+    const foundProduct = products.find((product) => product.sku === barcode || product.id?.toString() === barcode);
+
+    if (foundProduct) {
+      handleAddProduct(foundProduct);
+      // You could show a success message here
+      console.log('Producto encontrado y agregado:', foundProduct.name);
+    } else {
+      // Product not found - could show an error message
+      console.log('Producto no encontrado para código:', barcode);
+    }
+  };
+
   const sortOptions = [
     { value: 'name', label: 'Nombre' },
     { value: 'price', label: 'Precio' },
@@ -55,7 +69,11 @@ export default function PosProductGrid({ products, onAddProduct, loading = false
         }}
       >
         <Stack direction="row" width="100%" spacing={2} alignItems="center" flexWrap="wrap">
-          <ProductSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+          <ProductSearchBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            onBarcodeDetected={handleBarcodeDetected}
+          />
           <PosProductFiltersDrawer
             open={openFiltersDrawer}
             onOpen={() => setOpenFiltersDrawer(true)}

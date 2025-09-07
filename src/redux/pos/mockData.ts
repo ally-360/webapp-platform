@@ -7,7 +7,8 @@ export const mockProducts = [
     category: 'Bebidas',
     stock: 50,
     tax_rate: 0.19,
-    quantity: 1
+    quantity: 1,
+    image: 'https://e7.pngegg.com/pngimages/328/478/png-clipart-coca-cola-coca-cola-thumbnail.png'
   },
   {
     id: 2,
@@ -17,7 +18,8 @@ export const mockProducts = [
     category: 'Panadería',
     stock: 25,
     tax_rate: 0.05,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.bimbo.com.co/Media/Default/Productos/Panes/Tajados/pan-tajado-blanco-680g.png'
   },
   {
     id: 3,
@@ -27,7 +29,8 @@ export const mockProducts = [
     category: 'Lácteos',
     stock: 30,
     tax_rate: 0.05,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.lacteos.com.co/media/default/placeholder.png'
   },
   {
     id: 4,
@@ -37,7 +40,8 @@ export const mockProducts = [
     category: 'Granos',
     stock: 45,
     tax_rate: 0.05,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.arrozdiana.com.co/wp-content/uploads/2020/09/arroz-diana-500g.png'
   },
   {
     id: 5,
@@ -47,7 +51,8 @@ export const mockProducts = [
     category: 'Aceites',
     stock: 20,
     tax_rate: 0.19,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.gourmet.com.co/media/default/placeholder.png'
   },
   {
     id: 6,
@@ -57,7 +62,8 @@ export const mockProducts = [
     category: 'Café',
     stock: 15,
     tax_rate: 0.05,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.juanvaldez.com.co/media/default/placeholder.png'
   },
   {
     id: 7,
@@ -67,7 +73,8 @@ export const mockProducts = [
     category: 'Proteínas',
     stock: 18,
     tax_rate: 0.05,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.huevos.com.co/media/default/placeholder.png'
   },
   {
     id: 8,
@@ -77,7 +84,8 @@ export const mockProducts = [
     category: 'Higiene',
     stock: 35,
     tax_rate: 0.19,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.dove.com/co/es/home/p/jabon-dove-90g-10132500.html'
   },
   {
     id: 9,
@@ -87,7 +95,8 @@ export const mockProducts = [
     category: 'Higiene',
     stock: 22,
     tax_rate: 0.19,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.familia.com.co/media/default/placeholder.png'
   },
   {
     id: 10,
@@ -97,7 +106,8 @@ export const mockProducts = [
     category: 'Enlatados',
     stock: 40,
     tax_rate: 0.05,
-    quantity: 1
+    quantity: 1,
+    image: 'https://www.vancamps.com.co/media/default/placeholder.png'
   }
 ];
 

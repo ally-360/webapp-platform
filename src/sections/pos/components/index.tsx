@@ -11,6 +11,7 @@ export { default as PosBottomTabBar } from './pos-bottom-tab-bar';
 export { default as ProductSearchBar } from './product-search-bar';
 export { default as ProductCard } from './product-card';
 export { default as NoProductsMessage } from './no-products-message';
+export { default as BarcodeScanner } from './barcode-scanner';
 
 // Container Components
 export { default as RegisterOpenScreen } from './register-open-screen';

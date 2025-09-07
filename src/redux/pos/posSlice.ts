@@ -10,6 +10,7 @@ interface Product {
   tax_rate?: number;
   category?: string;
   stock?: number;
+  image?: string;
 }
 
 interface Customer {

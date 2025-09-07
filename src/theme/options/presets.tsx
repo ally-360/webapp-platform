@@ -53,11 +53,11 @@ export const primaryPresets = [
   // BLUE
   {
     name: 'blue',
-    lighter: '#BBE1FF', // tono suave para fondos o estados hover
-    light: '#1E90FF', // Dodger Blue – llamativo, buen contraste
-    main: '#0563D0', // Material Blue 500 – estable, legible
-    dark: '#1976D2', // Material Blue 700 – para énfasis y hover
-    darker: '#0D47A1', // Material Blue 900 – profundidad seria
+    lighter: '#BBE1FF',
+    light: '#1E90FF',
+    main: '#0096dc',
+    dark: '#1976D2',
+    darker: '#0D47A1',
     contrastText: '#FFFFFF'
   },
   // ORANGE
