@@ -14,7 +14,7 @@ import { SeoIllustration } from 'src/assets/illustrations';
 //
 import React from 'react';
 import { useAuthContext } from 'src/auth/hooks';
-import AIChatbot, { AICapabilitiesBanner, AIStatsWidget } from 'src/components/ai-chatbot';
+import { AICapabilitiesBannerEnhanced, AIStatsWidget } from 'src/components/ai-chatbot';
 import AppWidget from '../app-widget';
 import AppWelcome from '../app-welcome';
 import AppNewInvoice from '../app-new-invoice';
@@ -107,16 +107,11 @@ export default function OverviewAppView() {
 
         {/* AI Capabilities Banner - Prominent Section */}
         <Grid xs={12}>
-          <AICapabilitiesBanner />
-        </Grid>
-
-        {/* AI Stats Widget */}
-        <Grid xs={12} lg={6}>
-          <AIStatsWidget />
+          <AICapabilitiesBannerEnhanced />
         </Grid>
 
         {/* Space for future AI features */}
-        <Grid xs={12} lg={6}>
+        {/* <Grid xs={12} lg={6}>
           <Stack spacing={{ xs: 2, sm: 3 }} direction={{ xs: 'column', sm: 'row' }}>
             <AppWidget
               title="Precisión de IA"
@@ -138,7 +133,7 @@ export default function OverviewAppView() {
               }}
             />
           </Stack>
-        </Grid>
+        </Grid> */}
 
         {/* Charts - Stack on mobile and tablet */}
         <Grid xs={12} sm={12} md={6} lg={5}>
@@ -285,9 +280,6 @@ export default function OverviewAppView() {
           </Stack>
         </Grid>
       </Grid>
-      
-      {/* AI Chatbot - Floating Component */}
-      <AIChatbot />
     </Container>
   );
 }

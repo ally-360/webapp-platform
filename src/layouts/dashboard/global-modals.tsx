@@ -1,5 +1,6 @@
 import { useAppSelector } from 'src/hooks/store';
 import React, { lazy, Suspense } from 'react';
+import { AIChatbotEnhanced } from 'src/components/ai-chatbot';
 
 export default function GlobalModals() {
   const { contactsPopup: openContactModal } = useAppSelector((state) => state.contacts);
@@ -13,11 +14,16 @@ export default function GlobalModals() {
   const FormPDVS = lazy(() => import('src/sections/PDVS/pdv-new-edit-form'));
 
   return (
-    <Suspense fallback={null}>
-      {openContactModal && <UserPopupCreateView />}
-      {categoryOpen && <PopupCreateCategory />}
-      {brandOpen && <PopupCreateBrand />}
-      {pdvOpen && <FormPDVS />}
-    </Suspense>
+    <>
+      <Suspense fallback={null}>
+        {openContactModal && <UserPopupCreateView />}
+        {categoryOpen && <PopupCreateCategory />}
+        {brandOpen && <PopupCreateBrand />}
+        {pdvOpen && <FormPDVS />}
+      </Suspense>
+      
+      {/* AI Chatbot - Disponible en todas las páginas del dashboard */}
+      <AIChatbotEnhanced />
+    </>
   );
 }
