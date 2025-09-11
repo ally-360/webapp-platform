@@ -101,7 +101,6 @@ VITE_API_VERSION=v1
 
 # Feature Flags
 VITE_ENABLE_REDUX_DEVTOOLS=true
-VITE_ENABLE_API_MOCKING=false
 
 # Authentication
 VITE_JWT_SECRET_KEY=your-jwt-secret-key
@@ -518,7 +517,7 @@ vercel --prod
 VITE_NODE_ENV=production
 VITE_HOST_API=https://api.ally360.com
 VITE_ENABLE_REDUX_DEVTOOLS=false
-VITE_ENABLE_API_MOCKING=false
+VITE_USE_MOCK=false
 ```
 
 ### Plataformas soportadas
