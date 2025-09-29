@@ -29,6 +29,7 @@ import {
 
 // Redux
 import { useAppDispatch } from 'src/hooks/store';
+import { clearAllStateOnCompanySwitch } from 'src/redux/actions/companySwitch';
 import { setCredentials, clearCredentials } from 'src/redux/slices/authSlice';
 import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
 import { AuthContext } from './auth-context';
@@ -41,6 +42,7 @@ interface InitialState {
   isFirstLogin: boolean;
   company: GetCompanyResponse | null;
   pdvCompany: any;
+  changingCompany: boolean;
 }
 
 const initialState: InitialState = {
@@ -49,7 +51,8 @@ const initialState: InitialState = {
   isAuthenticated: false,
   isFirstLogin: false,
   company: null,
-  pdvCompany: null
+  pdvCompany: null,
+  changingCompany: false
 };
 
 /**
@@ -61,7 +64,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
 
-  // RTK Query hooks
   const [loginMutation] = useLoginMutation();
   const [registerMutation] = useRegisterMutation();
   const [logoutMutation] = useLogoutMutation();
@@ -69,7 +71,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const [createPDVMutation] = useCreatePDVMutation();
   const [selectCompanyMutation] = useSelectCompanyMutation();
 
-  // Query para obtener usuario actual (se ejecuta solo si hay token)
   const {
     data: currentUser,
     isLoading: userLoading,
@@ -78,7 +79,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     skip: !localStorage.getItem('accessToken')
   });
 
-  // Query para obtener empresas del usuario (se ejecuta solo si hay token)
   const {
     data: userCompanies,
     isLoading: companiesLoading,
@@ -87,7 +87,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     skip: !localStorage.getItem('accessToken')
   });
 
-  // Inicialización desde localStorage
   const initialize = useCallback(async () => {
     try {
       const token = localStorage.getItem('accessToken');
@@ -98,7 +97,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
       setSession(token);
 
-      // El usuario y empresas se cargarán automáticamente via RTK Query
       setState((prev) => ({ ...prev, loading: userLoading || companiesLoading }));
     } catch (error) {
       console.warn('Auth initialization error:', error);
@@ -141,7 +139,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   useEffect(() => {
     if (userCompanies && userCompanies.length > 0) {
       console.log('✅ Companies data loaded:', userCompanies);
-      
+
       // Adaptar datos del backend al formato frontend
       const adaptedCompanies = userCompanies.map((company) => ({
         id: company.id,
@@ -244,12 +242,31 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           pdvCompany: null,
           isAuthenticated: true,
           isFirstLogin: companies.length === 0,
-          loading: false
+          loading: false,
+          changingCompany: false
         });
 
         // Si solo hay una empresa, seleccionarla automáticamente
         if (companies.length === 1) {
-          await selectCompanyMutation({ company_id: companies[0].company_id });
+          try {
+            const companyResult = await selectCompanyMutation({ company_id: companies[0].company_id }).unwrap();
+
+            // Actualizar token con el nuevo token de empresa
+            if (companyResult.access_token) {
+              setSession(companyResult.access_token);
+              dispatch(
+                setCredentials({
+                  token: companyResult.access_token,
+                  user,
+                  companies
+                })
+              );
+              console.log('✅ Auto-selected company and updated token');
+            }
+          } catch (selectError) {
+            console.error('❌ Error auto-selecting company:', selectError);
+            // No lanzar error, el login fue exitoso
+          }
         }
 
         enqueueSnackbar('Bienvenido', { variant: 'success' });
@@ -327,11 +344,11 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         } as GetCompanyResponse;
 
         setState((prev) => ({ ...prev, company: adaptedCompany }));
-        
+
         // Guardar datos de la empresa en el step-by-step para navegación
         dispatch(setPrevValuesCompany(adaptedCompany));
         dispatch(setStep(1)); // Avanzar al siguiente paso (PDV)
-        
+
         enqueueSnackbar('Empresa creada exitosamente', { variant: 'success' });
       } catch (error: any) {
         console.error('❌ Create company error:', error);
@@ -348,7 +365,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       try {
         const result = await createPDVMutation(pdvData).unwrap();
         enqueueSnackbar('PDV registrado exitosamente', { variant: 'success' });
-        
+
         // Mapear PDVOutput a GetPDVResponse para el step-by-step
         const mappedPDV: GetPDVResponse = {
           id: result.id,
@@ -358,10 +375,9 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           phoneNumber: result.phone_number || '',
           main: false // Se puede configurar más tarde
         };
-        
+
         dispatch(setPrevValuesPDV(mappedPDV));
         dispatch(setStep(2));
-        
       } catch (error: any) {
         console.error('Error registering PDV:', error);
         enqueueSnackbar(error?.data?.detail || 'Error registrando PDV', { variant: 'error' });
@@ -369,6 +385,61 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       }
     },
     [createPDVMutation, enqueueSnackbar, dispatch]
+  );
+
+  const selectCompany = useCallback(
+    async (companyId: string) => {
+      try {
+        console.log('🏢 Selecting company:', companyId);
+
+        // 1. Activar estado de cambio de empresa
+        setState((prev) => ({ ...prev, changingCompany: true }));
+
+        // 2. Limpiar todo el estado de la aplicación ANTES de cambiar empresa
+        await dispatch(clearAllStateOnCompanySwitch());
+
+        const result = await selectCompanyMutation({ company_id: companyId }).unwrap();
+
+        if (result.access_token) {
+          // 3. Actualizar token con el nuevo token de empresa
+          setSession(result.access_token);
+
+          // 4. Actualizar la empresa seleccionada en el estado local
+          const selectedCompany = userCompanies?.find((comp) => comp.id === companyId);
+          if (selectedCompany) {
+            // Adaptar respuesta del backend al formato frontend
+            const adaptedCompany = {
+              id: selectedCompany.id,
+              name: selectedCompany.name,
+              nit: selectedCompany.nit,
+              phoneNumber: selectedCompany.phone_number,
+              address: selectedCompany.address || '',
+              website: '',
+              economicActivity: selectedCompany.economic_activity || '',
+              quantityEmployees: selectedCompany.quantity_employees?.toString() || ''
+            };
+
+            setState((prev) => ({
+              ...prev,
+              company: adaptedCompany,
+              changingCompany: false
+            }));
+
+            console.log('✅ Company selected, state cleared, and token updated');
+            enqueueSnackbar(`Empresa seleccionada: ${selectedCompany.name}`, { variant: 'success' });
+          }
+        }
+
+        return result;
+      } catch (error: any) {
+        console.error('❌ Error selecting company:', error);
+        // Desactivar loading en caso de error
+        setState((prev) => ({ ...prev, changingCompany: false }));
+        enqueueSnackbar(error?.data?.detail || 'Error seleccionando empresa', { variant: 'error' });
+        throw error;
+      }
+    },
+    [selectCompanyMutation, userCompanies, enqueueSnackbar, dispatch]
   );
 
   const updateCompany = useCallback(async (_databody: UpdateProfile) => {
@@ -413,10 +484,12 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
       isFirstLogin: state.isFirstLogin,
+      changingCompany: state.changingCompany,
 
       login,
       register,
       logout,
+      selectCompany,
       updateCompany,
       updatePDV,
       createCompany,
@@ -428,6 +501,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       login,
       logout,
       register,
+      selectCompany,
       updateCompany,
       updatePDV,
       createCompany,
@@ -438,6 +512,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       state.company,
       state.pdvCompany,
       state.isFirstLogin,
+      state.changingCompany,
       status
     ]
   );

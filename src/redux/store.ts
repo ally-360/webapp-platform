@@ -10,6 +10,8 @@ import stepByStepReducer from './inventory/stepByStepSlice';
 import posReducer from './pos/posSlice';
 // RTK Query & Auth
 import { authApi } from './services/authApi';
+import { categoriesApi } from './services/categoriesApi';
+import { brandsApi } from './services/brandsApi';
 import authReducer from './slices/authSlice';
 
 export const store = configureStore({
@@ -17,8 +19,9 @@ export const store = configureStore({
     // 🔐 Auth & API
     auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
+    [categoriesApi.reducerPath]: categoriesApi.reducer,
+    [brandsApi.reducerPath]: brandsApi.reducer,
 
-    // 📦 Existing reducers
     products: productsReducer,
     pdvs: pdvsReducer,
     locations: locationsReducer,
@@ -29,7 +32,8 @@ export const store = configureStore({
     stepByStep: stepByStepReducer,
     pos: posReducer
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(authApi.middleware)
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(authApi.middleware, categoriesApi.middleware, brandsApi.middleware)
 });
 
 export type RootState = ReturnType<typeof store.getState>;

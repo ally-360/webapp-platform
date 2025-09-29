@@ -52,8 +52,6 @@ export default function RegisterPDVForm() {
   const preValuesPDV: GetPDVResponse | undefined = useAppSelector((state) => state.stepByStep.preValuesPDV);
   const { locations } = useAppSelector((state) => state.locations);
 
-  console.log('preValuesPDV', preValuesPDV);
-
   const defaultValues: RegisterPDVFormValues = {
     name: preValuesPDV?.name ?? '',
     description: preValuesPDV?.description ?? '',
@@ -93,14 +91,12 @@ export default function RegisterPDVForm() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // Validar que municipio tenga datos válidos
       const municipio = data.municipio as any;
       if (!municipio || Object.keys(municipio).length === 0 || !municipio.id) {
         setErrorMsg('Por favor selecciona un municipio válido');
         return;
       }
 
-      // Crear datos para enviar al backend (sin municipio y departamento)
       const { departamento: _departamento, municipio: _, ...pdvData } = data;
 
       const databody = {
@@ -109,7 +105,6 @@ export default function RegisterPDVForm() {
       };
 
       if (preValuesPDV?.id) {
-        // TODO: validar que funcione el update
         await updatePDV(preValuesPDV.id, databody);
       } else {
         await createPDV(databody);
@@ -146,17 +141,14 @@ export default function RegisterPDVForm() {
   const [searchQueryMunicipio, setSearchQueryMunicipio] = React.useState('');
   const [searchQueryDepartamento, setSearchQueryDepartamento] = React.useState('');
   const isOptionEqualToValue = (option: any, value: any) => {
-    // Si value es null, undefined o un objeto vacío, no hay coincidencia
     if (!value || Object.keys(value).length === 0) {
       return false;
     }
 
-    // Si option es null o undefined, no hay coincidencia
     if (!option) {
       return false;
     }
 
-    // Comparar por id y name si ambos existen
     if (option.id && value.id) {
       return option.id === value.id;
     }

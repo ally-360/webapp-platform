@@ -85,6 +85,10 @@ const slice = createSlice({
     },
     getViewCategoryProducts(state, action) {
       state.viewCategoryProducts = action.payload;
+    },
+    resetCategoriesState(_state) {
+      // Reset al estado inicial cuando se cambia de empresa
+      return initialState;
     }
   }
 });
@@ -93,7 +97,7 @@ const slice = createSlice({
 export default slice.reducer;
 
 // Actions
-export const { switchPopupState } = slice.actions;
+export const { switchPopupState, resetCategoriesState } = slice.actions;
 
 // ----------------------------------------------------------------------
 

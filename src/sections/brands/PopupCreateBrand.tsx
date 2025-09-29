@@ -19,18 +19,18 @@ import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
 import { LoadingButton } from '@mui/lab';
 
+// RTK Query
+import { useCreateBrandMutation, useUpdateBrandMutation } from 'src/redux/services/brandsApi';
+
+// Redux Legacy (para compatibilidad con el estado del popup)
+import { switchPopupState } from 'src/redux/inventory/brandsSlice';
+
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useTranslation } from 'react-i18next';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { RHFTextField } from 'src/components/hook-form';
 import { Icon } from '@iconify/react';
-import {
-  getBrands,
-  switchPopupState,
-  createBrand as createBrandThunk,
-  editBrand as editBrandThunk
-} from 'src/redux/inventory/brandsSlice';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 const Transition = React.forwardRef<unknown, TransitionProps & { children: React.ReactElement<any, any> }>(
@@ -43,21 +43,29 @@ function PopupCreateBrand() {
   const theme = useTheme();
   const { brandEdit, openPopup } = useAppSelector((state) => state.brands);
 
+  // RTK Query hooks
+  const [createBrand] = useCreateBrandMutation();
+  const [updateBrand] = useUpdateBrandMutation();
+
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
 
   useEffect(() => {
     // console.log(brandEdit);
   }, [brandEdit]);
+
   // create brand schema (fixed)
   const createBrandSchema = Yup.object().shape({
-    name: Yup.string().required('Nombre requerido')
+    name: Yup.string().required('Nombre requerido'),
+    description: Yup.string().optional()
   });
 
   const defaultValues = useMemo(
-    () => ({
-      name: brandEdit ? (brandEdit as any).name : ''
-    }),
+    () =>
+      ({
+        name: brandEdit ? (brandEdit as any).name : '',
+        description: brandEdit ? (brandEdit as any).description || '' : ''
+      } as { name: string; description: string }),
     [brandEdit]
   );
 
@@ -79,22 +87,31 @@ function PopupCreateBrand() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       if (brandEdit) {
-        await dispatch(editBrandThunk({ id: (brandEdit as any).id, databody: data }) as any);
+        // Actualizar marca existente
+        await updateBrand({
+          id: (brandEdit as any).id,
+          data: {
+            name: data.name,
+            description: data.description
+          }
+        }).unwrap();
+        enqueueSnackbar(t(`Marca ${data.name} editada correctamente`), { variant: 'success' });
       } else {
-        await dispatch(createBrandThunk(data) as any);
+        // Crear nueva marca
+        await createBrand({
+          name: data.name,
+          description: data.description
+        }).unwrap();
+        enqueueSnackbar(t(`Marca ${data.name} creada`), { variant: 'success' });
       }
-      dispatch(getBrands() as any);
+
       reset();
-      enqueueSnackbar(brandEdit ? t(`Marca ${data.name} editada correctamente`) : t(`Marca ${data.name} creada`), {
-        variant: 'success'
-      });
       dispatch(switchPopupState(null));
-    } catch (error) {
-      enqueueSnackbar(t('No se ha podido crear la marca, verifica los datos nuevamente'), {
+    } catch (error: any) {
+      console.error('Error with brand operation:', error);
+      enqueueSnackbar(error?.data?.detail || t('No se ha podido crear la marca, verifica los datos nuevamente'), {
         variant: 'error'
       });
-      // eslint-disable-next-line no-console
-      console.log(error);
     }
   });
 
@@ -129,6 +146,7 @@ function PopupCreateBrand() {
         <DialogContent>
           <Stack spacing={2} mt={4} mb={3} direction="column" alignItems="center">
             <RHFTextField label="Nombre" name="name" required />
+            <RHFTextField label="Descripción" name="description" />
           </Stack>
         </DialogContent>
         <DialogActions

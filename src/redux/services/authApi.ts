@@ -10,7 +10,7 @@ import type { RootState } from '../store';
 // ========================================
 
 export interface LoginCredentials {
-  username: string; // backend usa 'username' en lugar de 'email'
+  username: string;
   password: string;
   grant_type?: string;
   scope?: string;
@@ -22,9 +22,9 @@ export interface RegisterUserData {
   email: string;
   password: string;
   profile: {
-    first_name: string; // backend usa 'first_name' en lugar de 'name'
-    last_name: string; // backend usa 'last_name' en lugar de 'lastname'
-    phone_number?: string | null; // backend usa 'phone_number' en lugar de 'personalPhoneNumber'
+    first_name: string;
+    last_name: string;
+    phone_number?: string | null;
     dni?: string | null;
   };
 }
@@ -146,7 +146,7 @@ export const authApi = createApi({
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-          username: credentials.email, // backend espera 'username'
+          username: credentials.email,
           password: credentials.password,
           grant_type: 'password'
         })
@@ -200,7 +200,7 @@ export const authApi = createApi({
     /**
      * Select company context - POST /auth/select-company
      */
-    selectCompany: builder.mutation<{ message: string }, { company_id: string }>({
+    selectCompany: builder.mutation<{ access_token: string; token_type: string }, { company_id: string }>({
       query: (data) => ({
         url: '/auth/select-company',
         method: 'POST',

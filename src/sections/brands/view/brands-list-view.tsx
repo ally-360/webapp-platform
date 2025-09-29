@@ -1,6 +1,5 @@
-/* eslint-disable no-nested-ternary */
 import { Icon } from '@iconify/react';
-import { useState, useEffect, React, useRef, Fragment } from 'react';
+import React, { useState, useRef, Fragment } from 'react';
 
 // material
 import {
@@ -30,51 +29,59 @@ import { paths } from 'src/routes/paths';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { enqueueSnackbar } from 'notistack';
 import { ProductListView } from 'src/sections/product/view';
-import { deleteBrand, getBrands, switchPopupState } from 'src/redux/inventory/brandsSlice';
+
+// RTK Query
+import { useGetBrandsQuery, useGetBrandByIdQuery, useDeleteBrandMutation } from 'src/redux/services/brandsApi';
+
+// Redux Legacy (para compatibilidad con el estado del popup)
+import { switchPopupState } from 'src/redux/inventory/brandsSlice';
+
 import MenuBrands from 'src/sections/brands/MenuBrands';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useAppDispatch } from 'src/hooks/store';
 // utils
 
 // hooks
 
 export default function InventoryBrandsList() {
   const settings = useSettingsContext();
-  const componentRef = useRef();
+  const componentRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // const theme = useTheme();
   const dispatch = useAppDispatch();
 
-  // Get categories and get products in brand from API
-  useEffect(() => {
-    dispatch(getBrands());
-  }, [dispatch]);
+  // RTK Query hooks
+  const { data: brands = [], isLoading } = useGetBrandsQuery();
+  const [deleteBrand] = useDeleteBrandMutation();
 
-  const { brands, openPopup, isLoading, brandsEmpty } = useAppSelector((state) => state.brands);
+  const brandsEmpty = brands.length === 0;
 
-  const [expandedCategories, setExpandedCategories] = useState([]);
+  // states for menu options in brands
+  const [viewBrand, setViewBrand] = useState<string>('');
 
-  // states for menu options in categories
-  const [viewBrand, setViewBrand] = useState(0);
+  // RTK Query para obtener marca específica
+  const { data: viewBrandById, isLoading: viewBrandByIdLoading } = useGetBrandByIdQuery(viewBrand, {
+    skip: !viewBrand
+  });
 
   const menuRef = useRef(null);
 
-  const handleEdit = (brand) => {
+  const handleEdit = (brand: any) => {
     dispatch(switchPopupState(brand));
   };
 
-  const handleDelete = async ({ id }) => {
+  const handleDelete = async ({ id }: { id: string }) => {
     try {
-      setViewBrand(0);
-      dispatch(deleteBrand({ id }));
-      enqueueSnackbar('Marca elimina', { variant: 'success' });
-    } catch (error) {
-      console.log(error);
+      setViewBrand('');
+      await deleteBrand(id).unwrap();
+      enqueueSnackbar('Marca eliminada', { variant: 'success' });
+    } catch (error: any) {
+      console.error('Error deleting brand:', error);
+      enqueueSnackbar(error?.data?.detail || 'Error eliminando marca', { variant: 'error' });
     }
   };
 
-  const handleView = (brandId) => {
+  const handleView = (brandId: string) => {
     setViewBrand(brandId);
   };
 
@@ -100,7 +107,7 @@ export default function InventoryBrandsList() {
           <Button
             color="primary"
             variant="contained"
-            sx={isMobile && { width: '100%' }}
+            sx={isMobile ? { width: '100%' } : undefined}
             onClick={handleClickPopup}
             startIcon={<Icon icon="mingcute:add-line" />}
           >
@@ -113,7 +120,7 @@ export default function InventoryBrandsList() {
           <Grid item xs={12} md={12}>
             <Alert severity="info">
               <AlertTitle>Crea una marca</AlertTitle>
-              Puedes crear una marca dando click en el botón superior derecho <strong>"Crear marca"</strong>
+              Puedes crear una marca dando click en el botón superior derecho <strong>&quot;Crear marca&quot;</strong>
             </Alert>
           </Grid>
         </Grid>
@@ -139,12 +146,7 @@ export default function InventoryBrandsList() {
                       }
                       disablePadding
                       style={{
-                        backgroundColor:
-                          viewBrand === brand.id
-                            ? '#D6E2F5'
-                            : expandedCategories.includes(brand.id)
-                            ? '#E3F2FD'
-                            : 'white',
+                        backgroundColor: viewBrand === brand.id ? '#D6E2F5' : 'white',
                         color: viewBrand === brand.id ? theme.palette.primary.dark : '#212121'
                       }}
                     >
@@ -172,18 +174,22 @@ export default function InventoryBrandsList() {
         </Grid>
         <Grid item xs={12} md={8}>
           {isLoading && <Skeleton variant="rectangular" height={400} />}
-          {viewBrand === 0 && !isLoading && (
+          {!viewBrand && !isLoading && (
             <Card sx={{ height: '100%' }}>
               <CardContent>{brandsEmpty ? '' : 'Seleciona una marca para visualizarla'}</CardContent>
             </Card>
           )}
-          {viewBrand !== 0 && !isLoading && !brandsEmpty && (
+          {viewBrand && !viewBrandByIdLoading && viewBrandById && !brandsEmpty && (
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={12}>
                     <Typography variant="h5" sx={{ mb: 3 }}>
-                      {brands.find((brand) => brand.id === viewBrand).name}
+                      {viewBrandById.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 3 }}>
+                      <strong>Descripción: </strong>
+                      {viewBrandById.description || 'Sin descripción'}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -191,7 +197,7 @@ export default function InventoryBrandsList() {
                 <Typography variant="h6" sx={{ mb: 3 }}>
                   Productos asociados
                 </Typography>
-                <ProductListView categoryView={brands.find((brand) => brand.id === viewBrand)} />
+                <ProductListView categoryView={viewBrandById} />
               </CardContent>
             </Card>
           )}

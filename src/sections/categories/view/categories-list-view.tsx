@@ -1,6 +1,5 @@
-/* eslint-disable no-nested-ternary */
 import { Icon } from '@iconify/react';
-import React, { useState, useEffect, useRef, Fragment } from 'react';
+import React, { useState, useRef, Fragment } from 'react';
 
 // material
 import {
@@ -26,12 +25,17 @@ import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
 
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+
+// RTK Query
 import {
-  deleteCategory,
-  getCategories,
-  getViewCategoryById,
-  switchPopupState
-} from 'src/redux/inventory/categoriesSlice';
+  useGetCategoriesQuery,
+  useGetCategoryByIdQuery,
+  useDeleteCategoryMutation
+} from 'src/redux/services/categoriesApi';
+
+// Redux Legacy (para compatibilidad con el estado del popup)
+import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
+
 import { useSettingsContext } from 'src/components/settings';
 import { paths } from 'src/routes/paths';
 import MenuCategories from 'src/sections/categories/MenuCategories';
@@ -39,56 +43,52 @@ import MenuCategories from 'src/sections/categories/MenuCategories';
 import { enqueueSnackbar } from 'notistack';
 import { ProductListView } from 'src/sections/product/view';
 import { Box } from '@mui/system';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useAppDispatch } from 'src/hooks/store';
 // utils
 
 // hooks
 
 export default function InvetoryCategoriesList() {
   const settings = useSettingsContext();
-  const componentRef = useRef();
+  const componentRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
 
-  // const theme = useTheme();
   const dispatch = useAppDispatch();
-  const { categories, openPopup, isEmpty, isLoading, viewCategoryById, viewCategoryByIdLoading } = useAppSelector(
-    (state) => state.categories
-  );
 
-  useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
+  // RTK Query hooks
+  const { data: categories = [], isLoading } = useGetCategoriesQuery();
+  const [deleteCategory] = useDeleteCategoryMutation();
 
-  const [expandedCategories, setExpandedCategories] = useState([]);
+  const isEmpty = categories.length === 0;
+
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
   // states for menu options in categories
-  const [viewCategory, setViewCategory] = useState(0);
+  const [viewCategory, setViewCategory] = useState<string>('');
 
-  useEffect(() => {
-    if (viewCategory !== 0) {
-      dispatch(getViewCategoryById(viewCategory));
-    }
-  }, [viewCategory, dispatch]);
-
-  const { products } = useAppSelector((state) => state.categories);
+  // RTK Query para obtener categoría específica
+  const { data: viewCategoryById, isLoading: viewCategoryByIdLoading } = useGetCategoryByIdQuery(viewCategory, {
+    skip: !viewCategory
+  });
 
   const menuRef = useRef(null);
 
-  const handleEdit = (category) => {
+  const handleEdit = (category: any) => {
     dispatch(switchPopupState(category));
   };
 
-  const handleDelete = async ({ id }) => {
+  const handleDelete = async ({ id }: { id: string }) => {
     try {
-      setViewCategory(0);
-      dispatch(deleteCategory(id));
+      setViewCategory('');
+      await deleteCategory(id).unwrap();
       enqueueSnackbar('Categoria eliminada', { variant: 'success' });
-    } catch (error) {
-      console.log(error);
+    } catch (err: any) {
+      console.error('Error deleting category:', err);
+      enqueueSnackbar(err?.data?.detail || 'Error eliminando categoria', { variant: 'error' });
     }
   };
 
-  const handleClick = (categoryId) => {
+  const handleClick = (categoryId: string) => {
     const isExpanded = expandedCategories.includes(categoryId);
     if (isExpanded) {
       setExpandedCategories(expandedCategories.filter((id) => id !== categoryId));
@@ -97,7 +97,7 @@ export default function InvetoryCategoriesList() {
     }
   };
 
-  const handleView = (categoryId) => {
+  const handleView = (categoryId: string) => {
     setViewCategory(categoryId);
   };
 
@@ -152,16 +152,18 @@ export default function InvetoryCategoriesList() {
             {isLoading && <Skeleton variant="rectangular" height={400} />}
             {!isLoading && (
               <List sx={{ width: '100%', bgcolor: 'background.paper', minHeight: '200px' }} component="nav">
-                {categories.map(
-                  (category) =>
-                    category.categoryMainCategory === null && (
+                {categories
+                  .filter((category) => !category.parent_id) // Categorías principales
+                  .map((category) => {
+                    const subcategories = categories.filter((sub) => sub.parent_id === category.id);
+                    return (
                       <Fragment key={category.id}>
                         <ListItem
                           disablePadding
                           secondaryAction={
                             <>
-                              {category.subcategories.length > 0 ? (
-                                expandedCategories.includes(category.id) ? (
+                              {subcategories.length > 0 &&
+                                (expandedCategories.includes(category.id) ? (
                                   <IconButton color="primary" onClick={() => handleClick(category.id)}>
                                     <Icon width={20} height={20} icon="eva:arrow-ios-upward-fill" />
                                   </IconButton>
@@ -169,8 +171,7 @@ export default function InvetoryCategoriesList() {
                                   <IconButton onClick={() => handleClick(category.id)}>
                                     <Icon width={20} height={20} icon="eva:arrow-ios-downward-fill" />
                                   </IconButton>
-                                )
-                              ) : null}
+                                ))}
                               <MenuCategories
                                 element={category}
                                 handleEdit={handleEdit}
@@ -197,7 +198,7 @@ export default function InvetoryCategoriesList() {
                           </ListItemButton>
                         </ListItem>
 
-                        {category.subcategories.length > 0 && (
+                        {subcategories.length > 0 && (
                           <Collapse
                             key={`collapse-${category.id}`}
                             in={expandedCategories.includes(category.id)}
@@ -205,8 +206,9 @@ export default function InvetoryCategoriesList() {
                             unmountOnExit
                           >
                             <List component="div" disablePadding>
-                              {category.subcategories.map((subcategory) => (
+                              {subcategories.map((subcategory) => (
                                 <ListItem
+                                  key={subcategory.id}
                                   disablePadding
                                   secondaryAction={
                                     <MenuCategories
@@ -217,11 +219,7 @@ export default function InvetoryCategoriesList() {
                                     />
                                   }
                                 >
-                                  <ListItemButton
-                                    onClick={() => handleView(subcategory.id)}
-                                    sx={{ pl: 4 }}
-                                    key={subcategory.id}
-                                  >
+                                  <ListItemButton onClick={() => handleView(subcategory.id)} sx={{ pl: 4 }}>
                                     <ListItemText
                                       sx={{
                                         span: {
@@ -237,71 +235,49 @@ export default function InvetoryCategoriesList() {
                           </Collapse>
                         )}
                       </Fragment>
-                    )
-                )}
+                    );
+                  })}
               </List>
             )}
           </Card>
         </Grid>
 
         <Grid item xs={12} md={8}>
-          {isLoading || (viewCategoryByIdLoading && <Skeleton variant="rounded" height={400} />)}
-          {viewCategory === 0 && !isLoading && (
+          {isLoading && <Skeleton variant="rounded" height={400} />}
+          {!viewCategory && !isLoading && (
             <Card sx={{ height: '100%' }}>
-              <CardContent>{isEmpty ? '' : 'Seleciona una marca para visualizarla'}</CardContent>
+              <CardContent>{isEmpty ? '' : 'Seleciona una categoria para visualizarla'}</CardContent>
             </Card>
           )}
-          {viewCategory !== 0 && !viewCategoryByIdLoading && viewCategoryById !== null && !isEmpty && (
+          {viewCategory && !viewCategoryByIdLoading && viewCategoryById && !isEmpty && (
             <Card sx={{ height: '100%' }}>
               <CardContent>
-                {viewCategory === 0 ? (
-                  'seleciona una categoria'
-                ) : (
-                  <>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={12}>
-                        <Typography variant="h5" sx={{ mb: 3 }}>
-                          {viewCategoryById.name}
-                          {console.log(viewCategoryById)}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mb: 1 }}>
-                          {viewCategoryById.categoryMainCategory !== null && (
-                            <>
-                              <strong>Categoria Padre: </strong>
-                              {viewCategoryById?.categoryMainCategory?.name}
-                            </>
-                          )}
-                        </Typography>
-                        <Typography variant="body2" sx={{ mb: 3 }}>
-                          {/* Description for category */}
-                          <strong>Descripción: </strong>
-                          {viewCategoryById.description}
-                        </Typography>
-                      </Grid>
+                <>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={12}>
+                      <Typography variant="h5" sx={{ mb: 3 }}>
+                        {viewCategoryById.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        {viewCategoryById.parent && (
+                          <>
+                            <strong>Categoria Padre: </strong>
+                            {viewCategoryById.parent.name}
+                          </>
+                        )}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 3 }}>
+                        <strong>Descripción: </strong>
+                        {viewCategoryById.description || 'Sin descripción'}
+                      </Typography>
                     </Grid>
-                    <Divider sx={{ mb: 3 }} />
-                    <Typography variant="h6" sx={{ mb: 3 }}>
-                      Productos asociados
-                    </Typography>
-                    {/* <DataGrid
-                      checkboxSelection
-                      disableSelectionOnClick
-                      autoHeight
-                      rows={categories.find((category) => category.id === viewCategory).products}
-                      columns={columns}
-                      pagination
-                      pageSize={10}
-                      rowHeight={60}
-                      loading={products.length === 0}
-                      components={{
-                        Toolbar: GridToolbar,
-                        Pagination: CustomPagination
-                      }}
-                    /> */}
-                    {/* Insertar tabla de productos */}
-                    <ProductListView categoryView={viewCategoryById} />
-                  </>
-                )}
+                  </Grid>
+                  <Divider sx={{ mb: 3 }} />
+                  <Typography variant="h6" sx={{ mb: 3 }}>
+                    Productos asociados
+                  </Typography>
+                  <ProductListView categoryView={viewCategoryById} />
+                </>
               </CardContent>
             </Card>
           )}

@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 // @mui
 import {
   Card,
@@ -24,8 +24,9 @@ import { useSnackbar } from 'notistack';
 import { bgGradient } from 'src/theme/css';
 // components
 import Iconify from 'src/components/iconify';
-// mock
-import { companies } from 'src/_mock/business';
+// auth
+import { useAuthContext } from 'src/auth/hooks/use-auth-context';
+import { useGetMyCompaniesQuery } from 'src/redux/services/authApi';
 
 // ----------------------------------------------------------------------
 
@@ -33,9 +34,9 @@ interface Company {
   id: string;
   name: string;
   nit: string;
-  phone: string;
-  address: string;
-  logo?: string;
+  phone_number: string;
+  address?: string | null;
+  logo?: string | null;
 }
 
 // ----------------------------------------------------------------------
@@ -83,7 +84,7 @@ const CompanyCard = memo(
             <Box sx={{ position: 'relative' }}>
               <Tooltip title={`Logo de ${company.name}`} placement="top">
                 <Avatar
-                  src={company.logo}
+                  src={company.logo || undefined}
                   sx={{
                     width: 80,
                     height: 80,
@@ -171,7 +172,7 @@ const CompanyCard = memo(
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Iconify icon="eva:phone-fill" width={14} sx={{ color: theme.palette.text.secondary }} />
                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                    {company.phone}
+                    {company.phone_number}
                   </Typography>
                 </Box>
 
@@ -186,7 +187,7 @@ const CompanyCard = memo(
                       lineHeight: 1.4
                     }}
                   >
-                    {company.address}
+                    {company.address || 'Sin dirección'}
                   </Typography>
                 </Box>
               </Stack>
@@ -256,29 +257,26 @@ const CompanyCard = memo(
 export default function SelectBusinessPage() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const { selectCompany, changingCompany } = useAuthContext();
+  const { data: userCompanies = [] } = useGetMyCompaniesQuery();
   const theme = useTheme();
-  const [isSelecting, setIsSelecting] = useState(false);
 
   const handleSelect = useCallback(
-    async (_companyId: string) => {
-      if (isSelecting) return;
+    async (companyId: string) => {
+      if (changingCompany) return;
 
-      setIsSelecting(true);
       try {
-        // Simular delay de API
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        // const newToken = 'mocked-new-token-based-on-company';
-        // window.localStorage.setItem('accessToken', newToken);
+        enqueueSnackbar('Cambiando empresa...', { variant: 'info' });
+        await selectCompany(companyId);
         enqueueSnackbar('Empresa seleccionada con éxito', { variant: 'success' });
+
+        // Navegar al dashboard después del cambio exitoso
         navigate('/dashboard');
       } catch (err) {
         enqueueSnackbar('Error al seleccionar la empresa', { variant: 'error' });
-      } finally {
-        setIsSelecting(false);
       }
     },
-    [navigate, enqueueSnackbar, isSelecting]
+    [selectCompany, enqueueSnackbar, changingCompany, navigate]
   );
 
   return (
@@ -361,7 +359,7 @@ export default function SelectBusinessPage() {
               </Typography>
 
               <Chip
-                label={`${companies.length} empresas disponibles`}
+                label={`${userCompanies.length} empresas disponibles`}
                 variant="outlined"
                 color="primary"
                 icon={<Iconify icon="eva:grid-fill" width={16} />}
@@ -379,9 +377,9 @@ export default function SelectBusinessPage() {
 
             {/* Companies Grid */}
             <Grid container spacing={{ xs: 3, sm: 4 }} justifyContent="center">
-              {companies.map((company, index) => (
+              {userCompanies.map((company, index) => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={company.id}>
-                  <CompanyCard company={company} onSelect={handleSelect} index={index} isSelecting={isSelecting} />
+                  <CompanyCard company={company} onSelect={handleSelect} index={index} isSelecting={changingCompany} />
                 </Grid>
               ))}
             </Grid>

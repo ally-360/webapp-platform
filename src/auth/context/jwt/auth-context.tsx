@@ -7,6 +7,7 @@ export const defaultAuthContext: AuthContextType = {
   authenticated: false,
   unauthenticated: true,
   isFirstLogin: false,
+  changingCompany: false,
   company: null,
   pdvCompany: null as any,
 
@@ -20,6 +21,9 @@ export const defaultAuthContext: AuthContextType = {
   },
   logout: () => {
     throw new Error('logout method not implemented');
+  },
+  selectCompany: async () => {
+    throw new Error('selectCompany method not implemented');
   },
   updateCompany: async () => {
     throw new Error('updateCompany method not implemented');

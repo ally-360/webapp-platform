@@ -59,6 +59,10 @@ const slice = createSlice({
       state.openPopup = !state.openPopup;
       state.brandEdit = null;
       state.seeBrand = false;
+    },
+    resetBrandsState(_state) {
+      // Reset al estado inicial cuando se cambia de empresa
+      return initialState;
     }
   }
 });
@@ -68,7 +72,7 @@ export default slice.reducer;
 
 // Actions
 
-export const { switchPopupState } = slice.actions;
+export const { switchPopupState, resetBrandsState } = slice.actions;
 
 export function getBrands() {
   return async (dispatch, getState) => {

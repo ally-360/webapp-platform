@@ -68,6 +68,10 @@ const pdvsSlice = createSlice({
     },
     setEditId(state, action) {
       state.editId = action.payload;
+    },
+    resetPDVsState(_state) {
+      // Reset al estado inicial cuando se cambia de empresa
+      return initialState;
     }
   }
 });
@@ -81,7 +85,8 @@ export const {
   deletePDVError,
   switchPopup,
   setSeePDV,
-  setEditId
+  setEditId,
+  resetPDVsState
 } = pdvsSlice.actions;
 
 export default pdvsSlice.reducer;

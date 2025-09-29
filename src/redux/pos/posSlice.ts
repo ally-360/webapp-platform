@@ -469,6 +469,12 @@ const posSlice = createSlice({
       if (action.payload.completedSales) {
         state.completedSales = action.payload.completedSales;
       }
+    },
+
+    // ===== COMPANY RESET =====
+    resetPOSState(_state) {
+      // Reset al estado inicial cuando se cambia de empresa
+      return initialState;
     }
   }
 });
@@ -495,7 +501,8 @@ export const {
   applyDiscountToSaleWindow,
   recalculateTotals,
   completeSale,
-  initializeFromStorage
+  initializeFromStorage,
+  resetPOSState
 } = posSlice.actions;
 
 // Types export

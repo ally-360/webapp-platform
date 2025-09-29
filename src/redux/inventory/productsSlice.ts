@@ -83,6 +83,10 @@ const productSlice = createSlice({
     },
     setPopupAssignInventory(state, action) {
       state.popupAssignInventory = action.payload;
+    },
+    resetProductsState(_state) {
+      // Reset al estado inicial cuando se cambia de empresa
+      return initialState;
     }
     // changeStatusProduct(state, action) {}
   }
@@ -90,8 +94,13 @@ const productSlice = createSlice({
 
 export default productSlice.reducer;
 
-export const { getAllProductsSuccess, getAllProductsError, setPopupAssignInventory, getProductByIdSuccess } =
-  productSlice.actions;
+export const {
+  getAllProductsSuccess,
+  getAllProductsError,
+  setPopupAssignInventory,
+  getProductByIdSuccess,
+  resetProductsState
+} = productSlice.actions;
 
 // Actions
 
