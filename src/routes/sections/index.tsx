@@ -1,9 +1,13 @@
+import { lazy } from 'react';
 import { Navigate, useRoutes } from 'react-router-dom';
 import { PATH_AFTER_LOGIN } from 'src/config-global';
 import { mainRoutes } from './main';
 import { authRoutes } from './auth';
 import { dashboardRoutes } from './dashboard';
 import { posRoutes } from './pos';
+
+// Email verification page
+const EmailVerificationPage = lazy(() => import('src/pages/auth/email-verification'));
 
 // ----------------------------------------------------------------------
 
@@ -16,6 +20,12 @@ export default function Router() {
     },
 
     // ----------------------------------------------------------------------
+
+    // Email verification route (outside auth guard)
+    {
+      path: 'verify-email',
+      element: <EmailVerificationPage />
+    },
 
     // Auth routes
     ...authRoutes,

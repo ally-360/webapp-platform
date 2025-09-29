@@ -14,37 +14,31 @@ export const RegisterSchema = object().shape({
   email: string().email('Ingrese un correo valido').required('Correo es requerido'),
   password: string()
     .required('La contraseña es requerida')
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .max(16, 'La contraseña debe tener menos de 16 caracteres'),
+    .min(8, 'La contraseña debe tener al menos 8 caracteres') // Backend requiere min 8
+    .max(50, 'La contraseña debe tener menos de 50 caracteres'),
   profile: object().shape({
     lastname: string()
-      .min(3, 'Ingrese un apellido valido')
+      .min(2, 'Ingrese un apellido valido') // Backend requiere min 2
       .max(50, 'Ingrese un apellido más corto')
       .required('Ingrese el apellido'),
-    name: string().min(3, 'Ingrese un nombre valido').max(50, 'Ingrese un nombre valido').required('Ingrese el nombre'),
-    personalPhoneNumber: string()
-      .required('Ingrese un número de teléfono')
-      .min(12, 'Ingrese un número de teléfono')
-      .max(13, 'Ingrese un número de teléfono'),
-    dni: string()
-      .min(10, 'Ingrese un número de Cédula de ciudadanía')
-      .max(10, 'Ingrese un número de Cédula de ciudadanía')
-      .required('Ingrese un número de Cédula de ciudadanía'),
-    photo: string()
+    name: string()
+      .min(2, 'Ingrese un nombre valido') // Backend requiere min 2
+      .max(50, 'Ingrese un nombre valido')
+      .required('Ingrese el nombre'),
+    personalPhoneNumber: string().nullable().max(20, 'Número de teléfono muy largo'), // Backend permite hasta 20 chars
+    dni: string().nullable().max(20, 'Número de identificación muy largo'), // Backend permite hasta 20 chars
+    photo: string().nullable()
   })
 });
 
 export const RegisterCompanySchema = object().shape({
-  name: string().min(3, 'Ingrese un nombre valido').max(50, 'Ingrese un nombre valido').required('Ingrese el nombre'),
-  address: string()
-    .min(3, 'Ingrese una dirección valida')
-    .max(50, 'Ingrese una dirección valida')
-    .required('Ingrese la dirección'),
+  name: string().min(1, 'Ingrese un nombre valido').required('Ingrese el nombre'),
+  address: string().nullable().min(3, 'Ingrese una dirección valida'),
   nit: string().required('Ingrese un número de NIT valido'),
   phoneNumber: string().required('Ingrese un número de teléfono valido'),
-  quantityEmployees: string().required('Ingrese la cantidad de empleados'),
-  economicActivity: string().required('Ingrese la actividad económica'),
-  website: string().required('Ingrese el sitio web').min(3, 'Ingrese un sitio web valido')
+  quantityEmployees: string().nullable(),
+  economicActivity: string().nullable(),
+  website: string().nullable() // Campo removido del backend pero mantenido para compatibilidad
 });
 
 export const RegisterPDVSchema = object().shape({

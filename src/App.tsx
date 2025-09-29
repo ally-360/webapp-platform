@@ -1,26 +1,10 @@
 // i18n
 import 'src/locales/i18n';
 
-// scroll bar
-import 'simplebar-react/dist/simplebar.min.css';
-
 // lightbox
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/captions.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
-
-// map
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-// editor
-import 'react-quill/dist/quill.snow.css';
-
-// slick-carousel
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-
-// lazy image
-import 'react-lazy-load-image-component/src/effects/blur.css';
 
 // ----------------------------------------------------------------------
 
@@ -54,8 +38,8 @@ import { store } from 'src/redux/store';
 export default function App() {
   useScrollToTop();
   return (
-    <AuthProvider>
-      <Provider store={store}>
+    <Provider store={store}>
+      <AuthProvider>
         <ErrorHandlerProvider>
           <AxiosErrorSetup />
           <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
@@ -85,7 +69,7 @@ export default function App() {
             </SettingsProvider>
           </LocalizationProvider>
         </ErrorHandlerProvider>
-      </Provider>
-    </AuthProvider>
+      </AuthProvider>
+    </Provider>
   );
 }

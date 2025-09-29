@@ -32,6 +32,7 @@ export const paths = {
       forgotPassword: `${ROOTS.AUTH}/jwt/forgot-password`
     }
   },
+  verifyEmail: '/verify-email',
   stepByStep: {
     root: `${ROOTS.AUTH}/step-by-step`
   },

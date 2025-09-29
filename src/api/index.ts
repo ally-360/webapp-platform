@@ -5,16 +5,8 @@
 import * as mockApi from './mockApi';
 import * as realApi from './realApi';
 
-// Determinar qué API usar basado en variable de entorno
-const getUseMock = (): boolean => {
-  try {
-    return (import.meta.env as any)?.VITE_USE_MOCK === 'true';
-  } catch {
-    return false;
-  }
-};
-
-const USE_MOCK = getUseMock();
+// TEMPORAL: Forzar API real para la integración con el backend
+const USE_MOCK = false;
 
 // Seleccionar implementación base
 const api = USE_MOCK ? mockApi : realApi;
@@ -66,7 +58,6 @@ const {
 // ========================================
 // 🏪 POS SPECIFIC EXPORTS
 // ========================================
-// Forzar mock para historial POS y acciones mientras el backend se integra
 const {
   getPosSalesHistory,
   downloadSalePDF,

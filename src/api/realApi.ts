@@ -28,7 +28,7 @@ import {
 import { JWTconfig } from '../config-global';
 
 // Configuración de la API real
-const API_BASE = `${JWTconfig.apiUrl}/${JWTconfig.apiV}`;
+const API_BASE = `${JWTconfig.apiUrl}`;
 
 // ========================================
 // 🛠️ UTILIDADES HTTP
@@ -78,7 +78,6 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 
   const data = await response.json();
 
-  // Manejar formato de respuesta del backend
   if (data && typeof data === 'object' && 'success' in data) {
     if (data.success && 'data' in data) {
       return data;
@@ -88,7 +87,6 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
     }
   }
 
-  // Si no tiene el formato esperado, asumir que data es el contenido
   return {
     success: true,
     data
