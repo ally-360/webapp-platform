@@ -1,11 +1,11 @@
 import React from 'react';
 import * as Yup from 'yup';
 import { Form, FormikProvider, useFormik } from 'formik';
-import { useSnackbar } from 'notistack5';
+import { useSnackbar } from 'notistack';
 import { Stack, TextField } from '@mui/material';
 
 export default function RegisterAddUserForm() {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
 
   const RegisterAddUserSchema = Yup.object().shape({
     name: Yup.string().required('Nombre requerido'),

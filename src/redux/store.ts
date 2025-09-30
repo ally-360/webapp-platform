@@ -12,6 +12,7 @@ import posReducer from './pos/posSlice';
 import { authApi } from './services/authApi';
 import { categoriesApi } from './services/categoriesApi';
 import { brandsApi } from './services/brandsApi';
+import { productsApi } from './services/productsApi';
 import authReducer from './slices/authSlice';
 
 export const store = configureStore({
@@ -21,6 +22,7 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [brandsApi.reducerPath]: brandsApi.reducer,
+    [productsApi.reducerPath]: productsApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -33,7 +35,12 @@ export const store = configureStore({
     pos: posReducer
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApi.middleware, categoriesApi.middleware, brandsApi.middleware)
+    getDefaultMiddleware().concat(
+      authApi.middleware,
+      categoriesApi.middleware,
+      brandsApi.middleware,
+      productsApi.middleware
+    )
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -281,7 +281,14 @@ const posSlice = createSlice({
 
       window.payments = window.payments.filter((p) => p.id !== action.payload.paymentId);
       const totalPaid = window.payments.reduce((sum, p) => sum + p.amount, 0);
-      window.status = totalPaid >= window.total ? 'paid' : window.payments.length > 0 ? 'pending_payment' : 'draft';
+
+      if (totalPaid >= window.total) {
+        window.status = 'paid';
+      } else if (window.payments.length > 0) {
+        window.status = 'pending_payment';
+      } else {
+        window.status = 'draft';
+      }
     },
 
     // ===== DISCOUNTS =====

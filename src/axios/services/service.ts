@@ -71,7 +71,7 @@ class RequestService {
 
   // pdv
 
-  getPDVS = async ({ r }) => apiClient(configGetWithToken(`/pdv?r=${r}`));
+  getPDVS = async ({ r }) => apiClient(configGetWithToken(`/pdvs`));
 
   createPDV = async (databody) => apiClient(configPostWithToken(`/pdv`, databody));
 

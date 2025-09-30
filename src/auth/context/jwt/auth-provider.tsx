@@ -43,6 +43,7 @@ interface InitialState {
   company: GetCompanyResponse | null;
   pdvCompany: any;
   changingCompany: boolean;
+  selectedCompany: boolean;
 }
 
 const initialState: InitialState = {
@@ -52,7 +53,8 @@ const initialState: InitialState = {
   isFirstLogin: false,
   company: null,
   pdvCompany: null,
-  changingCompany: false
+  changingCompany: false,
+  selectedCompany: false
 };
 
 /**
@@ -108,7 +110,17 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     initialize();
   }, [initialize]);
 
-  // Actualizar estado cuando se obtiene el usuario
+  const decodeToken = (token: string) => {
+    try {
+      const payload = token.split('.')[1];
+      const decodedPayload = atob(payload);
+      return JSON.parse(decodedPayload);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     if (currentUser) {
       const adaptedUser = {
@@ -137,10 +149,15 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   // Actualizar estado cuando se obtienen las empresas
   useEffect(() => {
-    if (userCompanies && userCompanies.length > 0) {
-      console.log('✅ Companies data loaded:', userCompanies);
+    const decodedToken = decodeToken(localStorage.getItem('accessToken') || '');
 
-      // Adaptar datos del backend al formato frontend
+    if (decodedToken) {
+      setState((prev) => ({
+        ...prev,
+        selectedCompany: !!decodedToken?.tenant_id
+      }));
+    }
+    if (userCompanies && userCompanies.length > 0) {
       const adaptedCompanies = userCompanies.map((company) => ({
         id: company.id,
         name: company.name,
@@ -243,7 +260,8 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           isAuthenticated: true,
           isFirstLogin: companies.length === 0,
           loading: false,
-          changingCompany: false
+          changingCompany: false,
+          selectedCompany: !!(companies.length === 1)
         });
 
         // Si solo hay una empresa, seleccionarla automáticamente
@@ -310,6 +328,54 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     [registerMutation, enqueueSnackbar]
   );
 
+  const selectCompany = useCallback(
+    async (companyId: string) => {
+      try {
+        setState((prev) => ({ ...prev, changingCompany: true }));
+
+        await dispatch(clearAllStateOnCompanySwitch());
+
+        const result = await selectCompanyMutation({ company_id: companyId }).unwrap();
+
+        if (result.access_token) {
+          setSession(result.access_token);
+
+          const selectedCompany = userCompanies?.find((comp) => comp.id === companyId);
+          if (selectedCompany) {
+            const adaptedCompany = {
+              id: selectedCompany.id,
+              name: selectedCompany.name,
+              nit: selectedCompany.nit,
+              phoneNumber: selectedCompany.phone_number,
+              address: selectedCompany.address || '',
+              website: '',
+              economicActivity: selectedCompany.economic_activity || '',
+              quantityEmployees: selectedCompany.quantity_employees?.toString() || ''
+            };
+
+            setState((prev) => ({
+              ...prev,
+              company: adaptedCompany,
+              changingCompany: false,
+              selectedCompany: true
+            }));
+
+            enqueueSnackbar(`Empresa seleccionada: ${selectedCompany.name}`, { variant: 'success' });
+          }
+        }
+
+        return result;
+      } catch (error: any) {
+        console.error('❌ Error selecting company:', error);
+        // Desactivar loading en caso de error
+        setState((prev) => ({ ...prev, changingCompany: false }));
+        enqueueSnackbar(error?.data?.detail || 'Error seleccionando empresa', { variant: 'error' });
+        throw error;
+      }
+    },
+    [selectCompanyMutation, userCompanies, enqueueSnackbar, dispatch]
+  );
+
   const createCompany = useCallback(
     async (databody: RegisterCompany): Promise<void> => {
       try {
@@ -329,7 +395,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         };
 
         const result = await createCompanyMutation(backendData).unwrap();
-        console.log('✅ Company created successfully:', result);
 
         // Adaptar respuesta del backend al formato frontend
         const adaptedCompany = {
@@ -345,9 +410,10 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
         setState((prev) => ({ ...prev, company: adaptedCompany }));
 
-        // Guardar datos de la empresa en el step-by-step para navegación
         dispatch(setPrevValuesCompany(adaptedCompany));
-        dispatch(setStep(1)); // Avanzar al siguiente paso (PDV)
+        dispatch(setStep(1));
+
+        await selectCompany(adaptedCompany.id);
 
         enqueueSnackbar('Empresa creada exitosamente', { variant: 'success' });
       } catch (error: any) {
@@ -357,7 +423,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         throw error;
       }
     },
-    [createCompanyMutation, dispatch, enqueueSnackbar]
+    [createCompanyMutation, dispatch, enqueueSnackbar, selectCompany]
   );
 
   const createPDV = useCallback(
@@ -385,61 +451,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       }
     },
     [createPDVMutation, enqueueSnackbar, dispatch]
-  );
-
-  const selectCompany = useCallback(
-    async (companyId: string) => {
-      try {
-        console.log('🏢 Selecting company:', companyId);
-
-        // 1. Activar estado de cambio de empresa
-        setState((prev) => ({ ...prev, changingCompany: true }));
-
-        // 2. Limpiar todo el estado de la aplicación ANTES de cambiar empresa
-        await dispatch(clearAllStateOnCompanySwitch());
-
-        const result = await selectCompanyMutation({ company_id: companyId }).unwrap();
-
-        if (result.access_token) {
-          // 3. Actualizar token con el nuevo token de empresa
-          setSession(result.access_token);
-
-          // 4. Actualizar la empresa seleccionada en el estado local
-          const selectedCompany = userCompanies?.find((comp) => comp.id === companyId);
-          if (selectedCompany) {
-            // Adaptar respuesta del backend al formato frontend
-            const adaptedCompany = {
-              id: selectedCompany.id,
-              name: selectedCompany.name,
-              nit: selectedCompany.nit,
-              phoneNumber: selectedCompany.phone_number,
-              address: selectedCompany.address || '',
-              website: '',
-              economicActivity: selectedCompany.economic_activity || '',
-              quantityEmployees: selectedCompany.quantity_employees?.toString() || ''
-            };
-
-            setState((prev) => ({
-              ...prev,
-              company: adaptedCompany,
-              changingCompany: false
-            }));
-
-            console.log('✅ Company selected, state cleared, and token updated');
-            enqueueSnackbar(`Empresa seleccionada: ${selectedCompany.name}`, { variant: 'success' });
-          }
-        }
-
-        return result;
-      } catch (error: any) {
-        console.error('❌ Error selecting company:', error);
-        // Desactivar loading en caso de error
-        setState((prev) => ({ ...prev, changingCompany: false }));
-        enqueueSnackbar(error?.data?.detail || 'Error seleccionando empresa', { variant: 'error' });
-        throw error;
-      }
-    },
-    [selectCompanyMutation, userCompanies, enqueueSnackbar, dispatch]
   );
 
   const updateCompany = useCallback(async (_databody: UpdateProfile) => {
@@ -483,6 +494,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       loading: status === 'loading',
       authenticated: status === 'authenticated',
       unauthenticated: status === 'unauthenticated',
+      selectedCompany: state.selectedCompany,
       isFirstLogin: state.isFirstLogin,
       changingCompany: state.changingCompany,
 
@@ -510,6 +522,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       updateProfileInfo,
       state.user,
       state.company,
+      state.selectedCompany,
       state.pdvCompany,
       state.isFirstLogin,
       state.changingCompany,

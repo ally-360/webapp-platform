@@ -86,7 +86,7 @@ export default function InventoryBrandsList() {
   };
 
   const handleClickPopup = () => {
-    dispatch(switchPopupState(false));
+    dispatch(switchPopupState(true));
   };
 
   return (

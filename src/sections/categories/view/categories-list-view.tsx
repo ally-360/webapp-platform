@@ -102,7 +102,7 @@ export default function InvetoryCategoriesList() {
   };
 
   const handleClickPopup = () => {
-    dispatch(switchPopupState(false));
+    dispatch(switchPopupState(true));
   };
 
   return (
