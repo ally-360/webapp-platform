@@ -7,7 +7,7 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
 import { useTranslation } from 'react-i18next';
-import InvoiceNewEditForm from '../invoice-new-edit-form';
+import InvoiceNewEditForm from 'src/sections/invoice/invoice-new-edit-form';
 
 // ----------------------------------------------------------------------
 

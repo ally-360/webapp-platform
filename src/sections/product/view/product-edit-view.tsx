@@ -8,24 +8,29 @@ import { paths } from 'src/routes/paths';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
-import { useDispatch, useSelector } from 'react-redux';
-import { getProductById } from 'src/redux/inventory/productsSlice';
-import { useEffect } from 'react';
+import { useGetProductByIdQuery } from 'src/redux/services/productsApi';
 import ProductNewEditForm from '../product-new-edit-form';
 
 // ----------------------------------------------------------------------
 
-export default function ProductEditView({ id }) {
+interface ProductEditViewProps {
+  id: string;
+}
+
+export default function ProductEditView({ id }: ProductEditViewProps) {
   const settings = useSettingsContext();
 
-  // const { product: currentProduct } = useGetProduct(id);
-  const dispatch = useDispatch();
+  // ========================================
+  // 🔥 RTK QUERY - PRODUCTO PARA EDITAR
+  // ========================================
 
-  useEffect(() => {
-    dispatch(getProductById(id));
-  }, [dispatch, id]);
-
-  const { product: currentProduct } = useSelector((state) => state.products);
+  const {
+    data: currentProduct,
+    isLoading,
+    error
+  } = useGetProductByIdQuery(id, {
+    skip: !id
+  });
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -37,18 +42,22 @@ export default function ProductEditView({ id }) {
             name: 'Product',
             href: paths.dashboard.product.root
           },
-          { name: currentProduct?.name }
+          { name: currentProduct?.name || 'Producto' }
         ]}
         sx={{
           mb: { xs: 3, md: 5 }
         }}
       />
 
-      <ProductNewEditForm currentProduct={currentProduct} />
+      {!isLoading && currentProduct && <ProductNewEditForm currentProduct={currentProduct} />}
+
+      {isLoading && <div>Cargando producto...</div>}
+
+      {error && <div>Error al cargar el producto</div>}
     </Container>
   );
 }
 
 ProductEditView.propTypes = {
-  id: PropTypes.string
+  id: PropTypes.string.isRequired
 };

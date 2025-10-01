@@ -13,6 +13,7 @@ import { authApi } from './services/authApi';
 import { categoriesApi } from './services/categoriesApi';
 import { brandsApi } from './services/brandsApi';
 import { productsApi } from './services/productsApi';
+import { catalogApi } from './services/catalogApi';
 import authReducer from './slices/authSlice';
 
 export const store = configureStore({
@@ -23,6 +24,7 @@ export const store = configureStore({
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [brandsApi.reducerPath]: brandsApi.reducer,
     [productsApi.reducerPath]: productsApi.reducer,
+    [catalogApi.reducerPath]: catalogApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -39,7 +41,8 @@ export const store = configureStore({
       authApi.middleware,
       categoriesApi.middleware,
       brandsApi.middleware,
-      productsApi.middleware
+      productsApi.middleware,
+      catalogApi.middleware
     )
 });
 

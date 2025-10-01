@@ -6,37 +6,31 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import match from 'autosuggest-highlight/match';
-import Slide from '@mui/material/Slide';
 import parse from 'autosuggest-highlight/parse';
-import { Box, InputAdornment, TextField, Stack, Link, Typography, Divider } from '@mui/material';
+import { Box, InputAdornment, TextField, Stack, Typography, Divider } from '@mui/material';
 import { Icon } from '@iconify/react';
 import { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useSnackbar } from 'notistack';
-import { useDispatch, useSelector } from 'react-redux';
-import { switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { useDispatch } from 'react-redux';
 import { LoadingButton } from '@mui/lab';
-import ButtonAutocomplete from 'src/sections/product/common/ButtonAutocomplete';
 import { setPopupAssignInventory } from 'src/redux/inventory/productsSlice';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { useForm } from 'react-hook-form';
 import { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-
-const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
+import { useGetPDVsQuery } from 'src/redux/services/catalogApi';
+import { useAppSelector } from 'src/hooks/store';
 
 export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, setAssignWarehouse }) {
-  const { enqueueSnackbar } = useSnackbar();
+  useSnackbar();
 
   const assignInventorySchema = Yup.object().shape({
     pdv: Yup.object({
       pdv: Yup.string().required('Punto de venta requerido'),
       id: Yup.string().required('Punto de venta requerido')
-    })
-      .required('Punto de venta requerido')
-      .nullable(),
-
-    quantity: Yup.number().required('Cantidad requerida'),
+    }).required('Punto de venta requerido'),
+    quantity: Yup.number().typeError('Cantidad requerida').required('Cantidad requerida'),
     minQuantity: Yup.number().optional(),
     edit: Yup.boolean()
   });
@@ -54,7 +48,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
     [pdvEdit]
   );
 
-  const methods = useForm({
+  const methods = useForm<any>({
     resolver: yupResolver(assignInventorySchema),
     defaultValues
   });
@@ -83,10 +77,10 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
     }
   }, [pdvEdit, setValue]);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (formValues: any) => {
     try {
-      console.log('send values', values);
-      const resp = handleAssignInventory(values.pdv, values.quantity, values.minQuantity, values.edit);
+      console.log('send values', formValues);
+      const resp = handleAssignInventory(formValues.pdv, formValues.quantity, formValues.minQuantity, formValues.edit);
       if (resp) {
         reset();
       }
@@ -97,61 +91,35 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
   };
 
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [searchResults, setSearchResults] = React.useState([]);
-
-  const [selectedOption, setSelectedOption] = React.useState('');
   const handleInputChange = (event, value) => {
     setSearchQuery(value);
   };
 
-  const isOptionEqualToValue = (option, value) => {
+  const isOptionEqualToValue = (option: any, value: any) => {
     if (option && value) {
-      return option.id === value.id && option.pdv === value.pdv;
+      return option.id === value.id || option.name === value.pdv;
     }
     return false;
   };
 
-  const handleOptionSelect = (event, option) => {
-    setSelectedOption(option);
-    setValue('warehouse', option);
+  const handleOptionSelect = (_event: unknown, option: any) => {
+    if (option) {
+      setValue('pdv', { pdv: option.name, id: option.id }, { shouldValidate: true });
+    } else {
+      setValue('pdv', { pdv: '', id: '' }, { shouldValidate: true });
+    }
   };
 
   const dispatch = useDispatch();
 
-  // eslint-disable-next-line consistent-return
-  const validator = () => {
-    if (values.warehouse.id === '') {
-      enqueueSnackbar('Debe seleccionar un punto de venta', { variant: 'error' });
-      return true;
-    }
-    if (values.quantity === '') {
-      enqueueSnackbar('Debe ingresar una cantidad', { variant: 'error' });
-      return true;
-    }
+  const { data: pdvs = [], isLoading: isLoadingPdvs } = useGetPDVsQuery();
 
-    if (values.minQuantity === '') {
-      enqueueSnackbar('Debe ingresar una cantidad mínima', { variant: 'error' });
-      return true;
-    }
-
-    handleSubmit();
-  };
-
-  // const dispatch = useDispatch();
-
-  // useEffect(() => {
-  //   dispatch(getWarehouses());
-  // }, [dispatch]);
-
-  const { pdvs, openPopup } = useSelector((state) => state.pdvs);
-
-  const { popupAssignInventory } = useSelector((state) => state.products);
+  const { popupAssignInventory } = useAppSelector((state) => state.products);
 
   useEffect(() => {
     console.log(pdvs);
-    setSearchResults(pdvs);
   }, [pdvs]);
-  const [scroll, setScroll] = React.useState('paper');
+  const [scroll] = React.useState<'paper' | 'body'>('paper');
 
   useEffect(() => {
     console.log(values);
@@ -171,7 +139,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
         maxWidth="sm"
         open={popupAssignInventory}
       >
-        <FormProvider methods={methods}>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle id="scroll-dialog-title" sx={{ p: '20px 20px 14px' }}>
             Seleccionar Punto De Venta
           </DialogTitle>
@@ -189,11 +157,11 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
               disablePortal
               value={values.pdv}
               name="pdv"
-              getOptionLabel={(option) => option.name || option.pdv || ''}
-              options={searchResults}
+              getOptionLabel={(option) => option?.name || option?.pdv || ''}
+              options={pdvs}
               inputValue={searchQuery}
               onInputChange={handleInputChange}
-              // onChange={handleOptionSelect}
+              onChange={handleOptionSelect}
               isOptionEqualToValue={isOptionEqualToValue}
               renderInput={(params) => (
                 <TextField
@@ -224,36 +192,27 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
 
                 return (
                   <li {...props}>
-                    <Link onClick={() => handleOptionSelect(option)} to="#" underline="none">
-                      <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
-                        <Typography variant="body2" color="text.primary">
-                          {parts.map((part, index) => (
-                            <span
-                              key={index}
-                              style={{
-                                fontWeight: part.highlight ? 700 : 400
-                              }}
-                            >
-                              {part.text}
-                            </span>
-                          ))}
-                        </Typography>
-                      </Box>
-                    </Link>
+                    <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.primary">
+                        {parts.map((part, index) => (
+                          <span
+                            key={index}
+                            style={{
+                              fontWeight: part.highlight ? 700 : 400
+                            }}
+                          >
+                            {part.text}
+                          </span>
+                        ))}
+                      </Typography>
+                    </Box>
                   </li>
                 );
               }}
               noOptionsText={
                 <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                  No se encontraron resultados a la búsqueda {searchQuery}
+                  {isLoadingPdvs ? 'Cargando...' : `No se encontraron resultados a la búsqueda ${searchQuery}`}
                 </Typography>
-              }
-              PaperComponent={({ children }) =>
-                ButtonAutocomplete({
-                  children,
-                  handleOnClick: () => dispatch(switchPopup()),
-                  title: 'Agregar punto de venta'
-                })
               }
             />
             <Stack direction="row" sx={{ marginTop: 3 }} spacing={2}>
@@ -266,8 +225,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
                   Guardar
                 </Button> */}
             <LoadingButton
-              type="button"
-              onClick={onSubmit}
+              type="submit"
               color="primary"
               fullWidth
               variant="contained"

@@ -140,7 +140,7 @@ export default function InventoryBrandsList() {
                           handleEdit={handleEdit}
                           handleDelete={handleDelete}
                           handleView={handleView}
-                          view={viewBrand}
+                          view={viewBrand === brand.id}
                           element={brand}
                         />
                       }

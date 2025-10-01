@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
@@ -16,8 +16,9 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import * as XLSX from 'xlsx';
 import { headerTable } from 'src/sections/product/constantsTableExportData';
 import ReactToPrint from 'react-to-print';
-import { SliderThumb } from '@mui/material';
-import { useAppSelector } from 'src/hooks/store';
+// import { SliderThumb } from '@mui/material';
+// import { useAppSelector } from 'src/hooks/store';
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
 
 // ----------------------------------------------------------------------
 
@@ -33,6 +34,46 @@ interface ProductTableToolbarProps {
   componentRef: any;
 }
 
+// PDF Styles and Component outside render to satisfy lint
+const pdfStyles = StyleSheet.create({
+  page: { padding: 24, fontSize: 10 },
+  title: { fontSize: 16, marginBottom: 8 },
+  header: { flexDirection: 'row', borderBottomWidth: 1, paddingBottom: 6, marginBottom: 6 },
+  row: { flexDirection: 'row', borderBottomWidth: 0.5, paddingVertical: 4 },
+  cell: { flex: 1, paddingRight: 6 },
+  small: { flex: 0.6 },
+  large: { flex: 1.6 }
+});
+
+function ProductsPDF({ rows }: { rows: any[] }) {
+  return (
+    <Document>
+      <Page size="A4" style={pdfStyles.page}>
+        <Text style={pdfStyles.title}>Listado de productos</Text>
+        <View style={pdfStyles.header}>
+          <Text style={[pdfStyles.cell, pdfStyles.small]}>Código</Text>
+          <Text style={[pdfStyles.cell, pdfStyles.large]}>Nombre</Text>
+          <Text style={pdfStyles.cell}>Precio</Text>
+          <Text style={pdfStyles.cell}>Stock</Text>
+          <Text style={pdfStyles.cell}>PDV</Text>
+        </View>
+        {(rows || []).flatMap((product) => {
+          const pdvs = product.productPdv && product.productPdv.length ? product.productPdv : [null];
+          return pdvs.map((pdv) => (
+            <View key={`${product.id}-${pdv ? pdv.pdv_id : 'none'}`} style={pdfStyles.row}>
+              <Text style={[pdfStyles.cell, pdfStyles.small]}>{product.barCode || ''}</Text>
+              <Text style={[pdfStyles.cell, pdfStyles.large]}>{product.name}</Text>
+              <Text style={pdfStyles.cell}>${product.priceSale}</Text>
+              <Text style={pdfStyles.cell}>{product.quantityStock}</Text>
+              <Text style={pdfStyles.cell}>{pdv ? `${pdv.pdv_name} (${pdv.quantity})` : '-'}</Text>
+            </View>
+          ));
+        })}
+      </Page>
+    </Document>
+  );
+}
+
 export default function ProductTableToolbar({
   categoryView,
   filters,
@@ -40,7 +81,7 @@ export default function ProductTableToolbar({
   dataFiltered,
   //
   stockOptions,
-  publishOptions,
+  publishOptions: _publishOptions,
   componentRef
 }: ProductTableToolbarProps) {
   const popover = usePopover();
@@ -51,14 +92,11 @@ export default function ProductTableToolbar({
     [onFilters]
   );
 
-  const { products } = useAppSelector((state) => state.products);
-  console.log(products);
+  // const { products } = useAppSelector((state) => state.products);
 
   // Price options
 
-  const [priceOptions, setPriceOptions] = useState({ minPrice: 0, maxPrice: 0 });
-
-  console.log(priceOptions);
+  // const [priceOptions] = useState({ minPrice: 0, maxPrice: 0 });
 
   const handleFilterStock = useCallback(
     (event) => {
@@ -67,12 +105,12 @@ export default function ProductTableToolbar({
     [onFilters]
   );
 
-  const handleFilterPublish = useCallback(
-    (event) => {
-      onFilters('publish', typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value);
-    },
-    [onFilters]
-  );
+  // const handleFilterPublish = useCallback(
+  //   (event) => {
+  //     onFilters('publish', typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value);
+  //   },
+  //   [onFilters]
+  // );
   const downloadExcel = (data) => {
     const worksheetData = headerTable;
 
@@ -81,13 +119,13 @@ export default function ProductTableToolbar({
     let rowIndex = 2; // Start from the second row to avoid overwriting the header
 
     data.forEach((product) => {
-      product.productPdv.forEach((pdv) => {
+      (product.productPdv || []).forEach((pdv) => {
         const rowData = {
           id: product.id,
           name: product.name,
           description: product.description,
-          code: product.code,
-          images: product.images.join(', '), // Assuming images is an array
+          code: product.barCode,
+          images: Array.isArray(product.images) ? product.images.join(', ') : '',
           typeProduct: product.typeProduct,
           state: product.state,
           sellInNegative: product.sellInNegative,
@@ -96,11 +134,10 @@ export default function ProductTableToolbar({
           priceSale: product.priceSale,
           priceBase: product.priceBase,
           quantityStock: product.quantityStock,
-          pdvName: pdv.pdv.name,
-          minQuantity: pdv.minQuantity,
-          maxQuantity: pdv.maxQuantity,
+          pdvName: pdv.pdv_name,
+          minQuantity: pdv.min_quantity,
           pdvQuantity: pdv.quantity,
-          category: product.category
+          category: product.category?.name
         };
         XLSX.utils.sheet_add_json(worksheet, [rowData], { skipHeader: true, origin: `A${rowIndex}` });
         // eslint-disable-next-line no-plusplus
@@ -112,6 +149,22 @@ export default function ProductTableToolbar({
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
     XLSX.writeFile(workbook, `${EXPORT_NAME}.xlsx`);
   };
+
+  // PDF download link element
+  const pdfLink = useMemo(
+    () => (
+      <PDFDownloadLink
+        document={<ProductsPDF rows={dataFiltered} />}
+        fileName={`${EXPORT_NAME}.pdf`}
+        style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
+      >
+        <MenuItem>
+          <Iconify icon="solar:document-bold" /> PDF
+        </MenuItem>
+      </PDFDownloadLink>
+    ),
+    [dataFiltered]
+  );
 
   return (
     <>
@@ -213,7 +266,7 @@ export default function ProductTableToolbar({
         </IconButton>
       </Stack>
 
-      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 180 }}>
         <ReactToPrint
           trigger={() => (
             <MenuItem>
@@ -223,14 +276,7 @@ export default function ProductTableToolbar({
           content={() => componentRef.current}
         />
 
-        <MenuItem
-          onClick={() => {
-            popover.onClose();
-          }}
-        >
-          <Iconify icon="solar:import-bold" />
-          Importar
-        </MenuItem>
+        {pdfLink}
 
         <MenuItem
           onClick={() => {
@@ -238,21 +284,21 @@ export default function ProductTableToolbar({
           }}
         >
           <Iconify icon="solar:export-bold" />
-          Exportar
+          Excel
         </MenuItem>
       </CustomPopover>
     </>
   );
 }
 
-function AirbnbThumbComponent(props) {
-  const { children, ...other } = props;
-  return (
-    <SliderThumb {...other}>
-      {children}
-      <span className="airbnb-bar" />
-      <span className="airbnb-bar" />
-      <span className="airbnb-bar" />
-    </SliderThumb>
-  );
-}
+// function AirbnbThumbComponent(props) {
+//   const { children, ...other } = props;
+//   return (
+//     <SliderThumb {...other}>
+//       {children}
+//       <span className="airbnb-bar" />
+//       <span className="airbnb-bar" />
+//       <span className="airbnb-bar" />
+//     </SliderThumb>
+//   );
+// }

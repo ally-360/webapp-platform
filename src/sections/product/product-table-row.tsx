@@ -32,8 +32,8 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
 
   const confirm = useBoolean(false);
 
-  const minQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.minQuantity + acc, 0);
-  const maxQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.maxQuantity + acc, 0);
+  const minQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.min_quantity + acc, 0);
+  const maxQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.quantity + acc, 0);
   const inventoryType =
     // eslint-disable-next-line no-nested-ternary
     quantityStock > minQuantityAllPdvs ? 'Existencias' : quantityStock === 0 ? 'Sin exitencias' : 'Pocas existencias';
@@ -59,7 +59,12 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={name} src={images[0]} variant="rounded" sx={{ width: 64, height: 64, mr: 2 }} />
+          <Avatar
+            alt={name}
+            src={Array.isArray(images) && images.length > 0 ? images[0] : undefined}
+            variant="rounded"
+            sx={{ width: 64, height: 64, mr: 2 }}
+          />
           <ListItemText
             disableTypography
             primary={
@@ -127,7 +132,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
               productPdv.map((element, index) => (
                 <Box key={index} sx={{ p: 0.2 }}>
                   <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
-                    {element.pdv.name}: {element.quantity} {t('productos')}
+                    {element.pdv_name}: {element.quantity} {t('productos')}
                   </Typography>
                 </Box>
               ))}

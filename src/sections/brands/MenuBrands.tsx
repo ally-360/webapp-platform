@@ -1,6 +1,5 @@
 import { Button, Divider, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import React, { useState, useRef, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import Iconify from 'src/components/iconify';
 import { useTranslation } from 'react-i18next';
 import CustomPopover from 'src/components/custom-popover/custom-popover';
@@ -8,7 +7,23 @@ import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useBoolean } from 'src/hooks/use-boolean';
 
-export default function MenuBrands({ handleEdit, handleDelete, handleView, view, element, edit }) {
+interface MenuBrandsProps {
+  handleEdit: (element: any) => void;
+  handleDelete: (element: any) => void;
+  handleView: (id: string) => void;
+  view?: boolean;
+  element: any;
+  edit?: boolean;
+}
+
+export default function MenuBrands({
+  handleEdit,
+  handleDelete,
+  handleView,
+  view = true,
+  element,
+  edit
+}: MenuBrandsProps) {
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
   const { t } = useTranslation();
@@ -90,7 +105,7 @@ export default function MenuBrands({ handleEdit, handleDelete, handleView, view,
         )}
 
         {view && (
-          <MenuItem onClick={() => handleView()}>
+          <MenuItem onClick={() => handleView(element.id)}>
             <Iconify icon="solar:eye-bold" />
             <Typography variant="body2" sx={{ ml: 2 }}>
               Ver
@@ -119,16 +134,3 @@ export default function MenuBrands({ handleEdit, handleDelete, handleView, view,
     </>
   );
 }
-
-MenuBrands.propTypes = {
-  handleEdit: PropTypes.func,
-  handleDelete: PropTypes.func,
-  handleView: PropTypes.func,
-  view: PropTypes.bool,
-  element: PropTypes.object,
-  edit: PropTypes.bool
-};
-
-MenuBrands.defaultProps = {
-  view: true
-};

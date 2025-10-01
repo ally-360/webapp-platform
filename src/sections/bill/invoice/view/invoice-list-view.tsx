@@ -22,12 +22,9 @@ import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
-// _mock
-import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
-import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
@@ -44,6 +41,9 @@ import {
 //
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from '@mui/material';
+import { useGetInvoicesQuery, useDeleteInvoiceMutation } from 'src/redux/services/invoicesApi';
+import { useGetContactsQuery } from 'src/redux/services/contactsApi';
+import { enqueueSnackbar } from 'notistack';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -75,26 +75,36 @@ const defaultFilters = {
 
 export default function InvoiceListView() {
   const theme = useTheme();
-
   const settings = useSettingsContext();
-
   const router = useRouter();
-
-  const table = useTable({ defaultOrderBy: 'createDate' });
-
+  const table = useTable({ defaultOrderBy: 'issue_date' });
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const confirm = useBoolean(false);
 
-  const confirm = useBoolean(0);
-
-  const [tableData, setTableData] = useState(_invoices);
+  // RTK Query hooks
+  const { data: invoices = [], isLoading } = useGetInvoicesQuery({ type: 'purchase' });
+  const { data: contacts = [] } = useGetContactsQuery({});
+  const [deleteInvoice] = useDeleteInvoiceMutation();
 
   const [filters, setFilters] = useState(defaultFilters);
 
   const dateError =
-    filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
+    filters.startDate && filters.endDate
+      ? new Date(filters.startDate).getTime() > new Date(filters.endDate).getTime()
+      : false;
+
+  // Map invoices with customer data for display
+  const enrichedInvoices = invoices.map((invoice) => {
+    const customer = contacts.find((contact) => contact.id === invoice.customer_id);
+    return {
+      ...invoice,
+      customerName: customer?.name || 'Cliente no encontrado',
+      customerData: customer
+    };
+  });
 
   const dataFiltered = applyFilter({
-    inputData: tableData,
+    inputData: enrichedInvoices,
     comparator: getComparator(table.order, table.orderBy),
     filters,
     dateError
@@ -115,22 +125,22 @@ export default function InvoiceListView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const getInvoiceLength = (status) => tableData.filter((item) => item.status === status).length;
+  const getInvoiceLength = (status) => enrichedInvoices.filter((item) => item.status === status).length;
 
   const getTotalAmount = (status) =>
     sumBy(
-      tableData.filter((item) => item.status === status),
-      'totalAmount'
+      enrichedInvoices.filter((item) => item.status === status),
+      (item) => parseFloat(item.total_amount || '0')
     );
 
-  const getPercentByStatus = (status) => (getInvoiceLength(status) / tableData.length) * 100;
+  const getPercentByStatus = (status) => (getInvoiceLength(status) / enrichedInvoices.length) * 100;
 
   const TABS = [
-    { value: 'all', label: 'Todas', color: 'default', count: tableData.length },
+    { value: 'all', label: 'Todas', color: 'default', count: enrichedInvoices.length },
     { value: 'paid', label: 'Pagadas', color: 'success', count: getInvoiceLength('paid') },
     { value: 'pending', label: 'Pendientes', color: 'warning', count: getInvoiceLength('pending') },
-    { value: 'overdue', label: 'Vencidas', color: 'error', count: getInvoiceLength('overdue') }
-    // { value: 'draft', label: 'Draft', color: 'default', count: getInvoiceLength('draft') }
+    { value: 'overdue', label: 'Vencidas', color: 'error', count: getInvoiceLength('overdue') },
+    { value: 'draft', label: 'Borradores', color: 'default', count: getInvoiceLength('draft') }
   ];
 
   const handleFilters = useCallback(
@@ -145,25 +155,33 @@ export default function InvoiceListView() {
   );
 
   const handleDeleteRow = useCallback(
-    (id) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id) => {
+      try {
+        await deleteInvoice(id).unwrap();
+        enqueueSnackbar('Factura eliminada exitosamente', { variant: 'success' });
+        table.onUpdatePageDeleteRow(dataInPage.length);
+      } catch (error) {
+        console.error('Error deleting invoice:', error);
+        enqueueSnackbar('Error al eliminar la factura', { variant: 'error' });
+      }
     },
-    [dataInPage.length, table, tableData]
+    [dataInPage.length, table, deleteInvoice]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRows: tableData.length,
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      await Promise.all(table.selected.map((id) => deleteInvoice(id).unwrap()));
+      enqueueSnackbar('Facturas eliminadas exitosamente', { variant: 'success' });
+      table.onUpdatePageDeleteRows({
+        totalRows: enrichedInvoices.length,
+        totalRowsInPage: dataInPage.length,
+        totalRowsFiltered: dataFiltered.length
+      });
+    } catch (error) {
+      console.error('Error deleting invoices:', error);
+      enqueueSnackbar('Error al eliminar las facturas', { variant: 'error' });
+    }
+  }, [dataFiltered.length, dataInPage.length, table, enrichedInvoices.length, deleteInvoice]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -218,7 +236,7 @@ export default function InvoiceListView() {
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
-              sx={isMobile && { width: '100%' }}
+              sx={isMobile ? { width: '100%' } : {}}
             >
               {t('Nueva factura')}
             </Button>
@@ -233,58 +251,56 @@ export default function InvoiceListView() {
             mb: { xs: 3, md: 5 }
           }}
         >
-          <Scrollbar>
-            <Stack
-              direction="row"
-              divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
-              sx={{ py: 2 }}
-            >
-              <InvoiceAnalytic
-                title="Total"
-                total={tableData.length}
-                percent={100}
-                price={sumBy(tableData, 'totalAmount')}
-                icon="solar:bill-list-bold-duotone"
-                color={theme.palette.info.main}
-              />
+          <Stack
+            direction="row"
+            divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
+            sx={{ py: 2, overflowX: 'auto' }}
+          >
+            <InvoiceAnalytic
+              title="Total"
+              total={enrichedInvoices.length}
+              percent={100}
+              price={sumBy(enrichedInvoices, (item) => parseFloat(item.total_amount || '0'))}
+              icon="solar:bill-list-bold-duotone"
+              color={theme.palette.info.main}
+            />
 
-              <InvoiceAnalytic
-                title="Paid"
-                total={getInvoiceLength('paid')}
-                percent={getPercentByStatus('paid')}
-                price={getTotalAmount('paid')}
-                icon="solar:file-check-bold-duotone"
-                color={theme.palette.success.main}
-              />
+            <InvoiceAnalytic
+              title="Pagadas"
+              total={getInvoiceLength('paid')}
+              percent={getPercentByStatus('paid')}
+              price={getTotalAmount('paid')}
+              icon="solar:file-check-bold-duotone"
+              color={theme.palette.success.main}
+            />
 
-              <InvoiceAnalytic
-                title="Pending"
-                total={getInvoiceLength('pending')}
-                percent={getPercentByStatus('pending')}
-                price={getTotalAmount('pending')}
-                icon="solar:sort-by-time-bold-duotone"
-                color={theme.palette.warning.main}
-              />
+            <InvoiceAnalytic
+              title="Pendientes"
+              total={getInvoiceLength('pending')}
+              percent={getPercentByStatus('pending')}
+              price={getTotalAmount('pending')}
+              icon="solar:sort-by-time-bold-duotone"
+              color={theme.palette.warning.main}
+            />
 
-              <InvoiceAnalytic
-                title="Overdue"
-                total={getInvoiceLength('overdue')}
-                percent={getPercentByStatus('overdue')}
-                price={getTotalAmount('overdue')}
-                icon="solar:bell-bing-bold-duotone"
-                color={theme.palette.error.main}
-              />
+            <InvoiceAnalytic
+              title="Vencidas"
+              total={getInvoiceLength('overdue')}
+              percent={getPercentByStatus('overdue')}
+              price={getTotalAmount('overdue')}
+              icon="solar:bell-bing-bold-duotone"
+              color={theme.palette.error.main}
+            />
 
-              {/* <InvoiceAnalytic
-                title="Draft"
-                total={getInvoiceLength('draft')}
-                percent={getPercentByStatus('draft')}
-                price={getTotalAmount('draft')}
-                icon="solar:file-corrupted-bold-duotone"
-                color={theme.palette.text.secondary}
-              /> */}
-            </Stack>
-          </Scrollbar>
+            <InvoiceAnalytic
+              title="Borradores"
+              total={getInvoiceLength('draft')}
+              percent={getPercentByStatus('draft')}
+              price={getTotalAmount('draft')}
+              icon="solar:file-corrupted-bold-duotone"
+              color={theme.palette.text.secondary}
+            />
+          </Stack>
         </Card>
 
         <Card>
@@ -305,7 +321,7 @@ export default function InvoiceListView() {
                 icon={
                   <Label
                     variant={((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'}
-                    color={tab.color}
+                    color={tab.color as 'default' | 'success' | 'warning' | 'error'}
                   >
                     {tab.count}
                   </Label>
@@ -319,7 +335,7 @@ export default function InvoiceListView() {
             onFilters={handleFilters}
             //
             dateError={dateError}
-            serviceOptions={INVOICE_SERVICE_OPTIONS.map((option) => option.name)}
+            serviceOptions={[]}
           />
 
           {canReset && (
@@ -338,11 +354,11 @@ export default function InvoiceListView() {
             <TableSelectedAction
               dense={table.dense}
               numSelected={table.selected.length}
-              rowCount={tableData.length}
+              rowCount={enrichedInvoices.length}
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  tableData.map((row) => row.id)
+                  enrichedInvoices.map((row) => row.id)
                 )
               }
               action={
@@ -374,47 +390,45 @@ export default function InvoiceListView() {
               }
             />
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row.id)
-                    )
-                  }
+            <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
+              <TableHeadCustom
+                order={table.order}
+                orderBy={table.orderBy}
+                headLabel={TABLE_HEAD}
+                rowCount={enrichedInvoices.length}
+                numSelected={table.selected.length}
+                onSort={table.onSort}
+                onSelectAllRows={(checked) =>
+                  table.onSelectAllRows(
+                    checked,
+                    enrichedInvoices.map((row) => row.id)
+                  )
+                }
+              />
+
+              <TableBody>
+                {dataFiltered
+                  .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
+                  .map((row) => (
+                    <InvoiceTableRow
+                      key={row.id}
+                      row={row}
+                      selected={table.selected.includes(row.id)}
+                      onSelectRow={() => table.onSelectRow(row.id)}
+                      onViewRow={() => handleViewRow(row.id)}
+                      onEditRow={() => handleEditRow(row.id)}
+                      onDeleteRow={() => handleDeleteRow(row.id)}
+                    />
+                  ))}
+
+                <TableEmptyRows
+                  height={denseHeight}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, enrichedInvoices.length)}
                 />
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
-                    .map((row) => (
-                      <InvoiceTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id)}
-                        onSelectRow={() => table.onSelectRow(row.id)}
-                        onViewRow={() => handleViewRow(row.id)}
-                        onEditRow={() => handleEditRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                      />
-                    ))}
-
-                  <TableEmptyRows
-                    height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
-                  />
-
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
+                <TableNoData notFound={notFound} />
+              </TableBody>
+            </Table>
           </TableContainer>
 
           <TablePaginationCustom
@@ -461,6 +475,10 @@ export default function InvoiceListView() {
 function applyFilter({ inputData, comparator, filters, dateError }) {
   const { name, status, service, startDate, endDate } = filters;
 
+  if (!Array.isArray(inputData)) {
+    return [];
+  }
+
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
@@ -474,8 +492,8 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
   if (name) {
     inputData = inputData.filter(
       (invoice) =>
-        invoice.invoiceNumber.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        invoice.invoiceTo.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+        invoice.number?.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
+        invoice.customerName?.toLowerCase().indexOf(name.toLowerCase()) !== -1
     );
   }
 
@@ -483,16 +501,17 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
     inputData = inputData.filter((invoice) => invoice.status === status);
   }
 
-  if (service.length) {
-    inputData = inputData.filter((invoice) => invoice.items.some((filterItem) => service.includes(filterItem.service)));
+  if (service && service.length) {
+    // For invoice service filtering - can be implemented later if needed
+    // inputData = inputData.filter((invoice) => invoice.items?.some((filterItem) => service.includes(filterItem.service)));
   }
 
   if (!dateError) {
     if (startDate && endDate) {
       inputData = inputData.filter(
         (invoice) =>
-          fTimestamp(invoice.createDate) >= fTimestamp(startDate) &&
-          fTimestamp(invoice.createDate) <= fTimestamp(endDate)
+          fTimestamp(invoice.issue_date) >= fTimestamp(startDate) &&
+          fTimestamp(invoice.issue_date) <= fTimestamp(endDate)
       );
     }
   }

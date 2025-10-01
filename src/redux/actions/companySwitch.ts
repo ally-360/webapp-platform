@@ -18,6 +18,7 @@ import { authApi } from '../services/authApi';
 import { categoriesApi } from '../services/categoriesApi';
 import { brandsApi } from '../services/brandsApi';
 import { productsApi } from '../services/productsApi';
+import { catalogApi } from '../services/catalogApi';
 
 /**
  * Acción que se dispara cuando se cambia de empresa
@@ -44,6 +45,7 @@ export const clearAllStateOnCompanySwitch = () => async (dispatch: AppDispatch) 
     dispatch(categoriesApi.util.resetApiState());
     dispatch(brandsApi.util.resetApiState());
     dispatch(productsApi.util.resetApiState());
+    dispatch(catalogApi.util.resetApiState());
 
     // 3. Limpiar localStorage específico (manteniendo auth token)
     const authToken = localStorage.getItem('accessToken');

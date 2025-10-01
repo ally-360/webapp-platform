@@ -1,26 +1,34 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { HOST_API } from 'src/config-global';
 import type { Product, PaginatedResponse, ProductFilters } from 'src/api/types';
+import type { getProductResponse } from 'src/interfaces/inventory/productsInterface';
 import type { RootState } from '../store';
 
 // ========================================
 // 📦 PRODUCTS API - RTK QUERY
 // ========================================
 
+export interface ProductStock {
+  pdv_id: string;
+  quantity: number;
+  min_quantity: number;
+}
+
 export interface CreateProductRequest {
   name: string;
+  sku?: string;
   description?: string;
   barCode?: string;
-  images: string[];
   typeProduct: '1' | '2'; // '1' = simple, '2' = configurable
-  taxesOption: number;
-  sku?: string;
-  priceSale: number; // en centavos
-  priceBase: number; // en centavos
-  categoryId: string;
-  brandId: string;
+  priceSale: number;
+  priceBase: number;
   state?: boolean;
   sellInNegative?: boolean;
-  quantityStock?: number;
+  brand_id: string;
+  category_id: string;
+  tax_ids: string[];
+  images: string[];
+  stocks: ProductStock[];
 }
 
 export interface UpdateProductRequest extends Partial<CreateProductRequest> {
@@ -30,7 +38,7 @@ export interface UpdateProductRequest extends Partial<CreateProductRequest> {
 export const productsApi = createApi({
   reducerPath: 'productsApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_HOST_API,
+    baseUrl: HOST_API,
     prepareHeaders: (headers, { getState }) => {
       const { auth } = getState() as RootState;
       console.log('🔑 ProductsAPI prepareHeaders:', { token: auth.token ? 'EXISTS' : 'MISSING' });
@@ -61,27 +69,21 @@ export const productsApi = createApi({
         if (filters.page) searchParams.set('page', filters.page.toString());
         if (filters.limit) searchParams.set('limit', filters.limit.toString());
 
-        const url = `/products?${searchParams.toString()}`;
-        console.log('📡 ProductsAPI Query URL:', url, { filters });
-        return url;
+        return `/products?${searchParams.toString()}`;
       },
       providesTags: (result) =>
-        result
+        result?.data
           ? [...result.data.map(({ id }) => ({ type: 'Product' as const, id })), { type: 'ProductList', id: 'LIST' }]
-          : [{ type: 'ProductList', id: 'LIST' }],
-      transformResponse: (response: { success: boolean; data: PaginatedResponse<Product> }) => {
-        console.log('📦 ProductsAPI Response:', response);
-        return response.data;
-      }
+          : [{ type: 'ProductList', id: 'LIST' }]
     }),
 
     /**
      * Obtener producto por ID
      */
-    getProductById: builder.query<Product, string>({
+    getProductById: builder.query<getProductResponse, string>({
       query: (productId) => `/products/${productId}`,
       providesTags: (result, error, productId) => [{ type: 'Product', id: productId }],
-      transformResponse: (response: { success: boolean; data: Product }) => response.data
+      transformResponse: (response: any): getProductResponse => (response?.data ? response.data : response)
     }),
 
     // ========================================
@@ -91,30 +93,30 @@ export const productsApi = createApi({
     /**
      * Crear nuevo producto
      */
-    createProduct: builder.mutation<Product, CreateProductRequest>({
+    createProduct: builder.mutation<getProductResponse, CreateProductRequest>({
       query: (newProduct) => ({
-        url: '/products',
+        url: '/products/simple',
         method: 'POST',
         body: newProduct
       }),
       invalidatesTags: [{ type: 'ProductList', id: 'LIST' }],
-      transformResponse: (response: { success: boolean; data: Product }) => response.data
+      transformResponse: (response: any): getProductResponse => (response?.data ? response.data : response)
     }),
 
     /**
      * Actualizar producto existente
      */
-    updateProduct: builder.mutation<Product, UpdateProductRequest>({
+    updateProduct: builder.mutation<getProductResponse, UpdateProductRequest>({
       query: ({ id, ...patch }) => ({
         url: `/products/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: patch
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: 'Product', id },
         { type: 'ProductList', id: 'LIST' }
       ],
-      transformResponse: (response: { success: boolean; data: Product }) => response.data
+      transformResponse: (response: any): getProductResponse => (response?.data ? response.data : response)
     }),
 
     /**
@@ -134,9 +136,9 @@ export const productsApi = createApi({
     /**
      * Cambiar estado del producto (activar/desactivar)
      */
-    toggleProductState: builder.mutation<Product, { productId: string; state: boolean }>({
+    toggleProductState: builder.mutation<getProductResponse, { productId: string; state: boolean }>({
       query: ({ productId, state }) => ({
-        url: `/products/${productId}/state`,
+        url: `/products/${productId}`,
         method: 'PATCH',
         body: { state }
       }),
@@ -144,23 +146,30 @@ export const productsApi = createApi({
         { type: 'Product', id: productId },
         { type: 'ProductList', id: 'LIST' }
       ],
-      transformResponse: (response: { success: boolean; data: Product }) => response.data
+      transformResponse: (response: any): getProductResponse => (response?.data ? response.data : response)
     }),
 
-    /**
-     * Actualizar stock de producto
-     */
-    updateProductStock: builder.mutation<Product, { productId: string; quantityStock: number }>({
-      query: ({ productId, quantityStock }) => ({
-        url: `/products/${productId}/stock`,
-        method: 'PATCH',
-        body: { quantityStock }
+    /** Assign taxes to a product */
+    assignProductTaxes: builder.mutation<any, { productId: string; tax_ids: string[] }>({
+      query: ({ productId, tax_ids }) => ({
+        url: `/products/${productId}/taxes`,
+        method: 'POST',
+        body: { tax_ids }
       }),
       invalidatesTags: (result, error, { productId }) => [
         { type: 'Product', id: productId },
         { type: 'ProductList', id: 'LIST' }
-      ],
-      transformResponse: (response: { success: boolean; data: Product }) => response.data
+      ]
+    }),
+
+    /** Update min stock for a product in a PDV */
+    updateProductMinStock: builder.mutation<any, { productId: string; pdvId: string; minQuantity: number }>({
+      query: ({ productId, pdvId, minQuantity }) => ({
+        url: `/products/${productId}/stock/${pdvId}/min-quantity`,
+        method: 'PATCH',
+        body: { min_quantity: minQuantity }
+      }),
+      invalidatesTags: (result, error, { productId }) => [{ type: 'Product', id: productId }]
     })
   })
 });
@@ -179,7 +188,8 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useToggleProductStateMutation,
-  useUpdateProductStockMutation,
+  useAssignProductTaxesMutation,
+  useUpdateProductMinStockMutation,
 
   // Utils
   util: { getRunningQueriesThunk }

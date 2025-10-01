@@ -1,19 +1,23 @@
 import sumBy from 'lodash/sumBy';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import Tooltip from '@mui/material/Tooltip';
-import Container from '@mui/material/Container';
-import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
-import TableContainer from '@mui/material/TableContainer';
+import {
+  Tab,
+  Tabs,
+  Card,
+  Table,
+  Stack,
+  Button,
+  Divider,
+  Tooltip,
+  Container,
+  TableBody,
+  IconButton,
+  TableContainer,
+  useMediaQuery,
+  Box
+} from '@mui/material';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -21,16 +25,13 @@ import { RouterLink } from 'src/routes/components';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
-import { fTimestamp } from 'src/utils/format-time';
-// _mock
-import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
-import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { LoadingScreen } from 'src/components/loading-screen';
 import {
   useTable,
   getComparator,
@@ -43,7 +44,10 @@ import {
 } from 'src/components/table';
 //
 import { useTranslation } from 'react-i18next';
-import { useMediaQuery } from '@mui/material';
+import { enqueueSnackbar } from 'notistack';
+// Redux
+import { useGetSalesInvoicesQuery, useDeleteSalesInvoiceMutation } from 'src/redux/services/salesInvoicesApi';
+//
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -52,13 +56,13 @@ import InvoiceTableFiltersResult from '../invoice-table-filters-result';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'invoiceNumber', label: 'Cliente' },
-  { id: 'createDate', label: 'Creada' },
-  { id: 'dueDate', label: 'Vencimiento' },
-  { id: 'price', label: 'Valor' },
-  { id: 'price', label: 'Cobrado' },
-  { id: 'price', label: 'Por cobrar' },
-  // { id: 'sent', label: 'Sent', align: 'center' },
+  { id: 'number', label: 'Número' },
+  { id: 'customer', label: 'Cliente' },
+  { id: 'issue_date', label: 'Fecha emisión' },
+  { id: 'due_date', label: 'Vencimiento' },
+  { id: 'total_amount', label: 'Total' },
+  { id: 'paid_amount', label: 'Pagado' },
+  { id: 'balance_due', label: 'Por pagar' },
   { id: 'status', label: 'Estado' },
   { id: '' }
 ];
@@ -67,38 +71,56 @@ const defaultFilters = {
   name: '',
   service: [],
   status: 'all',
-  startDate: null,
-  endDate: null
+  startDate: null as Date | null,
+  endDate: null as Date | null
 };
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceListView() {
   const theme = useTheme();
-
   const settings = useSettingsContext();
-
   const router = useRouter();
-
-  const table = useTable({ defaultOrderBy: 'createDate' });
-
+  const table = useTable({ defaultOrderBy: 'issue_date' });
   const confirm = useBoolean(false);
-
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  const [tableData, setTableData] = useState(_invoices);
+  const { t } = useTranslation();
 
   const [filters, setFilters] = useState(defaultFilters);
+
+  // RTK Query hooks
+  const {
+    data: invoicesData,
+    isLoading,
+    isError,
+    refetch
+  } = useGetSalesInvoicesQuery({
+    page: table.page + 1,
+    limit: table.rowsPerPage,
+    status: filters.status === 'all' ? undefined : filters.status,
+    start_date: filters.startDate?.toISOString().split('T')[0],
+    end_date: filters.endDate?.toISOString().split('T')[0]
+  });
+
+  const [deleteSalesInvoice] = useDeleteSalesInvoiceMutation();
+
+  // Data processing
+  const tableData = useMemo(() => invoicesData?.invoices || [], [invoicesData]);
+  const totalCount = invoicesData?.total || 0;
 
   const dateError =
     filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError
-  });
+  const dataFiltered = useMemo(
+    () =>
+      applyFilter({
+        inputData: tableData,
+        comparator: getComparator(table.order, table.orderBy),
+        filters,
+        dateError
+      }),
+    [tableData, table.order, table.orderBy, filters, dateError]
+  );
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -115,22 +137,22 @@ export default function InvoiceListView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const getInvoiceLength = (status) => tableData.filter((item) => item.status === status).length;
+  const getInvoiceLength = (status: string) => tableData.filter((item) => item.status === status).length;
 
-  const getTotalAmount = (status) =>
+  const getTotalAmount = (status: string) =>
     sumBy(
       tableData.filter((item) => item.status === status),
-      'totalAmount'
+      (item) => parseFloat(item.total_amount)
     );
 
-  const getPercentByStatus = (status) => (getInvoiceLength(status) / tableData.length) * 100;
+  const getPercentByStatus = (status: string) => (getInvoiceLength(status) / tableData.length) * 100;
 
   const TABS = [
-    { value: 'all', label: 'Todas', color: 'default', count: tableData.length },
-    { value: 'paid', label: 'Pagadas', color: 'success', count: getInvoiceLength('paid') },
-    { value: 'pending', label: 'Pendientes', color: 'warning', count: getInvoiceLength('pending') },
-    { value: 'overdue', label: 'Vencidas', color: 'error', count: getInvoiceLength('overdue') }
-    // { value: 'draft', label: 'Draft', color: 'default', count: getInvoiceLength('draft') }
+    { value: 'all', label: 'Todas', color: 'default' as const, count: tableData.length },
+    { value: 'open', label: 'Abiertas', color: 'info' as const, count: getInvoiceLength('OPEN') },
+    { value: 'paid', label: 'Pagadas', color: 'success' as const, count: getInvoiceLength('PAID') },
+    { value: 'cancelled', label: 'Canceladas', color: 'error' as const, count: getInvoiceLength('CANCELLED') },
+    { value: 'draft', label: 'Borrador', color: 'warning' as const, count: getInvoiceLength('DRAFT') }
   ];
 
   const handleFilters = useCallback(
@@ -145,25 +167,34 @@ export default function InvoiceListView() {
   );
 
   const handleDeleteRow = useCallback(
-    (id) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id: string) => {
+      try {
+        await deleteSalesInvoice(id).unwrap();
+        enqueueSnackbar('Factura eliminada correctamente', { variant: 'success' });
+        table.onUpdatePageDeleteRow(dataInPage.length);
+      } catch (error) {
+        console.error('Error deleting invoice:', error);
+        enqueueSnackbar('Error al eliminar la factura', { variant: 'error' });
+      }
     },
-    [dataInPage.length, table, tableData]
+    [deleteSalesInvoice, table, dataInPage.length]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRows: tableData.length,
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      const deletePromises = table.selected.map((id) => deleteSalesInvoice(id).unwrap());
+      await Promise.all(deletePromises);
+      enqueueSnackbar('Facturas eliminadas correctamente', { variant: 'success' });
+      table.onUpdatePageDeleteRows({
+        totalRows: totalCount,
+        totalRowsInPage: dataInPage.length,
+        totalRowsFiltered: dataFiltered.length
+      });
+    } catch (error) {
+      console.error('Error deleting invoices:', error);
+      enqueueSnackbar('Error al eliminar las facturas', { variant: 'error' });
+    }
+  }, [deleteSalesInvoice, table, totalCount, dataInPage.length, dataFiltered.length]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -190,7 +221,10 @@ export default function InvoiceListView() {
     setFilters(defaultFilters);
   }, []);
 
-  const { t } = useTranslation();
+  // Show loading screen
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <>
@@ -215,7 +249,7 @@ export default function InvoiceListView() {
             <Button
               component={RouterLink}
               href={paths.dashboard.sales.newSale}
-              sx={isMobile && { width: '100%' }}
+              sx={isMobile ? { width: '100%' } : undefined}
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
@@ -233,7 +267,7 @@ export default function InvoiceListView() {
             mb: { xs: 3, md: 5 }
           }}
         >
-          <Scrollbar>
+          <Box sx={{ overflow: 'auto' }}>
             <Stack
               direction="row"
               divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
@@ -243,48 +277,39 @@ export default function InvoiceListView() {
                 title="Total"
                 total={tableData.length}
                 percent={100}
-                price={sumBy(tableData, 'totalAmount')}
+                price={sumBy(tableData, (item) => parseFloat(item.total_amount))}
                 icon="solar:bill-list-bold-duotone"
                 color={theme.palette.info.main}
               />
 
               <InvoiceAnalytic
-                title="Paid"
+                title="Abiertas"
+                total={getInvoiceLength('open')}
+                percent={getPercentByStatus('open')}
+                price={getTotalAmount('open')}
+                icon="solar:file-check-bold-duotone"
+                color={theme.palette.info.main}
+              />
+
+              <InvoiceAnalytic
+                title="Pagadas"
                 total={getInvoiceLength('paid')}
                 percent={getPercentByStatus('paid')}
                 price={getTotalAmount('paid')}
-                icon="solar:file-check-bold-duotone"
+                icon="solar:sort-by-time-bold-duotone"
                 color={theme.palette.success.main}
               />
 
               <InvoiceAnalytic
-                title="Pending"
-                total={getInvoiceLength('pending')}
-                percent={getPercentByStatus('pending')}
-                price={getTotalAmount('pending')}
-                icon="solar:sort-by-time-bold-duotone"
-                color={theme.palette.warning.main}
-              />
-
-              <InvoiceAnalytic
-                title="Overdue"
-                total={getInvoiceLength('overdue')}
-                percent={getPercentByStatus('overdue')}
-                price={getTotalAmount('overdue')}
+                title="Canceladas"
+                total={getInvoiceLength('cancelled')}
+                percent={getPercentByStatus('cancelled')}
+                price={getTotalAmount('cancelled')}
                 icon="solar:bell-bing-bold-duotone"
                 color={theme.palette.error.main}
               />
-
-              {/* <InvoiceAnalytic
-                title="Draft"
-                total={getInvoiceLength('draft')}
-                percent={getPercentByStatus('draft')}
-                price={getTotalAmount('draft')}
-                icon="solar:file-corrupted-bold-duotone"
-                color={theme.palette.text.secondary}
-              /> */}
             </Stack>
-          </Scrollbar>
+          </Box>
         </Card>
 
         <Card>
@@ -319,7 +344,7 @@ export default function InvoiceListView() {
             onFilters={handleFilters}
             //
             dateError={dateError}
-            serviceOptions={INVOICE_SERVICE_OPTIONS.map((option) => option.name)}
+            serviceOptions={[]}
           />
 
           {canReset && (
@@ -374,7 +399,7 @@ export default function InvoiceListView() {
               }
             />
 
-            <Scrollbar>
+            <Box sx={{ overflow: 'auto' }}>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
                 <TableHeadCustom
                   order={table.order}
@@ -414,7 +439,7 @@ export default function InvoiceListView() {
                   <TableNoData notFound={notFound} />
                 </TableBody>
               </Table>
-            </Scrollbar>
+            </Box>
           </TableContainer>
 
           <TablePaginationCustom
@@ -458,7 +483,20 @@ export default function InvoiceListView() {
 
 // ----------------------------------------------------------------------
 
-function applyFilter({ inputData, comparator, filters, dateError }) {
+interface FilterProps {
+  inputData: any[];
+  comparator: (a: any, b: any) => number;
+  filters: {
+    name: string;
+    service: string[];
+    status: string;
+    startDate: Date | null;
+    endDate: Date | null;
+  };
+  dateError: boolean;
+}
+
+function applyFilter({ inputData, comparator, filters, dateError }: FilterProps) {
   const { name, status, service, startDate, endDate } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
@@ -474,8 +512,8 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
   if (name) {
     inputData = inputData.filter(
       (invoice) =>
-        invoice.invoiceNumber.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        invoice.invoiceTo.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+        invoice.number.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
+        (invoice.customer?.name && invoice.customer.name.toLowerCase().indexOf(name.toLowerCase()) !== -1)
     );
   }
 
@@ -484,17 +522,14 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
   }
 
   if (service.length) {
-    inputData = inputData.filter((invoice) => invoice.items.some((filterItem) => service.includes(filterItem.service)));
+    // For now, we'll skip service filtering since the API structure is different
+    // inputData = inputData.filter((invoice) => invoice.line_items?.some((item) => service.includes(item.name)));
   }
 
-  if (!dateError) {
-    if (startDate && endDate) {
-      inputData = inputData.filter(
-        (invoice) =>
-          fTimestamp(invoice.createDate) >= fTimestamp(startDate) &&
-          fTimestamp(invoice.createDate) <= fTimestamp(endDate)
-      );
-    }
+  if (!dateError && startDate && endDate) {
+    inputData = inputData.filter(
+      (invoice) => new Date(invoice.issue_date) >= startDate && new Date(invoice.issue_date) <= endDate
+    );
   }
 
   return inputData;

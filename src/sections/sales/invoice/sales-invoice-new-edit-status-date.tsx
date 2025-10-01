@@ -5,22 +5,14 @@ import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
 // components
 import { RHFSelect, RHFTextField } from 'src/components/hook-form';
-import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
-import { useGetNextInvoiceNumberQuery } from 'src/redux/services/invoicesApi';
 import { useEffect } from 'react';
 
 // ----------------------------------------------------------------------
 
-export default function InvoiceNewEditStatusDate() {
+export default function SalesInvoiceNewEditStatusDate() {
   const { control, watch, setValue } = useFormContext();
 
   const values = watch();
-
-  // Get PDVs and next invoice number
-  const { data: pdvs = [] } = useGetPDVsQuery();
-  const { data: nextNumberData } = useGetNextInvoiceNumberQuery(values.pdvId || '', {
-    skip: !values.pdvId
-  });
 
   useEffect(() => {
     if (values.method === 'Contado') {
@@ -30,30 +22,8 @@ export default function InvoiceNewEditStatusDate() {
     }
   }, [values.method, setValue]);
 
-  // Update invoice number when PDV changes
-  useEffect(() => {
-    if (nextNumberData?.number) {
-      setValue('invoiceNumber', nextNumberData.number);
-    }
-  }, [nextNumberData, setValue]);
-
   return (
     <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ p: 3, bgcolor: 'background.neutral' }}>
-      {/* PDV Selection */}
-      <RHFSelect
-        fullWidth
-        name="pdvId"
-        label="Punto de Venta"
-        InputLabelProps={{ shrink: true }}
-        PaperPropsSx={{ textTransform: 'capitalize' }}
-      >
-        {pdvs.map((pdv) => (
-          <MenuItem key={pdv.id} value={pdv.id}>
-            {pdv.name}
-          </MenuItem>
-        ))}
-      </RHFSelect>
-
       <RHFTextField disabled name="invoiceNumber" label="Número de factura" value={values.invoiceNumber} />
 
       <RHFSelect
@@ -90,6 +60,7 @@ export default function InvoiceNewEditStatusDate() {
           />
         )}
       />
+
       {values.method === 'Credito' && (
         <>
           {/* Plazo de pago */}
@@ -129,6 +100,7 @@ export default function InvoiceNewEditStatusDate() {
               </MenuItem>
             ))}
           </RHFSelect>
+
           <Controller
             name="dueDate"
             control={control}
@@ -151,6 +123,7 @@ export default function InvoiceNewEditStatusDate() {
           />
         </>
       )}
+
       {values.method === 'Contado' && (
         <RHFSelect
           fullWidth
