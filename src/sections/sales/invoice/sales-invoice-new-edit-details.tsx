@@ -11,6 +11,8 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import Autocomplete from '@mui/material/Autocomplete';
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { IconButton, Tooltip } from '@mui/material';
 // utils
 import { fCurrency } from 'src/utils/format-number';
@@ -47,7 +49,8 @@ export default function SalesInvoiceNewEditDetails() {
 
   const { data: pdvs = [], isLoading: pdvsLoading, error: pdvsError } = useGetPDVsQuery();
 
-  const [PDV, setPDV] = useState('');
+  const [globalPDV, setGlobalPDV] = useState('');
+  const [useGlobalPDV, setUseGlobalPDV] = useState(false);
 
   // Ensure products and PDVs are arrays for options using useMemo
   const productsOptions = useMemo(() => {
@@ -77,7 +80,23 @@ export default function SalesInvoiceNewEditDetails() {
     setValue('totalAmount', totalAmount);
   }, [setValue, totalAmount]);
 
+  // Apply global PDV to all products when enabled
+  useEffect(() => {
+    if (useGlobalPDV && globalPDV) {
+      values.items?.forEach((_, index) => {
+        setValue(`items[${index}].pdv_id`, globalPDV);
+      });
+    }
+  }, [useGlobalPDV, globalPDV, values.items, setValue]);
+
   const handleAdd = () => {
+    let defaultPDV = '';
+    if (useGlobalPDV) {
+      defaultPDV = globalPDV;
+    } else if (PDVSoptions.length === 1) {
+      defaultPDV = PDVSoptions[0].id;
+    }
+
     append({
       title: '',
       description: '',
@@ -86,7 +105,8 @@ export default function SalesInvoiceNewEditDetails() {
       price: 0,
       total: 0,
       taxes: 0,
-      product_id: ''
+      product_id: '',
+      pdv_id: defaultPDV
     });
   };
 
@@ -186,35 +206,72 @@ export default function SalesInvoiceNewEditDetails() {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Dropdown para escoger punto de venta */}
+      {/* Configuración de PDV global */}
       <Stack divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} spacing={2}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} sx={{ maxWidth: '320px' }}>
-          <RHFSelect
-            name="pdv_id"
-            size="small"
-            label="Punto de venta"
-            value={PDV}
-            InputLabelProps={{ shrink: true }}
-            PaperPropsSx={{ textTransform: 'capitalize' }}
-            onChange={(event) => setPDV(event.target.value)}
-            sx={{
-              minWidth: { md: '350px' },
-              marginBottom: 2,
-              maxWidth: { md: '350px' }
-            }}
-          >
-            {PDVSoptions.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.name}
-              </MenuItem>
-            ))}
-          </RHFSelect>
-          <Tooltip title="Selecciona el punto de venta">
-            <IconButton size="small" sx={{ width: '38px', height: '38px' }}>
-              <Iconify icon="mdi:help-circle-outline" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
+        {PDVSoptions.length > 1 && (
+          <Stack spacing={2}>
+            <Typography variant="h6" sx={{ color: 'text.disabled' }}>
+              Puntos De Venta Para Cada Producto:
+            </Typography>
+
+            <FormControlLabel
+              control={<Switch checked={useGlobalPDV} onChange={(event) => setUseGlobalPDV(event.target.checked)} />}
+              label="Usar el mismo PDV para todos los productos"
+            />
+
+            {useGlobalPDV && (
+              <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} sx={{ maxWidth: '400px' }}>
+                <RHFSelect
+                  name="global_pdv_id"
+                  size="small"
+                  label="Punto de venta global"
+                  value={globalPDV}
+                  InputLabelProps={{ shrink: true }}
+                  PaperPropsSx={{ textTransform: 'capitalize' }}
+                  onChange={(event) => setGlobalPDV(event.target.value)}
+                  sx={{
+                    minWidth: { md: '350px' },
+                    maxWidth: { md: '350px' }
+                  }}
+                >
+                  {PDVSoptions.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+                <Tooltip title="Aplica este PDV a todos los productos">
+                  <IconButton size="small" sx={{ width: '38px', height: '38px' }}>
+                    <Iconify icon="mdi:help-circle-outline" />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+            )}
+          </Stack>
+        )}
+
+        {PDVSoptions.length === 1 && (
+          <Stack spacing={2}>
+            <Typography variant="h6" sx={{ color: 'text.disabled' }}>
+              Punto De Venta (Único):
+            </Typography>
+            <Box
+              sx={{
+                p: 2,
+                backgroundColor: 'background.neutral',
+                borderRadius: 1,
+                maxWidth: '400px'
+              }}
+            >
+              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                {PDVSoptions[0].name}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Este es el único punto de venta disponible y se aplicará automáticamente a todos los productos.
+              </Typography>
+            </Box>
+          </Stack>
+        )}
 
         <Typography variant="h6" sx={{ color: 'text.disabled', mb: 3 }}>
           Productos:
@@ -271,6 +328,42 @@ export default function SalesInvoiceNewEditDetails() {
                 InputLabelProps={{ shrink: true }}
                 sx={{ maxWidth: { md: 120 } }}
               />
+
+              {/* Campo PDV individual - solo si hay múltiples PDVs y no se usa global */}
+              {PDVSoptions.length > 1 && !useGlobalPDV && (
+                <RHFSelect
+                  name={`items[${index}].pdv_id`}
+                  size="small"
+                  label="PDV"
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ minWidth: { md: 120 } }}
+                >
+                  {PDVSoptions.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </RHFSelect>
+              )}
+
+              {/* Mostrar PDV estático si solo hay uno */}
+              {PDVSoptions.length === 1 && (
+                <Box
+                  sx={{
+                    minWidth: { md: 120 },
+                    p: 1,
+                    backgroundColor: 'background.neutral',
+                    borderRadius: 0.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    height: '40px'
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    {PDVSoptions[0].name}
+                  </Typography>
+                </Box>
+              )}
 
               <RHFTextField
                 size="small"

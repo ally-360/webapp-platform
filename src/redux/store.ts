@@ -14,6 +14,10 @@ import { categoriesApi } from './services/categoriesApi';
 import { brandsApi } from './services/brandsApi';
 import { productsApi } from './services/productsApi';
 import { catalogApi } from './services/catalogApi';
+import { contactsApi } from './services/contactsApi';
+import { invoicesApi } from './services/invoicesApi';
+import { salesInvoicesApi } from './services/salesInvoicesApi';
+import { pdvsApi } from './services/pdvsApi';
 import authReducer from './slices/authSlice';
 
 export const store = configureStore({
@@ -25,6 +29,10 @@ export const store = configureStore({
     [brandsApi.reducerPath]: brandsApi.reducer,
     [productsApi.reducerPath]: productsApi.reducer,
     [catalogApi.reducerPath]: catalogApi.reducer,
+    [contactsApi.reducerPath]: contactsApi.reducer,
+    [invoicesApi.reducerPath]: invoicesApi.reducer,
+    [salesInvoicesApi.reducerPath]: salesInvoicesApi.reducer,
+    [pdvsApi.reducerPath]: pdvsApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -42,7 +50,11 @@ export const store = configureStore({
       categoriesApi.middleware,
       brandsApi.middleware,
       productsApi.middleware,
-      catalogApi.middleware
+      catalogApi.middleware,
+      contactsApi.middleware,
+      invoicesApi.middleware,
+      salesInvoicesApi.middleware,
+      pdvsApi.middleware
     )
 });
 

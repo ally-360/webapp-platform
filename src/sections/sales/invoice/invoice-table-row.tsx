@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
+import { useCallback, useState } from 'react';
+import { pdf } from '@react-pdf/renderer';
 // @mui
 import Link from '@mui/material/Link';
 import Button from '@mui/material/Button';
@@ -12,6 +14,7 @@ import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import ListItemText from '@mui/material/ListItemText';
+import CircularProgress from '@mui/material/CircularProgress';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
@@ -21,15 +24,79 @@ import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
+import { useSnackbar } from 'src/components/snackbar';
+//
+import InvoicePDF from './invoice-pdf';
+import InvoicePaymentDialog from './invoice-payment-dialog';
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditRow, onDeleteRow }) {
-  const { sent, invoiceNumber, createDate, dueDate, status, invoiceTo, totalAmount } = row;
+  const { number, issue_date, due_date, status, customer, total_amount, paid_amount, balance_due } = row;
 
-  const confirm = useBoolean();
-
+  const confirm = useBoolean(false);
+  const paymentDialog = useBoolean(false);
   const popover = usePopover();
+  const { enqueueSnackbar } = useSnackbar();
+  const [isSending, setIsSending] = useState(false);
+
+  const canAddPayment = status === 'OPEN' && parseFloat(balance_due || '0') > 0;
+
+  const handleDownloadPdf = useCallback(async () => {
+    try {
+      const blob = await pdf(<InvoicePDF invoice={row} currentStatus={status} />).toBlob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `factura-${number}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      enqueueSnackbar('PDF descargado exitosamente', { variant: 'success' });
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      enqueueSnackbar('Error al descargar el PDF', { variant: 'error' });
+    }
+  }, [row, status, number, enqueueSnackbar]);
+
+  const handleSendEmail = useCallback(async () => {
+    setIsSending(true);
+    try {
+      // Generar el PDF como blob
+      const pdfBlob = await pdf(<InvoicePDF invoice={row} currentStatus={status} />).toBlob();
+
+      const formData = new FormData();
+      formData.append('to_email', customer?.email || '');
+      formData.append('subject', `Factura ${number}`);
+      formData.append('message', 'Estimado cliente, adjunto encontrará su factura. Gracias por su compra.');
+      formData.append('pdf_file', pdfBlob, `factura-${number}.pdf`);
+
+      // Usar fetch directamente para enviar FormData
+      const token = localStorage.getItem('accessToken');
+      const companyId = localStorage.getItem('companyId');
+
+      const response = await fetch(`${(import.meta as any).env.VITE_HOST_API}/invoices/${row.id}/send-email`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'X-Company-ID': companyId || ''
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al enviar el email');
+      }
+
+      enqueueSnackbar('Email con PDF enviado exitosamente', { variant: 'success' });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      enqueueSnackbar('Error al enviar el email con PDF', { variant: 'error' });
+    } finally {
+      setIsSending(false);
+    }
+  }, [row, status, customer?.email, number, enqueueSnackbar, setIsSending]);
 
   return (
     <>
@@ -38,21 +105,27 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           <Checkbox checked={selected} onClick={onSelectRow} />
         </TableCell>
 
+        <TableCell>
+          <Typography variant="body2" noWrap>
+            {number}
+          </Typography>
+        </TableCell>
+
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={invoiceTo.name} sx={{ mr: 2 }}>
-            {invoiceTo.name.charAt(0).toUpperCase()}
+          <Avatar alt={customer?.name || 'Cliente'} sx={{ mr: 2 }}>
+            {(customer?.name || 'C').charAt(0).toUpperCase()}
           </Avatar>
 
           <ListItemText
             disableTypography
             primary={
               <Typography variant="body2" noWrap>
-                {invoiceTo.name}
+                {customer?.name || 'Sin cliente'}
               </Typography>
             }
             secondary={
               <Link noWrap variant="body2" onClick={onViewRow} sx={{ color: 'text.disabled', cursor: 'pointer' }}>
-                {invoiceNumber}
+                {customer?.email || number}
               </Link>
             }
           />
@@ -60,8 +133,8 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
 
         <TableCell>
           <ListItemText
-            primary={format(new Date(createDate), 'dd MMM yyyy')}
-            secondary={format(new Date(createDate), 'p')}
+            primary={format(new Date(issue_date), 'dd MMM yyyy')}
+            secondary={format(new Date(issue_date), 'p')}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
             secondaryTypographyProps={{
               mt: 0.5,
@@ -73,8 +146,8 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
 
         <TableCell>
           <ListItemText
-            primary={format(new Date(dueDate), 'dd MMM yyyy')}
-            secondary={format(new Date(dueDate), 'p')}
+            primary={format(new Date(due_date), 'dd MMM yyyy')}
+            secondary={format(new Date(due_date), 'p')}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
             secondaryTypographyProps={{
               mt: 0.5,
@@ -84,11 +157,11 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           />
         </TableCell>
 
-        <TableCell>{fCurrency(totalAmount)}</TableCell>
-        {/* Cobrado */}
-        <TableCell>{fCurrency(totalAmount)}</TableCell>
-        {/* Por cobrar */}
-        <TableCell>{fCurrency(totalAmount)}</TableCell>
+        <TableCell>{fCurrency(parseFloat(total_amount))}</TableCell>
+        {/* Pagado */}
+        <TableCell>{fCurrency(parseFloat(paid_amount))}</TableCell>
+        {/* Por pagar */}
+        <TableCell>{fCurrency(parseFloat(balance_due))}</TableCell>
 
         {/* <TableCell align="center">{sent}</TableCell> */}
 
@@ -96,13 +169,17 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           <Label
             variant="soft"
             color={
-              (status === 'paid' && 'success') ||
-              (status === 'pending' && 'warning') ||
-              (status === 'overdue' && 'error') ||
+              (status === 'PAID' && 'success') ||
+              (status === 'OPEN' && 'info') ||
+              (status === 'DRAFT' && 'warning') ||
+              (status === 'VOID' && 'error') ||
               'default'
             }
           >
-            {status}
+            {status === 'PAID' && 'Pagada'}
+            {status === 'OPEN' && 'Abierta'}
+            {status === 'DRAFT' && 'Borrador'}
+            {status === 'VOID' && 'Cancelada'}
           </Label>
         </TableCell>
 
@@ -121,7 +198,7 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           }}
         >
           <Iconify icon="solar:eye-bold" />
-          View
+          Ver
         </MenuItem>
 
         <MenuItem
@@ -131,7 +208,42 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           }}
         >
           <Iconify icon="solar:pen-bold" />
-          Edit
+          Editar
+        </MenuItem>
+
+        {canAddPayment && (
+          <MenuItem
+            onClick={() => {
+              paymentDialog.onTrue();
+              popover.onClose();
+            }}
+          >
+            <Iconify icon="solar:wallet-money-bold" />
+            Registrar Pago
+          </MenuItem>
+        )}
+
+        <Divider sx={{ borderStyle: 'dashed' }} />
+
+        <MenuItem
+          onClick={() => {
+            handleDownloadPdf();
+            popover.onClose();
+          }}
+        >
+          <Iconify icon="eva:cloud-download-fill" />
+          Descargar PDF
+        </MenuItem>
+
+        <MenuItem
+          onClick={() => {
+            handleSendEmail();
+            popover.onClose();
+          }}
+          disabled={isSending || !customer?.email}
+        >
+          {isSending ? <CircularProgress size={16} /> : <Iconify icon="iconamoon:send-fill" />}
+          Enviar Email
         </MenuItem>
 
         <Divider sx={{ borderStyle: 'dashed' }} />
@@ -144,21 +256,30 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
           sx={{ color: 'error.main' }}
         >
           <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
+          Cancelar
         </MenuItem>
       </CustomPopover>
 
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
-        title="Delete"
-        content="Are you sure want to delete?"
+        title="Cancelar Factura"
+        content={
+          <>
+            ¿Está seguro de que desea cancelar esta factura?
+            <br />
+            <br />
+            Las facturas canceladas no se pueden revertir y cambiarán su estado a CANCELLED.
+          </>
+        }
         action={
           <Button variant="contained" color="error" onClick={onDeleteRow}>
-            Delete
+            Cancelar Factura
           </Button>
         }
       />
+
+      <InvoicePaymentDialog open={paymentDialog.value} onClose={paymentDialog.onFalse} invoice={row} />
     </>
   );
 }

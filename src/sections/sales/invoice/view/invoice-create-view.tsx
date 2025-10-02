@@ -7,7 +7,7 @@ import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 //
 import { useTranslation } from 'react-i18next';
-import InvoiceNewEditForm from 'src/sections/invoice/invoice-new-edit-form';
+import SalesInvoiceNewEditForm from '../sales-invoice-new-edit-form';
 
 // ----------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ export default function InvoiceCreateView() {
         }}
       />
 
-      <InvoiceNewEditForm />
+      <SalesInvoiceNewEditForm />
     </Container>
   );
 }

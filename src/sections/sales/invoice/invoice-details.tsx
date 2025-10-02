@@ -19,11 +19,14 @@ import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
 // _mock
 import { INVOICE_STATUS_OPTIONS } from 'src/_mock';
+// hooks
+import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import Label from 'src/components/label';
-import Scrollbar from 'src/components/scrollbar';
 //
 import InvoiceToolbar from './invoice-toolbar';
+import InvoicePaymentHistory from './invoice-payment-history';
+import InvoicePaymentDialog from './invoice-payment-dialog';
 
 // ----------------------------------------------------------------------
 
@@ -39,11 +42,23 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 export default function InvoiceDetails({ invoice }) {
-  const [currentStatus, setCurrentStatus] = useState(invoice.status);
+  const [currentStatus, setCurrentStatus] = useState(invoice?.status || 'DRAFT');
+  const paymentDialog = useBoolean(false);
 
   const handleChangeStatus = useCallback((event) => {
     setCurrentStatus(event.target.value);
   }, []);
+
+  // Return loading state if invoice is not loaded
+  if (!invoice) {
+    return (
+      <Card sx={{ pt: 5, px: 5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+          <Typography>Cargando factura...</Typography>
+        </Box>
+      </Card>
+    );
+  }
 
   const renderTotal = (
     <>
@@ -55,37 +70,37 @@ export default function InvoiceDetails({ invoice }) {
         </TableCell>
         <TableCell width={120} sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
-          {fCurrency(invoice.subTotal)}
+          {fCurrency(parseFloat(invoice.subtotal || '0'))}
         </TableCell>
       </StyledTableRow>
 
       <StyledTableRow>
         <TableCell colSpan={3} />
-        <TableCell sx={{ color: 'text.secondary' }}>Shipping</TableCell>
-        <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          {fCurrency(-invoice.shipping)}
-        </TableCell>
-      </StyledTableRow>
-
-      <StyledTableRow>
-        <TableCell colSpan={3} />
-        <TableCell sx={{ color: 'text.secondary' }}>Discount</TableCell>
-        <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          {fCurrency(-invoice.discount)}
-        </TableCell>
-      </StyledTableRow>
-
-      <StyledTableRow>
-        <TableCell colSpan={3} />
-        <TableCell sx={{ color: 'text.secondary' }}>Taxes</TableCell>
-        <TableCell width={120}>{fCurrency(invoice.taxes)}</TableCell>
+        <TableCell sx={{ color: 'text.secondary' }}>Impuestos</TableCell>
+        <TableCell width={120}>{fCurrency(parseFloat(invoice.taxes_total || '0'))}</TableCell>
       </StyledTableRow>
 
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Total</TableCell>
         <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          {fCurrency(invoice.totalAmount)}
+          {fCurrency(parseFloat(invoice.total_amount || '0'))}
+        </TableCell>
+      </StyledTableRow>
+
+      <StyledTableRow>
+        <TableCell colSpan={3} />
+        <TableCell sx={{ color: 'text.secondary' }}>Pagado</TableCell>
+        <TableCell width={120} sx={{ color: 'success.main', typography: 'body2' }}>
+          {fCurrency(parseFloat(invoice.paid_amount || '0'))}
+        </TableCell>
+      </StyledTableRow>
+
+      <StyledTableRow>
+        <TableCell colSpan={3} />
+        <TableCell sx={{ typography: 'subtitle1', color: 'error.main' }}>Saldo Pendiente</TableCell>
+        <TableCell width={140} sx={{ typography: 'subtitle1', color: 'error.main' }}>
+          {fCurrency(parseFloat(invoice.balance_due || '0'))}
         </TableCell>
       </StyledTableRow>
     </>
@@ -94,15 +109,13 @@ export default function InvoiceDetails({ invoice }) {
   const renderFooter = (
     <Grid container>
       <Grid xs={12} md={9} sx={{ py: 3 }}>
-        <Typography variant="subtitle2">NOTES</Typography>
+        <Typography variant="subtitle2">NOTAS</Typography>
 
-        <Typography variant="body2">
-          We appreciate your business. Should you need us to add VAT or extra notes let us know!
-        </Typography>
+        <Typography variant="body2">{invoice.notes || 'Gracias por su compra.'}</Typography>
       </Grid>
 
       <Grid xs={12} md={3} sx={{ py: 3, textAlign: 'right' }}>
-        <Typography variant="subtitle2">Have a Question?</Typography>
+        <Typography variant="subtitle2">¿Tienes alguna pregunta?</Typography>
 
         <Typography variant="body2">soporte@ally360.co</Typography>
       </Grid>
@@ -111,49 +124,49 @@ export default function InvoiceDetails({ invoice }) {
 
   const renderList = (
     <TableContainer sx={{ overflow: 'unset', mt: 5 }}>
-      <Scrollbar>
+      <Box sx={{ overflow: 'auto' }}>
         <Table sx={{ minWidth: 960 }}>
           <TableHead>
             <TableRow>
               <TableCell width={40}>#</TableCell>
 
-              <TableCell sx={{ typography: 'subtitle2' }}>Description</TableCell>
+              <TableCell sx={{ typography: 'subtitle2' }}>Descripción</TableCell>
 
-              <TableCell>Qty</TableCell>
+              <TableCell>Cant.</TableCell>
 
-              <TableCell align="right">Unit price</TableCell>
+              <TableCell align="right">Precio Unit.</TableCell>
 
               <TableCell align="right">Total</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {invoice.items.map((row, index) => (
-              <TableRow key={index}>
+            {(invoice.line_items || []).map((row, index) => (
+              <TableRow key={row.id || index}>
                 <TableCell>{index + 1}</TableCell>
 
                 <TableCell>
                   <Box sx={{ maxWidth: 560 }}>
-                    <Typography variant="subtitle2">{row.title}</Typography>
+                    <Typography variant="subtitle2">{row.name}</Typography>
 
                     <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                      {row.description}
+                      {row.sku}
                     </Typography>
                   </Box>
                 </TableCell>
 
                 <TableCell>{row.quantity}</TableCell>
 
-                <TableCell align="right">{fCurrency(row.price)}</TableCell>
+                <TableCell align="right">{fCurrency(parseFloat(row.unit_price))}</TableCell>
 
-                <TableCell align="right">{fCurrency(row.price * row.quantity)}</TableCell>
+                <TableCell align="right">{fCurrency(parseFloat(row.line_total))}</TableCell>
               </TableRow>
             ))}
 
             {renderTotal}
           </TableBody>
         </Table>
-      </Scrollbar>
+      </Box>
     </TableContainer>
   );
 
@@ -164,6 +177,7 @@ export default function InvoiceDetails({ invoice }) {
         currentStatus={currentStatus || ''}
         onChangeStatus={handleChangeStatus}
         statusOptions={INVOICE_STATUS_OPTIONS}
+        onAddPayment={paymentDialog.onTrue}
       />
 
       <Card sx={{ pt: 5, px: 5 }}>
@@ -182,54 +196,46 @@ export default function InvoiceDetails({ invoice }) {
             <Label
               variant="soft"
               color={
-                (currentStatus === 'paid' && 'success') ||
-                (currentStatus === 'pending' && 'warning') ||
-                (currentStatus === 'overdue' && 'error') ||
+                (currentStatus === 'PAID' && 'success') ||
+                (currentStatus === 'OPEN' && 'warning') ||
+                (currentStatus === 'VOID' && 'error') ||
+                (currentStatus === 'DRAFT' && 'info') ||
                 'default'
               }
             >
               {currentStatus}
             </Label>
 
-            <Typography variant="h6">{invoice.invoiceNumber}</Typography>
+            <Typography variant="h6">{invoice.number}</Typography>
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Invoice From
+              Cliente
             </Typography>
-            {invoice.invoiceFrom.name}
+            {invoice.customer?.name}
             <br />
-            {invoice.invoiceFrom.fullAddress}
+            {invoice.customer?.email}
             <br />
-            Phone: {invoice.invoiceFrom.phoneNumber}
+            {invoice.customer?.id_type}: {invoice.customer?.id_number}
             <br />
+            {invoice.customer?.billing_address?.address}
+            <br />
+            {invoice.customer?.billing_address?.city}, {invoice.customer?.billing_address?.country}
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Invoice To
+              Fecha de Creación
             </Typography>
-            {invoice.invoiceTo.name}
-            <br />
-            {invoice.invoiceTo.fullAddress}
-            <br />
-            Phone: {invoice.invoiceTo.phoneNumber}
-            <br />
+            {fDate(invoice.issue_date, 'dd/MM/yyyy')}
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Date Create
+              Fecha de Vencimiento
             </Typography>
-            {fDate(invoice.createDate)}
-          </Stack>
-
-          <Stack sx={{ typography: 'body2' }}>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Due Date
-            </Typography>
-            {fDate(invoice.dueDate)}
+            {fDate(invoice.due_date, 'dd/MM/yyyy')}
           </Stack>
         </Box>
 
@@ -239,6 +245,14 @@ export default function InvoiceDetails({ invoice }) {
 
         {renderFooter}
       </Card>
+
+      {/* Payment History */}
+      <Box sx={{ mt: 3 }}>
+        <InvoicePaymentHistory invoiceId={invoice.id} />
+      </Box>
+
+      {/* Payment Dialog */}
+      <InvoicePaymentDialog open={paymentDialog.value} onClose={paymentDialog.onFalse} invoice={invoice} />
     </>
   );
 }

@@ -105,7 +105,7 @@ function mapContactToFormValues(contact: any) {
 
   // Extract type: convert array back to number
   const typeNum = contact.type?.includes('provider') ? 2 : 1;
-  
+
   // Extract identity info
   const typeDocument = contact.id_type === 'NIT' ? 2 : 1;
   const typePerson = contact.person_type === 'juridica' || contact.person_type === 'JURIDICA' ? 2 : 1;
@@ -113,7 +113,7 @@ function mapContactToFormValues(contact: any) {
   // Parse name for natural persons (might have lastname)
   let name = contact.name || '';
   let lastname = '';
-  
+
   if (typeDocument === 1 || (typeDocument === 2 && typePerson === 1)) {
     // Natural person - try to split name
     const nameParts = (contact.name || '').split(' ');
@@ -233,7 +233,7 @@ export default function UserNewEditForm({ currentUser }) {
     try {
       // Remove department
       const { departamento: _departamento, ...rest } = data;
-      
+
       if (currentUser?.id) {
         // Update existing contact
         await updateContact({
@@ -244,7 +244,7 @@ export default function UserNewEditForm({ currentUser }) {
         // Create new contact
         await createContact(mapFormToContactPayload(rest)).unwrap();
       }
-      
+
       reset();
       enqueueSnackbar(
         currentUser ? 'Se ha actualizado correctamente el contacto!' : 'Se ha creado correctamente el contacto!'

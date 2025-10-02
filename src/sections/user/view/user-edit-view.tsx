@@ -16,11 +16,11 @@ import UserNewEditForm from '../user-new-edit-form';
 
 export default function UserEditView({ id }) {
   const settings = useSettingsContext();
-  
+
   const { data: currentUser, isLoading, error } = useGetContactByIdQuery(id || '', { skip: !id });
 
   if (isLoading) return <LoadingScreen />;
-  
+
   if (error || !currentUser) {
     return (
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>

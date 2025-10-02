@@ -105,9 +105,10 @@ export const {
 // Actions
 
 export const getAllProducts =
-  ({ page = 0, pageSize: limit = 25, companyId }: { page?: number; pageSize?: number; companyId?: string }) =>
+  (params: { page?: number; pageSize?: number; companyId?: string } = {}) =>
   async (dispatch: Dispatch) => {
     try {
+      const { page = 0, pageSize: limit = 25, companyId } = params;
       dispatch(productSlice.actions.startLoading());
 
       // 🎯 Usar nueva API unificada (funciona con mock y real API)

@@ -148,10 +148,10 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
   };
 
   // Helper function to get status for API
-  const getStatusForAPI = (status: string): 'draft' | 'open' | undefined => {
-    if (status === 'borrador') return 'draft';
-    if (status === 'enviada' || status === 'pagada' || status === 'vencida') return 'open';
-    return 'draft';
+  const getStatusForAPI = (status: string): 'DRAFT' | 'OPEN' | undefined => {
+    if (status === 'borrador') return 'DRAFT';
+    if (status === 'enviada' || status === 'pagada' || status === 'vencida') return 'OPEN';
+    return 'DRAFT';
   };
 
   const validateFormData = (data: any) => {
@@ -198,7 +198,7 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
     const transformedData = {
       customer_id: data.invoiceTo?.id?.toString() || '',
       pdv_id: data.global_pdv_id || data.items?.[0]?.pdv_id || (pdvs.length === 1 ? pdvs[0].id : ''),
-      type: 'sale' as const,
+      type: 'SALE' as const,
       issue_date: formatDateForAPI(data.createDate),
       due_date: formatDateForAPI(data.dueDate),
       status: getStatusForAPI(data.status),
@@ -226,7 +226,7 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
 
       try {
         const invoiceData = transformFormDataToApi(data);
-        invoiceData.status = 'draft';
+        invoiceData.status = 'DRAFT';
 
         console.log('📤 Sending draft invoice data:', invoiceData);
 
@@ -273,7 +273,7 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
 
       try {
         const invoiceData = transformFormDataToApi(data);
-        invoiceData.status = 'open';
+        invoiceData.status = 'OPEN';
 
         console.log('📤 Sending open invoice data:', invoiceData);
 

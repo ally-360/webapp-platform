@@ -25,12 +25,14 @@ import InvoicePDF from './invoice-pdf';
 
 // ----------------------------------------------------------------------
 
-export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus }) {
+export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus, onAddPayment }) {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
 
   const view = useBoolean(false);
   const [isSending, setIsSending] = useState(false);
+
+  const canAddPayment = invoice?.status === 'OPEN' && parseFloat(invoice?.balance_due || '0') > 0;
 
   const handleEdit = useCallback(() => {
     router.push(paths.dashboard.sales.edit(invoice.id));
@@ -65,13 +67,13 @@ export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, 
       formData.append('to_email', invoice.customer?.email || '');
       formData.append('subject', `Factura ${invoice.number}`);
       formData.append('message', 'Estimado cliente, adjunto encontrará su factura. Gracias por su compra.');
-      formData.append('attachment', pdfBlob, `factura-${invoice.number}.pdf`);
+      formData.append('pdf_file', pdfBlob, `factura-${invoice.number}.pdf`);
 
       // Usar fetch directamente para enviar FormData
       const token = localStorage.getItem('accessToken');
       const companyId = localStorage.getItem('companyId');
 
-      const response = await fetch(`${(import.meta as any).env.VITE_HOST_API}/invoices/${invoice.id}/email`, {
+      const response = await fetch(`${(import.meta as any).env.VITE_HOST_API}/invoices/${invoice.id}/send-email`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -137,7 +139,26 @@ export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, 
               <Iconify icon="solar:share-bold" />
             </IconButton>
           </Tooltip>
+
+          {canAddPayment && (
+            <Tooltip title="Registrar Pago">
+              <IconButton onClick={onAddPayment} color="success">
+                <Iconify icon="solar:wallet-money-bold" />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
+
+        {canAddPayment && (
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<Iconify icon="solar:wallet-money-bold" />}
+            onClick={onAddPayment}
+          >
+            Registrar Pago
+          </Button>
+        )}
 
         <TextField
           fullWidth
@@ -184,5 +205,6 @@ InvoiceToolbar.propTypes = {
   currentStatus: PropTypes.string,
   invoice: PropTypes.object,
   onChangeStatus: PropTypes.func,
+  onAddPayment: PropTypes.func,
   statusOptions: PropTypes.array
 };
