@@ -24,31 +24,55 @@ import InvoiceNewEditStatusDate from './invoice-new-edit-status-date';
 
 // ----------------------------------------------------------------------
 
-const NewBillSchema = Yup.object().shape({
-  supplier_id: Yup.string().required('El proveedor es requerido'),
-  pdv_id: Yup.string().required('El punto de venta es requerido'),
-  issue_date: Yup.date().required('La fecha de emisión es requerida'),
-  due_date: Yup.date()
-    .required('La fecha de vencimiento es requerida')
-    .nullable()
-    .test('date-min', 'La fecha de vencimiento debe ser posterior a la fecha de emisión', (value, { parent }) => {
-      if (!value || !parent.issue_date) return true;
-      return new Date(value).getTime() >= new Date(parent.issue_date).getTime();
-    }),
-  items: Yup.array()
-    .of(
-      Yup.object().shape({
-        product_id: Yup.string().required('Producto es requerido'),
-        quantity: Yup.number().required('Cantidad es requerida').min(1, 'La cantidad debe ser mayor a 0'),
-        unit_price: Yup.number().required('Precio es requerido').min(0, 'El precio debe ser mayor o igual a 0')
-      })
-    )
-    .min(1, 'Debe agregar al menos un producto'),
-  number: Yup.string(),
-  notes: Yup.string(),
-  status: Yup.string(),
-  currency: Yup.string()
-});
+const NewBillSchema = Yup.object()
+  .shape({
+    supplier_id: Yup.string().required('El proveedor es requerido'),
+    // Ambas variantes opcionales; se valida a nivel de objeto que al menos una exista
+    pdv_id: Yup.string().nullable(),
+    pdvId: Yup.string().nullable(),
+    // Fechas: opcionales individualmente; se valida a nivel de objeto que exista una de emisión
+    issue_date: Yup.date().nullable(),
+    createDate: Yup.date().nullable(),
+    due_date: Yup.date()
+      .nullable()
+      .test(
+        'date-min',
+        'La fecha de vencimiento debe ser posterior a la fecha de emisión',
+        function validateDueDate(value) {
+          const { issue_date, createDate } = this.parent as any;
+          const emissionDate = issue_date || createDate;
+          if (!value || !emissionDate) return true;
+          return new Date(value).getTime() >= new Date(emissionDate).getTime();
+        }
+      ),
+    items: Yup.array()
+      .of(
+        Yup.object().shape({
+          product_id: Yup.string().required('Producto es requerido'),
+          quantity: Yup.number().required('Cantidad es requerida').min(1, 'La cantidad debe ser mayor a 0'),
+          unit_price: Yup.number().required('Precio es requerido').min(0, 'El precio debe ser mayor o igual a 0')
+        })
+      )
+      .min(1, 'Debe agregar al menos un producto'),
+    number: Yup.string(),
+    notes: Yup.string(),
+    status: Yup.string(),
+    currency: Yup.string(),
+    // Campos extra del componente Invoice para evitar errores de validación
+    method: Yup.string(),
+    paymentMethod: Yup.string(),
+    totalAmount: Yup.number(),
+    totalTaxes: Yup.number()
+  })
+  // Validación a nivel de objeto para evitar dependencias cíclicas
+  .test('require-pdv', 'El punto de venta es requerido', (obj) => {
+    if (!obj) return false;
+    return Boolean((obj as any).pdv_id || (obj as any).pdvId);
+  })
+  .test('require-issue-date', 'La fecha de emisión es requerida', (obj) => {
+    if (!obj) return false;
+    return Boolean((obj as any).issue_date || (obj as any).createDate);
+  });
 
 // ----------------------------------------------------------------------
 
@@ -111,158 +135,176 @@ export default function BillNewEditForm({ currentBill }) {
 
   const {
     reset,
-    handleSubmit,
+    getValues,
     formState: { isSubmitting }
   } = methods;
 
-  const handleSaveAsDraft = handleSubmit(
-    useCallback(
-      async (data) => {
-        loadingSave.onTrue();
+  // Transform and validate data for API submission
+  const transformFormDataToBillData = useCallback((data: any) => {
+    console.log('Raw form data:', data);
 
-        try {
-          console.log('Form data before mapping:', data);
+    // Extract and validate required fields using destructuring
+    const { supplier_id, due_date } = data;
+    const pdv_id = data.pdv_id || data.pdvId;
+    const issue_date = data.issue_date || data.createDate;
 
-          // Validate required fields
-          if (!data.supplier_id) {
-            enqueueSnackbar('Debe seleccionar un proveedor', { variant: 'error' });
-            return;
-          }
+    // Validate required fields
+    if (!supplier_id) {
+      throw new Error('Debe seleccionar un proveedor');
+    }
+    if (!pdv_id) {
+      throw new Error('Debe seleccionar un punto de venta');
+    }
+    if (!issue_date) {
+      throw new Error('Debe seleccionar una fecha de emisión');
+    }
 
-          const pdvId = data.pdv_id || (data as any).pdvId;
-          if (!pdvId) {
-            enqueueSnackbar('Debe seleccionar un punto de venta', { variant: 'error' });
-            return;
-          }
+    // Filter and validate items
+    const validItems = (data.items || []).filter((item: any) => item.product_id && item.product_id !== '');
+    if (validItems.length === 0) {
+      throw new Error('Debe agregar al menos un producto');
+    }
 
-          // Filter items that have a selected product
-          const validItems = (data.items || []).filter((item) => item.product_id);
-          if (validItems.length === 0) {
-            enqueueSnackbar('Debe agregar al menos un producto', { variant: 'error' });
-            return;
-          }
+    // Validate each item
+    validItems.forEach((item: any, index: number) => {
+      if (!item.product_id) {
+        throw new Error(`Producto ${index + 1}: Debe seleccionar un producto`);
+      }
+      if (!item.quantity || Number(item.quantity) <= 0) {
+        throw new Error(`Producto ${index + 1}: La cantidad debe ser mayor a 0`);
+      }
+      if (item.unit_price === undefined || item.unit_price === null || Number(item.unit_price) < 0) {
+        throw new Error(`Producto ${index + 1}: El precio debe ser mayor o igual a 0`);
+      }
+    });
 
-          const billData = {
-            supplier_id: data.supplier_id,
-            pdv_id: pdvId,
-            number: data.number || undefined,
-            issue_date: (data.issue_date || (data as any).createDate).toISOString().split('T')[0],
-            due_date: data.due_date?.toISOString().split('T')[0] ?? new Date().toISOString().split('T')[0],
-            currency: data.currency || 'COP',
-            notes: data.notes || undefined,
-            line_items: validItems.map((item) => ({
-              product_id: item.product_id,
-              quantity: Number(item.quantity),
-              unit_price: Number(item.unit_price)
-            })),
-            status: 'draft' as const
-          };
-          console.log('Mapped bill data:', billData);
+    // Build/ensure bill number
+    const asDate = issue_date instanceof Date ? issue_date : new Date(issue_date);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const y = asDate.getFullYear();
+    const m = pad(asDate.getMonth() + 1);
+    const d = pad(asDate.getDate());
+    const hh = pad(asDate.getHours());
+    const mm = pad(asDate.getMinutes());
+    const ss = pad(asDate.getSeconds());
+    const rand = Math.floor(Math.random() * 9000 + 1000); // 4-digit
+    const autoNumber = `BILL-${y}${m}${d}-${hh}${mm}${ss}-${rand}`;
+    const number = (data.number && String(data.number).trim()) || autoNumber;
 
-          if (currentBill) {
-            await updateBill({
-              id: currentBill.id,
-              bill: billData
-            }).unwrap();
+    // Create the bill data object
+    const billData = {
+      supplier_id,
+      pdv_id,
+      number,
+      issue_date: new Date(issue_date).toISOString().split('T')[0],
+      due_date: due_date ? new Date(due_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      currency: data.currency || 'COP',
+      notes: data.notes || undefined,
+      line_items: validItems.map((item: any) => ({
+        product_id: item.product_id,
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price)
+      }))
+    };
 
-            enqueueSnackbar('Factura actualizada exitosamente', { variant: 'success' });
-            router.push(paths.dashboard.bill.details(currentBill.id));
-          } else {
-            const newBill = await createBill(billData).unwrap();
-            enqueueSnackbar('Factura creada como borrador exitosamente', { variant: 'success' });
-            router.push(paths.dashboard.bill.details(newBill.id));
-          }
+    console.log('Transformed bill data:', billData);
+    return billData;
+  }, []);
 
-          reset();
-        } catch (error) {
-          console.error('Error saving bill:', error);
-          enqueueSnackbar(currentBill ? 'Error al actualizar la factura' : 'Error al crear la factura', {
-            variant: 'error'
-          });
-        } finally {
-          loadingSave.onFalse();
-        }
-      },
-      [currentBill, createBill, updateBill, enqueueSnackbar, router, reset, loadingSave]
-    )
-  );
+  const handleSaveAsDraft = useCallback(async () => {
+    loadingSave.onTrue();
 
-  const handleCreateAndOpen = handleSubmit(
-    useCallback(
-      async (data) => {
-        loadingSend.onTrue();
+    try {
+      const data = getValues();
+      const billData = transformFormDataToBillData(data);
+      const finalBillData = { ...billData, status: 'draft' as const };
 
-        try {
-          console.log('Form data before mapping (Open):', data);
+      console.log('Final bill data (Draft):', finalBillData);
 
-          // Validate required fields
-          if (!data.supplier_id) {
-            enqueueSnackbar('Debe seleccionar un proveedor', { variant: 'error' });
-            return;
-          }
+      if (currentBill) {
+        await updateBill({
+          id: currentBill.id,
+          bill: finalBillData
+        }).unwrap();
 
-          const pdvId = data.pdv_id || (data as any).pdvId;
-          if (!pdvId) {
-            enqueueSnackbar('Debe seleccionar un punto de venta', { variant: 'error' });
-            return;
-          }
+        enqueueSnackbar('Factura actualizada exitosamente', { variant: 'success' });
+        router.push(paths.dashboard.bill.details(currentBill.id));
+      } else {
+        const newBill = await createBill(finalBillData).unwrap();
+        enqueueSnackbar('Factura creada como borrador exitosamente', { variant: 'success' });
+        router.push(paths.dashboard.bill.details(newBill.id));
+      }
 
-          // Filter items that have a selected product
-          const validItems = (data.items || []).filter((item) => item.product_id);
-          if (validItems.length === 0) {
-            enqueueSnackbar('Debe agregar al menos un producto', { variant: 'error' });
-            return;
-          }
+      reset();
+    } catch (error: any) {
+      console.error('Error saving bill:', error);
+      enqueueSnackbar(error.message || (currentBill ? 'Error al actualizar la factura' : 'Error al crear la factura'), {
+        variant: 'error'
+      });
+    } finally {
+      loadingSave.onFalse();
+    }
+  }, [
+    currentBill,
+    createBill,
+    updateBill,
+    enqueueSnackbar,
+    router,
+    reset,
+    loadingSave,
+    transformFormDataToBillData,
+    getValues
+  ]);
 
-          const billData = {
-            supplier_id: data.supplier_id,
-            pdv_id: pdvId,
-            number: data.number || undefined,
-            issue_date: (data.issue_date || (data as any).createDate).toISOString().split('T')[0],
-            due_date: data.due_date?.toISOString().split('T')[0] ?? new Date().toISOString().split('T')[0],
-            currency: data.currency || 'COP',
-            notes: data.notes || undefined,
-            line_items: validItems.map((item) => ({
-              product_id: item.product_id,
-              quantity: Number(item.quantity),
-              unit_price: Number(item.unit_price)
-            })),
-            status: 'open' as const
-          };
-          console.log('Mapped bill data (Open):', billData);
+  const handleCreateAndOpen = useCallback(async () => {
+    loadingSend.onTrue();
 
-          if (currentBill) {
-            await updateBill({
-              id: currentBill.id,
-              bill: billData
-            }).unwrap();
+    try {
+      const data = getValues();
+      const billData = transformFormDataToBillData(data);
+      const finalBillData = { ...billData, status: 'open' as const };
 
-            enqueueSnackbar('Factura actualizada y abierta exitosamente', { variant: 'success' });
-            router.push(paths.dashboard.bill.details(currentBill.id));
-          } else {
-            const newBill = await createBill(billData).unwrap();
-            enqueueSnackbar('Factura creada y abierta exitosamente. Inventario actualizado.', {
-              variant: 'success'
-            });
-            router.push(paths.dashboard.bill.details(newBill.id));
-          }
+      console.log('Final bill data (Open):', finalBillData);
 
-          reset();
-        } catch (error) {
-          console.error('Error creating/updating bill:', error);
-          enqueueSnackbar(currentBill ? 'Error al actualizar la factura' : 'Error al crear la factura', {
-            variant: 'error'
-          });
-        } finally {
-          loadingSend.onFalse();
-        }
-      },
-      [currentBill, createBill, updateBill, enqueueSnackbar, router, reset, loadingSend]
-    )
-  );
+      if (currentBill) {
+        await updateBill({
+          id: currentBill.id,
+          bill: finalBillData
+        }).unwrap();
+
+        enqueueSnackbar('Factura actualizada y abierta exitosamente', { variant: 'success' });
+        router.push(paths.dashboard.bill.details(currentBill.id));
+      } else {
+        const newBill = await createBill(finalBillData).unwrap();
+        enqueueSnackbar('Factura creada y abierta exitosamente. Inventario actualizado.', {
+          variant: 'success'
+        });
+        router.push(paths.dashboard.bill.details(newBill.id));
+      }
+
+      reset();
+    } catch (error: any) {
+      console.error('Error creating/updating bill:', error);
+      enqueueSnackbar(error.message || (currentBill ? 'Error al actualizar la factura' : 'Error al crear la factura'), {
+        variant: 'error'
+      });
+    } finally {
+      loadingSend.onFalse();
+    }
+  }, [
+    currentBill,
+    createBill,
+    updateBill,
+    enqueueSnackbar,
+    router,
+    reset,
+    loadingSend,
+    transformFormDataToBillData,
+    getValues
+  ]);
 
   return (
-    <FormProvider methods={methods} onSubmit={handleSaveAsDraft}>
+    <FormProvider methods={methods} onSubmit={() => console.log('Form submitted')}>
       <Card>
         <BillNewEditAddress />
 

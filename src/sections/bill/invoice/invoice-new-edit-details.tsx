@@ -27,7 +27,7 @@ import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 // ----------------------------------------------------------------------
 
 export default function InvoiceNewEditDetails() {
-  const { control, setValue, watch, resetField } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -36,11 +36,15 @@ export default function InvoiceNewEditDetails() {
 
   const values = watch();
 
-  const totalOnRow = values.items.map((item) => item.quantity * item.price);
+  const totalOnRow = (values.items || []).map((item) => Number(item?.quantity ?? 0) * Number(item?.price ?? 0));
 
   const subTotal = sum(totalOnRow);
 
-  const totalAmount = subTotal - values.discount - values.shipping + values.totalTaxes;
+  const totalAmount =
+    Number(subTotal || 0) -
+    Number(values.discount || 0) -
+    Number(values.shipping || 0) +
+    Number(values.totalTaxes || 0);
 
   const dispatch = useAppDispatch();
 
@@ -82,7 +86,10 @@ export default function InvoiceNewEditDetails() {
       quantity: 1,
       price: 0,
       total: 0,
-      taxes: 0
+      taxes: 0,
+      // Fields required by Bill form schema
+      product_id: '',
+      unit_price: 0
     });
   };
 
@@ -99,6 +106,8 @@ export default function InvoiceNewEditDetails() {
       setValue(`items[${index}].title`, '');
       setValue(`items[${index}].reference`, '');
       setValue(`items[${index}].taxes`, 0);
+      setValue(`items[${index}].product_id`, '');
+      setValue(`items[${index}].unit_price`, 0);
       // Agregar opcion al array productsOptions
     },
     [setValue]
@@ -108,27 +117,32 @@ export default function InvoiceNewEditDetails() {
 
   const handleChangeQuantity = useCallback(
     (event, index) => {
-      if (values.items[index].title.id === undefined) {
+      if (!values.items[index]?.title?.id) {
         enqueueSnackbar('Debes seleccionar un producto primero', { variant: 'warning' });
         return;
       }
-      setValue(`items[${index}].quantity`, Number(event.target.value));
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
+      const newQuantity = Number(event.target.value);
+      setValue(`items[${index}].quantity`, newQuantity);
+      setValue(`items[${index}].total`, newQuantity * Number(values.items[index]?.price ?? 0));
       // multiplicar la cantidad por los impuestos del producto y asignarlo a taxes
-      setValue(
-        `items[${index}].taxes`,
-        values.items[index].quantity * (values.items[index].title.priceSale - values.items[index].title.priceBase)
-      );
-      setValue('totalTaxes', sum(values.items.map((item) => item.taxes)));
+      const product = values.items[index]?.title;
+      if (product) {
+        setValue(
+          `items[${index}].taxes`,
+          newQuantity * (Number(product.priceSale ?? 0) - Number(product.priceBase ?? 0))
+        );
+      }
+      setValue('totalTaxes', sum(values.items.map((item) => Number(item.taxes ?? 0))));
     },
     [setValue, values.items]
   );
 
   const handleChangePrice = useCallback(
     (event, index) => {
-      setValue(`items[${index}].price`, Number(event.target.value));
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
-      // setValue('taxes', )
+      const newPrice = Number(event.target.value);
+      setValue(`items[${index}].price`, newPrice);
+      setValue(`items[${index}].unit_price`, newPrice);
+      setValue(`items[${index}].total`, Number(values.items[index]?.quantity ?? 0) * newPrice);
     },
     [setValue, values.items]
   );
@@ -191,19 +205,24 @@ export default function InvoiceNewEditDetails() {
     (index, option) => {
       // TODO: provisional, preguntar si el producto puede estar varias veces
       //  Buscar si ya el producto esta en el array
-      const product = values.items.find((item) => item.title.id === option.id);
+      const product = values.items.find((item) => item.title?.id === option.id);
       if (product) {
         enqueueSnackbar('Ya agregaste este producto, si deseas puedes aumentar la cantidad', { variant: 'warning' });
         return;
       }
 
+      const quantity = Number(values.items[index]?.quantity ?? 1);
+      const price = Number(option.priceSale ?? 0);
+
       setValue(`items[${index}].title`, option);
-      setValue(`items[${index}].price`, option.priceSale);
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
-      setValue(`items[${index}].taxes`, option.priceSale - option.priceBase);
+      setValue(`items[${index}].product_id`, option.id);
+      setValue(`items[${index}].price`, price);
+      setValue(`items[${index}].unit_price`, price);
+      setValue(`items[${index}].total`, quantity * price);
+      setValue(`items[${index}].taxes`, Number(option.priceSale ?? 0) - Number(option.priceBase ?? 0));
       // sumar el total de los impuestos de todos los productos y asignarlo a taxes
-      setValue('totalTaxes', sum(values.items.map((item) => item.taxes)));
-      setValue(`items[${index}].description`, stripHTMLTags(option.description));
+      setValue('totalTaxes', sum(values.items.map((item) => Number(item.taxes ?? 0))));
+      setValue(`items[${index}].description`, stripHTMLTags(option.description || ''));
       setValue(`items[${index}].reference`, option.sku !== '' ? option.sku : option.barCode);
     },
     [setValue, values.items]
@@ -286,7 +305,7 @@ export default function InvoiceNewEditDetails() {
                     options={productsOptions}
                     onInputChange={(event, value) => console.log(value)}
                     getOptionLabel={(option) => option.name || ''}
-                    getOptionSelected={(option, value) => option.name === value.name}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
                     onChange={(event, value) => {
                       if (value !== null) {
                         handleSelectProduct(index, value);
@@ -364,7 +383,10 @@ export default function InvoiceNewEditDetails() {
                     name={`items[${index}].total`}
                     label="Total"
                     placeholder="0.00"
-                    value={values.items[index].total === 0 ? '' : values.items[index].total.toFixed(1)}
+                    value={(() => {
+                      const totalVal = Number(values.items?.[index]?.total ?? 0);
+                      return !Number.isFinite(totalVal) || totalVal === 0 ? '' : totalVal.toFixed(1);
+                    })()}
                     onChange={(event) => handleChangePrice(event, index)}
                     InputProps={{
                       startAdornment: (

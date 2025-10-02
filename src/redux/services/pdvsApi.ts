@@ -86,10 +86,5 @@ export const pdvsApi = createApi({
   })
 });
 
-export const {
-  useGetPDVsQuery,
-  useGetPDVByIdQuery,
-  useCreatePDVMutation,
-  useUpdatePDVMutation,
-  useDeletePDVMutation
-} = pdvsApi;
+export const { useGetPDVsQuery, useGetPDVByIdQuery, useCreatePDVMutation, useUpdatePDVMutation, useDeletePDVMutation } =
+  pdvsApi;

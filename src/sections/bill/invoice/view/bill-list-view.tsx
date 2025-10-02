@@ -97,14 +97,16 @@ export default function BillListView() {
   const { data: contacts = [] } = useGetContactsQuery({});
   const [voidBill] = useVoidBillMutation();
 
-  // Enrich bills with supplier data
+  // Enrich bills with supplier data and calculated balance
   const enrichedBills = useMemo(
     () =>
       bills.map((bill) => {
         const supplier = contacts.find((contact) => contact.id === bill.supplier_id);
+        const balance_due = parseFloat(bill.total_amount || '0') - parseFloat(bill.paid_amount || '0');
         return {
           ...bill,
-          supplier
+          supplier,
+          balance_due
         };
       }),
     [bills, contacts]
@@ -235,12 +237,12 @@ export default function BillListView() {
       const worksheetData = selectedBills.map((bill: any) => ({
         Número: bill.number,
         Proveedor: bill.supplier?.name || 'Sin proveedor',
-        NIT: bill.supplier?.document_number || '',
+        NIT: bill.supplier?.id_number || '',
         'Fecha Emisión': fDate(bill.issue_date, 'dd/MM/yyyy'),
         Vencimiento: fDate(bill.due_date, 'dd/MM/yyyy'),
         'Total (COP)': parseFloat(bill.total_amount),
         'Pagado (COP)': parseFloat(bill.paid_amount),
-        'Pendiente (COP)': parseFloat(bill.balance_due),
+        'Pendiente (COP)': bill.balance_due,
         Estado: bill.status,
         Email: bill.supplier?.email || '',
         Teléfono: bill.supplier?.phone || '',

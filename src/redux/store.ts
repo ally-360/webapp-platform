@@ -17,6 +17,7 @@ import { catalogApi } from './services/catalogApi';
 import { contactsApi } from './services/contactsApi';
 import { invoicesApi } from './services/invoicesApi';
 import { salesInvoicesApi } from './services/salesInvoicesApi';
+import { billsApi } from './services/billsApi';
 import { pdvsApi } from './services/pdvsApi';
 import authReducer from './slices/authSlice';
 
@@ -32,6 +33,7 @@ export const store = configureStore({
     [contactsApi.reducerPath]: contactsApi.reducer,
     [invoicesApi.reducerPath]: invoicesApi.reducer,
     [salesInvoicesApi.reducerPath]: salesInvoicesApi.reducer,
+    [billsApi.reducerPath]: billsApi.reducer,
     [pdvsApi.reducerPath]: pdvsApi.reducer,
 
     products: productsReducer,
@@ -54,6 +56,7 @@ export const store = configureStore({
       contactsApi.middleware,
       invoicesApi.middleware,
       salesInvoicesApi.middleware,
+      billsApi.middleware,
       pdvsApi.middleware
     )
 });

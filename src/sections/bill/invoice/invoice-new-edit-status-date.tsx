@@ -76,7 +76,7 @@ export default function InvoiceNewEditStatusDate() {
         render={({ field, fieldState: { error } }) => (
           <DatePicker
             label="Fecha"
-            value={field.value}
+            value={field.value || new Date()}
             onChange={(newValue) => {
               field.onChange(newValue);
             }}
@@ -135,7 +135,7 @@ export default function InvoiceNewEditStatusDate() {
             render={({ field, fieldState: { error } }) => (
               <DatePicker
                 label="Vencimiento"
-                value={field.value}
+                value={field.value || null}
                 onChange={(newValue) => {
                   field.onChange(newValue);
                 }}
