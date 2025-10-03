@@ -62,14 +62,13 @@ export const productsApi = createApi({
       query: (filters = {}) => {
         const searchParams = new URLSearchParams();
 
-        if (filters.companyId) searchParams.set('companyId', filters.companyId);
         if (filters.search) searchParams.set('search', filters.search);
-        if (filters.categoryId) searchParams.set('categoryId', filters.categoryId);
-        if (filters.brandId) searchParams.set('brandId', filters.brandId);
+        if (filters.categoryId) searchParams.set('category_id', filters.categoryId);
+        if (filters.brandId) searchParams.set('brand_id', filters.brandId);
         if (filters.page) searchParams.set('page', filters.page.toString());
         if (filters.limit) searchParams.set('limit', filters.limit.toString());
 
-        return `/products?${searchParams.toString()}`;
+        return `/products/?${searchParams.toString()}`;
       },
       providesTags: (result) =>
         result?.data

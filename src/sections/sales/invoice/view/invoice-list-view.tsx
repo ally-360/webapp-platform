@@ -1,5 +1,5 @@
 import sumBy from 'lodash/sumBy';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { pdf } from '@react-pdf/renderer';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
@@ -18,8 +18,13 @@ import {
   TableContainer,
   useMediaQuery,
   Box,
-  CircularProgress
+  CircularProgress,
+  Skeleton,
+  Typography
 } from '@mui/material';
+// redux
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'src/redux/slices/authSlice';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -38,8 +43,6 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { LoadingScreen } from 'src/components/loading-screen';
 import {
   useTable,
-  getComparator,
-  emptyRows,
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
@@ -50,7 +53,11 @@ import {
 import { useTranslation } from 'react-i18next';
 import { enqueueSnackbar } from 'notistack';
 // Redux
-import { useGetSalesInvoicesQuery, useCancelSalesInvoiceMutation } from 'src/redux/services/salesInvoicesApi';
+import {
+  useGetSalesInvoicesQuery,
+  useCancelSalesInvoiceMutation,
+  useGetMonthlyStatusReportQuery
+} from 'src/redux/services/salesInvoicesApi';
 //
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
@@ -91,70 +98,322 @@ export default function InvoiceListView() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { t } = useTranslation();
 
+  // Redux selectors
+  const user = useSelector(selectCurrentUser);
+
   const [filters, setFilters] = useState(defaultFilters);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  // RTK Query hooks
-  const { data: invoicesData, isLoading } = useGetSalesInvoicesQuery({
-    page: table.page + 1,
-    limit: table.rowsPerPage,
-    status: filters.status === 'all' ? undefined : filters.status,
-    start_date: filters.startDate?.toISOString().split('T')[0],
-    end_date: filters.endDate?.toISOString().split('T')[0]
-  });
-
-  const [cancelSalesInvoice] = useCancelSalesInvoiceMutation();
-
-  // Data processing
-  const tableData = useMemo(() => invoicesData?.invoices || [], [invoicesData]);
-  const totalCount = invoicesData?.total || 0;
-
+  // Calcular dateError
   const dateError =
     filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
-  const dataFiltered = useMemo(
-    () =>
-      applyFilter({
-        inputData: tableData,
-        comparator: getComparator(table.order, table.orderBy),
-        filters,
-        dateError
-      }),
-    [tableData, table.order, table.orderBy, filters, dateError]
+  // Debounce para búsqueda - solo buscar si tiene al menos 2 caracteres
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (filters.name.length >= 2 || filters.name.length === 0) {
+        setDebouncedSearch(filters.name);
+      }
+    }, 500); // 500ms de debounce
+
+    return () => clearTimeout(timer);
+  }, [filters.name]);
+
+  // ========================================
+  // 🔥 RTK QUERY - INVOICES & STATISTICS
+  // ========================================
+
+  // RTK Query hooks para obtener facturas
+  const { data: invoicesData, isLoading } = useGetSalesInvoicesQuery(
+    {
+      page: table.page + 1, // RTK Query usa paginación desde 1
+      limit: table.rowsPerPage,
+      status: filters.status === 'all' ? undefined : filters.status,
+      start_date: filters.startDate?.toISOString().split('T')[0],
+      end_date: filters.endDate?.toISOString().split('T')[0],
+      search: debouncedSearch || undefined // Usar búsqueda con debounce
+    },
+    {
+      skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
+    }
   );
 
-  const dataInPage = dataFiltered.slice(
-    table.page * table.rowsPerPage,
-    table.page * table.rowsPerPage + table.rowsPerPage
+  // RTK Query hook para obtener estadísticas mensuales
+  const {
+    data: monthlyStats,
+    isLoading: monthlyStatsLoading,
+    error: _monthlyStatsError
+  } = useGetMonthlyStatusReportQuery(
+    {}, // Usa mes y año actual por defecto
+    {
+      skip: !user
+    }
   );
 
-  const denseHeight = table.dense ? 56 : 76;
+  const [cancelSalesInvoice] = useCancelSalesInvoiceMutation();
 
-  const canReset =
-    !!filters.name ||
-    !!filters.service.length ||
-    filters.status !== 'all' ||
-    (!!filters.startDate && !!filters.endDate);
+  // ========================================
+  // 📊 DATOS PROCESADOS
+  // ========================================
 
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+  // Data processing - Extraer datos de la respuesta paginada del servidor
+  const tableData = useMemo(() => invoicesData?.invoices || [], [invoicesData]);
+  const totalCount = invoicesData?.total || 0;
 
-  const getInvoiceLength = (status: string) => tableData.filter((item) => item.status === status).length;
+  // ========================================
+  // 📊 CONSTANTES Y CONFIGURACIÓN
+  // ========================================
 
-  const getTotalAmount = (status: string) =>
-    sumBy(
-      tableData.filter((item) => item.status === status),
-      (item) => parseFloat(item.total_amount)
-    );
-
-  const getPercentByStatus = (status: string) => (getInvoiceLength(status) / tableData.length) * 100;
-
-  const TABS = [
-    { value: 'all', label: 'Todas', color: 'default' as const, count: tableData.length },
-    { value: 'OPEN', label: 'Abiertas', color: 'info' as const, count: getInvoiceLength('OPEN') },
-    { value: 'PAID', label: 'Pagadas', color: 'success' as const, count: getInvoiceLength('PAID') },
-    { value: 'CANCELLED', label: 'Canceladas', color: 'error' as const, count: getInvoiceLength('VOID') },
-    { value: 'DRAFT', label: 'Borrador', color: 'warning' as const, count: getInvoiceLength('DRAFT') }
+  const MONTH_NAMES = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre'
   ];
+
+  // ========================================
+  // 📊 ESTADÍSTICAS DESDE API
+  // ========================================
+
+  // Optimizar función para obtener conteos desde API
+  const getInvoiceCountFromAPI = useCallback(
+    (status: string) => {
+      const countsByStatus = invoicesData?.counts_by_status;
+      if (!countsByStatus) return 0;
+
+      if (status === 'total' || status === 'all') {
+        return countsByStatus.reduce((sum, item) => sum + item.count, 0);
+      }
+
+      const statusData = countsByStatus.find((item) => item.status === status);
+      return statusData?.count || 0;
+    },
+    [invoicesData?.counts_by_status]
+  );
+
+  // Función optimizada para obtener datos de estadísticas
+  const getInvoiceLength = useCallback(
+    (status: string) => {
+      // Priorizar counts_by_status del response actual para tabs
+      const apiCount = getInvoiceCountFromAPI(status);
+      if (apiCount !== null && apiCount !== undefined) {
+        return apiCount;
+      }
+
+      // Fallback a estadísticas mensuales si está disponible
+      if (monthlyStats) {
+        const statusMap = {
+          OPEN: monthlyStats.open.count,
+          PAID: monthlyStats.paid.count,
+          VOID: monthlyStats.void.count,
+          DRAFT: 0,
+          default: monthlyStats.total.count
+        };
+        return statusMap[status] || statusMap.default;
+      }
+
+      // Fallback final a datos locales
+      return tableData.filter((item) => item.status === status).length;
+    },
+    [getInvoiceCountFromAPI, monthlyStats, tableData]
+  );
+
+  // Función optimizada para obtener porcentajes
+  const getPercentByStatus = useCallback(
+    (status: string) => {
+      const total = getInvoiceLength('total');
+      const statusCount = getInvoiceLength(status);
+      return total > 0 ? (statusCount / total) * 100 : 0;
+    },
+    [getInvoiceLength]
+  );
+
+  // ========================================
+  // 📅 NAVEGACIÓN DE MESES
+  // ========================================
+
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  // Funciones para navegación de meses con restricción de fechas futuras
+  const handlePreviousMonth = useCallback(() => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  }, [selectedMonth, selectedYear]);
+
+  const handleNextMonth = useCallback(() => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1;
+
+    let nextMonth = selectedMonth + 1;
+    let nextYear = selectedYear;
+
+    if (selectedMonth === 12) {
+      nextMonth = 1;
+      nextYear = selectedYear + 1;
+    }
+
+    // No permitir navegar a meses futuros
+    if (nextYear > currentYear || (nextYear === currentYear && nextMonth > currentMonth)) {
+      return;
+    }
+
+    setSelectedMonth(nextMonth);
+    setSelectedYear(nextYear);
+  }, [selectedMonth, selectedYear]);
+
+  // Verificar si el botón "siguiente" debe estar deshabilitado
+  const isNextMonthDisabled = useMemo(() => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1;
+
+    let nextMonth = selectedMonth + 1;
+    let nextYear = selectedYear;
+
+    if (selectedMonth === 12) {
+      nextMonth = 1;
+      nextYear = selectedYear + 1;
+    }
+
+    return nextYear > currentYear || (nextYear === currentYear && nextMonth > currentMonth);
+  }, [selectedMonth, selectedYear]);
+
+  // Actualizar query de estadísticas mensuales cuando cambie mes/año
+  const { data: monthlyStatsForPeriod } = useGetMonthlyStatusReportQuery(
+    {
+      year: selectedYear,
+      month: selectedMonth
+    },
+    {
+      skip: !user
+    }
+  );
+
+  // Usar la constante MONTH_NAMES definida arriba
+  const currentMonthName = selectedMonth ? MONTH_NAMES[selectedMonth - 1] : '';
+
+  const currentMonthlyStats = monthlyStatsForPeriod || monthlyStats;
+
+  // Función optimizada para obtener datos del período seleccionado
+  const getPeriodData = useCallback(
+    (status: string) => {
+      if (currentMonthlyStats) {
+        const statusMap = {
+          OPEN: {
+            count: currentMonthlyStats.open.count,
+            percentaje: 0,
+            amount: parseFloat(currentMonthlyStats.open.recaudado)
+          },
+          PAID: {
+            count: currentMonthlyStats.paid.count,
+            percentaje: 0,
+            amount: parseFloat(currentMonthlyStats.paid.recaudado)
+          },
+          VOID: {
+            count: currentMonthlyStats.void.count,
+            percentaje: 0,
+            amount: parseFloat(currentMonthlyStats.void.recaudado)
+          },
+          DRAFT: { count: 0, percentaje: 0, amount: 0 },
+          default: {
+            count: currentMonthlyStats.total.count,
+            percentaje: 100,
+            amount: parseFloat(currentMonthlyStats.total.recaudado)
+          }
+        };
+
+        return statusMap[status] || statusMap.default;
+      }
+
+      // Fallback a datos locales
+      const filteredData = tableData.filter((item) => item.status === status);
+      return {
+        count: filteredData.length,
+        percentaje: 0,
+        amount: sumBy(filteredData, (item) => parseFloat(item.total_amount))
+      };
+    },
+    [currentMonthlyStats, tableData]
+  );
+
+  // ========================================
+  // 📊 DATOS OPTIMIZADOS CON MEMOIZACIÓN
+  // ========================================
+
+  // Memoizar datos procesados para evitar recálculos
+  const processedData = useMemo(() => {
+    const data = tableData;
+    const total = totalCount;
+    const filtered = data; // Ya no necesitamos filtros del lado cliente
+    const inPage = filtered;
+
+    const resetConditions = {
+      name: !!filters.name,
+      service: !!filters.service.length,
+      status: filters.status !== 'all',
+      dates: !!(filters.startDate && filters.endDate)
+    };
+
+    const canReset = Object.values(resetConditions).some(Boolean);
+    const notFound = (!filtered.length && canReset) || !filtered.length;
+
+    return {
+      tableData: data,
+      totalCount: total,
+      dataFiltered: filtered,
+      dataInPage: inPage,
+      canReset,
+      notFound
+    };
+  }, [tableData, totalCount, filters]);
+
+  // Obtener información del mes seleccionado para mostrar en el título
+  const selectedMonthName = useMemo(() => {
+    const selectedDate = new Date(selectedYear, selectedMonth - 1);
+    return selectedDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  }, [selectedYear, selectedMonth]);
+
+  // Destructuring de datos procesados para uso en el componente
+  const {
+    tableData: _tableDataProcessed,
+    totalCount: _totalCountProcessed,
+    dataFiltered,
+    dataInPage,
+    canReset,
+    notFound
+  } = processedData;
+
+  // Altura de las filas según densidad
+  const denseHeight = table.dense ? 56 : 76;
+  const TABS = useMemo(
+    () => [
+      { value: 'all', label: 'Todas', color: 'default' as const, count: getInvoiceLength('total') },
+      { value: 'OPEN', label: 'Abiertas', color: 'info' as const, count: getInvoiceLength('OPEN') },
+      { value: 'PAID', label: 'Pagadas', color: 'success' as const, count: getInvoiceLength('PAID') },
+      { value: 'VOID', label: 'Canceladas', color: 'error' as const, count: getInvoiceLength('VOID') },
+      { value: 'DRAFT', label: 'Borrador', color: 'warning' as const, count: getInvoiceLength('DRAFT') }
+    ],
+    [getInvoiceLength]
+  );
+
+  // ========================================
+  // 🔧 HANDLERS OPTIMIZADOS
+  // ========================================
 
   const handleFilters = useCallback(
     (name, value) => {
@@ -178,7 +437,7 @@ export default function InvoiceListView() {
         enqueueSnackbar('Error al cancelar la factura', { variant: 'error' });
       }
     },
-    [cancelSalesInvoice, table, dataInPage.length]
+    [cancelSalesInvoice, table, dataInPage]
   );
 
   const handleDeleteRows = useCallback(async () => {
@@ -190,14 +449,14 @@ export default function InvoiceListView() {
       enqueueSnackbar('Facturas canceladas correctamente', { variant: 'success' });
       table.onUpdatePageDeleteRows({
         totalRows: totalCount,
-        totalRowsInPage: dataInPage.length,
-        totalRowsFiltered: dataFiltered.length
+        totalRowsInPage: tableData.length,
+        totalRowsFiltered: totalCount
       });
     } catch (error) {
       console.error('Error canceling invoices:', error);
       enqueueSnackbar('Error al cancelar las facturas', { variant: 'error' });
     }
-  }, [cancelSalesInvoice, table, totalCount, dataInPage.length, dataFiltered.length]);
+  }, [cancelSalesInvoice, table, totalCount, tableData.length]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -445,6 +704,7 @@ export default function InvoiceListView() {
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
           heading={t('Facturas de venta')}
+          subHeading={`Estadísticas del mes actual: ${selectedMonthName}`}
           icon="solar:bill-list-bold-duotone"
           links={[
             {
@@ -487,41 +747,107 @@ export default function InvoiceListView() {
               divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
               sx={{ py: 2 }}
             >
-              <InvoiceAnalytic
-                title="Total"
-                total={tableData.length}
-                percent={100}
-                price={sumBy(tableData, (item) => parseFloat(item.total_amount))}
-                icon="solar:bill-list-bold-duotone"
-                color={theme.palette.info.main}
-              />
+              {monthlyStatsLoading ? (
+                // Mostrar esqueletos de carga mientras se obtienen las estadísticas
+                Array.from({ length: 4 }).map((_, index) => (
+                  <Box key={index} sx={{ flex: 1, p: 2 }}>
+                    <Stack spacing={1}>
+                      <Skeleton variant="text" height={24} />
+                      <Skeleton variant="text" height={32} />
+                      <Skeleton variant="text" height={20} />
+                    </Stack>
+                  </Box>
+                ))
+              ) : (
+                <Stack
+                  direction="column"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mb: 1, flex: 1, px: 2 }}
+                >
+                  <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                    {currentMonthName} {selectedYear}
+                  </Typography>
+                  <Stack direction="row" alignItems="center" sx={{ mb: 1, flex: 1, width: '100%', gap: 2, mt: 1 }}>
+                    <IconButton
+                      size="small"
+                      onClick={handlePreviousMonth}
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        border: 1,
+                        borderColor: 'divider',
+                        '&:hover': {
+                          backgroundColor: 'action.hover'
+                        }
+                      }}
+                    >
+                      <Iconify icon="eva:arrow-left-fill" width={16} />
+                    </IconButton>
+                    <InvoiceAnalytic
+                      title="Total"
+                      total={getPeriodData('total').count}
+                      percent={100}
+                      price={getPeriodData('total').amount}
+                      icon="solar:bill-list-bold-duotone"
+                      color={theme.palette.info.main}
+                      onPreviousMonth={handlePreviousMonth}
+                      onNextMonth={handleNextMonth}
+                      selectedMonth={selectedMonth}
+                      selectedYear={selectedYear}
+                    />
 
-              <InvoiceAnalytic
-                title="Abiertas"
-                total={getInvoiceLength('OPEN')}
-                percent={getPercentByStatus('OPEN')}
-                price={getTotalAmount('OPEN')}
-                icon="solar:file-check-bold-duotone"
-                color={theme.palette.info.main}
-              />
+                    <InvoiceAnalytic
+                      title="Abiertas"
+                      total={getPeriodData('OPEN').count}
+                      percent={getPercentByStatus('OPEN')}
+                      price={getPeriodData('OPEN').amount}
+                      icon="solar:file-check-bold-duotone"
+                      color={theme.palette.info.main}
+                    />
 
-              <InvoiceAnalytic
-                title="Pagadas"
-                total={getInvoiceLength('PAID')}
-                percent={getPercentByStatus('PAID')}
-                price={getTotalAmount('PAID')}
-                icon="solar:sort-by-time-bold-duotone"
-                color={theme.palette.success.main}
-              />
+                    <InvoiceAnalytic
+                      title="Pagadas"
+                      total={getPeriodData('PAID').count}
+                      percent={getPercentByStatus('PAID')}
+                      price={getPeriodData('PAID').amount}
+                      icon="solar:sort-by-time-bold-duotone"
+                      color={theme.palette.success.main}
+                    />
 
-              <InvoiceAnalytic
-                title="Canceladas"
-                total={getInvoiceLength('VOID')}
-                percent={getPercentByStatus('VOID')}
-                price={getTotalAmount('VOID')}
-                icon="solar:bell-bing-bold-duotone"
-                color={theme.palette.error.main}
-              />
+                    <InvoiceAnalytic
+                      title="Canceladas"
+                      total={getPeriodData('VOID').count}
+                      percent={getPeriodData('VOID').percentaje}
+                      price={getPeriodData('VOID').amount}
+                      icon="solar:bell-bing-bold-duotone"
+                      color={theme.palette.error.main}
+                    />
+
+                    <IconButton
+                      size="small"
+                      onClick={handleNextMonth}
+                      disabled={isNextMonthDisabled}
+                      sx={{
+                        width: 28,
+                        height: 28,
+                        border: 1,
+                        borderColor: 'divider',
+                        opacity: isNextMonthDisabled ? 0.5 : 1,
+                        '&:hover': {
+                          backgroundColor: isNextMonthDisabled ? 'transparent' : 'action.hover'
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: 'divider',
+                          color: 'text.disabled'
+                        }
+                      }}
+                    >
+                      <Iconify icon="eva:arrow-right-fill" width={16} />
+                    </IconButton>
+                  </Stack>
+                </Stack>
+              )}
             </Stack>
           </Box>
         </Card>
@@ -644,9 +970,21 @@ export default function InvoiceListView() {
                 />
 
                 <TableBody>
-                  {dataFiltered
-                    .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
-                    .map((row) => (
+                  {isLoading &&
+                    Array.from({ length: table.rowsPerPage }, (_, index) => (
+                      <InvoiceTableRow
+                        key={index}
+                        row={null}
+                        selected={false}
+                        onSelectRow={() => null}
+                        onViewRow={() => null}
+                        onEditRow={() => null}
+                        onDeleteRow={() => null}
+                      />
+                    ))}
+
+                  {!isLoading &&
+                    dataInPage.map((row) => (
                       <InvoiceTableRow
                         key={row.id}
                         row={row}
@@ -658,10 +996,7 @@ export default function InvoiceListView() {
                       />
                     ))}
 
-                  <TableEmptyRows
-                    height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
-                  />
+                  <TableEmptyRows height={denseHeight} emptyRows={Math.max(0, table.rowsPerPage - dataInPage.length)} />
 
                   <TableNoData notFound={notFound} />
                 </TableBody>
@@ -670,7 +1005,7 @@ export default function InvoiceListView() {
           </TableContainer>
 
           <TablePaginationCustom
-            count={dataFiltered.length}
+            count={totalCount}
             page={table.page}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
@@ -714,19 +1049,18 @@ export default function InvoiceListView() {
 
 // ----------------------------------------------------------------------
 
+// Interface comentada - ya no se usa
+/*
 interface FilterProps {
-  inputData: any[];
+  inputData: SalesInvoice[];
   comparator: (a: any, b: any) => number;
-  filters: {
-    name: string;
-    service: string[];
-    status: string;
-    startDate: Date | null;
-    endDate: Date | null;
-  };
+  filters: IInvoiceTableFilters;
   dateError: boolean;
 }
+*/
 
+// Función de filtrado comentada - ya no se usa porque los filtros se manejan en el servidor
+/*
 function applyFilter({ inputData, comparator, filters, dateError }: FilterProps) {
   const { name, status, service, startDate, endDate } = filters;
 
@@ -765,3 +1099,4 @@ function applyFilter({ inputData, comparator, filters, dateError }: FilterProps)
 
   return inputData;
 }
+*/

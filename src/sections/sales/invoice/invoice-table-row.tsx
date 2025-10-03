@@ -32,7 +32,18 @@ import InvoicePaymentDialog from './invoice-payment-dialog';
 // ----------------------------------------------------------------------
 
 export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow, onEditRow, onDeleteRow }) {
-  const { number, issue_date, due_date, status, customer, total_amount, paid_amount, balance_due } = row;
+  const {
+    number,
+    issue_date,
+    due_date,
+    status,
+    customer_id,
+    customer_email,
+    customer_name,
+    total_amount,
+    paid_amount,
+    balance_due
+  } = row;
 
   const confirm = useBoolean(false);
   const paymentDialog = useBoolean(false);
@@ -67,7 +78,7 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
       const pdfBlob = await pdf(<InvoicePDF invoice={row} currentStatus={status} />).toBlob();
 
       const formData = new FormData();
-      formData.append('to_email', customer?.email || '');
+      formData.append('to_email', customer_email || '');
       formData.append('subject', `Factura ${number}`);
       formData.append('message', 'Estimado cliente, adjunto encontrará su factura. Gracias por su compra.');
       formData.append('pdf_file', pdfBlob, `factura-${number}.pdf`);
@@ -96,7 +107,7 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
     } finally {
       setIsSending(false);
     }
-  }, [row, status, customer?.email, number, enqueueSnackbar, setIsSending]);
+  }, [row, status, customer_email, number, enqueueSnackbar, setIsSending]);
 
   return (
     <>
@@ -106,26 +117,35 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
         </TableCell>
 
         <TableCell>
-          <Typography variant="body2" noWrap>
+          <Typography
+            onClick={onViewRow}
+            sx={{
+              cursor: 'pointer',
+              color: 'text.primary',
+              ':hover': { color: 'text.secondary', textDecoration: 'underline' }
+            }}
+            variant="body2"
+            noWrap
+          >
             {number}
           </Typography>
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={customer?.name || 'Cliente'} sx={{ mr: 2 }}>
-            {(customer?.name || 'C').charAt(0).toUpperCase()}
+          <Avatar alt={customer_name || 'Cliente'} sx={{ mr: 2 }}>
+            {(customer_name || 'C').charAt(0).toUpperCase()}
           </Avatar>
 
           <ListItemText
             disableTypography
             primary={
               <Typography variant="body2" noWrap>
-                {customer?.name || 'Sin cliente'}
+                {customer_name || 'Sin cliente'}
               </Typography>
             }
             secondary={
-              <Link noWrap variant="body2" onClick={onViewRow} sx={{ color: 'text.disabled', cursor: 'pointer' }}>
-                {customer?.email || number}
+              <Link noWrap variant="body2" sx={{ color: 'text.disabled', cursor: 'pointer' }}>
+                {customer_email || number}
               </Link>
             }
           />
@@ -133,6 +153,7 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
 
         <TableCell>
           <ListItemText
+            onClick={onViewRow}
             primary={format(new Date(issue_date), 'dd MMM yyyy')}
             secondary={format(new Date(issue_date), 'p')}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
@@ -240,7 +261,7 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
             handleSendEmail();
             popover.onClose();
           }}
-          disabled={isSending || !customer?.email}
+          disabled={isSending || !customer_email}
         >
           {isSending ? <CircularProgress size={16} /> : <Iconify icon="iconamoon:send-fill" />}
           Enviar Email

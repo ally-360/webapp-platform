@@ -5,16 +5,24 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 // hooks
-// _mock
-import { _appAuthors, _appInstalled, _appRelated, _appInvoices } from 'src/_mock';
-// components
+import { useAuthContext } from 'src/auth/hooks';
 import { useSettingsContext } from 'src/components/settings';
+// _mock
+import { _appAuthors, _appInstalled } from 'src/_mock';
+// components
+import { AICapabilitiesBannerEnhanced } from 'src/components/ai-chatbot';
 // assets
 import { SeoIllustration } from 'src/assets/illustrations';
+// api
+import { useGetSalesInvoicesQuery } from 'src/redux/services/salesInvoicesApi';
+import {
+  useGetDailySalesQuery,
+  useGetLowStockProductsQuery,
+  useGetTopProductsQuery,
+  useGetSalesComparisonQuery
+} from 'src/redux/services/dashboardApi';
 //
 import React from 'react';
-import { useAuthContext } from 'src/auth/hooks';
-import { AICapabilitiesBannerEnhanced } from 'src/components/ai-chatbot';
 import AppWidget from '../app-widget';
 import AppWelcome from '../app-welcome';
 import AppNewInvoice from '../app-new-invoice';
@@ -29,12 +37,39 @@ import AppWelcomeStep from '../app-welcome-step';
 
 export default function OverviewAppView() {
   const { user } = useAuthContext();
-
   const theme = useTheme();
-
   const settings = useSettingsContext();
 
-  console.log('User in OverviewAppView:', user);
+  // Obtener fecha de hoy para filtros
+  const today = new Date().toISOString().split('T')[0];
+
+  // RTK Query hooks - datos reales del backend
+  const { data: salesInvoices } = useGetSalesInvoicesQuery({
+    limit: 10
+  });
+
+  const { data: dailySales } = useGetDailySalesQuery({
+    date: today
+  });
+
+  const { data: lowStockProducts } = useGetLowStockProductsQuery({
+    limit: 15
+  });
+
+  const { data: topProducts } = useGetTopProductsQuery({
+    period: 'week',
+    limit: 5
+  });
+
+  const { data: salesComparison } = useGetSalesComparisonQuery({});
+
+  console.log('Dashboard Data:', {
+    salesInvoices,
+    dailySales,
+    lowStockProducts,
+    topProducts,
+    salesComparison
+  });
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ py: { xs: 2, sm: 3 } }}>
@@ -66,12 +101,12 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        {/* Widget Summary Cards - Full width on mobile, 2 columns on tablet, 3 on desktop */}
+        {/* Widget Summary Cards - Datos reales del backend */}
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
-            title="Ventas del Mes"
-            percent={15.8}
-            total={2847650}
+            title="Ventas de Hoy"
+            percent={salesComparison?.percentage_change || 0}
+            total={parseFloat(dailySales?.total_amount || '0')}
             sx={{ height: { xs: 'auto', sm: '100%' } }}
             chart={{
               series: [45, 32, 68, 55, 89, 45, 72, 83, 67, 91]
@@ -81,10 +116,10 @@ export default function OverviewAppView() {
 
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
-            title="Facturas Emitidas"
+            title="Facturas Emitidas Hoy"
             percent={8.2}
             sx={{ height: { xs: 'auto', sm: '100%' } }}
-            total={1247}
+            total={dailySales?.total_invoices || 0}
             chart={{
               colors: [theme.palette.info.light, theme.palette.info.main],
               series: [28, 45, 72, 38, 52, 67, 84, 59, 73, 42]
@@ -94,12 +129,12 @@ export default function OverviewAppView() {
 
         <Grid xs={12} sm={12} md={4}>
           <AppWidgetSummary
-            title="Clientes Activos"
+            title="Productos con Stock Bajo"
             sx={{ height: { xs: 'auto', sm: '100%' } }}
-            percent={3.7}
-            total={892}
+            percent={-2.1}
+            total={lowStockProducts?.total_count || 0}
             chart={{
-              colors: [theme.palette.success.light, theme.palette.success.main],
+              colors: [theme.palette.warning.light, theme.palette.warning.main],
               series: [15, 28, 45, 22, 38, 55, 29, 47, 68, 35]
             }}
           />
@@ -135,20 +170,17 @@ export default function OverviewAppView() {
           </Stack>
         </Grid> */}
 
-        {/* Charts - Stack on mobile and tablet */}
+        {/* Charts - Datos reales del backend */}
         <Grid xs={12} sm={12} md={6} lg={5}>
           <AppCurrentDownload
             title="Productos Más Vendidos"
-            subheader="(+15.8%) más que el mes anterior"
+            subheader="Top 5 de la semana"
             sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
-              series: [
-                { label: 'Laptops HP', value: 234567 },
-                { label: 'Mouse Inalámbrico', value: 189234 },
-                { label: 'Teclado Mecánico', value: 145678 },
-                { label: 'Monitor 24"', value: 98345 },
-                { label: 'Otros Productos', value: 67890 }
-              ]
+              series: topProducts?.products?.map((product) => ({
+                label: product.product_name,
+                value: product.total_quantity
+              })) || [{ label: 'Cargando...', value: 0 }]
             }}
           />
         </Grid>
@@ -200,25 +232,36 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        {/* Table - Full width on mobile and tablet */}
+        {/* Table - Últimas facturas reales del backend */}
         <Grid xs={12} lg={8}>
           <AppNewInvoice
             title="Últimas Facturas"
-            subheader="(+12.3%) más que el mes anterior"
-            tableData={_appInvoices}
+            subheader={`${salesInvoices?.total || 0} facturas en total`}
+            tableData={salesInvoices?.invoices?.slice(0, 10) || []}
             tableLabels={[
-              { id: 'invoiceNumber', label: 'N° Factura' },
-              { id: 'category', label: 'Categoría' },
-              { id: 'price', label: 'Valor Total' },
+              { id: 'number', label: 'N° Factura' },
+              { id: 'issue_date', label: 'Fecha' },
+              { id: 'total_amount', label: 'Valor Total' },
               { id: 'status', label: 'Estado' },
               { id: '' }
             ]}
           />
         </Grid>
 
-        {/* Side widgets - Better distribution on mobile and tablet */}
+        {/* Side widgets - Información real de productos y alertas */}
         <Grid xs={12} sm={6} md={4} lg={4}>
-          <AppTopRelated title="Productos Relacionados" subheader="Productos con mayor rotación" list={_appRelated} />
+          <AppTopRelated
+            title="Productos con Stock Bajo"
+            subheader={`${lowStockProducts?.total_count || 0} productos críticos`}
+            list={
+              lowStockProducts?.products?.slice(0, 5).map((product) => ({
+                id: product.id,
+                name: product.name,
+                avatar: null,
+                favourite: product.current_stock
+              })) || []
+            }
+          />
         </Grid>
 
         <Grid xs={12} sm={6} md={4} lg={4}>
@@ -236,29 +279,18 @@ export default function OverviewAppView() {
         <Grid xs={12} sm={6} md={12} lg={12}>
           <Stack spacing={{ xs: 2, sm: 3 }} direction={{ xs: 'column', sm: 'row' }}>
             <AppWidget
-              title="Tasa de Conversión"
-              total={73}
+              title="Comparación vs Ayer"
+              total={Math.abs(salesComparison?.percentage_change || 0)}
               icon="solar:chart-square-bold"
               sx={{ flex: 1 }}
               chart={{
-                series: 73
+                series: Math.abs(salesComparison?.percentage_change || 0)
               }}
             />
 
             <AppWidget
-              title="Órdenes Pendientes"
-              total={42}
-              icon="solar:bell-bing-bold"
-              color="warning"
-              sx={{ flex: 1 }}
-              chart={{
-                series: 42
-              }}
-            />
-
-            <AppWidget
-              title="Productos Activos"
-              total={856}
+              title="Total Productos"
+              total={topProducts?.products?.length || 0}
               icon="solar:box-bold"
               color="info"
               sx={{ flex: 1 }}
@@ -268,9 +300,20 @@ export default function OverviewAppView() {
             />
 
             <AppWidget
-              title="Satisfacción Cliente"
-              total={94}
-              icon="solar:heart-bold"
+              title="Alertas de Stock"
+              total={lowStockProducts?.total_count || 0}
+              icon="solar:danger-triangle-bold"
+              color="warning"
+              sx={{ flex: 1 }}
+              chart={{
+                series: lowStockProducts?.total_count || 0
+              }}
+            />
+
+            <AppWidget
+              title="Ventas del Día"
+              total={parseFloat(dailySales?.total_amount || '0')}
+              icon="solar:money-bag-bold"
               color="success"
               sx={{ flex: 1 }}
               chart={{

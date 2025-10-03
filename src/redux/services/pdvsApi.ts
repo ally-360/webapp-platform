@@ -5,30 +5,27 @@ import { baseQueryWithAuth } from './baseQuery';
 export interface PDV {
   id: string;
   name: string;
-  description?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
+  address: string;
+  phone_number: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface CreatePDVRequest {
   name: string;
-  description?: string;
+  address: string;
+  phone_number: string;
+  is_active?: boolean;
+}
+
+export interface UpdatePDVRequest {
+  name?: string;
   address?: string;
-  phone?: string;
-  email?: string;
+  phone_number?: string;
   is_active?: boolean;
 }
 
 export interface PDVsResponse {
-  pdvs?: PDV[];
-  data?: PDV[];
-  total?: number;
-  limit?: number;
-  offset?: number;
+  pdvs: PDV[];
 }
 
 export const pdvsApi = createApi({
@@ -38,15 +35,12 @@ export const pdvsApi = createApi({
   endpoints: (builder) => ({
     // Get all PDVs
     getPDVs: builder.query<PDV[], void>({
-      query: () => '/pdvs',
-      transformResponse: (response: any) => {
-        console.log('PDVs API response:', response);
-        if (response?.pdvs) return response.pdvs;
-        if (response?.data) return response.data;
-        if (Array.isArray(response)) return response;
-        return [];
-      },
-      providesTags: ['PDV']
+      query: () => '/pdvs/',
+      transformResponse: (response: PDVsResponse) => response.pdvs || [],
+      providesTags: (result) =>
+        result
+          ? [...result.map(({ id }) => ({ type: 'PDV' as const, id })), { type: 'PDV', id: 'LIST' }]
+          : [{ type: 'PDV', id: 'LIST' }]
     }),
 
     // Get single PDV by ID
@@ -58,21 +52,24 @@ export const pdvsApi = createApi({
     // Create new PDV
     createPDV: builder.mutation<PDV, CreatePDVRequest>({
       query: (pdv) => ({
-        url: '/pdvs',
+        url: '/pdvs/',
         method: 'POST',
         body: pdv
       }),
-      invalidatesTags: ['PDV']
+      invalidatesTags: [{ type: 'PDV', id: 'LIST' }]
     }),
 
     // Update existing PDV
-    updatePDV: builder.mutation<PDV, { id: string; pdv: Partial<CreatePDVRequest> }>({
+    updatePDV: builder.mutation<PDV, { id: string; pdv: UpdatePDVRequest }>({
       query: ({ id, pdv }) => ({
         url: `/pdvs/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: pdv
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'PDV', id }, 'PDV']
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'PDV', id },
+        { type: 'PDV', id: 'LIST' }
+      ]
     }),
 
     // Delete PDV
@@ -81,7 +78,7 @@ export const pdvsApi = createApi({
         url: `/pdvs/${id}`,
         method: 'DELETE'
       }),
-      invalidatesTags: ['PDV']
+      invalidatesTags: [{ type: 'PDV', id: 'LIST' }]
     })
   })
 });

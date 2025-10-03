@@ -206,16 +206,6 @@ export const dashboardRoutes = [
         ]
       },
       {
-        path: 'invoice',
-        children: [
-          { element: <InvoiceListPage />, index: true },
-          { path: 'list', element: <InvoiceListPage /> },
-          { path: ':id', element: <InvoiceDetailsPage /> },
-          { path: ':id/edit', element: <InvoiceEditPage /> },
-          { path: 'new', element: <InvoiceCreatePage /> }
-        ]
-      },
-      {
         path: 'post',
         children: [
           { element: <BlogPostsPage />, index: true },

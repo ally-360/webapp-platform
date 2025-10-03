@@ -197,7 +197,7 @@ export default function InventoryBrandsList() {
                 <Typography variant="h6" sx={{ mb: 3 }}>
                   Productos asociados
                 </Typography>
-                <ProductListView categoryView={viewBrandById} />
+                <ProductListView brandView={viewBrandById} />
               </CardContent>
             </Card>
           )}

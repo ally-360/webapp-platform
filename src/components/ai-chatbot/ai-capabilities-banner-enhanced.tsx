@@ -130,8 +130,7 @@ export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabili
           background: `linear-gradient(135deg, 
             rgba(0, 176, 240, 0.1) 0%,
             rgba(0, 150, 220, 0.2) 100%)`,
-          filter: 'blur(20px)',
-          animation: `${floatGently} 6s ease-in-out infinite`
+          filter: 'blur(20px)'
         }}
       />
 
@@ -146,8 +145,7 @@ export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabili
           background: `linear-gradient(135deg, 
             rgba(156, 39, 176, 0.1) 0%,
             rgba(123, 31, 162, 0.2) 100%)`,
-          filter: 'blur(15px)',
-          animation: `${floatGently} 8s ease-in-out infinite reverse`
+          filter: 'blur(15px)'
         }}
       />
 
@@ -164,7 +162,6 @@ export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabili
                 rgba(0, 120, 200, 0.6) 100%)`,
               backdropFilter: 'blur(20px)',
               border: '2px solid rgba(255, 255, 255, 0.3)',
-              animation: `${pulseGlow} 3s ease-in-out infinite`,
               position: 'relative',
               '&::after': {
                 content: '""',
@@ -175,8 +172,7 @@ export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabili
                 height: 20,
                 borderRadius: '50%',
                 background: '#4CAF50',
-                border: '3px solid white',
-                animation: `${sparkle} 2s ease-in-out infinite`
+                border: '3px solid white'
               }
             }}
           >
@@ -239,7 +235,6 @@ export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabili
                 cursor: 'pointer',
                 position: 'relative',
                 overflow: 'hidden',
-                animation: `${floatGently} ${4 + index}s ease-in-out infinite`,
                 '&:hover': {
                   transform: 'translateY(-8px) scale(1.02)',
                   background: `linear-gradient(135deg, 
@@ -349,15 +344,7 @@ export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabili
             variant="contained"
             size="large"
             onClick={onChatClick}
-            startIcon={
-              <Iconify
-                icon="ph:chat-circle-duotone"
-                width={20}
-                sx={{
-                  animation: `${sparkle} 2s ease-in-out infinite`
-                }}
-              />
-            }
+            startIcon={<Iconify icon="ph:chat-circle-duotone" width={20} />}
             sx={{
               px: 4,
               py: 1.5,
@@ -393,8 +380,7 @@ export default function AICapabilitiesBannerEnhanced({ onChatClick }: AICapabili
                 background: `linear-gradient(90deg, 
                   transparent 0%,
                   rgba(255, 255, 255, 0.2) 50%,
-                  transparent 100%)`,
-                animation: `${shimmerEffect} 3s ease-in-out infinite`
+                  transparent 100%)`
               }
             }}
           >

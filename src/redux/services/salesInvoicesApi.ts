@@ -7,7 +7,7 @@ export interface SalesInvoice {
   customer_id: string;
   number: string;
   type: 'SALE';
-  status: 'DRAFT' | 'OPEN' | 'PAID' | 'CANCELLED';
+  status: 'DRAFT' | 'OPEN' | 'PAID' | 'VOID';
   issue_date: string;
   due_date: string;
   notes: string;
@@ -51,6 +51,18 @@ export interface SalesInvoicesResponse {
   total: number;
   limit: number;
   offset: number;
+  applied_filters: {
+    status: string | null;
+    customer_id: string | null;
+    pdv_id: string | null;
+    date_from: string | null;
+    date_to: string | null;
+    search: string | null;
+  };
+  counts_by_status: {
+    status: string;
+    count: number;
+  }[];
 }
 
 export interface CreateSalesInvoiceRequest {
@@ -132,6 +144,7 @@ export const salesInvoicesApi = createApi({
         pdv_id?: string;
         start_date?: string;
         end_date?: string;
+        search?: string;
       }
     >({
       query: (params = {}) => ({
@@ -253,6 +266,31 @@ export const salesInvoicesApi = createApi({
     // Get next invoice number
     getNextInvoiceNumber: builder.query<{ next_number: string }, string>({
       query: (pdvId) => `/next-number/${pdvId}`
+    }),
+
+    // Get monthly status report
+    getMonthlyStatusReport: builder.query<
+      {
+        year: number;
+        month: number;
+        total: { count: number; recaudado: string };
+        open: { count: number; recaudado: string };
+        paid: { count: number; recaudado: string };
+        void: { count: number; recaudado: string };
+      },
+      { year?: number; month?: number }
+    >({
+      query: (params = {}) => {
+        const currentDate = new Date();
+        const year = params.year || currentDate.getFullYear();
+        const month = params.month || currentDate.getMonth() + 1;
+
+        return {
+          url: `/reports/monthly-status`,
+          params: { year, month }
+        };
+      },
+      providesTags: ['SalesInvoice']
     })
   })
 });
@@ -270,5 +308,6 @@ export const {
   useDownloadInvoicePdfMutation,
   useSendInvoiceEmailMutation,
   useGetInvoicesSummaryQuery,
-  useGetNextInvoiceNumberQuery
+  useGetNextInvoiceNumberQuery,
+  useGetMonthlyStatusReportQuery
 } = salesInvoicesApi;

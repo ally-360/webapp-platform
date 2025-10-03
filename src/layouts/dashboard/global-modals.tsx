@@ -13,7 +13,7 @@ export default function GlobalModals() {
   const UserPopupCreateView = lazy(() => import('src/sections/user/view/user-popup-create-view'));
   const PopupCreateCategory = lazy(() => import('src/sections/categories/PopupCreateCategory'));
   const PopupCreateBrand = lazy(() => import('src/sections/brands/PopupCreateBrand'));
-  const FormPDVS = lazy(() => import('src/sections/PDVS/pdv-new-edit-form'));
+  const FormPDVS = lazy(() => import('src/sections/PDVS/pdv-new-edit-form-simple'));
 
   // No mostrar chatbot en rutas específicas como POS
   const shouldShowChatbot = !location.pathname.startsWith('/pos');

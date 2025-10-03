@@ -8,6 +8,7 @@ import SvgColor from 'src/components/svg-color';
 import { useDispatch } from 'react-redux';
 import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
+import { switchPopup } from 'src/redux/inventory/pdvsSlice';
 import { togglePopup as toggleContactsPopup } from 'src/redux/inventory/contactsSlice';
 import { useNavigate } from 'react-router';
 
@@ -61,7 +62,6 @@ export function useNavData() {
   const { t } = useLocales();
 
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const data = useMemo(
@@ -90,9 +90,9 @@ export function useNavData() {
             children: [
               {
                 title: t('Productos'),
-                path: paths.dashboard.inventory.list,
+                path: paths.dashboard.inventory.list, // Click principal va al listado
                 openPopup() {
-                  navigate(paths.dashboard.inventory.newProduct);
+                  navigate(paths.dashboard.inventory.newProduct); // Botón + va a creación
                 }
               },
               {
@@ -115,10 +115,6 @@ export function useNavData() {
                 openPopup() {
                   dispatch(switchPopup(true));
                 }
-              },
-              {
-                title: t('Ajuste de inventario'),
-                path: paths.dashboard.inventory.pdvs
               }
             ]
           },
@@ -160,28 +156,24 @@ export function useNavData() {
               {
                 title: t('Facturas de compra'),
                 path: paths.dashboard.bill.root
-              },
-              {
-                title: t('Recepiones de compra'),
-                path: paths.dashboard.bill.provide
               }
             ]
           },
-          {
-            title: t('Contabilidad'),
-            path: paths.dashboard.accounting.root,
-            icon: ICONS.invoice,
-            children: [
-              { title: t('Catálogo de cuentas'), path: paths.dashboard.accounting.chartOfAccounts },
-              { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
-            ]
-          },
-          {
-            title: t('orden de compra'),
-            path: paths.dashboard.order.root,
-            icon: ICONS.order,
-            children: [{ title: t('Ordenes'), path: paths.dashboard.order.root }]
-          },
+          // {
+          //   title: t('Contabilidad'),
+          //   path: paths.dashboard.accounting.root,
+          //   icon: ICONS.invoice,
+          //   children: [
+          //     { title: t('Catálogo de cuentas'), path: paths.dashboard.accounting.chartOfAccounts },
+          //     { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
+          //   ]
+          // },
+          // {
+          //   title: t('orden de compra'),
+          //   path: paths.dashboard.order.root,
+          //   icon: ICONS.order,
+          //   children: [{ title: t('Ordenes'), path: paths.dashboard.order.root }]
+          // },
           // USER
           {
             title: t('Contactos'),

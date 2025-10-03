@@ -1,5 +1,5 @@
 import sumBy from 'lodash/sumBy';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 // @mui
 import { useTheme, alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -14,6 +14,9 @@ import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
+// redux
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from 'src/redux/slices/authSlice';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -23,7 +26,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 // utils
 import { fTimestamp } from 'src/utils/format-time';
 // _mock
-import { _invoices, INVOICE_SERVICE_OPTIONS } from 'src/_mock';
+import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -34,7 +37,6 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   getComparator,
-  emptyRows,
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
@@ -43,6 +45,7 @@ import {
 } from 'src/components/table';
 //
 import { useTranslation } from 'react-i18next';
+import { useGetSalesInvoicesQuery, useDeleteSalesInvoiceMutation } from 'src/redux/services/salesInvoicesApi';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -66,41 +69,97 @@ const defaultFilters = {
   name: '',
   service: [],
   status: 'all',
-  startDate: null,
-  endDate: null
+  startDate: null as Date | null,
+  endDate: null as Date | null
 };
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceListView() {
   const theme = useTheme();
-
   const settings = useSettingsContext();
-
   const router = useRouter();
-
   const table = useTable({ defaultOrderBy: 'createDate' });
+  const confirm = useBoolean(false);
+  const { t } = useTranslation();
 
-  const confirm = useBoolean();
-
-  const [tableData, setTableData] = useState(_invoices);
+  // Redux selectors
+  const user = useSelector(selectCurrentUser);
 
   const [filters, setFilters] = useState(defaultFilters);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
+  // Calcular dateError
   const dateError =
     filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
-  const dataFiltered = applyFilter({
-    inputData: tableData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters,
-    dateError
+  // Debounce para búsqueda - solo buscar si tiene al menos 2 caracteres
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (filters.name.length >= 2 || filters.name.length === 0) {
+        setDebouncedSearch(filters.name);
+      }
+    }, 500); // 500ms de debounce
+
+    return () => clearTimeout(timer);
+  }, [filters.name]);
+
+  // ========================================
+  // 🔥 RTK QUERY - INVOICES
+  // ========================================
+
+  const {
+    data: invoicesData,
+    isLoading: invoicesLoading,
+    refetch: refetchInvoices
+  } = useGetSalesInvoicesQuery(
+    {
+      page: table.page + 1, // RTK Query usa paginación desde 1
+      limit: table.rowsPerPage,
+      status: filters.status === 'all' ? undefined : filters.status,
+      start_date: filters.startDate?.toISOString().split('T')[0],
+      end_date: filters.endDate?.toISOString().split('T')[0]
+    },
+    {
+      skip: !user // Solo hacer request si hay usuario
+    }
+  );
+
+  const [deleteInvoice] = useDeleteSalesInvoiceMutation();
+
+  // ========================================
+  // 📊 DATOS PROCESADOS
+  // ========================================
+
+  // Extraer datos de la respuesta paginada del servidor
+  const tableData = useMemo(() => invoicesData?.invoices || [], [invoicesData]);
+  const totalInvoices = invoicesData?.total || 0;
+
+  // Debug para verificar paginación
+  console.log('🔍 InvoiceListView Pagination:', {
+    tablePage: table.page,
+    apiPage: table.page + 1,
+    rowsPerPage: table.rowsPerPage,
+    totalInvoices,
+    invoicesCount: tableData.length,
+    searchTerm: debouncedSearch,
+    timestamp: new Date().toLocaleTimeString()
   });
 
-  const dataInPage = dataFiltered.slice(
-    table.page * table.rowsPerPage,
-    table.page * table.rowsPerPage + table.rowsPerPage
+  // Aplicar filtros del lado cliente para compatibilidad con la lógica existente
+  const dataFiltered = useMemo(
+    () =>
+      applyFilter({
+        inputData: tableData,
+        comparator: getComparator(table.order, table.orderBy),
+        filters,
+        dateError
+      }),
+    [tableData, table.order, table.orderBy, filters, dateError]
   );
+
+  // Los datos ya vienen paginados del servidor, pero aplicamos filtros locales
+  const dataInPage = dataFiltered;
 
   const denseHeight = table.dense ? 56 : 76;
 
@@ -112,26 +171,30 @@ export default function InvoiceListView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const getInvoiceLength = (status) => tableData.filter((item) => item.status === status).length;
+  const getInvoiceLength = (status: string) => tableData.filter((item) => item.status === status).length;
 
-  const getTotalAmount = (status) =>
+  const getTotalAmount = (status: string) =>
     sumBy(
       tableData.filter((item) => item.status === status),
-      'totalAmount'
+      'total_amount'
     );
 
-  const getPercentByStatus = (status) => (getInvoiceLength(status) / tableData.length) * 100;
+  const getPercentByStatus = (status: string) => (getInvoiceLength(status) / tableData.length) * 100;
 
   const TABS = [
-    { value: 'all', label: 'Todas', color: 'default', count: tableData.length },
-    { value: 'paid', label: 'Pagadas', color: 'success', count: getInvoiceLength('paid') },
-    { value: 'pending', label: 'Pendientes', color: 'warning', count: getInvoiceLength('pending') },
-    { value: 'overdue', label: 'Vencidas', color: 'error', count: getInvoiceLength('overdue') }
-    // { value: 'draft', label: 'Draft', color: 'default', count: getInvoiceLength('draft') }
+    { value: 'all', label: 'Todas', color: 'default' as const, count: tableData.length },
+    { value: 'PAID', label: 'Pagadas', color: 'success' as const, count: getInvoiceLength('PAID') },
+    { value: 'OPEN', label: 'Pendientes', color: 'warning' as const, count: getInvoiceLength('OPEN') },
+    { value: 'OVERDUE', label: 'Vencidas', color: 'error' as const, count: getInvoiceLength('OVERDUE') },
+    { value: 'DRAFT', label: 'Borrador', color: 'info' as const, count: getInvoiceLength('DRAFT') }
   ];
 
+  // ========================================
+  // 🎯 HANDLERS
+  // ========================================
+
   const handleFilters = useCallback(
-    (name, value) => {
+    (name: string, value: any) => {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
@@ -142,25 +205,32 @@ export default function InvoiceListView() {
   );
 
   const handleDeleteRow = useCallback(
-    (id) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id: string) => {
+      try {
+        await deleteInvoice(id).unwrap();
+        // El refetch se disparará automáticamente por la invalidación de tags
+        table.onUpdatePageDeleteRow(dataInPage.length);
+      } catch (error) {
+        console.error('Error deleting invoice:', error);
+      }
     },
-    [dataInPage.length, table, tableData]
+    [deleteInvoice, table, dataInPage.length]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-    setTableData(deleteRows);
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      const deletePromises = table.selected.map((invoiceId) => deleteInvoice(invoiceId).unwrap());
+      await Promise.all(deletePromises);
 
-    table.onUpdatePageDeleteRows({
-      totalRows: tableData.length,
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+      table.onUpdatePageDeleteRows({
+        totalRows: totalInvoices,
+        totalRowsInPage: tableData.length,
+        totalRowsFiltered: totalInvoices
+      });
+    } catch (error) {
+      console.error('Error deleting invoices:', error);
+    }
+  }, [deleteInvoice, table, totalInvoices, tableData.length]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -186,8 +256,6 @@ export default function InvoiceListView() {
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
   }, []);
-
-  const { t } = useTranslation();
 
   return (
     <>
@@ -386,9 +454,21 @@ export default function InvoiceListView() {
                 />
 
                 <TableBody>
-                  {dataFiltered
-                    .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
-                    .map((row) => (
+                  {invoicesLoading &&
+                    Array.from({ length: table.rowsPerPage }, (_, index) => (
+                      <InvoiceTableRow
+                        key={index}
+                        row={null}
+                        selected={false}
+                        onSelectRow={() => {}}
+                        onViewRow={() => {}}
+                        onEditRow={() => {}}
+                        onDeleteRow={() => {}}
+                      />
+                    ))}
+
+                  {!invoicesLoading &&
+                    dataInPage.map((row) => (
                       <InvoiceTableRow
                         key={row.id}
                         row={row}
@@ -400,10 +480,7 @@ export default function InvoiceListView() {
                       />
                     ))}
 
-                  <TableEmptyRows
-                    height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
-                  />
+                  <TableEmptyRows height={denseHeight} emptyRows={Math.max(0, table.rowsPerPage - dataInPage.length)} />
 
                   <TableNoData notFound={notFound} />
                 </TableBody>
@@ -412,7 +489,7 @@ export default function InvoiceListView() {
           </TableContainer>
 
           <TablePaginationCustom
-            count={dataFiltered.length}
+            count={totalInvoices}
             page={table.page}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import isEqual from 'lodash/isEqual';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -10,6 +10,7 @@ import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
+import { useMediaQuery } from '@mui/material';
 // routes
 import { paths } from 'src/routes/paths';
 // hooks
@@ -31,11 +32,13 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+// RTK Query
+import { useGetPDVsQuery, useDeletePDVMutation } from 'src/redux/services/pdvsApi';
+// Redux
+import { switchPopup, setSeePDV } from 'src/redux/inventory/pdvsSlice';
+import { useAppDispatch } from 'src/hooks/store';
+import { enqueueSnackbar } from 'notistack';
 //
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { deletePDV, getAllPDVSWhitoutLoading, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
-import { useMediaQuery } from '@mui/material';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import PDVSTableRow from '../pdvs-table-row';
 import PDVSTableToolbar from '../pdvs-table-toolbar';
 import PDVSTableFiltersResult from '../pdvs-table-filters-result';
@@ -59,53 +62,40 @@ const defaultFilters = {
 // ----------------------------------------------------------------------
 
 export default function PdvsListView() {
-
-  const [MUNICIPIO_OPTIONS, SETMUNICIPIO_OPTIONS] = useState([]);
-
   // Ref component to print
-  const componentRef = useRef();
+  const componentRef = useRef<HTMLDivElement>(null);
 
   const table = useTable(true);
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('sm'));
-
+  const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
   const settings = useSettingsContext();
-
-  const [tableData, setTableData] = useState([]);
+  const confirm = useBoolean(false);
+  const dispatch = useAppDispatch();
 
   const [filters, setFilters] = useState(defaultFilters);
 
-  // const { products, pdvsLoading, pdvsEmpty } = useSelector((state) => state.products);
+  // RTK Query hooks
+  const { data: pdvs = [], isLoading } = useGetPDVsQuery();
+  const [deletePDVMutation] = useDeletePDVMutation();
 
-  const {pdvs , pdvsLoading, pdvsEmpty} = useAppSelector((state) => state.pdvs);
+  // Transform PDVs data to include location as string for filtering
+  const transformedPDVs = useMemo(() => 
+    pdvs.map((pdv) => ({
+      ...pdv,
+      location: pdv.address, // Use address as location since backend doesn't have location object
+      main: false // Backend doesn't have main field, defaulting to false
+    })), [pdvs]
+  );
 
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-
-    dispatch(getAllPDVSWhitoutLoading());
-    
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (pdvs.length) {
-      const municipios = pdvs.map((pdv) => ({ value: pdv.location.name, label: pdv.location.name }));
-      // Eliminar duplicados
-      const municipiosSinDuplicados = municipios.filter((municipio, index, self) => self.findIndex((m) => m.value === municipio.value) === index);
-      SETMUNICIPIO_OPTIONS(municipiosSinDuplicados);
-    }
-  }, [pdvs]);
-
-
-  const confirm = useBoolean(false);
-
-  useEffect(() => {
-    if (pdvs.length) {
-      setTableData(pdvs.map((pdv) => ({ ...pdv, location: pdv.location.name }) ));
-    }
+  // Generate municipality options from addresses
+  const municipioOptions = useMemo(() => {
+    if (pdvs.length === 0) return [];
+    const addresses = pdvs.map(pdv => pdv.address).filter(Boolean);
+    const uniqueAddresses = [...new Set(addresses)];
+    return uniqueAddresses.map(addr => ({ value: addr, label: addr }));
   }, [pdvs]);
 
   const dataFiltered = applyFilter({
-    inputData: tableData,
+    inputData: transformedPDVs,
     comparator: getComparator(table.order, table.orderBy),
     filters
   });
@@ -116,13 +106,11 @@ export default function PdvsListView() {
   );
 
   const denseHeight = table.dense ? 60 : 80;
-
   const canReset = !isEqual(defaultFilters, filters);
-
-  const notFound = (!dataFiltered.length && canReset) || pdvsEmpty;
+  const notFound = (!dataFiltered.length && canReset) || (!pdvs.length && !isLoading);
 
   const handleFilters = useCallback(
-    (name, value) => {
+    (name: string, value: any) => {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
@@ -132,30 +120,29 @@ export default function PdvsListView() {
     [table]
   );
 
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      await Promise.all(table.selected.map(id => deletePDVMutation(id).unwrap()));
+      enqueueSnackbar('PDVs eliminados correctamente', { variant: 'success' });
+      table.onUpdatePageDeleteRows({
+        totalRows: transformedPDVs.length,
+        totalRowsInPage: dataInPage.length,
+        totalRowsFiltered: dataFiltered.length
+      });
+    } catch (err) {
+      enqueueSnackbar('Error al eliminar PDVs', { variant: 'error' });
+    }
+  }, [dataFiltered.length, dataInPage.length, deletePDVMutation, table, transformedPDVs.length]);
 
-  const handleDeleteRows = useCallback(() => {
-    table.selected.forEach((id) => {
-      dispatch(deletePDV(id));
-    });
-
-    table.onUpdatePageDeleteRows({
-      totalRows: tableData.length,
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length
-    });
-    
-  }, [dataFiltered.length, dataInPage.length, dispatch, table, tableData.length]);
-
-  
   const handleEditRow = useCallback(
-    (id) => {
+    (id: string) => {
       dispatch(switchPopup(id));
     },
     [dispatch]
   );
 
   const handleViewRow = useCallback(
-    (id) => {
+    (id: string) => {
       dispatch(setSeePDV({ seePDV: true, id }));
     },
     [dispatch]
@@ -165,19 +152,19 @@ export default function PdvsListView() {
     setFilters(defaultFilters);
   }, []);
 
-  // nueva logica
-
-
   const handleDeleteRow = useCallback(
-    (id) => {
-      dispatch(deletePDV(id));
+    async (id: string) => {
+      try {
+        await deletePDVMutation(id).unwrap();
+        enqueueSnackbar('PDV eliminado correctamente', { variant: 'success' });
+      } catch (err) {
+        enqueueSnackbar('Error al eliminar PDV', { variant: 'error' });
+      }
     },
-    [ dispatch ]
+    [deletePDVMutation]
   );
 
-  // Popup create punto de venta
-
-  const { openPopup } = useAppSelector((state) => state.pdvs);
+  // Popup create punto de venta - remove unused variable
 
 
   return (
@@ -199,7 +186,7 @@ export default function PdvsListView() {
               onClick={() => dispatch(switchPopup(false))}
               variant="contained"
               color="primary"
-              sx={isMobile && { width: '100%' }}
+              sx={isMobile ? { width: '100%' } : undefined}
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
               Crear Punto De Venta
@@ -215,7 +202,7 @@ export default function PdvsListView() {
             dataFiltered={dataFiltered}
             onFilters={handleFilters}
             //
-            stockOptions={MUNICIPIO_OPTIONS}
+            stockOptions={municipioOptions}
           />
 
           {canReset && (
@@ -234,11 +221,11 @@ export default function PdvsListView() {
             <TableSelectedAction
               dense={table.dense}
               numSelected={table.selected.length}
-              rowCount={tableData.length}
+              rowCount={transformedPDVs.length}
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  tableData.map((row) => row.id)
+                  transformedPDVs.map((row) => row.id)
                 )
               }
               action={
@@ -255,19 +242,19 @@ export default function PdvsListView() {
                   order={table.order}
                   orderBy={table.orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
+                  rowCount={transformedPDVs.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      transformedPDVs.map((row) => row.id)
                     )
                   }
                 />
 
                 <TableBody>
-                  {pdvsLoading ? (
+                  {isLoading ? (
                     [...Array(table.rowsPerPage)].map((i, index) => (
                       <TableSkeleton key={index} sx={{ height: denseHeight }} />
                     ))
@@ -291,7 +278,7 @@ export default function PdvsListView() {
 
                   <TableEmptyRows
                     height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, transformedPDVs.length)}
                   />
                   <TableNoData notFound={notFound} />
                 </TableBody>

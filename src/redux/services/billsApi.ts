@@ -131,6 +131,30 @@ export interface CreateBillPaymentRequest {
   notes?: string;
 }
 
+export interface BillStatusCount {
+  status: string;
+  count: number;
+}
+
+export interface BillStatusData {
+  count: number;
+  total: string;
+  recaudado: string;
+}
+
+export interface BillsMonthlyStatusResponse {
+  year: number;
+  month: number;
+  total: BillStatusData;
+  open: BillStatusData;
+  paid: BillStatusData;
+  partial: BillStatusData;
+  void: BillStatusData;
+  draft: BillStatusData;
+  counts_by_status: BillStatusCount[];
+  applied_filters?: any;
+}
+
 export const billsApi = createApi({
   reducerPath: 'billsApi',
   baseQuery: baseQueryWithAuth,
@@ -241,6 +265,12 @@ export const billsApi = createApi({
           body: formData
         };
       }
+    }),
+
+    // Get bills monthly status
+    getBillsMonthlyStatus: builder.query<BillsMonthlyStatusResponse, { year: number; month: number }>({
+      query: ({ year, month }) => `/bills/reports/monthly-status?year=${year}&month=${month}`,
+      providesTags: ['Bill']
     })
   })
 });
@@ -254,5 +284,6 @@ export const {
   useAddBillPaymentMutation,
   useGetBillPaymentsQuery,
   useDeleteBillPaymentMutation,
-  useSendBillEmailMutation
+  useSendBillEmailMutation,
+  useGetBillsMonthlyStatusQuery
 } = billsApi;

@@ -45,7 +45,7 @@ import {
   TablePaginationCustom
 } from 'src/components/table';
 // Redux
-import { useGetBillsQuery, useVoidBillMutation } from 'src/redux/services/billsApi';
+import { useGetBillsQuery, useVoidBillMutation, useGetBillsMonthlyStatusQuery } from 'src/redux/services/billsApi';
 import { useGetContactsQuery } from 'src/redux/services/contactsApi';
 //
 import { useTranslation } from 'react-i18next';
@@ -92,10 +92,49 @@ export default function BillListView() {
   const [filters, setFilters] = useState(defaultFilters);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Month navigation state
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
   // RTK Query hooks
   const { data: bills = [], isLoading } = useGetBillsQuery();
   const { data: contacts = [] } = useGetContactsQuery({});
   const [voidBill] = useVoidBillMutation();
+
+  // Get monthly status data
+  const { data: monthlyStatus } = useGetBillsMonthlyStatusQuery({
+    year: selectedYear,
+    month: selectedMonth
+  });
+
+  // Month navigation handlers
+  const handlePreviousMonth = useCallback(() => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  }, [selectedMonth, selectedYear]);
+
+  const handleNextMonth = useCallback(() => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+
+    // Prevent navigation to future months
+    const isNextMonthDisabled =
+      selectedYear > currentYear || (selectedYear === currentYear && selectedMonth >= currentMonth);
+
+    if (!isNextMonthDisabled) {
+      if (selectedMonth === 12) {
+        setSelectedMonth(1);
+        setSelectedYear(selectedYear + 1);
+      } else {
+        setSelectedMonth(selectedMonth + 1);
+      }
+    }
+  }, [selectedMonth, selectedYear]);
 
   // Enrich bills with supplier data and calculated balance
   const enrichedBills = useMemo(
@@ -141,23 +180,113 @@ export default function BillListView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const getInvoiceLength = (status: string) => enrichedBills.filter((item) => item.status === status).length;
+  // Helper functions for getting data from backend or fallback to local data
+  const getPeriodData = useCallback(
+    (status: string) => {
+      if (!monthlyStatus) {
+        // Fallback to local data if backend data is not available
+        const filteredBills = enrichedBills.filter((item) => item.status === status);
+        return {
+          count: filteredBills.length,
+          total: sumBy(filteredBills, (item) => parseFloat(item.total_amount))
+        };
+      }
 
-  const getTotalAmount = (status: string) =>
-    sumBy(
-      enrichedBills.filter((item) => item.status === status),
-      (item) => parseFloat(item.total_amount)
-    );
+      const statusMap = {
+        all: monthlyStatus.total,
+        open: monthlyStatus.open,
+        paid: monthlyStatus.paid,
+        partial: monthlyStatus.partial,
+        void: monthlyStatus.void,
+        draft: monthlyStatus.draft
+      };
 
-  const getPercentByStatus = (status: string) => (getInvoiceLength(status) / enrichedBills.length) * 100;
+      const statusData = statusMap[status] || { count: 0, total: '0' };
+      return {
+        count: statusData.count,
+        total: parseFloat(statusData.total || '0')
+      };
+    },
+    [monthlyStatus, enrichedBills]
+  );
 
-  const TABS = [
-    { value: 'all', label: 'Todas', color: 'default' as const, count: enrichedBills.length },
-    { value: 'open', label: 'Abiertas', color: 'info' as const, count: getInvoiceLength('open') },
-    { value: 'paid', label: 'Pagadas', color: 'success' as const, count: getInvoiceLength('paid') },
-    { value: 'void', label: 'Anuladas', color: 'error' as const, count: getInvoiceLength('void') },
-    { value: 'draft', label: 'Borrador', color: 'warning' as const, count: getInvoiceLength('draft') }
-  ];
+  // Memoized data processing
+  const processedData = useMemo(() => {
+    const total = getPeriodData('all');
+    const open = getPeriodData('open');
+    const paid = getPeriodData('paid');
+    const partial = getPeriodData('partial');
+    const void_status = getPeriodData('void');
+    const draft = getPeriodData('draft');
+
+    const totalCount = total.count || 1; // Prevent division by zero
+
+    return {
+      total,
+      open,
+      paid,
+      partial,
+      void: void_status,
+      draft,
+      totalCount
+    };
+  }, [getPeriodData]);
+
+  // Memoized TABS using backend data
+  const TABS = useMemo(() => {
+    if (monthlyStatus?.counts_by_status) {
+      const countsMap: Record<string, number> = monthlyStatus.counts_by_status.reduce((acc, item) => {
+        acc[item.status.toLowerCase()] = item.count;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const totalCount = monthlyStatus.counts_by_status.reduce((sum, item) => sum + item.count, 0);
+
+      return [
+        { value: 'all', label: 'Todas', color: 'default' as const, count: totalCount },
+        { value: 'open', label: 'Abiertas', color: 'info' as const, count: countsMap.open || 0 },
+        { value: 'paid', label: 'Pagadas', color: 'success' as const, count: countsMap.paid || 0 },
+        { value: 'partial', label: 'Parciales', color: 'warning' as const, count: countsMap.partial || 0 },
+        { value: 'void', label: 'Anuladas', color: 'error' as const, count: countsMap.void || 0 },
+        { value: 'draft', label: 'Borrador', color: 'warning' as const, count: countsMap.draft || 0 }
+      ];
+    }
+
+    // Fallback to local data
+    return [
+      { value: 'all', label: 'Todas', color: 'default' as const, count: enrichedBills.length },
+      {
+        value: 'open',
+        label: 'Abiertas',
+        color: 'info' as const,
+        count: enrichedBills.filter((item) => item.status === 'open').length
+      },
+      {
+        value: 'paid',
+        label: 'Pagadas',
+        color: 'success' as const,
+        count: enrichedBills.filter((item) => item.status === 'paid').length
+      },
+      {
+        value: 'partial',
+        label: 'Parciales',
+        color: 'warning' as const,
+        count: enrichedBills.filter((item) => item.status === 'partial').length
+      },
+      {
+        value: 'void',
+        label: 'Anuladas',
+        color: 'error' as const,
+        count: enrichedBills.filter((item) => item.status === 'void').length
+      },
+      {
+        value: 'draft',
+        label: 'Borrador',
+        color: 'warning' as const,
+        count: enrichedBills.filter((item) => item.status === 'draft').length
+      }
+    ];
+  }, [monthlyStatus, enrichedBills]);
 
   const handleFilters = useCallback(
     (name, value) => {
@@ -482,45 +611,59 @@ export default function BillListView() {
           >
             <InvoiceAnalytic
               title="Total"
-              total={enrichedBills.length}
+              total={processedData.total.count}
               percent={100}
-              price={sumBy(enrichedBills, (item) => parseFloat(item.total_amount))}
+              price={processedData.total.total}
               icon="solar:bill-list-bold-duotone"
               color={theme.palette.info.main}
+              showNavigation
+              onPreviousMonth={handlePreviousMonth}
+              onNextMonth={handleNextMonth}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
             />
 
             <InvoiceAnalytic
               title="Abiertas"
-              total={getInvoiceLength('open')}
-              percent={getPercentByStatus('open')}
-              price={getTotalAmount('open')}
+              total={processedData.open.count}
+              percent={(processedData.open.count / processedData.totalCount) * 100}
+              price={processedData.open.total}
               icon="solar:file-check-bold-duotone"
               color={theme.palette.info.main}
             />
 
             <InvoiceAnalytic
               title="Pagadas"
-              total={getInvoiceLength('paid')}
-              percent={getPercentByStatus('paid')}
-              price={getTotalAmount('paid')}
+              total={processedData.paid.count}
+              percent={(processedData.paid.count / processedData.totalCount) * 100}
+              price={processedData.paid.total}
               icon="solar:file-check-bold-duotone"
               color={theme.palette.success.main}
             />
 
             <InvoiceAnalytic
+              title="Parciales"
+              total={processedData.partial.count}
+              percent={(processedData.partial.count / processedData.totalCount) * 100}
+              price={processedData.partial.total}
+              icon="solar:file-text-bold-duotone"
+              color={theme.palette.warning.main}
+            />
+
+            <InvoiceAnalytic
               title="Anuladas"
-              total={getInvoiceLength('void')}
-              percent={getPercentByStatus('void')}
-              price={getTotalAmount('void')}
+              total={processedData.void.count}
+              percent={(processedData.void.count / processedData.totalCount) * 100}
+              price={processedData.void.total}
               icon="solar:bell-bing-bold-duotone"
               color={theme.palette.error.main}
             />
 
             <InvoiceAnalytic
               title="Borradores"
-              total={getInvoiceLength('draft')}
-              percent={getPercentByStatus('draft')}
-              price={getTotalAmount('draft')}
+              total={processedData.draft.count}
+              percent={(processedData.draft.count / processedData.totalCount) * 100}
+              price={processedData.draft.total}
               icon="solar:file-corrupted-bold-duotone"
               color={theme.palette.text.secondary}
             />
