@@ -59,11 +59,6 @@ const BillInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/bill/invoi
 
 const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
 
-// POS
-
-const PosListView = lazy(() => import('src/pages/dashboard/pos/list'));
-const PosContainerView = lazy(() => import('src/pages/dashboard/pos/details'));
-
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
 const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
@@ -97,6 +92,15 @@ const KanbanPage = lazy(() => import('src/pages/dashboard/kanban'));
 const PermissionDeniedPage = lazy(() => import('src/pages/dashboard/permission'));
 // BLANK PAGE
 const BlankPage = lazy(() => import('src/pages/dashboard/blank'));
+
+// ACCOUNTING PAGES
+const ChartOfAccountsPage = lazy(() => import('src/pages/dashboard/accounting/chart-of-accounts'));
+const ChartOfAccountsMappingsPage = lazy(() => import('src/pages/dashboard/accounting/chart-of-accounts-mappings'));
+const ChartOfAccountsImportPage = lazy(() => import('src/pages/dashboard/accounting/chart-of-accounts-import'));
+const JournalListPage = lazy(() => import('src/pages/dashboard/accounting/journal-list'));
+const JournalEntryEditorPage = lazy(() => import('src/pages/dashboard/accounting/journal-entry-editor'));
+const JournalEntryDetailPage = lazy(() => import('src/pages/dashboard/accounting/journal-entry-detail'));
+const JournalReversalPage = lazy(() => import('src/pages/dashboard/accounting/journal-reversal'));
 
 // ----------------------------------------------------------------------
 
@@ -135,10 +139,6 @@ export const dashboardRoutes = [
       { path: 'banking', element: <OverviewBankingPage /> },
       { path: 'booking', element: <OverviewBookingPage /> },
       { path: 'file', element: <OverviewFilePage /> },
-      {
-        path: 'pos',
-        element: <PosContainerView />
-      },
       {
         path: 'inventory',
         children: [
@@ -206,16 +206,6 @@ export const dashboardRoutes = [
         ]
       },
       {
-        path: 'invoice',
-        children: [
-          { element: <InvoiceListPage />, index: true },
-          { path: 'list', element: <InvoiceListPage /> },
-          { path: ':id', element: <InvoiceDetailsPage /> },
-          { path: ':id/edit', element: <InvoiceEditPage /> },
-          { path: 'new', element: <InvoiceCreatePage /> }
-        ]
-      },
-      {
         path: 'post',
         children: [
           { element: <BlogPostsPage />, index: true },
@@ -243,6 +233,21 @@ export const dashboardRoutes = [
           { path: ':id', element: <TourDetailsPage /> },
           { path: 'new', element: <TourCreatePage /> },
           { path: ':id/edit', element: <TourEditPage /> }
+        ]
+      },
+      // ACCOUNTING
+      {
+        path: 'accounting',
+        children: [
+          { element: <ChartOfAccountsPage />, index: true },
+          { path: 'chart-of-accounts', element: <ChartOfAccountsPage /> },
+          { path: 'chart-of-accounts/mappings', element: <ChartOfAccountsMappingsPage /> },
+          { path: 'chart-of-accounts/import', element: <ChartOfAccountsImportPage /> },
+          { path: 'journal', element: <JournalListPage /> },
+          { path: 'journal/new', element: <JournalEntryEditorPage /> },
+          { path: 'journal/:entryId', element: <JournalEntryDetailPage /> },
+          { path: 'journal/:entryId/edit', element: <JournalEntryEditorPage /> },
+          { path: 'journal/:entryId/reversal', element: <JournalReversalPage /> }
         ]
       },
       { path: 'file-manager', element: <FileManagerPage /> },

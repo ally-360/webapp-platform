@@ -1,187 +1,213 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // @mui
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
-// routes
-// _mock
-// components
-import { useSettingsContext } from 'src/components/settings';
-import { AppBar, Button, CardHeader, IconButton, Typography, useMediaQuery } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { Alert } from '@mui/material';
 
-import { Icon } from '@iconify/react';
-import { Stack } from '@mui/system';
-import Iconify from 'src/components/iconify';
-import { RouterLink } from 'src/routes/components';
+// redux
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { addSaleWindow, initializeSalesFromStorage } from 'src/redux/pos/posIndex';
-import { paths } from 'src/routes/paths';
-import PosWindowView from './pos-window-view';
-//
-const saveToLocalStorage = (state) => {
-  try {
-    const serializedState = JSON.stringify(state);
-    localStorage.setItem('sales', serializedState);
-  } catch (e) {
-    // manejar errores
-  }
-};
+import { addSaleWindow, openRegister } from 'src/redux/pos/posSlice';
 
-const loadFromLocalStorage = () => {
-  try {
-    const serializedState = localStorage.getItem('sales');
-    if (serializedState === null) return undefined;
-    const { salesWindows } = JSON.parse(serializedState);
-    return salesWindows;
-  } catch (e) {
-    // manejar errores
-    return undefined;
-  }
-};
+// hooks
+import {
+  usePosInitialization,
+  usePosStatePersistence,
+  useTabManagement,
+  useDrawerPersistence,
+  useDrawerWidth
+} from '../hooks';
+
+// components
+import PosWindowView from './pos-window-view-new';
+import PosRegisterOpenDialog from '../pos-register-open-dialog';
+import PosSettingsDrawer from '../pos-settings-drawer';
+import { RegisterOpenScreen, EmptyWindowsMessage, PosBottomBar } from '../components';
+
+// ----------------------------------------------------------------------
+// TYPES & CONSTANTS
 // ----------------------------------------------------------------------
 
+interface RegisterOpenData {
+  pdv_name: string;
+  opening_amount: number;
+  opening_date: Date;
+  operator_name: string;
+  notes?: string;
+}
+
+const DEFAULT_REGISTER_VALUES = {
+  operator_name: 'Usuario Demo',
+  pdv_name: 'PDV Principal - Palmira',
+  opening_amount: 50000,
+  opening_date: new Date()
+} as const;
+
+// ----------------------------------------------------------------------
+// MAIN COMPONENT
+// ----------------------------------------------------------------------
+
+/**
+ * Contenedor principal del POS
+ *
+ * Este componente maneja:
+ * - Estado de la caja/registro
+ * - Gestión de ventanas de venta
+ * - Persistencia en localStorage
+ * - Interfaz de usuario principal
+ */
 export default function PosContainerView() {
-  const settings = useSettingsContext();
   const dispatch = useAppDispatch();
-  const sales = useAppSelector((state) => state.pos.salesWindows);
+  const { currentRegister, salesWindows, error } = useAppSelector((state) => state.pos);
+  const { computeContentWidth } = useDrawerWidth();
+
+  // Estado local
   const [addingNewSale, setAddingNewSale] = useState(false);
-  useEffect(() => {
-    if (addingNewSale && sales.length > 0) {
-      setOpenTab(sales[sales.length - 1].id);
-      setAddingNewSale(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addingNewSale]);
-  useEffect(() => {
-    const savedSalesWindows = loadFromLocalStorage();
-    if (savedSalesWindows) {
-      dispatch(initializeSalesFromStorage(savedSalesWindows));
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
-    saveToLocalStorage({ salesWindows: sales });
-  }, [sales]);
-  const drawerWidthLg = '30vw';
-  const drawerWidth = '500px';
-
-  const theme = useTheme();
-  const isLargeScreen = useMediaQuery(theme.breakpoints.up('xl'));
-
   const [openDrawer, setOpenDrawer] = useState(true);
+  const [openTab, setOpenTab] = useState(0);
+  const [showRegisterDialog, setShowRegisterDialog] = useState(false);
+  const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+  const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
 
-  const hiddenDrawer = () => {
-    // hidden drawer
-    setOpenDrawer(!openDrawer);
-  };
+  // Hooks personalizados
+  usePosInitialization();
+  usePosStatePersistence(currentRegister, salesWindows);
+  useTabManagement(salesWindows, addingNewSale, setOpenTab, setAddingNewSale);
+  useDrawerPersistence(openDrawer);
 
-  const [openTab, setOpenTab] = useState(sales.length > 0 ? sales[sales.length - 1].id : 0);
+  // Valores derivados (memoized para performance)
+  const isRegisterOpen = useMemo(() => Boolean(currentRegister?.status === 'open'), [currentRegister?.status]);
 
-  const handleChangeTab = (newValue) => {
+  const shouldShowRegisterDialog = useMemo(
+    () => showRegisterDialog && !isRegisterOpen,
+    [showRegisterDialog, isRegisterOpen]
+  );
+
+  const computedBottomBarWidth = useMemo(
+    () => (openDrawer && salesWindows.length > 0 ? computeContentWidth(openDrawer) : '100%'),
+    [openDrawer, salesWindows.length, computeContentWidth]
+  );
+
+  // Event handlers (memoized para evitar re-renders innecesarios)
+  const toggleDrawer = useCallback(() => {
+    setOpenDrawer((prev) => !prev);
+  }, []);
+
+  const handleChangeTab = useCallback((newValue: number) => {
     setOpenTab(newValue);
-  };
+  }, []);
 
-  const handleAddTab = () => {
+  const handleAddTab = useCallback(() => {
+    if (!isRegisterOpen) {
+      setShowRegisterDialog(true);
+      setOpenRegisterDialog(true);
+      return;
+    }
     dispatch(addSaleWindow());
     setAddingNewSale(true);
-  };
+  }, [isRegisterOpen, dispatch]);
 
-  return (
-    <Container maxWidth={false} sx={{ pt: 12 }}>
-      {/* Header Bar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          background: theme.palette.background.paper,
-          left: 0,
-          width:
-            // eslint-disable-next-line no-nested-ternary
-            openDrawer ? (isLargeScreen ? `calc(100% - ${drawerWidthLg})` : `calc(100% - ${drawerWidth})`) : '100%',
-          // eslint-disable-next-line no-nested-ternary
-          boxShadow: theme.shadows,
-          zIndex: 99999,
-          transition: theme.transitions.create('width ', {
-            easing: theme.transitions.easing.easeOut,
-            duration: theme.transitions.duration.enteringScreen
-          })
-        }}
-      >
-        <CardHeader
-          avatar={
-            <>
-              <IconButton component={RouterLink} to={paths.dashboard.root}>
-                {/* back icon */}
-                <Iconify icon="eva:arrow-ios-back-fill" />
-              </IconButton>
-              <img src="/logo/faviconBackgroundTransparent.svg" alt="logo" width="30" />
-            </>
-          }
-          title={
-            <Typography sx={{ color: theme.palette.text.primary }} variant="h6">
-              Venta POS
-              <Typography component="span" sx={{ color: 'text.secondary' }}>
-                &nbsp;(PDV: Palmira)
-              </Typography>
-            </Typography>
-          }
-          sx={{ p: 2 }}
-          action={
-            <IconButton>
-              <Icon icon="ic:round-settings" />
-            </IconButton>
-          }
+  const handleRegisterOpen = useCallback(
+    (registerData: RegisterOpenData) => {
+      dispatch(
+        openRegister({
+          user_id: 'mock_user_id', // TODO: Obtener del contexto de auth
+          user_name: registerData.operator_name,
+          pdv_id: 'mock_pdv_id', // TODO: Obtener del contexto
+          pdv_name: registerData.pdv_name,
+          opening_amount: registerData.opening_amount,
+          notes: registerData.notes
+        })
+      );
+      setShowRegisterDialog(false);
+      setOpenRegisterDialog(false);
+    },
+    [dispatch]
+  );
+
+  const handleOpenRegisterDialog = useCallback(() => {
+    setOpenRegisterDialog(true);
+  }, []);
+
+  const handleCloseRegisterDialog = useCallback(() => {
+    setOpenRegisterDialog(false);
+  }, []);
+
+  const handleCloseSettingsDrawer = useCallback(() => {
+    setShowSettingsDrawer(false);
+  }, []);
+
+  // Effect para controlar mostrar/ocultar dialog de registro
+  useEffect(() => {
+    if (!isRegisterOpen) {
+      setShowRegisterDialog(true);
+    } else {
+      setShowRegisterDialog(false);
+      // Set active tab if we have windows
+      if (salesWindows.length > 0 && openTab === 0) {
+        setOpenTab(salesWindows[0].id);
+      }
+    }
+  }, [isRegisterOpen, salesWindows.length, salesWindows, openTab]);
+
+  // Early return: Pantalla de apertura de caja
+  if (shouldShowRegisterDialog) {
+    return (
+      <>
+        <RegisterOpenScreen onOpenDialog={handleOpenRegisterDialog} />
+        <PosRegisterOpenDialog
+          open={openRegisterDialog}
+          onClose={handleCloseRegisterDialog}
+          onConfirm={handleRegisterOpen}
+          defaultValues={DEFAULT_REGISTER_VALUES}
         />
-      </AppBar>
-      <Grid container spacing={3}>
-        {sales.map(
-          (sale) =>
-            openTab === sale.id && (
-              <PosWindowView key={sale.id} openDrawer={openDrawer} hiddenDrawer={hiddenDrawer} sale={sale} />
-            )
+      </>
+    );
+  }
+
+  // Render principal
+  return (
+    <>
+      <Container maxWidth={false} sx={{ pt: 2 }}>
+        {/* Alert de error */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
         )}
 
-        {/* Bottom container */}
-        <AppBar
-          position="fixed"
-          sx={{
-            background: theme.palette.background.paper,
-            left: 0,
-            bottom: 0,
-            top: 'auto',
-            boxShadow: theme.shadows,
-            width:
-              // eslint-disable-next-line no-nested-ternary
-              openDrawer ? (isLargeScreen ? `calc(100% - ${drawerWidthLg})` : `calc(100% - ${drawerWidth})`) : '100%',
-            zIndex: 99999,
-            transition: theme.transitions.create('width ', {
-              easing: theme.transitions.easing.easeOut,
-              duration: theme.transitions.duration.enteringScreen
-            })
-          }}
-        >
-          <CardHeader
-            title={
-              <Stack flexDirection="row" alignItems="center" p={0} gap={2}>
-                {sales.map((tab) => (
-                  <Button
-                    key={tab.id}
-                    variant={openTab === tab.id ? 'contained' : 'outlined'}
-                    startIcon={<Icon icon="mdi:cart" />}
-                    onClick={() => handleChangeTab(tab.id)}
-                  >
-                    {tab.name}
-                  </Button>
-                ))}
-                <IconButton onClick={handleAddTab}>
-                  <Icon icon="mdi:plus" />
-                </IconButton>
-              </Stack>
-            }
-            sx={{ p: 1.5 }}
-          />
-          {/* add new window */}
-        </AppBar>
-      </Grid>
-    </Container>
+        {/* Ventanas de venta */}
+        <Grid container spacing={3}>
+          {salesWindows.map(
+            (sale) =>
+              openTab === sale.id && (
+                <PosWindowView key={sale.id} openDrawer={openDrawer} hiddenDrawer={toggleDrawer} sale={sale} />
+              )
+          )}
+
+          {/* Mensaje cuando no hay ventanas */}
+          {salesWindows.length === 0 && <EmptyWindowsMessage onAddTab={handleAddTab} />}
+        </Grid>
+      </Container>
+
+      {/* Bottom Tab Bar */}
+      <PosBottomBar
+        salesWindows={salesWindows}
+        openTab={openTab}
+        onChangeTab={handleChangeTab}
+        onAddTab={handleAddTab}
+        isRegisterOpen={isRegisterOpen}
+        computedWidth={computedBottomBarWidth}
+      />
+
+      {/* Diálogos */}
+      <PosRegisterOpenDialog
+        open={openRegisterDialog}
+        onClose={handleCloseRegisterDialog}
+        onConfirm={handleRegisterOpen}
+        defaultValues={DEFAULT_REGISTER_VALUES}
+      />
+
+      <PosSettingsDrawer open={showSettingsDrawer} onClose={handleCloseSettingsDrawer} />
+    </>
   );
 }

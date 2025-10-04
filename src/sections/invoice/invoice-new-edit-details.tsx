@@ -12,18 +12,18 @@ import InputAdornment from '@mui/material/InputAdornment';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 // _mock
-import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
+// import { INVOICE_SERVICE_OPTIONS } from 'src/_mock';
 
 // components
 import Iconify from 'src/components/iconify';
 import { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
-import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceNewEditDetails() {
-  const { control, setValue, watch, resetField } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -58,22 +58,22 @@ export default function InvoiceNewEditDetails() {
     remove(index);
   };
 
-  const handleClearService = useCallback(
-    (index) => {
-      resetField(`items[${index}].quantity`);
-      resetField(`items[${index}].price`);
-      resetField(`items[${index}].total`);
-    },
-    [resetField]
-  );
+  // const handleClearService = useCallback(
+  //   (index) => {
+  //     resetField(`items[${index}].quantity`);
+  //     resetField(`items[${index}].price`);
+  //     resetField(`items[${index}].total`);
+  //   },
+  //   [resetField]
+  // );
 
-  const handleSelectService = useCallback(
-    (index, option) => {
-      setValue(`items[${index}].price`, INVOICE_SERVICE_OPTIONS.find((service) => service.name === option)?.price);
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
-    },
-    [setValue, values.items]
-  );
+  // const handleSelectService = useCallback(
+  //   (index, option) => {
+  //     setValue(`items[${index}].price`, INVOICE_SERVICE_OPTIONS.find((service) => service.name === option)?.price);
+  //     setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
+  //   },
+  //   [setValue, values.items]
+  // );
 
   const handleChangeQuantity = useCallback(
     (event, index) => {
@@ -139,17 +139,24 @@ export default function InvoiceNewEditDetails() {
 
   // Obtenemos los productos
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(getAllProducts());
+    try {
+      dispatch(getAllProducts({ page: 1, pageSize: 25 }));
+    } catch (error) {
+      console.error('Error loading products:', error);
+    }
   }, [dispatch]);
 
-  const { products } = useSelector((state) => state.products);
+  const { products, productsLoading } = useAppSelector((state) => state.products);
+
+  // Ensure products is always an array
+  const productsOptions = Array.isArray(products) ? products : [];
 
   useEffect(() => {
-    console.log(products);
-  }, [products]);
+    console.log('Products:', products, 'Array?', Array.isArray(products), 'Loading:', productsLoading);
+  }, [products, productsLoading]);
 
   // Función para eliminar etiquetas HTML
   function stripHTMLTags(html) {
@@ -188,7 +195,8 @@ export default function InvoiceNewEditDetails() {
                 size="small"
                 label="Producto"
                 InputLabelProps={{ shrink: true }}
-                options={products}
+                options={productsOptions}
+                loading={productsLoading}
                 onInputChange={(event, value) => console.log(value)}
                 getOptionLabel={(option) => option.name || ''}
                 getOptionSelected={(option, value) => option.name === value.name}

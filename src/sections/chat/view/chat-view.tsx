@@ -10,7 +10,8 @@ import { useRouter, useSearchParams } from 'src/routes/hook';
 // hooks
 import { useMockedUser } from 'src/hooks/use-mocked-user';
 // api
-import { useGetContacts, useGetConversation, useGetConversations } from 'src/api/chat';
+import { useGetConversation, useGetConversations } from 'src/api/chat';
+import { useGetContactsQuery } from 'src/redux/services/contactsApi';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
@@ -36,14 +37,14 @@ export default function ChatView() {
 
   const [recipients, setRecipients] = useState([]);
 
-  const { contacts } = useGetContacts();
+  const { data: contacts = [] } = useGetContactsQuery({});
 
   const { conversations, conversationsLoading } = useGetConversations();
 
   const { conversation, conversationError } = useGetConversation(`${selectedConversationId}`);
 
   const participants = conversation
-    ? conversation.participants.filter((participant) => participant.id !== user.id)
+    ? conversation.participants.filter((participant) => participant.id !== user?.id)
     : [];
 
   useEffect(() => {

@@ -17,7 +17,7 @@ export default function TableNoData({ notFound, sx, text }: TableNoDataProps) {
         <TableCell colSpan={12}>
           <EmptyContent
             filled
-            title={text || 'No data found'}
+            title={text || 'No se encontraron datos'}
             sx={{
               py: 10,
               ...sx

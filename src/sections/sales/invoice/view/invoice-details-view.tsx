@@ -3,36 +3,83 @@ import PropTypes from 'prop-types';
 import Container from '@mui/material/Container';
 // routes
 import { paths } from 'src/routes/paths';
-// _mock
-import { _invoices } from 'src/_mock';
+import { useParams } from 'src/routes/hook';
 // components
 import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { LoadingScreen } from 'src/components/loading-screen';
+// Redux
+import { useGetSalesInvoiceByIdQuery } from 'src/redux/services/salesInvoicesApi';
 //
 import InvoiceDetails from '../invoice-details';
 
 // ----------------------------------------------------------------------
 
-export default function InvoiceDetailsView({ id }) {
+export default function InvoiceDetailsView({ id: propId }) {
   const settings = useSettingsContext();
+  const params = useParams();
 
-  const currentInvoice = _invoices.filter((invoice) => invoice.id === id)[0];
+  const id = propId || params.id;
+
+  const {
+    data: currentInvoice,
+    isLoading,
+    isError,
+    error
+  } = useGetSalesInvoiceByIdQuery(id, {
+    skip: !id
+  });
+
+  console.log('🔍 RTK Query state:', { currentInvoice, isLoading, isError, error });
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (!id || isError || !currentInvoice) {
+    console.error('❌ Error loading invoice:', error);
+    return (
+      <Container maxWidth={settings.themeStretch ? false : 'lg'}>
+        <CustomBreadcrumbs
+          icon="solar:bill-list-bold-duotone"
+          heading="Error"
+          links={[
+            {
+              name: 'Dashboard',
+              href: paths.dashboard.root
+            },
+            {
+              name: 'Facturas',
+              href: paths.dashboard.sales.root
+            },
+            { name: 'Error' }
+          ]}
+          sx={{ mb: { xs: 3, md: 5 } }}
+        />
+        <div>
+          {!id
+            ? 'ID de factura no proporcionado'
+            : `Error al cargar la factura: ${error?.toString() || 'Error desconocido'}`}
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
         icon="solar:bill-list-bold-duotone"
-        heading={currentInvoice?.invoiceNumber}
+        heading={currentInvoice?.number}
         links={[
           {
             name: 'Dashboard',
             href: paths.dashboard.root
           },
           {
-            name: 'Invoice',
-            href: paths.dashboard.invoice.root
+            name: 'Facturas',
+            href: paths.dashboard.sales.root
           },
-          { name: currentInvoice?.invoiceNumber }
+          { name: currentInvoice?.number }
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />

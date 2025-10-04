@@ -21,6 +21,7 @@ import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
 import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
+import { paths } from 'src/routes/paths';
 
 const steps = ['Crear empresa', 'Puntos de venta', 'Resumen'];
 
@@ -80,7 +81,7 @@ export default function StepByStep() {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate(paths.auth.jwt.login);
     } catch (error) {
       console.error(error);
       enqueueSnackbar('No se pudo cerrar sesión', { variant: 'error' });

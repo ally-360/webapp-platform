@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { useCallback } from 'react';
-import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import { useCallback, useState } from 'react';
+import { PDFViewer, pdf } from '@react-pdf/renderer';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -19,19 +19,81 @@ import { useRouter } from 'src/routes/hook';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import Iconify from 'src/components/iconify';
+import { useSnackbar } from 'src/components/snackbar';
 //
 import InvoicePDF from './invoice-pdf';
 
 // ----------------------------------------------------------------------
 
-export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus }) {
+export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus, onAddPayment }) {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const view = useBoolean();
+  const view = useBoolean(false);
+  const [isSending, setIsSending] = useState(false);
+
+  const canAddPayment = invoice?.status === 'OPEN' && parseFloat(invoice?.balance_due || '0') > 0;
 
   const handleEdit = useCallback(() => {
-    router.push(paths.dashboard.invoice.edit(invoice.id));
+    router.push(paths.dashboard.sales.edit(invoice.id));
   }, [invoice.id, router]);
+
+  const handleDownloadPdf = useCallback(async () => {
+    try {
+      const blob = await pdf(<InvoicePDF invoice={invoice} currentStatus={currentStatus} />).toBlob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `factura-${invoice.number}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      enqueueSnackbar('PDF descargado exitosamente', { variant: 'success' });
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      enqueueSnackbar('Error al descargar el PDF', { variant: 'error' });
+    }
+  }, [invoice, currentStatus, enqueueSnackbar]);
+
+  const handleSendEmail = useCallback(async () => {
+    setIsSending(true);
+    try {
+      // Generar el PDF como blob
+      const pdfBlob = await pdf(<InvoicePDF invoice={invoice} currentStatus={currentStatus} />).toBlob();
+
+      // Crear FormData para enviar el PDF como adjunto
+      const formData = new FormData();
+      formData.append('to_email', invoice.customer?.email || '');
+      formData.append('subject', `Factura ${invoice.number}`);
+      formData.append('message', 'Estimado cliente, adjunto encontrará su factura. Gracias por su compra.');
+      formData.append('pdf_file', pdfBlob, `factura-${invoice.number}.pdf`);
+
+      // Usar fetch directamente para enviar FormData
+      const token = localStorage.getItem('accessToken');
+      const companyId = localStorage.getItem('companyId');
+
+      const response = await fetch(`${(import.meta as any).env.VITE_HOST_API}/invoices/${invoice.id}/send-email`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'X-Company-ID': companyId || ''
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al enviar el email');
+      }
+
+      enqueueSnackbar('Email con PDF enviado exitosamente', { variant: 'success' });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      enqueueSnackbar('Error al enviar el email con PDF', { variant: 'error' });
+    } finally {
+      setIsSending(false);
+    }
+  }, [invoice, currentStatus, enqueueSnackbar, setIsSending]);
 
   return (
     <>
@@ -54,23 +116,11 @@ export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, 
             </IconButton>
           </Tooltip>
 
-          <PDFDownloadLink
-            document={<InvoicePDF invoice={invoice} currentStatus={currentStatus} />}
-            fileName={invoice.invoiceNumber}
-            style={{ textDecoration: 'none' }}
-          >
-            {({ loading }) => (
-              <Tooltip title="Download">
-                <IconButton>
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    <Iconify icon="eva:cloud-download-fill" />
-                  )}
-                </IconButton>
-              </Tooltip>
-            )}
-          </PDFDownloadLink>
+          <Tooltip title="Descargar PDF">
+            <IconButton onClick={handleDownloadPdf}>
+              <Iconify icon="eva:cloud-download-fill" />
+            </IconButton>
+          </Tooltip>
 
           <Tooltip title="Print">
             <IconButton>
@@ -78,9 +128,9 @@ export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, 
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Send">
-            <IconButton>
-              <Iconify icon="iconamoon:send-fill" />
+          <Tooltip title="Enviar por Email">
+            <IconButton onClick={handleSendEmail} disabled={isSending || !invoice.customer?.email}>
+              {isSending ? <CircularProgress size={24} color="inherit" /> : <Iconify icon="iconamoon:send-fill" />}
             </IconButton>
           </Tooltip>
 
@@ -89,7 +139,26 @@ export default function InvoiceToolbar({ invoice, currentStatus, statusOptions, 
               <Iconify icon="solar:share-bold" />
             </IconButton>
           </Tooltip>
+
+          {canAddPayment && (
+            <Tooltip title="Registrar Pago">
+              <IconButton onClick={onAddPayment} color="success">
+                <Iconify icon="solar:wallet-money-bold" />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
+
+        {canAddPayment && (
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<Iconify icon="solar:wallet-money-bold" />}
+            onClick={onAddPayment}
+          >
+            Registrar Pago
+          </Button>
+        )}
 
         <TextField
           fullWidth
@@ -136,5 +205,6 @@ InvoiceToolbar.propTypes = {
   currentStatus: PropTypes.string,
   invoice: PropTypes.object,
   onChangeStatus: PropTypes.func,
+  onAddPayment: PropTypes.func,
   statusOptions: PropTypes.array
 };

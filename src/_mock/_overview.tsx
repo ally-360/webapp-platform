@@ -42,17 +42,36 @@ export const _appAuthors = [...Array(3)].map((_, index) => ({
   totalFavorites: _mock.number.nativeL(index)
 }));
 
-export const _appInvoices = [...Array(5)].map((_, index) => {
-  const category = ['Android', 'Mac', 'Windows', 'Android', 'Mac'][index];
-
-  const status = ['paid', 'out of date', 'progress', 'paid', 'paid'][index];
+export const _appInvoices = [...Array(8)].map((_, index) => {
+  const categories = [
+    'Electrónicos',
+    'Oficina',
+    'Computadores',
+    'Accesorios',
+    'Software',
+    'Mobiliario',
+    'Papelería',
+    'Impresoras'
+  ][index];
+  const statuses = ['Pagada', 'Pendiente', 'Vencida', 'Pagada', 'Pagada', 'Pendiente', 'Pagada', 'Vencida'][index];
+  const invoiceNumbers = [
+    `FAC-2025-${1234 + index}`,
+    `FAC-2025-${1250 + index}`,
+    `FAC-2025-${1300 + index}`,
+    `FAC-2025-${1400 + index}`,
+    `FAC-2025-${1500 + index}`,
+    `FAC-2025-${1600 + index}`,
+    `FAC-2025-${1700 + index}`,
+    `FAC-2025-${1800 + index}`
+  ][index];
+  const prices = [1250000, 890000, 2340000, 450000, 890000, 1560000, 234000, 3450000][index];
 
   return {
     id: _mock.id(index),
-    invoiceNumber: `INV-199${index}`,
-    price: _mock.number.price(index),
-    category,
-    status
+    invoiceNumber: invoiceNumbers,
+    price: prices,
+    category: categories,
+    status: statuses
   };
 });
 
@@ -66,31 +85,59 @@ export const _appFeatured = [...Array(3)].map((_, index) => ({
 // ANALYTIC
 // ----------------------------------------------------------------------
 
-export const _analyticTasks = [...Array(5)].map((_, index) => ({
-  id: _mock.id(index),
-  name: _mock.taskNames(index)
-}));
-
-export const _analyticPosts = [...Array(5)].map((_, index) => ({
-  id: _mock.id(index),
-  postedAt: _mock.time(index),
-  title: _mock.postTitle(index),
-  coverUrl: _mock.image.cover(index),
-  description: _mock.sentence(index)
-}));
-
-export const _analyticOrderTimeline = [...Array(5)].map((_, index) => {
-  const title = [
-    '1983, orders, $4220',
-    '12 Invoices have been paid',
-    'Order #37745 from September',
-    'New order placed #XF-2356',
-    'New order placed #XF-2346'
+export const _analyticTasks = [...Array(5)].map((_, index) => {
+  const taskNames = [
+    'Revisar inventario de productos',
+    'Actualizar catálogo de precios',
+    'Procesar órdenes pendientes',
+    'Generar reporte mensual',
+    'Contactar proveedores nuevos'
   ][index];
 
   return {
     id: _mock.id(index),
-    title,
+    name: taskNames
+  };
+});
+
+export const _analyticPosts = [...Array(5)].map((_, index) => {
+  const titles = [
+    'Nuevas tendencias en tecnología empresarial 2024',
+    'Optimización de procesos de inventario',
+    'Estrategias de ventas para el segundo semestre',
+    'Implementación de sistemas CRM modernos',
+    'Análisis de mercado: oportunidades de crecimiento'
+  ][index];
+
+  const descriptions = [
+    'Descubre las últimas innovaciones que están transformando el mundo empresarial...',
+    'Mejora la eficiencia de tu inventario con estas técnicas probadas...',
+    'Aumenta tus ventas con estrategias enfocadas en resultados...',
+    'Moderniza tu gestión de clientes con herramientas avanzadas...',
+    'Identifica nuevas oportunidades de mercado para tu negocio...'
+  ][index];
+
+  return {
+    id: _mock.id(index),
+    postedAt: _mock.time(index),
+    title: titles,
+    coverUrl: _mock.image.cover(index),
+    description: descriptions
+  };
+});
+
+export const _analyticOrderTimeline = [...Array(5)].map((_, index) => {
+  const titles = [
+    'Orden #ORD-2025-001 - Cliente: TecnoSoft SA - $2,850,000',
+    '15 Facturas han sido procesadas y enviadas',
+    'Orden #ORD-2025-002 de Septiembre - Estado: Completada',
+    'Nueva orden recibida #ORD-2025-003 - Cliente: Distribuidora Norte',
+    'Orden #ORD-2025-004 confirmada - Entrega programada para mañana'
+  ][index];
+
+  return {
+    id: _mock.id(index),
+    title: titles,
     type: `order${index + 1}`,
     time: _mock.time(index)
   };
@@ -98,28 +145,28 @@ export const _analyticOrderTimeline = [...Array(5)].map((_, index) => {
 
 export const _analyticTraffic = [
   {
-    value: 'facebook',
-    label: 'FaceBook',
-    total: _mock.number.nativeL(1),
-    icon: 'eva:facebook-fill'
+    value: 'erp-web',
+    label: 'ERP Web',
+    total: 45832,
+    icon: 'eva:globe-2-fill'
   },
   {
-    value: 'google',
-    label: 'Google',
-    total: _mock.number.nativeL(2),
-    icon: 'eva:google-fill'
+    value: 'mobile-app',
+    label: 'App Móvil',
+    total: 28764,
+    icon: 'eva:smartphone-fill'
   },
   {
-    value: 'linkedin',
-    label: 'Linkedin',
-    total: _mock.number.nativeL(3),
-    icon: 'eva:linkedin-fill'
+    value: 'pos-terminal',
+    label: 'Terminal POS',
+    total: 18945,
+    icon: 'eva:credit-card-fill'
   },
   {
-    value: 'twitter',
-    label: 'Twitter',
-    total: _mock.number.nativeL(4),
-    icon: 'eva:twitter-fill'
+    value: 'api-calls',
+    label: 'API Externa',
+    total: 12387,
+    icon: 'eva:code-fill'
   }
 ];
 

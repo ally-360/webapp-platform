@@ -32,6 +32,7 @@ export const paths = {
       forgotPassword: `${ROOTS.AUTH}/jwt/forgot-password`
     }
   },
+  verifyEmail: '/verify-email',
   stepByStep: {
     root: `${ROOTS.AUTH}/step-by-step`
   },
@@ -101,16 +102,6 @@ export const paths = {
         edit: `${ROOTS.DASHBOARD}/product/${MOCK_ID}/edit`
       }
     },
-    invoice: {
-      root: `${ROOTS.DASHBOARD}/invoice`,
-      new: `${ROOTS.DASHBOARD}/invoice/new`,
-      details: (id: string) => `${ROOTS.DASHBOARD}/invoice/${id}`,
-      edit: (id: string) => `${ROOTS.DASHBOARD}/invoice/${id}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}/edit`
-      }
-    },
     post: {
       root: `${ROOTS.DASHBOARD}/post`,
       new: `${ROOTS.DASHBOARD}/post/new`,
@@ -146,6 +137,19 @@ export const paths = {
       demo: {
         details: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}`,
         edit: `${ROOTS.DASHBOARD}/tour/${MOCK_ID}/edit`
+      }
+    },
+    accounting: {
+      root: `${ROOTS.DASHBOARD}/accounting`,
+      chartOfAccounts: `${ROOTS.DASHBOARD}/accounting/chart-of-accounts`,
+      mappings: `${ROOTS.DASHBOARD}/accounting/chart-of-accounts/mappings`,
+      import: `${ROOTS.DASHBOARD}/accounting/chart-of-accounts/import`,
+      journal: {
+        root: `${ROOTS.DASHBOARD}/accounting/journal`,
+        new: `${ROOTS.DASHBOARD}/accounting/journal/new`,
+        details: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}`,
+        edit: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}/edit`,
+        reversal: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}/reversal`
       }
     }
   }

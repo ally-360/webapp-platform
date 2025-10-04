@@ -14,18 +14,11 @@ import InputAdornment from '@mui/material/InputAdornment';
 // routes
 import { paths } from 'src/routes/paths';
 // hooks
-import { useResponsive } from 'src/hooks/use-responsive';
+// import { useResponsive } from 'src/hooks/use-responsive';
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import { useRouter } from 'src/routes/hook';
-import FormProvider, {
-  RHFEditor,
-  RHFUpload,
-  RHFSwitch,
-  RHFTextField,
-  RHFAutocomplete,
-  RHFSelect
-} from 'src/components/hook-form';
+import FormProvider, { RHFUpload, RHFSwitch, RHFTextField, RHFAutocomplete, RHFSelect } from 'src/components/hook-form';
 import {
   Avatar,
   IconButton,
@@ -39,64 +32,60 @@ import {
   Zoom
 } from '@mui/material';
 import { Icon } from '@iconify/react';
-import { getCategories, switchPopupState } from 'src/redux/inventory/categoriesSlice';
-import { switchPopupState as switchPopupStateBrand, getBrands } from 'src/redux/inventory/brandsSlice';
+import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
+import { switchPopupState as switchPopupStateBrand } from 'src/redux/inventory/brandsSlice';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
-import { useTheme } from '@emotion/react';
+import { useTheme } from '@mui/material/styles';
 import MenuCategories from 'src/sections/categories/MenuCategories';
 import { setPopupAssignInventory } from 'src/redux/inventory/productsSlice';
 import PopupAssingInventory from 'src/sections/product/PopupAssignInventory';
+// RTK Query
+import {
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useAssignProductTaxesMutation,
+  useUpdateProductMinStockMutation,
+  type CreateProductRequest
+} from 'src/redux/services/productsApi';
+import { useGetTaxesQuery, useGetCategoriesQuery, useGetBrandsQuery } from 'src/redux/services/catalogApi';
 import { NewProductSchema } from 'src/interfaces/inventory/productsSchemas';
 import { NewProductInterface, PDVproduct, getProductResponse } from 'src/interfaces/inventory/productsInterface';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useAppDispatch } from 'src/hooks/store';
 import { fNumber } from 'src/utils/format-number';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
-import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 
 export default function ProductNewEditForm({ currentProduct }: { currentProduct: getProductResponse }) {
   const router = useRouter();
-  const mdUp = useResponsive('up', 'md', true);
+  // const mdUp = useResponsive('up', 'md');
 
   const dispatch = useAppDispatch();
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const [includeTaxes, setIncludeTaxes] = useState(false);
-
-  const TAXES_OPTIONS = useMemo(
-    () => [
-      { value: 0, label: '0%' },
-      { value: 5, label: '5%' },
-      { value: 10, label: '10%' },
-      { value: 15, label: '15%' },
-      { value: 19, label: '19%' }
-    ],
-    []
-  );
+  const [includeTaxes] = useState(false);
 
   const defaultValues = useMemo(
     () => ({
       name: currentProduct?.name || '',
       description: currentProduct?.description || '',
       typeProduct: currentProduct?.typeProduct || 1,
-      images: currentProduct?.images || [
-        'https://media.istockphoto.com/id/499208007/es/foto/coca-cola-cl%C3%A1sica-en-un-frasco-de-vidrio.jpg?s=612x612&w=0&k=20&c=4n-_VfFOTAzahIon4E6jCcd26-gs01in17JKbDQ2PTg='
-      ],
+      images: currentProduct?.images || [],
       //
       barCode: currentProduct?.barCode || '',
       sku: currentProduct?.sku || '',
       priceBase: currentProduct?.priceBase || '',
       priceSale: currentProduct?.priceSale || '',
       taxesOption: currentProduct?.taxesOption || 0,
+      tax_ids: [],
       productsPdvs:
-        currentProduct?.productPdv.map((item) => ({
-          pdv: item.pdv.name,
-          id: item.pdv.id,
+        (currentProduct as any)?.productPdv?.map((item: any) => ({
+          pdv: item.pdv_name,
+          id: item.pdv_id,
           quantity: item.quantity,
-          minQuantity: item.minQuantity
+          minQuantity: item.min_quantity
         })) || [],
       quantityStock: currentProduct?.quantityStock || 0,
 
@@ -104,12 +93,12 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
       state: currentProduct?.state || true,
       sellInNegative: currentProduct?.sellInNegative || false,
 
-      category: currentProduct?.category || ''
+      category: (currentProduct as any)?.category?.id || ''
     }),
     [currentProduct]
   );
 
-  const methods = useForm({
+  const methods = useForm<any>({
     resolver: yupResolver(NewProductSchema),
     defaultValues
   });
@@ -123,6 +112,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   } = methods;
 
   const values = watch();
+  const setValueAny = setValue as any;
 
   useEffect(() => {
     console.log('values', values);
@@ -132,90 +122,181 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
   const [searchQueryBrand, setSearchQueryBrand] = useState('');
 
+  // Handlers declared early to satisfy effect deps below
+  const handleCategorySelect = useCallback(
+    (_event: unknown, option: any) => {
+      setSelectedOptionCategory(option);
+      setValueAny('category', option?.id);
+    },
+    [setValueAny]
+  );
+
+  const handleBrandSelect = useCallback(
+    (_event: unknown, option: any) => {
+      setSelectedOptionBrand(option);
+      setValueAny('brand', option?.id);
+    },
+    [setValueAny]
+  );
+
   useEffect(() => {
     if (currentProduct) {
       reset(defaultValues);
       handleBrandSelect(null, currentProduct.brand);
       handleCategorySelect(null, currentProduct.category);
     }
-  }, [currentProduct, defaultValues, reset]);
+  }, [currentProduct, defaultValues, reset, handleBrandSelect, handleCategorySelect]);
 
   useEffect(() => {
     if (includeTaxes) {
-      setValue('taxesOption', 0);
+      setValueAny('taxesOption', 0);
     } else {
-      setValue('taxesOption', currentProduct?.taxesOption || 0);
+      setValueAny('taxesOption', currentProduct?.taxesOption || 0);
     }
-  }, [currentProduct?.taxesOption, includeTaxes, setValue]);
+  }, [currentProduct?.taxesOption, includeTaxes, setValueAny]);
 
-  const onSubmit = handleSubmit(async (data: NewProductInterface) => {
+  const { data: taxes = [] } = useGetTaxesQuery();
+  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategoriesQuery();
+  const { data: brands = [], isLoading: isLoadingBrands } = useGetBrandsQuery();
+
+  // Prefill selected taxes in edit mode when product has a single taxesOption id
+  useEffect(() => {
+    if (!currentProduct) return;
+    const current = values.tax_ids || [];
+    if (current.length === 0 && currentProduct.taxesOption != null) {
+      const foundTax = (Array.isArray(taxes) ? taxes : []).find(
+        (t: any) => String(t.id) === String(currentProduct.taxesOption)
+      );
+      if (foundTax) {
+        setValueAny('tax_ids', [String(foundTax.id)], { shouldValidate: true });
+      }
+    }
+  }, [currentProduct, taxes, values.tax_ids, setValueAny]);
+
+  const [createProduct, { isLoading: isCreating }] = useCreateProductMutation();
+  const [updateProduct, { isLoading: isUpdating }] = useUpdateProductMutation();
+  const [assignProductTaxes] = useAssignProductTaxesMutation();
+  const [updateProductMinStock] = useUpdateProductMinStockMutation();
+
+  const toBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
+  const onSubmit = handleSubmit(async (data: NewProductInterface & { tax_ids?: string[] }) => {
     const lastProductsPdvs = data.productsPdvs;
-    const priceBase = data.priceBase.replace(/[^0-9.-]+/g, '');
-    const priceSale = data.priceSale.replace(/[^0-9.-]+/g, '');
+    const priceBaseNum = Number(String(data.priceBase).replace(/[^0-9.-]+/g, '')) || 0;
+    const priceSaleNum = Number(String(data.priceSale).replace(/[^0-9.-]+/g, '')) || 0;
 
     try {
-      setValue('quantityStock', data.productsPdvs.reduce((acc: number, pdv: PDVproduct) => acc + pdv.quantity, 0) || 0);
-      // Cambiar en todos los pdvs el pdv por el id del pdv y dejar el minQuantity y quantity
-      // remover las comas del precio
+      setValue(
+        'quantityStock',
+        data.productsPdvs.reduce((acc: number, pdv: PDVproduct) => acc + Number(pdv.quantity || 0), 0) || 0
+      );
 
-      data.priceBase = priceBase;
-      data.priceSale = priceSale;
-      data.productsPdvs = data.productsPdvs.map((pdv: PDVproduct) => ({
-        pdv: pdv.id,
-        minQuantity: pdv.minQuantity,
-        quantity: pdv.quantity
-      }));
+      // Normalize images to base64 strings
+      const imageValues = (data.images || []) as any[];
+      const imagesBase64: string[] = (
+        await Promise.all(
+          imageValues.map(async (img) => {
+            if (typeof img === 'string') return img;
+            if (img?.preview && img instanceof File) return toBase64(img);
+            if (img?.preview && img?.file instanceof File) return toBase64(img.file);
+            if (img instanceof File) return toBase64(img);
+            return null;
+          })
+        )
+      ).filter(Boolean) as string[];
+
+      const payload: CreateProductRequest = {
+        name: data.name,
+        sku: data.sku || undefined,
+        description: data.description || undefined,
+        barCode: data.barCode || undefined,
+        typeProduct: String(data.typeProduct) as '1' | '2',
+        priceSale: priceSaleNum || priceBaseNum,
+        priceBase: priceBaseNum,
+        state: Boolean(data.state),
+        sellInNegative: Boolean(data.sellInNegative),
+        brand_id: String(data.brand),
+        category_id: String(data.category),
+        tax_ids: Array.isArray((data as any).tax_ids) ? ((data as any).tax_ids as string[]) : [],
+        images: imagesBase64,
+        stocks: data.productsPdvs.map((pdv: PDVproduct) => ({
+          pdv_id: pdv.id,
+          quantity: Number(pdv.quantity),
+          min_quantity: Number(pdv.minQuantity || 0)
+        }))
+      };
+
+      let saved;
       if (currentProduct) {
-        // TODO BACKEND: el patch da error
-        await RequestService.updateProduct({ id: currentProduct.id, databody: data });
+        saved = await updateProduct({ id: currentProduct.id, ...payload }).unwrap();
+        // Update PDV min quantities using specific endpoint
+        if (Array.isArray(values.productsPdvs) && values.productsPdvs.length) {
+          await Promise.all(
+            values.productsPdvs.map((pdv: PDVproduct) =>
+              updateProductMinStock({
+                productId: saved.id,
+                pdvId: String(pdv.id),
+                minQuantity: Number(pdv.minQuantity || 0)
+              }).unwrap()
+            )
+          );
+        }
         enqueueSnackbar('Se ha editado correctamente!');
-        router.push(paths.dashboard.product.root);
-        reset();
-        return;
+      } else {
+        saved = await createProduct(payload).unwrap();
+        enqueueSnackbar('Creación exitosa!');
       }
-      await RequestService.createProduct(data);
+
+      // Assign taxes explicitly after save (backend endpoint)
+      if (Array.isArray(payload.tax_ids) && payload.tax_ids.length) {
+        await assignProductTaxes({ productId: saved.id, tax_ids: payload.tax_ids }).unwrap();
+      }
       reset();
-      enqueueSnackbar(currentProduct ? 'Se ha editado correctamente!' : 'Creación exitosa!');
       router.push(paths.dashboard.product.root);
-      console.info('DATA', data);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      enqueueSnackbar('Error al crear el producto', { variant: 'error' });
+      enqueueSnackbar(error?.data?.detail || 'Error al crear el producto', { variant: 'error' });
       data.productsPdvs = lastProductsPdvs;
     }
   });
 
   const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const files = values.images || [];
-
-      const newFiles = acceptedFiles.map((file) =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file)
-        })
+    async (acceptedFiles: File[]) => {
+      const current = (values.images || []) as any[];
+      const base64Files = await Promise.all(
+        acceptedFiles.map(
+          (file) =>
+            new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(file);
+            })
+        )
       );
-
-      setValue('images', [...files, ...newFiles], { shouldValidate: true });
+      setValueAny('images', [...current, ...base64Files], { shouldValidate: true });
     },
-    [setValue, values.images]
+    [setValueAny, values.images]
   );
 
   const handleRemoveFile = useCallback(
     (inputFile) => {
       const filtered = values.images && values.images?.filter((file) => file !== inputFile);
-      setValue('images', filtered);
+      setValueAny('images', filtered);
     },
-    [setValue, values.images]
+    [setValueAny, values.images]
   );
 
   const handleRemoveAllFiles = useCallback(() => {
-    setValue('images', []);
-  }, [setValue]);
+    setValueAny('images', []);
+  }, [setValueAny]);
 
-  const handleChangeIncludeTaxes = useCallback((event) => {
-    setIncludeTaxes(event.target.checked);
-  }, []);
-  const upMd = useResponsive('up', 'md');
+  // Removed unused handleChangeIncludeTaxes
 
   // Autocomplete category
 
@@ -225,18 +306,11 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
 
   const [searchQueryCategory, setSearchQueryCategory] = useState('');
 
-  const handleCategorySelect = (event, option) => {
-    setSelectedOptionCategory(option); // Actualizar el estado con la opción seleccionada
-    setValue('category', option?.id);
-  };
-
   const handleInputCategoryChange = (event, value) => {
     setSearchQueryCategory(value);
   };
 
-  useEffect(() => {
-    dispatch(getCategories());
-  }, [dispatch]);
+  // Categories & Brands are loaded via RTK Query
 
   const isOptionEqualToValue = (option, value) => {
     if (option && value) {
@@ -246,50 +320,39 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   };
 
   const theme = useTheme();
-
-  const { categories, isEmpty } = useAppSelector((state) => state.categories);
-  const isLoadingCategories = useAppSelector((state) => state.categories.isLoading);
+  const isEmpty = categories.length === 0;
+  const brandsEmpty = brands.length === 0;
   // Autocomplete brand
 
-  useEffect(() => {
-    dispatch(getBrands());
-  }, [dispatch]);
-  const { brands, brandsEmpty, isLoading } = useAppSelector((state) => state.brands);
+  const isLoading = isLoadingBrands;
 
   const handleInputBrandChange = (event, value) => {
     setSearchQueryBrand(value);
-  };
-
-  const handleBrandSelect = (event, option) => {
-    setSelectedOptionBrand(option); // Actualizar el estado con la opción seleccionada
-    setValue('brand', option?.id);
   };
 
   const handleClickOpenPopupBrand = () => {
     dispatch(switchPopupStateBrand(false));
   };
   const priceBase = watch('priceBase');
-  const tax = watch('taxesOption');
-  // TaxesOption
+  // Calculate priceSale based on selected taxes
   useEffect(() => {
-    if (tax === 0) {
-      setValue('priceSale', priceBase);
+    const selectedTaxIds: string[] = values.tax_ids || [];
+    if (!priceBase) {
+      setValueAny('priceSale', '');
       return;
     }
-    if (priceBase && tax) {
-      // si es 0 no se le agrega impuesto
-      console.log('priceBase', priceBase);
-
-      console.log('tax', tax);
-      const priceBaseNumber = Number(priceBase.replace(/[^0-9.-]+/g, ''));
-      const taxAmount = priceBaseNumber * (tax / 100);
-      console.log('taxAmount', taxAmount);
-      const priceSale = priceBaseNumber + taxAmount;
-      console.log('priceBaseNumber', priceBaseNumber);
-      console.log('priceSale', priceSale);
-      setValue('priceSale', fNumber(priceSale));
+    const base = Number(String(priceBase).replace(/[^0-9.-]+/g, '')) || 0;
+    if (!selectedTaxIds.length) {
+      setValueAny('priceSale', fNumber(base));
+      return;
     }
-  }, [priceBase, tax, setValue]);
+    const totalPercentage = selectedTaxIds.reduce((acc, id) => {
+      const found = taxes.find((t) => t.id === id);
+      return acc + (found?.percentage || 0);
+    }, 0);
+    const final = base + base * (totalPercentage / 100);
+    setValueAny('priceSale', fNumber(final));
+  }, [priceBase, taxes, values.tax_ids, setValueAny]);
   // Assign inventory
 
   // Edit inventory
@@ -318,7 +381,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
 
       return item;
     });
-    setValue('productsPdvs', newPdv);
+    setValueAny('productsPdvs', newPdv);
     setPdvEdit(null);
   };
 
@@ -337,7 +400,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
       });
       return false;
     }
-    setValue('productsPdvs', [
+    setValueAny('productsPdvs', [
       ...values.productsPdvs,
       {
         pdv: pdv.name,
@@ -418,7 +481,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
               label="Categoria"
               value={selectedOptionCategory}
               getOptionLabel={(option) => (option.name ? option.name : '')}
-              options={categories}
+              options={Array.isArray(categories) ? categories : []}
               inputValue={searchQueryCategory}
               onInputChange={handleInputCategoryChange}
               onChange={handleCategorySelect}
@@ -528,7 +591,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
                 />
               )}
               getOptionLabel={(option) => (option.name ? option.name : '')}
-              options={brands}
+              options={Array.isArray(brands) ? brands : []}
               loading={isLoading}
               renderOption={(props, option) => {
                 const matches = match(option.name, searchQueryBrand);
@@ -575,9 +638,8 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
           </Stack>
 
           <Stack spacing={1.5}>
-            {/* TODO Backend: poner opcional la descripción */}
             <Typography variant="subtitle2">Descripción</Typography>
-            <RHFEditor name="description" />
+            <RHFTextField name="description" multiline rows={4} placeholder="Descripción del producto..." />
           </Stack>
         </Stack>
       </Card>
@@ -597,16 +659,16 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
               name="priceBase"
               label="Precio de venta"
               onChange={(event) => {
-                setValue('priceBase', fNumber(event.target.value));
+                setValueAny('priceBase', fNumber(event.target.value));
               }}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}
             />
-            <RHFSelect name="taxesOption" label="Impuestos" disabled={includeTaxes}>
-              {TAXES_OPTIONS.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
+            <RHFSelect name="tax_ids" label="Impuestos" SelectProps={{ multiple: true }}>
+              {(Array.isArray(taxes) ? taxes : []).map((tax) => (
+                <MenuItem key={tax.id} value={tax.id}>
+                  {tax.name} ({tax.percentage}%)
                 </MenuItem>
               ))}
             </RHFSelect>
@@ -662,7 +724,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
                   }}
                   handleDelete={() => {
                     const newPdv = values.productsPdvs.filter((pdv: PDVproduct) => pdv.id !== item.id);
-                    setValue('productsPdvs', newPdv);
+                    setValueAny('productsPdvs', newPdv);
                   }}
                 />
               </Stack>
@@ -676,7 +738,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
           {/* Agregar errores del pdv */}
           {errors.productsPdvs && (
             <Typography variant="subtitle2" color="error">
-              {errors.productsPdvs.message}
+              {(errors.productsPdvs as any)?.message as string}
             </Typography>
           )}
         </Stack>
@@ -687,7 +749,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
+        <Grid xs={12} md={8}>
           {renderDetails}
 
           {renderPricing}
@@ -699,7 +761,6 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
             top: '50px',
             height: 'fit-content'
           }}
-          item
           xs={12}
           md={4}
         >
@@ -730,11 +791,12 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
                     onRemove={handleRemoveFile}
                     onRemoveAll={handleRemoveAllFiles}
                     onUpload={() => console.info('ON UPLOAD')}
+                    helperText="Formatos: JPG, PNG. Max 3MB por imagen."
                   />
                 </Stack>
                 <Stack>
-                  <RHFSwitch name="state" label="Estado" />
-                  <RHFSwitch name="sellInNegative" label="Vender en negativo" />
+                  <RHFSwitch name="state" label="Estado" helperText="" />
+                  <RHFSwitch name="sellInNegative" label="Vender en negativo" helperText="" />
                 </Stack>
               </Stack>
             </Card>
@@ -745,7 +807,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
               fullWidth
               variant="contained"
               size="large"
-              loading={isSubmitting}
+              loading={isSubmitting || isCreating || isUpdating}
             >
               {currentProduct ? 'Editar producto' : 'Crear producto'}
             </LoadingButton>

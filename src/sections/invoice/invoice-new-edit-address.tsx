@@ -8,8 +8,8 @@ import Typography from '@mui/material/Typography';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
-// _mock
-import { _addressBooks } from 'src/_mock';
+// api
+import { useGetContactsForInvoicesQuery } from 'src/redux/services/contactsApi';
 // components
 import Iconify from 'src/components/iconify';
 //
@@ -26,16 +26,14 @@ export default function InvoiceNewEditAddress() {
   } = useFormContext();
 
   const upMd = useResponsive('up', 'md');
-
   const values = watch();
-
   const { invoiceFrom, invoiceTo } = values;
-
-  const from = useBoolean();
-
-  const to = useBoolean();
-
+  const from = useBoolean(false);
+  const to = useBoolean(false);
   const { company } = useAuthContext();
+
+  // Get contacts for invoices (clients)
+  const { data: contacts = [] } = useGetContactsForInvoicesQuery({});
 
   return (
     <>
@@ -55,11 +53,10 @@ export default function InvoiceNewEditAddress() {
             </IconButton>
           </Stack> */}
           <Stack spacing={1}>
-            <Typography variant="h6">{company.name}</Typography>
-            <Typography variant="body2">Identificación: {company.nit}</Typography>
-            <Typography variant="body2">Teléfono: {company.phoneNumber}</Typography>
+            <Typography variant="h6">{company?.name}</Typography>
+            <Typography variant="body2">Identificación: {company?.nit}</Typography>
+            <Typography variant="body2">Teléfono: {company?.phoneNumber}</Typography>
           </Stack>
-          {console.log('company', company)}
         </Stack>
         <Divider flexItem orientation={upMd ? 'vertical' : 'horizontal'} sx={{ borderStyle: 'dashed' }} />
         <Stack sx={{ width: 1 }}>
@@ -81,7 +78,7 @@ export default function InvoiceNewEditAddress() {
             </Stack>
           ) : (
             <Typography typography="caption" sx={{ color: 'error.main' }}>
-              {errors.invoiceTo?.message}
+              {errors.invoiceTo?.message as string}
             </Typography>
           )}
         </Stack>
@@ -93,7 +90,7 @@ export default function InvoiceNewEditAddress() {
         onClose={from.onFalse}
         selected={(selectedId) => invoiceFrom?.id === selectedId}
         onSelect={(address) => setValue('invoiceFrom', address)}
-        list={_addressBooks}
+        list={contacts}
         action={
           <Button size="small" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ alignSelf: 'flex-end' }}>
             Nuevo
@@ -107,7 +104,7 @@ export default function InvoiceNewEditAddress() {
         onClose={to.onFalse}
         selected={(selectedId) => invoiceTo?.id === selectedId}
         onSelect={(address) => setValue('invoiceTo', address)}
-        list={_addressBooks}
+        list={contacts}
         action={
           <Button
             color="primary"

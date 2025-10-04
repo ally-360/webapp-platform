@@ -2,6 +2,7 @@ import { Icon } from '@iconify/react';
 import { Avatar, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 import { Stack } from '@mui/system';
 import React from 'react';
+import PropTypes from 'prop-types';
 import MenuCategories from 'src/sections/categories/MenuCategories';
 import { fCurrency, fNumber } from 'src/utils/format-number';
 
@@ -9,8 +10,8 @@ function ProductDetailsInventory({ product }) {
   const { productPdv, priceBase } = product;
   return (
     <div>
-      {productPdv.map((item: PDVproduct) => (
-        <Stack key={item.id} flexDirection="row" alignItems="center">
+      {productPdv.map((item: any) => (
+        <Stack key={item.pdv_id || item.id} flexDirection="row" alignItems="center">
           <ListItem
             sx={{ paddingLeft: 0, cursor: 'pointer' }}
             onClick={() => {
@@ -25,8 +26,8 @@ function ProductDetailsInventory({ product }) {
               </Avatar>
             </ListItemAvatar>
             <ListItemText
-              primary={item.pdv.name}
-              secondary={`Cantidad: ${fNumber(item.quantity)} Cantidad minima: ${fNumber(item.minQuantity)}`}
+              primary={item.pdv_name}
+              secondary={`Cantidad: ${fNumber(item.quantity)} Cantidad minima: ${fNumber(item.min_quantity)}`}
             />
             {/* TODO BACKEND: agregar precio en que se compra el producto, mantener trazabilidad y devolver valor del inventario por pdv */}
             <ListItemText primary="Valor del inventario" secondary={`${fCurrency(item.quantity * priceBase)} COP`} />
@@ -52,3 +53,10 @@ function ProductDetailsInventory({ product }) {
 }
 
 export default ProductDetailsInventory;
+
+ProductDetailsInventory.propTypes = {
+  product: PropTypes.shape({
+    productPdv: PropTypes.array,
+    priceBase: PropTypes.number
+  })
+};

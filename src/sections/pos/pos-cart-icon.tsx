@@ -15,7 +15,7 @@ export default function PosCartIcon({ rightDrawer, totalItems, ...other }) {
     <Box
       sx={{
         right: rightDrawer,
-        top: 112,
+        top: 90,
         zIndex: 999,
         display: 'flex',
         cursor: 'pointer',

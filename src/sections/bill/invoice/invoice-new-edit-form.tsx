@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { useMemo } from 'react';
 import * as Yup from 'yup';
 import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
 import Card from '@mui/material/Card';
@@ -10,14 +9,14 @@ import Stack from '@mui/material/Stack';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
-// _mock
-import { _addressBooks } from 'src/_mock';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import FormProvider from 'src/components/hook-form';
 //
 import { useNavigate } from 'react-router';
+import { useCreateInvoiceMutation, useUpdateInvoiceMutation } from 'src/redux/services/invoicesApi';
+import { enqueueSnackbar } from 'notistack';
 import InvoiceNewEditDetails from './invoice-new-edit-details';
 import InvoiceNewEditAddress from './invoice-new-edit-address';
 import InvoiceNewEditStatusDate from './invoice-new-edit-status-date';
@@ -30,72 +29,115 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
   const loadingSend = useBoolean(false);
 
   const NewInvoiceSchema = Yup.object().shape({
-    invoiceProvider: Yup.mixed().nullable().required('El proveedor es requerido'),
-    createDate: Yup.mixed().nullable().required('Fecha de creación es requerida '),
-    dueDate: Yup.mixed().required('La fecha de vencimiento es requerida'),
-    // not required
-    totalTaxes: Yup.number(),
-    status: Yup.string(),
-    method: Yup.string(),
-    shipping: Yup.number(),
-    invoiceFrom: Yup.mixed(),
-    totalAmount: Yup.number(),
-    invoiceNumber: Yup.string(),
-
-    paymentTerm: Yup.string().optional(),
-    items: Yup.array().of(
-      Yup.object().shape({
-        title: Yup.string().required('El título es requerido'),
-        description: Yup.string().required('La descripción es requerida'),
-        quantity: Yup.number().required('La cantidad es requerida'),
-        price: Yup.number().required('El precio es requerido'),
-        total: Yup.number().required('El total es requerido'),
-        tax: Yup.number().required('El impuesto es requerido')
-      })
-    )
+    pdvId: Yup.string().required('El punto de venta es requerido'),
+    invoiceNumber: Yup.string().required('El número de factura es requerido'),
+    invoiceProvider: Yup.mixed().nullable().required('El cliente es requerido'),
+    createDate: Yup.date().required('Fecha de creación es requerida'),
+    dueDate: Yup.date().when('method', {
+      is: 'Credito',
+      then: (schema) => schema.required('La fecha de vencimiento es requerida'),
+      otherwise: (schema) => schema.nullable()
+    }),
+    totalTaxes: Yup.number().default(0),
+    status: Yup.string().default('draft'),
+    method: Yup.string().default('Contado'),
+    shipping: Yup.number().default(0),
+    invoiceFrom: Yup.mixed().nullable(),
+    totalAmount: Yup.number().default(0),
+    paymentTerm: Yup.string().default(''),
+    notes: Yup.string().default(''),
+    items: Yup.array()
+      .of(
+        Yup.object().shape({
+          title: Yup.object().required('El producto es requerido'),
+          quantity: Yup.number().min(1, 'La cantidad debe ser mayor a 0').required('La cantidad es requerida'),
+          price: Yup.number().min(0, 'El precio debe ser mayor o igual a 0').required('El precio es requerido')
+        })
+      )
+      .min(1, 'Debe agregar al menos un producto')
   });
 
   const defaultValues = useMemo(
     () => ({
-      invoiceNumber: currentInvoice?.invoiceNumber || 'INV-1990',
-      createDate: currentInvoice?.createDate || new Date(),
-      dueDate: currentInvoice?.dueDate || null,
-      totalTaxes: currentInvoice?.totalTaxes || 0,
-      shipping: currentInvoice?.shipping || 0,
+      pdvId: currentInvoice?.pdv_id || '',
+      invoiceNumber: currentInvoice?.number || 'INV-1990',
+      createDate: currentInvoice?.issue_date ? new Date(currentInvoice.issue_date) : new Date(),
+      dueDate: currentInvoice?.due_date ? new Date(currentInvoice.due_date) : undefined,
+      totalTaxes: currentInvoice?.taxes_total ? parseFloat(currentInvoice.taxes_total) : 0,
+      shipping: 0,
       status: currentInvoice?.status || 'draft',
-      method: currentInvoice?.method || 'Contado',
-      paymentTerm: currentInvoice?.paymentTerm || '',
-      invoiceFrom: currentInvoice?.invoiceFrom || _addressBooks[0],
-      invoiceProvider: currentInvoice?.invoiceTo || null,
-      items: currentInvoice?.items || [{ title: '', description: '', service: '', quantity: 1, price: 0, total: 0 }],
-      totalAmount: currentInvoice?.totalAmount || 0
+      method: 'Contado',
+      paymentTerm: '',
+      notes: currentInvoice?.notes || '',
+      invoiceFrom: null,
+      invoiceProvider: currentInvoice?.customer_id || null,
+      items: currentInvoice?.items || [{ title: '', description: '', quantity: 1, price: 0, total: 0 }],
+      totalAmount: currentInvoice?.total_amount ? parseFloat(currentInvoice.total_amount) : 0
     }),
     [currentInvoice]
   );
 
   const methods = useForm({
-    resolver: yupResolver(NewInvoiceSchema),
     defaultValues
   });
 
   const {
     reset,
-
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
+
+  // RTK Query mutations
+  const [createInvoice] = useCreateInvoiceMutation();
+  const [updateInvoice] = useUpdateInvoiceMutation();
+
+  // Helper function to transform form data to API format
+  const transformFormDataToAPI = (data: any) => {
+    const issueDate =
+      data.createDate instanceof Date
+        ? data.createDate.toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+
+    const dueDate = data.dueDate instanceof Date ? data.dueDate.toISOString().split('T')[0] : issueDate;
+
+    return {
+      pdv_id: data.pdvId,
+      customer_id: data.invoiceProvider?.id || data.invoiceProvider,
+      issue_date: issueDate,
+      due_date: dueDate,
+      notes: data.notes || '',
+      status: data.status,
+      items: data.items
+        .filter((item: any) => item.title && item.title.id)
+        .map((item: any) => ({
+          product_id: item.title.id,
+          quantity: item.quantity,
+          unit_price: item.price
+        }))
+    };
+  };
 
   const handleSaveAsDraft = handleSubmit(async (data) => {
     loadingSave.onTrue();
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const invoiceData = transformFormDataToAPI(data);
+      invoiceData.status = 'draft';
+
+      if (currentInvoice) {
+        await updateInvoice({ id: currentInvoice.id, invoice: invoiceData }).unwrap();
+        enqueueSnackbar('Factura actualizada exitosamente', { variant: 'success' });
+      } else {
+        await createInvoice(invoiceData).unwrap();
+        enqueueSnackbar('Factura creada como borrador exitosamente', { variant: 'success' });
+      }
+
       reset();
       loadingSave.onFalse();
       router.push(paths.dashboard.invoice.root);
-      console.info('DATA', JSON.stringify(data, null, 2));
     } catch (error) {
       console.error(error);
+      enqueueSnackbar('Error al guardar la factura', { variant: 'error' });
       loadingSave.onFalse();
     }
   });
@@ -104,13 +146,23 @@ export default function InvoiceNewEditForm({ currentInvoice }) {
     loadingSend.onTrue();
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const invoiceData = transformFormDataToAPI(data);
+      invoiceData.status = 'pending';
+
+      if (currentInvoice) {
+        await updateInvoice({ id: currentInvoice.id, invoice: invoiceData }).unwrap();
+        enqueueSnackbar('Factura actualizada exitosamente', { variant: 'success' });
+      } else {
+        await createInvoice(invoiceData).unwrap();
+        enqueueSnackbar('Factura creada exitosamente', { variant: 'success' });
+      }
+
       reset();
       loadingSend.onFalse();
       router.push(paths.dashboard.invoice.root);
-      console.info('DATA', JSON.stringify(data, null, 2));
     } catch (error) {
       console.error(error);
+      enqueueSnackbar('Error al crear la factura', { variant: 'error' });
       loadingSend.onFalse();
     }
   });

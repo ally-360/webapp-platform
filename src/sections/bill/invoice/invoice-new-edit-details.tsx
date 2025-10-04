@@ -21,13 +21,13 @@ import { RHFAutocomplete, RHFSelect, RHFTextField } from 'src/components/hook-fo
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
 import { enqueueSnackbar } from 'notistack';
 import { IconButton, Tooltip } from '@mui/material';
-import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
+import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
 export default function InvoiceNewEditDetails() {
-  const { control, setValue, watch, resetField } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -36,22 +36,38 @@ export default function InvoiceNewEditDetails() {
 
   const values = watch();
 
-  const totalOnRow = values.items.map((item) => item.quantity * item.price);
+  const totalOnRow = (values.items || []).map((item) => Number(item?.quantity ?? 0) * Number(item?.price ?? 0));
 
   const subTotal = sum(totalOnRow);
 
-  const totalAmount = subTotal - values.discount - values.shipping + values.totalTaxes;
+  const totalAmount =
+    Number(subTotal || 0) -
+    Number(values.discount || 0) -
+    Number(values.shipping || 0) +
+    Number(values.totalTaxes || 0);
 
   const dispatch = useAppDispatch();
 
+  // Get PDVs using RTK Query
+  const { data: pdvs = [], isLoading: pdvsLoading, error: pdvsError } = useGetPDVsQuery();
+
   useEffect(() => {
-    dispatch(getAllProducts({ page: 1, pageSize: 25 }));
-    dispatch(getAllPDVS());
+    console.log('PDVs data:', pdvs, 'Loading:', pdvsLoading, 'Error:', pdvsError);
+    console.log('Is pdvs array?', Array.isArray(pdvs));
+  }, [pdvs, pdvsLoading, pdvsError]);
+
+  useEffect(() => {
+    try {
+      dispatch(getAllProducts({ page: 1, pageSize: 25 }));
+    } catch (error) {
+      console.error('Error dispatching getAllProducts:', error);
+      enqueueSnackbar('Error al cargar productos', { variant: 'error' });
+    }
   }, [dispatch]);
 
   const { products } = useAppSelector((state) => state.products);
 
-  const [productsOptions, setProductsOptions] = useState([]);
+  const [productsOptions, setProductsOptions] = useState<any[]>([]);
 
   useEffect(() => {
     console.log('Productos activos', products);
@@ -70,7 +86,10 @@ export default function InvoiceNewEditDetails() {
       quantity: 1,
       price: 0,
       total: 0,
-      taxes: 0
+      taxes: 0,
+      // Fields required by Bill form schema
+      product_id: '',
+      unit_price: 0
     });
   };
 
@@ -87,6 +106,8 @@ export default function InvoiceNewEditDetails() {
       setValue(`items[${index}].title`, '');
       setValue(`items[${index}].reference`, '');
       setValue(`items[${index}].taxes`, 0);
+      setValue(`items[${index}].product_id`, '');
+      setValue(`items[${index}].unit_price`, 0);
       // Agregar opcion al array productsOptions
     },
     [setValue]
@@ -96,27 +117,32 @@ export default function InvoiceNewEditDetails() {
 
   const handleChangeQuantity = useCallback(
     (event, index) => {
-      if (values.items[index].title.id === undefined) {
+      if (!values.items[index]?.title?.id) {
         enqueueSnackbar('Debes seleccionar un producto primero', { variant: 'warning' });
         return;
       }
-      setValue(`items[${index}].quantity`, Number(event.target.value));
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
+      const newQuantity = Number(event.target.value);
+      setValue(`items[${index}].quantity`, newQuantity);
+      setValue(`items[${index}].total`, newQuantity * Number(values.items[index]?.price ?? 0));
       // multiplicar la cantidad por los impuestos del producto y asignarlo a taxes
-      setValue(
-        `items[${index}].taxes`,
-        values.items[index].quantity * (values.items[index].title.priceSale - values.items[index].title.priceBase)
-      );
-      setValue('totalTaxes', sum(values.items.map((item) => item.taxes)));
+      const product = values.items[index]?.title;
+      if (product) {
+        setValue(
+          `items[${index}].taxes`,
+          newQuantity * (Number(product.priceSale ?? 0) - Number(product.priceBase ?? 0))
+        );
+      }
+      setValue('totalTaxes', sum(values.items.map((item) => Number(item.taxes ?? 0))));
     },
     [setValue, values.items]
   );
 
   const handleChangePrice = useCallback(
     (event, index) => {
-      setValue(`items[${index}].price`, Number(event.target.value));
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
-      // setValue('taxes', )
+      const newPrice = Number(event.target.value);
+      setValue(`items[${index}].price`, newPrice);
+      setValue(`items[${index}].unit_price`, newPrice);
+      setValue(`items[${index}].total`, Number(values.items[index]?.quantity ?? 0) * newPrice);
     },
     [setValue, values.items]
   );
@@ -179,19 +205,24 @@ export default function InvoiceNewEditDetails() {
     (index, option) => {
       // TODO: provisional, preguntar si el producto puede estar varias veces
       //  Buscar si ya el producto esta en el array
-      const product = values.items.find((item) => item.title.id === option.id);
+      const product = values.items.find((item) => item.title?.id === option.id);
       if (product) {
         enqueueSnackbar('Ya agregaste este producto, si deseas puedes aumentar la cantidad', { variant: 'warning' });
         return;
       }
 
+      const quantity = Number(values.items[index]?.quantity ?? 1);
+      const price = Number(option.priceSale ?? 0);
+
       setValue(`items[${index}].title`, option);
-      setValue(`items[${index}].price`, option.priceSale);
-      setValue(`items[${index}].total`, values.items.map((item) => item.quantity * item.price)[index]);
-      setValue(`items[${index}].taxes`, option.priceSale - option.priceBase);
+      setValue(`items[${index}].product_id`, option.id);
+      setValue(`items[${index}].price`, price);
+      setValue(`items[${index}].unit_price`, price);
+      setValue(`items[${index}].total`, quantity * price);
+      setValue(`items[${index}].taxes`, Number(option.priceSale ?? 0) - Number(option.priceBase ?? 0));
       // sumar el total de los impuestos de todos los productos y asignarlo a taxes
-      setValue('totalTaxes', sum(values.items.map((item) => item.taxes)));
-      setValue(`items[${index}].description`, stripHTMLTags(option.description));
+      setValue('totalTaxes', sum(values.items.map((item) => Number(item.taxes ?? 0))));
+      setValue(`items[${index}].description`, stripHTMLTags(option.description || ''));
       setValue(`items[${index}].reference`, option.sku !== '' ? option.sku : option.barCode);
     },
     [setValue, values.items]
@@ -201,10 +232,9 @@ export default function InvoiceNewEditDetails() {
     console.log(values);
   }, [values]);
 
-  const { pdvs } = useAppSelector((state) => state.pdvs);
   const PDVSoptions = [
-    { id: 0, name: 'Punto De Venta para cada producto' },
-    ...pdvs.map((pdv) => ({ id: pdv.id, name: pdv.name }))
+    { id: 0, name: 'Puntosss De Venta para cada producto' },
+    ...(Array.isArray(pdvs) ? pdvs.map((pdv) => ({ id: pdv.id, name: pdv.name })) : [])
   ];
   useEffect(() => {
     console.log(PDV);
@@ -212,190 +242,209 @@ export default function InvoiceNewEditDetails() {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Dropdown para escoger de que bodega se extraera el producto */}
-      <Stack divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} spacing={2}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} sx={{ maxWidth: '320px' }}>
-          <RHFSelect
-            name="pdv"
-            size="small"
-            label="Punto de venta"
-            value={PDV}
-            InputLabelProps={{ shrink: true }}
-            PaperPropsSx={{ textTransform: 'capitalize' }}
-            onChange={(event) => setPDV(event.target.value)}
-            sx={{
-              minWidth: { md: '350px' },
-              marginBottom: 2,
-              maxWidth: { md: '350px' }
-            }}
-          >
-            {PDVSoptions.map((option) => (
-              <MenuItem key={option.id} value={option.id}>
-                {option.name}
-              </MenuItem>
-            ))}
-          </RHFSelect>
-          <Tooltip title="Selecciona el punto de venta al cual se agregaran los productos">
-            <IconButton size="small" sx={{ width: '38px', height: '38px' }}>
-              <Iconify icon="mdi:help-circle-outline" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-
-        <Typography variant="h6" sx={{ color: 'text.disabled', mb: 3 }}>
-          Productos:
-        </Typography>
-      </Stack>
-      <Stack divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} spacing={2}>
-        {fields.map((item, index) => (
-          <Stack key={item.id} alignItems="flex-end" spacing={1}>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} sx={{ width: 1 }}>
-              <RHFAutocomplete
-                name={`items[${index}].title`}
+      {pdvsLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+          <Typography>Cargando puntos de venta...</Typography>
+        </Box>
+      ) : (
+        <>
+          {/* Dropdown para escoger de que bodega se extraera el producto */}
+          <Stack divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} spacing={2}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} sx={{ maxWidth: '320px' }}>
+              <RHFSelect
+                name="pdv"
                 size="small"
-                label="Producto"
-                placeholder="Nombre, SKU o Código"
+                label="Punto de venta"
+                value={PDV}
                 InputLabelProps={{ shrink: true }}
-                filterOptions={(options, state) => {
-                  // Filtrar las opciones por nombre o SKU que coincida con la entrada
-                  const inputValue = state.inputValue.toLowerCase();
-                  return options.filter(
-                    (option) =>
-                      option.name.toLowerCase().includes(inputValue) ||
-                      option.sku.toLowerCase().includes(inputValue) ||
-                      option.barCode.toLowerCase().includes(inputValue)
-                  );
-                }}
-                options={productsOptions}
-                onInputChange={(event, value) => console.log(value)}
-                getOptionLabel={(option) => option.name || ''}
-                getOptionSelected={(option, value) => option.name === value.name}
-                onChange={(event, value) => {
-                  if (value !== null) {
-                    handleSelectProduct(index, value);
-                  } else {
-                    handleClearProduct(index);
-                  }
-                }}
+                PaperPropsSx={{ textTransform: 'capitalize' }}
+                onChange={(event) => setPDV(event.target.value)}
                 sx={{
-                  minWidth: { md: 250 }
+                  minWidth: { md: '350px' },
+                  marginBottom: 2,
+                  maxWidth: { md: '350px' }
                 }}
-              />
+              >
+                {PDVSoptions.map((option) => (
+                  <MenuItem key={option.id} value={option.id}>
+                    {option.name}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
+              <Tooltip title="Selecciona el punto de venta al cual se agregaran los productos">
+                <IconButton size="small" sx={{ width: '38px', height: '38px' }}>
+                  <Iconify icon="mdi:help-circle-outline" />
+                </IconButton>
+              </Tooltip>
+            </Stack>
 
-              {PDV === 0 && (
-                <RHFSelect
-                  name={`items[${index}].pdv`}
+            <Typography variant="h6" sx={{ color: 'text.disabled', mb: 3 }}>
+              Productos:
+            </Typography>
+          </Stack>
+          <Stack divider={<Divider flexItem sx={{ borderStyle: 'dashed' }} />} spacing={2}>
+            {fields.map((item, index) => (
+              <Stack key={item.id} alignItems="flex-end" spacing={1}>
+                <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} sx={{ width: 1 }}>
+                  <RHFAutocomplete
+                    name={`items[${index}].title`}
+                    size="small"
+                    label="Producto"
+                    placeholder="Nombre, SKU o Código"
+                    InputLabelProps={{ shrink: true }}
+                    filterOptions={(options, state) => {
+                      // Filtrar las opciones por nombre o SKU que coincida con la entrada
+                      const inputValue = state.inputValue.toLowerCase();
+                      return options.filter(
+                        (option) =>
+                          option.name.toLowerCase().includes(inputValue) ||
+                          option.sku.toLowerCase().includes(inputValue) ||
+                          option.barCode.toLowerCase().includes(inputValue)
+                      );
+                    }}
+                    options={productsOptions}
+                    onInputChange={(event, value) => console.log(value)}
+                    getOptionLabel={(option) => option.name || ''}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    onChange={(event, value) => {
+                      if (value !== null) {
+                        handleSelectProduct(index, value);
+                      } else {
+                        handleClearProduct(index);
+                      }
+                    }}
+                    sx={{
+                      minWidth: { md: 250 }
+                    }}
+                  />
+
+                  {PDV === 0 && (
+                    <RHFSelect
+                      name={`items[${index}].pdv`}
+                      size="small"
+                      label="Punto de venta"
+                      InputLabelProps={{ shrink: true }}
+                      PaperPropsSx={{ textTransform: 'capitalize' }}
+                      sx={{
+                        minWidth: { md: '250px' },
+                        marginBottom: 2,
+                        maxWidth: { md: '250px' }
+                      }}
+                    >
+                      {Array.isArray(pdvs)
+                        ? pdvs.map((option) => (
+                            <MenuItem key={option.id} value={option.id}>
+                              {option.name}
+                            </MenuItem>
+                          ))
+                        : null}
+                    </RHFSelect>
+                  )}
+
+                  <RHFTextField
+                    size="small"
+                    name={`items[${index}].reference`}
+                    label="Referencia"
+                    InputLabelProps={{ shrink: true }}
+                  />
+
+                  <RHFTextField
+                    type="number"
+                    size="small"
+                    name={`items[${index}].quantity`}
+                    label="Cantidad"
+                    placeholder="0"
+                    onChange={(event) => handleChangeQuantity(event, index)}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ maxWidth: { md: 96 } }}
+                  />
+
+                  <RHFTextField
+                    size="small"
+                    type="number"
+                    name={`items[${index}].price`}
+                    label="Precio"
+                    placeholder="0.00"
+                    onChange={(event) => handleChangePrice(event, index)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Box sx={{ typography: 'subtitle2', color: 'text.disabled' }}>$</Box>
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{ maxWidth: { md: 120 } }}
+                  />
+
+                  <RHFTextField
+                    disabled
+                    size="small"
+                    type="number"
+                    name={`items[${index}].total`}
+                    label="Total"
+                    placeholder="0.00"
+                    value={(() => {
+                      const totalVal = Number(values.items?.[index]?.total ?? 0);
+                      return !Number.isFinite(totalVal) || totalVal === 0 ? '' : totalVal.toFixed(1);
+                    })()}
+                    onChange={(event) => handleChangePrice(event, index)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Box sx={{ typography: 'subtitle2', color: 'text.disabled' }}>$</Box>
+                        </InputAdornment>
+                      )
+                    }}
+                    sx={{
+                      maxWidth: { md: 130 },
+                      [`& .${inputBaseClasses.input}`]: {
+                        textAlign: { md: 'right' }
+                      }
+                    }}
+                  />
+                </Stack>
+
+                <Button
                   size="small"
-                  label="Punto de venta"
-                  InputLabelProps={{ shrink: true }}
-                  PaperPropsSx={{ textTransform: 'capitalize' }}
-                  sx={{
-                    minWidth: { md: '250px' },
-                    marginBottom: 2,
-                    maxWidth: { md: '250px' }
-                  }}
+                  color="error"
+                  startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                  onClick={() => handleRemove(index)}
                 >
-                  {pdvs.map((option) => (
-                    <MenuItem key={option.id} value={option.id}>
-                      {option.name}
-                    </MenuItem>
-                  ))}
-                </RHFSelect>
-              )}
+                  Eliminar
+                </Button>
+              </Stack>
+            ))}
+          </Stack>
 
+          <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
+
+          <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-end', md: 'center' }}>
+            <Button
+              color="primary"
+              variant="outlined"
+              startIcon={<Iconify icon="mingcute:add-line" />}
+              onClick={handleAdd}
+              sx={{ flexShrink: 0 }}
+            >
+              Agregar producto
+            </Button>
+
+            <Stack spacing={2} justifyContent="flex-end" direction={{ xs: 'column', md: 'row' }} sx={{ width: 1 }}>
               <RHFTextField
                 size="small"
-                name={`items[${index}].reference`}
-                label="Referencia"
-                InputLabelProps={{ shrink: true }}
-              />
-
-              <RHFTextField
+                label="Envio($)"
+                name="shipping"
                 type="number"
-                size="small"
-                name={`items[${index}].quantity`}
-                label="Cantidad"
-                placeholder="0"
-                onChange={(event) => handleChangeQuantity(event, index)}
-                InputLabelProps={{ shrink: true }}
-                sx={{ maxWidth: { md: 96 } }}
-              />
-
-              <RHFTextField
-                size="small"
-                type="number"
-                name={`items[${index}].price`}
-                label="Precio"
-                placeholder="0.00"
-                onChange={(event) => handleChangePrice(event, index)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Box sx={{ typography: 'subtitle2', color: 'text.disabled' }}>$</Box>
-                    </InputAdornment>
-                  )
-                }}
                 sx={{ maxWidth: { md: 120 } }}
               />
 
-              <RHFTextField
-                disabled
-                size="small"
-                type="number"
-                name={`items[${index}].total`}
-                label="Total"
-                placeholder="0.00"
-                value={values.items[index].total === 0 ? '' : values.items[index].total.toFixed(1)}
-                onChange={(event) => handleChangePrice(event, index)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Box sx={{ typography: 'subtitle2', color: 'text.disabled' }}>$</Box>
-                    </InputAdornment>
-                  )
-                }}
-                sx={{
-                  maxWidth: { md: 130 },
-                  [`& .${inputBaseClasses.input}`]: {
-                    textAlign: { md: 'right' }
-                  }
-                }}
-              />
+              {/* <RHFTextField size="small" label="Impuestos(%)" name="taxes" type="number" sx={{ maxWidth: { md: 120 } }} /> */}
             </Stack>
-
-            <Button
-              size="small"
-              color="error"
-              startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-              onClick={() => handleRemove(index)}
-            >
-              Eliminar
-            </Button>
           </Stack>
-        ))}
-      </Stack>
 
-      <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
-
-      <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} alignItems={{ xs: 'flex-end', md: 'center' }}>
-        <Button
-          color="primary"
-          variant="outlined"
-          startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={handleAdd}
-          sx={{ flexShrink: 0 }}
-        >
-          Agregar producto
-        </Button>
-
-        <Stack spacing={2} justifyContent="flex-end" direction={{ xs: 'column', md: 'row' }} sx={{ width: 1 }}>
-          <RHFTextField size="small" label="Envio($)" name="shipping" type="number" sx={{ maxWidth: { md: 120 } }} />
-
-          {/* <RHFTextField size="small" label="Impuestos(%)" name="taxes" type="number" sx={{ maxWidth: { md: 120 } }} /> */}
-        </Stack>
-      </Stack>
-
-      {renderTotal}
+          {renderTotal}
+        </>
+      )}
     </Box>
   );
 }

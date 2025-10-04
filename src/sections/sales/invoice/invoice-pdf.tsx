@@ -1,6 +1,8 @@
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 import { Page, View, Text, Image, Document, Font, StyleSheet } from '@react-pdf/renderer';
+// hooks
+import { useAuthContext } from 'src/auth/hooks';
 // utils
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
@@ -12,71 +14,338 @@ Font.register({
   fonts: [{ src: '/fonts/Roboto-Regular.ttf' }, { src: '/fonts/Roboto-Bold.ttf' }]
 });
 
+// Mapeo de estados en inglés a español
+const STATUS_LABELS = {
+  DRAFT: 'Borrador',
+  OPEN: 'Abierta',
+  PAID: 'Pagada',
+  VOID: 'Cancelada',
+  OVERDUE: 'Vencida'
+};
+
+// Colores del diseño Figma
+const COLORS = {
+  primary: '#E87117', // Naranja
+  gray900: '#1A1C21',
+  gray600: '#5E6470',
+  gray100: '#D7DAE0',
+  gray0: '#F9FAFC',
+  white: '#FFFFFF'
+};
+
 const useStyles = () =>
   useMemo(
     () =>
       StyleSheet.create({
-        col4: { width: '25%' },
-        col8: { width: '75%' },
-        col6: { width: '50%' },
-        mb4: { marginBottom: 4 },
-        mb8: { marginBottom: 8 },
-        mb40: { marginBottom: 40 },
-        h3: { fontSize: 16, fontWeight: 700 },
-        h4: { fontSize: 13, fontWeight: 700 },
-        body1: { fontSize: 10 },
-        body2: { fontSize: 9 },
-        subtitle1: { fontSize: 10, fontWeight: 700 },
-        subtitle2: { fontSize: 9, fontWeight: 700 },
-        alignRight: { textAlign: 'right' },
+        // Page - Fondo gris claro como Figma
         page: {
-          fontSize: 9,
-          lineHeight: 1.6,
+          padding: 16,
+          fontSize: 10,
           fontFamily: 'Roboto',
-          backgroundColor: '#FFFFFF',
-          textTransform: 'capitalize',
-          padding: '40px 24px 120px 24px'
+          backgroundColor: '#F9FAFC'
         },
-        footer: {
-          left: 0,
-          right: 0,
-          bottom: 0,
-          padding: 24,
-          margin: 'auto',
-          borderTopWidth: 1,
-          borderStyle: 'solid',
+
+        // Header con logo y empresa
+        header: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 24,
+          paddingHorizontal: 16
+        },
+
+        companyName: {
+          fontSize: 18,
+          fontWeight: 600,
+          color: '#E87117',
+          marginBottom: 2
+        },
+
+        companyInfo: {
+          fontSize: 10,
+          color: '#5E6470'
+        },
+
+        // Información de negocio en esquina superior derecha
+        businessInfo: {
           position: 'absolute',
-          borderColor: '#DFE3E8'
+          top: 50,
+          right: 32,
+          alignItems: 'flex-end'
         },
-        gridContainer: {
+
+        businessText: {
+          fontSize: 10,
+          color: '#5E6470',
+          textAlign: 'right',
+          marginBottom: 2
+        },
+
+        // Tarjeta principal con bordes redondeados
+        mainCard: {
+          backgroundColor: '#FFFFFF',
+          borderRadius: 12,
+          borderWidth: 0.5,
+          borderColor: '#D7DAE0',
+          padding: 20,
+          marginHorizontal: 16,
+          marginBottom: 24
+        },
+
+        // Sección superior con cliente y total
+        cardHeader: {
           flexDirection: 'row',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          marginBottom: 20
         },
-        table: {
-          display: 'flex',
-          width: 'auto'
+
+        // Billed to
+        billedToLabel: {
+          fontSize: 10,
+          fontWeight: 500,
+          color: '#5E6470',
+          marginBottom: 4
         },
-        tableRow: {
-          padding: '8px 0',
+
+        clientName: {
+          fontSize: 10,
+          fontWeight: 600,
+          color: '#1A1C21',
+          marginBottom: 2
+        },
+
+        clientInfo: {
+          fontSize: 10,
+          color: '#5E6470',
+          marginBottom: 2
+        },
+
+        // Total destacado
+        totalLabel: {
+          fontSize: 10,
+          fontWeight: 500,
+          color: '#5E6470',
+          textAlign: 'right'
+        },
+
+        totalAmount: {
+          fontSize: 20,
+          fontWeight: 700,
+          color: '#E87117',
+          textAlign: 'right'
+        },
+
+        // Línea separadora
+        separator: {
+          width: '100%',
+          height: 0.5,
+          backgroundColor: '#D7DAE0',
+          marginVertical: 16
+        },
+
+        // Información de factura
+        invoiceInfo: {
           flexDirection: 'row',
-          borderBottomWidth: 1,
-          borderStyle: 'solid',
-          borderColor: '#DFE3E8'
+          justifyContent: 'space-between',
+          marginBottom: 20
         },
-        noBorder: {
+
+        infoItem: {
+          marginRight: 20
+        },
+
+        infoLabel: {
+          fontSize: 10,
+          fontWeight: 500,
+          color: '#5E6470',
+          marginBottom: 4
+        },
+
+        infoValue: {
+          fontSize: 10,
+          fontWeight: 600,
+          color: '#1A1C21'
+        },
+
+        // Tabla de items
+        itemDetailLabel: {
+          fontSize: 8,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          color: '#5E6470',
+          marginBottom: 12
+        },
+
+        tableHeader: {
+          flexDirection: 'row',
+          marginBottom: 8
+        },
+
+        qtyLabel: {
+          position: 'absolute',
+          left: 275,
+          width: 30,
+          fontSize: 8,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          color: '#5E6470'
+        },
+
+        rateLabel: {
+          position: 'absolute',
+          left: 320,
+          width: 90,
+          fontSize: 8,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          color: '#5E6470',
+          textAlign: 'right'
+        },
+
+        amountLabel: {
+          position: 'absolute',
+          left: 425,
+          width: 106,
+          fontSize: 8,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          color: '#5E6470',
+          textAlign: 'right'
+        },
+
+        // Item row
+        itemRow: {
+          marginBottom: 16,
+          position: 'relative'
+        },
+
+        itemName: {
+          fontSize: 10,
+          fontWeight: 600,
+          color: '#1A1C21',
+          marginBottom: 2,
+          maxWidth: 260
+        },
+
+        itemDescription: {
+          fontSize: 10,
+          color: '#5E6470',
+          maxWidth: 260
+        },
+
+        itemQty: {
+          position: 'absolute',
+          left: 275,
+          width: 30,
+          fontSize: 10,
+          color: '#1A1C21'
+        },
+
+        itemRate: {
+          position: 'absolute',
+          left: 320,
+          width: 90,
+          fontSize: 10,
+          color: '#1A1C21',
+          textAlign: 'right'
+        },
+
+        itemAmount: {
+          position: 'absolute',
+          left: 425,
+          width: 106,
+          fontSize: 10,
+          color: '#1A1C21',
+          textAlign: 'right'
+        },
+
+        // Separador para totales
+        totalsSeparator: {
+          width: 240,
+          height: 0.5,
+          backgroundColor: '#D7DAE0',
+          marginLeft: 'auto',
+          marginVertical: 16
+        },
+
+        // Sección de totales
+        totalsSection: {
+          alignItems: 'flex-end',
+          marginTop: 20
+        },
+
+        totalRow: {
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          width: 240,
+          marginBottom: 8
+        },
+
+        totalRowLabel: {
+          fontSize: 10,
+          fontWeight: 500,
+          color: '#1A1C21',
+          flex: 1
+        },
+
+        totalRowValue: {
+          fontSize: 10,
+          fontWeight: 500,
+          color: '#1A1C21',
+          width: 60,
+          textAlign: 'right'
+        },
+
+        finalTotal: {
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          width: 240,
+          borderTopWidth: 0.5,
+          borderTopColor: '#D7DAE0',
           paddingTop: 8,
-          paddingBottom: 0,
-          borderBottomWidth: 0
+          marginTop: 8
         },
-        tableCell_1: {
-          width: '5%'
+
+        finalTotalLabel: {
+          fontSize: 10,
+          fontWeight: 700,
+          color: '#1A1C21',
+          flex: 1
         },
-        tableCell_2: {
-          width: '50%',
-          paddingRight: 16
+
+        finalTotalValue: {
+          fontSize: 10,
+          fontWeight: 700,
+          color: '#1A1C21',
+          width: 60,
+          textAlign: 'right'
         },
-        tableCell_3: {
-          width: '15%'
+
+        // Mensaje de agradecimiento
+        thankYou: {
+          fontSize: 10,
+          fontWeight: 600,
+          color: '#1A1C21',
+          marginTop: 20,
+          paddingLeft: 20
+        },
+
+        // Términos
+        termsSection: {
+          paddingHorizontal: 16,
+          marginTop: 20
+        },
+
+        termsTitle: {
+          fontSize: 10,
+          fontWeight: 500,
+          color: '#5E6470',
+          marginBottom: 4
+        },
+
+        termsText: {
+          fontSize: 10,
+          color: '#1A1C21'
         }
       }),
     []
@@ -85,185 +354,158 @@ const useStyles = () =>
 // ----------------------------------------------------------------------
 
 export default function InvoicePDF({ invoice, currentStatus }) {
-  const {
-    items,
-    taxes,
-    dueDate,
-    discount,
-    shipping,
-    invoiceTo,
-    createDate,
-    totalAmount,
-    invoiceFrom,
-    invoiceNumber,
-    subTotal
-  } = invoice;
-
   const styles = useStyles();
+  const { company } = useAuthContext();
+
+  // Normalize data from API structure
+  const line_items = invoice?.line_items || [];
+  const subtotal = parseFloat(invoice?.subtotal || '0');
+  const taxes_total = parseFloat(invoice?.taxes_total || '0');
+  const total_amount = parseFloat(invoice?.total_amount || '0');
+  const paid_amount = parseFloat(invoice?.paid_amount || '0');
+  const balance_due = parseFloat(invoice?.balance_due || '0');
+
+  // Traducir estado al español
+  const statusInSpanish = STATUS_LABELS[currentStatus] || currentStatus || 'Borrador';
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <View style={[styles.gridContainer, styles.mb40]}>
-          <Image source="/logo/logoFondoTransparentesvg.png" style={{ width: 48, height: 48 }} />
-
-          <View style={{ alignItems: 'flex-end', flexDirection: 'column' }}>
-            <Text style={styles.h3}>{currentStatus}</Text>
-            <Text> {invoiceNumber} </Text>
+        {/* Header con logo y empresa */}
+        <View style={styles.header}>
+          <Image source="/logo/logoFondoTransparentesvg.svg" style={{ width: 48, height: 48 }} />
+          <View style={{ alignItems: 'flex-start', marginLeft: 16 }}>
+            <Text style={styles.companyName}>{company?.name || 'Nombre Empresa'}</Text>
+            <Text style={styles.companyInfo}>{company?.website || 'www.empresa.com'}</Text>
+            <Text style={styles.companyInfo}>{company?.phoneNumber || '+57 300 000 0000'}</Text>
           </View>
         </View>
 
-        <View style={[styles.gridContainer, styles.mb40]}>
-          <View style={styles.col6}>
-            <Text style={[styles.subtitle2, styles.mb4]}>Invoice from</Text>
-            <Text style={styles.body2}>{invoiceFrom.name}</Text>
-            <Text style={styles.body2}>{invoiceFrom.fullAddress}</Text>
-            <Text style={styles.body2}>{invoiceFrom.phoneNumber}</Text>
-          </View>
-
-          <View style={styles.col6}>
-            <Text style={[styles.subtitle2, styles.mb4]}>Invoice to</Text>
-            <Text style={styles.body2}>{invoiceTo.name}</Text>
-            <Text style={styles.body2}>{invoiceTo.fullAddress}</Text>
-            <Text style={styles.body2}>{invoiceTo.phoneNumber}</Text>
-          </View>
+        {/* Información de negocio en esquina superior derecha */}
+        <View style={styles.businessInfo}>
+          <Text style={styles.businessText}>{company?.address || 'Dirección de la empresa'}</Text>
+          <Text style={styles.businessText}>Ciudad, Estado, País</Text>
+          <Text style={styles.businessText}>NIT: {company?.nit || '000000000-0'}</Text>
         </View>
 
-        <View style={[styles.gridContainer, styles.mb40]}>
-          <View style={styles.col6}>
-            <Text style={[styles.subtitle2, styles.mb4]}>Date create</Text>
-            <Text style={styles.body2}>{fDate(createDate)}</Text>
-          </View>
-          <View style={styles.col6}>
-            <Text style={[styles.subtitle2, styles.mb4]}>Due date</Text>
-            <Text style={styles.body2}>{fDate(dueDate)}</Text>
-          </View>
-        </View>
+        {/* Tarjeta principal */}
+        <View style={styles.mainCard}>
+          {/* Header con cliente y total */}
+          <View style={styles.cardHeader}>
+            {/* Billed to */}
+            <View>
+              <Text style={styles.billedToLabel}>Facturar a</Text>
+              <Text style={styles.clientName}>{invoice?.customer?.name || 'Nombre del Cliente'}</Text>
+              <Text style={styles.clientInfo}>
+                {invoice?.customer?.billing_address?.address || 'Dirección del cliente'}
+              </Text>
+              <Text style={styles.clientInfo}>
+                {invoice?.customer?.billing_address?.city || 'Ciudad'}
+                {', '}
+                {invoice?.customer?.billing_address?.country || 'País'}
+                {' - '}
+                {invoice?.customer?.billing_address?.postal_code || '00000'}
+              </Text>
+              <Text style={styles.clientInfo}>{invoice?.customer?.phone || '+57 (300) 000-0000'}</Text>
+            </View>
 
-        <Text style={[styles.subtitle1, styles.mb8]}>Invoice Details</Text>
-
-        <View style={styles.table}>
-          <View>
-            <View style={styles.tableRow}>
-              <View style={styles.tableCell_1}>
-                <Text style={styles.subtitle2}>#</Text>
-              </View>
-
-              <View style={styles.tableCell_2}>
-                <Text style={styles.subtitle2}>Description</Text>
-              </View>
-
-              <View style={styles.tableCell_3}>
-                <Text style={styles.subtitle2}>Qty</Text>
-              </View>
-
-              <View style={styles.tableCell_3}>
-                <Text style={styles.subtitle2}>Unit price</Text>
-              </View>
-
-              <View style={[styles.tableCell_3, styles.alignRight]}>
-                <Text style={styles.subtitle2}>Total</Text>
-              </View>
+            {/* Total destacado */}
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={styles.totalLabel}>Factura de (COP)</Text>
+              <Text style={styles.totalAmount}>{fCurrency(total_amount)}</Text>
             </View>
           </View>
 
+          {/* Separador */}
+          <View style={styles.separator} />
+
+          {/* Información de factura */}
+          <View style={styles.invoiceInfo}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Número de factura</Text>
+              <Text style={styles.infoValue}>#{invoice?.invoice_number || 'AB2324-01'}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Referencia</Text>
+              <Text style={styles.infoValue}>{invoice?.reference || 'INV-057'}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Fecha de factura</Text>
+              <Text style={styles.infoValue}>{fDate(invoice?.issue_date, 'dd MMM, yyyy')}</Text>
+            </View>
+          </View>
+
+          <View style={styles.invoiceInfo}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Asunto</Text>
+              <Text style={styles.infoValue}>{invoice?.subject || 'Sistema de Diseño'}</Text>
+            </View>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Fecha de vencimiento</Text>
+              <Text style={styles.infoValue}>{fDate(invoice?.due_date, 'dd MMM, yyyy')}</Text>
+            </View>
+          </View>
+
+          {/* Separador */}
+          <View style={styles.separator} />
+
+          {/* Tabla de items */}
           <View>
-            {items.map((item, index) => (
-              <View style={styles.tableRow} key={item.id}>
-                <View style={styles.tableCell_1}>
-                  <Text>{index + 1}</Text>
-                </View>
+            <Text style={styles.itemDetailLabel}>DETALLE DE ARTÍCULOS</Text>
 
-                <View style={styles.tableCell_2}>
-                  <Text style={styles.subtitle2}>{item.title}</Text>
-                  <Text>{item.description}</Text>
-                </View>
+            {/* Headers */}
+            <View style={styles.tableHeader}>
+              <Text style={styles.qtyLabel}>CANT</Text>
+              <Text style={styles.rateLabel}>PRECIO</Text>
+              <Text style={styles.amountLabel}>MONTO</Text>
+            </View>
 
-                <View style={styles.tableCell_3}>
-                  <Text>{item.quantity}</Text>
-                </View>
+            {/* Separador */}
+            <View style={styles.separator} />
 
-                <View style={styles.tableCell_3}>
-                  <Text>{item.price}</Text>
-                </View>
-
-                <View style={[styles.tableCell_3, styles.alignRight]}>
-                  <Text>{fCurrency(item.price * item.quantity)}</Text>
-                </View>
+            {/* Items */}
+            {line_items.map((item, index) => (
+              <View key={index} style={styles.itemRow}>
+                <Text style={styles.itemName}>{item.name || 'Nombre del artículo'}</Text>
+                <Text style={styles.itemDescription}>{item.description || 'Descripción del artículo'}</Text>
+                <Text style={styles.itemQty}>{Math.round(item.quantity || 1)}</Text>
+                <Text style={styles.itemRate}>{fCurrency(parseFloat(item.unit_price || '0'))}</Text>
+                <Text style={styles.itemAmount}>{fCurrency(parseFloat(item.line_total || '0'))}</Text>
               </View>
             ))}
 
-            <View style={[styles.tableRow, styles.noBorder]}>
-              <View style={styles.tableCell_1} />
-              <View style={styles.tableCell_2} />
-              <View style={styles.tableCell_3} />
-              <View style={styles.tableCell_3}>
-                <Text>Subtotal</Text>
-              </View>
-              <View style={[styles.tableCell_3, styles.alignRight]}>
-                <Text>{fCurrency(subTotal)}</Text>
-              </View>
-            </View>
+            {/* Separador para totales */}
+            <View style={styles.totalsSeparator} />
 
-            <View style={[styles.tableRow, styles.noBorder]}>
-              <View style={styles.tableCell_1} />
-              <View style={styles.tableCell_2} />
-              <View style={styles.tableCell_3} />
-              <View style={styles.tableCell_3}>
-                <Text>Shipping</Text>
+            {/* Totales */}
+            <View style={styles.totalsSection}>
+              <View style={styles.totalRow}>
+                <Text style={styles.totalRowLabel}>Subtotal</Text>
+                <Text style={styles.totalRowValue}>{fCurrency(subtotal)}</Text>
               </View>
-              <View style={[styles.tableCell_3, styles.alignRight]}>
-                <Text>{fCurrency(-shipping)}</Text>
-              </View>
-            </View>
 
-            <View style={[styles.tableRow, styles.noBorder]}>
-              <View style={styles.tableCell_1} />
-              <View style={styles.tableCell_2} />
-              <View style={styles.tableCell_3} />
-              <View style={styles.tableCell_3}>
-                <Text>Discount</Text>
-              </View>
-              <View style={[styles.tableCell_3, styles.alignRight]}>
-                <Text>{fCurrency(-discount)}</Text>
-              </View>
-            </View>
+              {taxes_total > 0 && (
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalRowLabel}>Impuesto (10%)</Text>
+                  <Text style={styles.totalRowValue}>{fCurrency(taxes_total)}</Text>
+                </View>
+              )}
 
-            <View style={[styles.tableRow, styles.noBorder]}>
-              <View style={styles.tableCell_1} />
-              <View style={styles.tableCell_2} />
-              <View style={styles.tableCell_3} />
-              <View style={styles.tableCell_3}>
-                <Text>Taxes</Text>
-              </View>
-              <View style={[styles.tableCell_3, styles.alignRight]}>
-                <Text>{fCurrency(taxes)}</Text>
-              </View>
-            </View>
-
-            <View style={[styles.tableRow, styles.noBorder]}>
-              <View style={styles.tableCell_1} />
-              <View style={styles.tableCell_2} />
-              <View style={styles.tableCell_3} />
-              <View style={styles.tableCell_3}>
-                <Text style={styles.h4}>Total</Text>
-              </View>
-              <View style={[styles.tableCell_3, styles.alignRight]}>
-                <Text style={styles.h4}>{fCurrency(totalAmount)}</Text>
+              <View style={styles.finalTotal}>
+                <Text style={styles.finalTotalLabel}>Total</Text>
+                <Text style={styles.finalTotalValue}>{fCurrency(total_amount)}</Text>
               </View>
             </View>
           </View>
+
+          {/* Mensaje de agradecimiento */}
+          <Text style={styles.thankYou}>Gracias por su preferencia.</Text>
         </View>
 
-        <View style={[styles.gridContainer, styles.footer]} fixed>
-          <View style={styles.col8}>
-            <Text style={styles.subtitle2}>NOTES</Text>
-            <Text>We appreciate your business. Should you need us to add VAT or extra notes let us know!</Text>
-          </View>
-          <View style={[styles.col4, styles.alignRight]}>
-            <Text style={styles.subtitle2}>Have a Question?</Text>
-            <Text>support@abcapp.com</Text>
-          </View>
+        {/* Términos y condiciones */}
+        <View style={styles.termsSection}>
+          <Text style={styles.termsTitle}>Términos y Condiciones</Text>
+          <Text style={styles.termsText}>Por favor pague dentro de 15 días de recibir esta factura.</Text>
         </View>
       </Page>
     </Document>

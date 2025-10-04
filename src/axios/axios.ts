@@ -6,7 +6,7 @@ import { getErrorConfig } from '../config/error-codes.config';
 // ----------------------------------------------------------------------
 
 const apiClient = axios.create({
-  baseURL: `${JWTconfig.apiUrl}/${JWTconfig.apiV}`
+  baseURL: `${JWTconfig.apiUrl}`
 });
 
 // Variable global para acceder al error handler desde los interceptores

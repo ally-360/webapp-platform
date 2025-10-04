@@ -1,32 +1,17 @@
 // i18n
 import 'src/locales/i18n';
 
-// scroll bar
-import 'simplebar-react/dist/simplebar.min.css';
-
 // lightbox
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/captions.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
-
-// map
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-// editor
-import 'react-quill/dist/quill.snow.css';
-
-// slick-carousel
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-
-// lazy image
-import 'react-lazy-load-image-component/src/effects/blur.css';
 
 // ----------------------------------------------------------------------
 
 // @mui
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { es } from 'date-fns/locale';
 // routes
 import Router from 'src/routes/sections';
 // theme
@@ -53,11 +38,11 @@ import { store } from 'src/redux/store';
 export default function App() {
   useScrollToTop();
   return (
-    <AuthProvider>
-      <Provider store={store}>
+    <Provider store={store}>
+      <AuthProvider>
         <ErrorHandlerProvider>
           <AxiosErrorSetup />
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
             <SettingsProvider
               defaultSettings={{
                 themeMode: 'light', // 'light' | 'dark'
@@ -72,11 +57,11 @@ export default function App() {
                 <MotionLazy>
                   <SnackbarProvider>
                     <CheckoutProvider>
-                        <SettingsDrawer />
-                        <ProgressBar />
-                        <AuthConsumer>
-                          <Router />
-                        </AuthConsumer>
+                      <SettingsDrawer />
+                      <ProgressBar />
+                      <AuthConsumer>
+                        <Router />
+                      </AuthConsumer>
                     </CheckoutProvider>
                   </SnackbarProvider>
                 </MotionLazy>
@@ -84,7 +69,7 @@ export default function App() {
             </SettingsProvider>
           </LocalizationProvider>
         </ErrorHandlerProvider>
-      </Provider>
-    </AuthProvider>
+      </AuthProvider>
+    </Provider>
   );
 }

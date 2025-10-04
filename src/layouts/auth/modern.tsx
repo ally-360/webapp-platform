@@ -78,7 +78,7 @@ export default function AuthModernLayout({ children, image }) {
           opacity: { xs: 0.24, md: 0 },
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center center',
-          backgroundImage: 'url(/assets/background/overlay_4.jpg)'
+          backgroundImage: 'url(/logo/Background.svg)'
         }
       }}
     >

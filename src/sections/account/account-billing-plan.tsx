@@ -80,24 +80,28 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
             startIcon={<Iconify icon="eva:star-fill" />}
             sx={{ position: 'absolute', top: 8, right: 8 }}
           >
-            Current
+            Actual
           </Label>
         )}
 
         <Box sx={{ width: 48, height: 48 }}>
-          {plan.subscription === 'basic' && <PlanFreeIcon />}
-          {plan.subscription === 'starter' && <PlanStarterIcon />}
-          {plan.subscription === 'premium' && <PlanPremiumIcon />}
+          {(plan.subscription === 'ally-kickstart' || plan.subscription === 'basic') && <PlanFreeIcon />}
+          {(plan.subscription === 'ally-boost' || plan.subscription === 'starter') && <PlanStarterIcon />}
+          {(plan.subscription === 'ally-supreme' || plan.subscription === 'premium') && <PlanPremiumIcon />}
         </Box>
 
-        <Box sx={{ typography: 'subtitle2', mt: 2, mb: 0.5, textTransform: 'capitalize' }}>{plan.subscription}</Box>
+        <Box sx={{ typography: 'subtitle2', mt: 2, mb: 0.5 }}>{plan.name || plan.subscription}</Box>
+
+        {plan.description && (
+          <Box sx={{ typography: 'caption', color: 'text.secondary', mb: 1 }}>{plan.description}</Box>
+        )}
 
         <Stack direction="row" alignItems="center" sx={{ typography: 'h4' }}>
-          {plan.price || 'Free'}
+          {plan.price ? `$${plan.price.toLocaleString('es-CO')}` : 'Gratis'}
 
           {!!plan.price && (
             <Box component="span" sx={{ typography: 'body2', color: 'text.disabled', ml: 0.5 }}>
-              /mo
+              /mes
             </Box>
           )}
         </Stack>
@@ -108,7 +112,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
   return (
     <>
       <Card>
-        <CardHeader title="Plan" />
+        <CardHeader title="Plan de Facturación" />
 
         <Grid container spacing={2} sx={{ p: 3 }}>
           {renderPlans}
@@ -119,14 +123,14 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
             <Grid xs={12} md={4} sx={{ color: 'text.secondary' }}>
               Plan
             </Grid>
-            <Grid xs={12} md={8} sx={{ typography: 'subtitle2', textTransform: 'capitalize' }}>
-              {selectedPlan || '-'}
+            <Grid xs={12} md={8} sx={{ typography: 'subtitle2' }}>
+              {plans.find((p) => p.subscription === selectedPlan)?.name || selectedPlan || '-'}
             </Grid>
           </Grid>
 
           <Grid container spacing={{ xs: 0.5, md: 2 }}>
             <Grid xs={12} md={4} sx={{ color: 'text.secondary' }}>
-              Billing name
+              Nombre de facturación
             </Grid>
             <Grid xs={12} md={8}>
               <Button
@@ -141,7 +145,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
 
           <Grid container spacing={{ xs: 0.5, md: 2 }}>
             <Grid xs={12} md={4} sx={{ color: 'text.secondary' }}>
-              Billing address
+              Dirección de facturación
             </Grid>
             <Grid xs={12} md={8} sx={{ color: 'text.secondary' }}>
               {selectedAddress?.fullAddress}
@@ -150,7 +154,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
 
           <Grid container spacing={{ xs: 0.5, md: 2 }}>
             <Grid xs={12} md={4} sx={{ color: 'text.secondary' }}>
-              Billing phone number
+              Teléfono de facturación
             </Grid>
             <Grid xs={12} md={8} sx={{ color: 'text.secondary' }}>
               {selectedAddress?.phoneNumber}
@@ -159,7 +163,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
 
           <Grid container spacing={{ xs: 0.5, md: 2 }}>
             <Grid xs={12} md={4} sx={{ color: 'text.secondary' }}>
-              Payment method
+              Método de pago
             </Grid>
             <Grid xs={12} md={8}>
               <Button
@@ -176,8 +180,8 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <Stack spacing={1.5} direction="row" justifyContent="flex-end" sx={{ p: 3 }}>
-          <Button variant="outlined">Cancel Plan</Button>
-          <Button variant="contained">Upgrade Plan</Button>
+          <Button variant="outlined">Cancelar Plan</Button>
+          <Button variant="contained">Actualizar Plan</Button>
         </Stack>
       </Card>
 
@@ -197,7 +201,7 @@ export default function AccountBillingPlan({ cardList, addressBook, plans }) {
         onSelect={handleSelectAddress}
         action={
           <Button size="small" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ alignSelf: 'flex-end' }}>
-            New
+            Nueva
           </Button>
         }
       />

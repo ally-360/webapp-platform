@@ -73,7 +73,7 @@ export default function JwtLoginView() {
   });
 
   const renderHead = (
-    <Stack spacing={0} sx={{ mb: 5}}>
+    <Stack spacing={0} sx={{ mb: 5 }}>
       <Typography variant="h4">¡Hola de nuevo!</Typography>
 
       <Stack direction="row">

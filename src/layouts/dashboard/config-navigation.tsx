@@ -8,12 +8,17 @@ import SvgColor from 'src/components/svg-color';
 import { useDispatch } from 'react-redux';
 import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
+import { switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { togglePopup as toggleContactsPopup } from 'src/redux/inventory/contactsSlice';
 import { useNavigate } from 'react-router';
+
+// Cast SvgColor to any locally to avoid TS prop inference issues
+const SvgColorAny: any = SvgColor;
 
 // ----------------------------------------------------------------------
 
 const icon = (name) => (
-  <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
+  <SvgColorAny src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />
   // OR
   // <Iconify icon="fluent:mail-24-filled" />
   // https://icon-sets.iconify.design/solar/
@@ -57,7 +62,6 @@ export function useNavData() {
   const { t } = useLocales();
 
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
 
   const data = useMemo(
@@ -86,9 +90,9 @@ export function useNavData() {
             children: [
               {
                 title: t('Productos'),
-                path: paths.dashboard.inventory.list,
+                path: paths.dashboard.inventory.list, // Click principal va al listado
                 openPopup() {
-                  navigate(paths.dashboard.inventory.newProduct);
+                  navigate(paths.dashboard.inventory.newProduct); // Botón + va a creación
                 }
               },
               {
@@ -104,18 +108,14 @@ export function useNavData() {
                 openPopup() {
                   dispatch(switchPopupStateBrands(true));
                 }
+              },
+              {
+                title: t('Puntos de venta'),
+                path: paths.dashboard.inventory.pdvs,
+                openPopup() {
+                  dispatch(switchPopup(true));
+                }
               }
-              // {
-              //   title: t('Puntos de venta'),
-              //   path: paths.dashboard.inventory.pdvs,
-              //   openPopup() {
-              //     dispatch(switchPopup(true));
-              //   }
-              // },
-              // {
-              //   title: t('Ajuste de inventario'),
-              //   path: paths.dashboard.inventory.pdvs
-              // }
             ]
           },
           {
@@ -130,6 +130,10 @@ export function useNavData() {
               {
                 title: t('Caja'),
                 path: paths.dashboard.pos
+              },
+              {
+                title: t('Historial de ventas'),
+                path: '/pos/history'
               }
             ]
           },
@@ -152,24 +156,32 @@ export function useNavData() {
               {
                 title: t('Facturas de compra'),
                 path: paths.dashboard.bill.root
-              },
-              {
-                title: t('Recepiones de compra'),
-                path: paths.dashboard.bill.provide
               }
             ]
           },
-          {
-            title: t('orden de compra'),
-            path: paths.dashboard.order.root,
-            icon: ICONS.order,
-            children: [{ title: t('Ordenes'), path: paths.dashboard.order.root }]
-          },
+          // {
+          //   title: t('Contabilidad'),
+          //   path: paths.dashboard.accounting.root,
+          //   icon: ICONS.invoice,
+          //   children: [
+          //     { title: t('Catálogo de cuentas'), path: paths.dashboard.accounting.chartOfAccounts },
+          //     { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
+          //   ]
+          // },
+          // {
+          //   title: t('orden de compra'),
+          //   path: paths.dashboard.order.root,
+          //   icon: ICONS.order,
+          //   children: [{ title: t('Ordenes'), path: paths.dashboard.order.root }]
+          // },
           // USER
           {
             title: t('Contactos'),
             path: paths.dashboard.user.list,
-            icon: ICONS.user
+            icon: ICONS.user,
+            openPopup() {
+              dispatch(toggleContactsPopup());
+            }
             // children: [
             //   // { title: t('profile'), path: paths.dashboard.user.root },
             //   // { title: t('cards'), path: paths.dashboard.user.cards },

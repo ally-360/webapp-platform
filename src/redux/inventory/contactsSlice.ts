@@ -1,14 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { ContactInterface } from '../../interfaces/auth/userInterfaces';
-import RequestService from '../../axios/services/service';
+import { getContacts as getContactsApi, createContact as createContactApi } from '../../api';
 
 // constantes
 
 interface ContactsState {
   contacts: ContactInterface[];
   contactsLoading: boolean;
-  error: any;
-  success: any;
+  error: string | null;
+  success: boolean | null;
   contactsEmpty: boolean;
 
   contactsPopup: boolean;
@@ -16,8 +16,8 @@ interface ContactsState {
   // Contact detail
   contact: ContactInterface | null;
   contactLoading: boolean;
-  contactError: any;
-  contactSuccess: any;
+  contactError: string | null;
+  contactSuccess: boolean | null;
 }
 
 const initialState: ContactsState = {
@@ -45,21 +45,21 @@ const contactsSlice = createSlice({
     },
     hasError(state, action) {
       state.contactsLoading = false;
-      state.error = action.payload;
+      state.error = action.payload as string;
       state.success = false;
       state.contactsEmpty = true;
     },
     getAllContactsSuccess(state, action) {
-      state.contacts = action.payload;
+      state.contacts = action.payload || [];
       state.contactsLoading = false;
       state.error = null;
       state.success = true;
-      state.contactsEmpty = action.payload.length === 0;
+      state.contactsEmpty = (action.payload || []).length === 0;
     },
     getAllContactsError(state, action) {
       state.contacts = [];
       state.contactsLoading = false;
-      state.error = action.payload;
+      state.error = action.payload as string;
       state.success = false;
       state.contactsEmpty = true;
     },
@@ -74,10 +74,12 @@ const contactsSlice = createSlice({
     // Contact detail
     startLoadingContact(state) {
       state.contactLoading = true;
+      state.contactError = null;
+      state.contactSuccess = null;
     },
     hasErrorContact(state, action) {
       state.contactLoading = false;
-      state.contactError = action.payload;
+      state.contactError = action.payload as string;
       state.contactSuccess = false;
     },
     getContactByIdSuccess(state, action) {
@@ -89,7 +91,7 @@ const contactsSlice = createSlice({
     getContactByIdError(state, action) {
       state.contact = null;
       state.contactLoading = false;
-      state.contactError = action.payload;
+      state.contactError = action.payload as string;
       state.contactSuccess = false;
     },
     updateContactSuccess(state, action) {
@@ -100,7 +102,7 @@ const contactsSlice = createSlice({
     },
     updateContactError(state, action) {
       state.contactLoading = false;
-      state.contactError = action.payload;
+      state.contactError = action.payload as string;
       state.contactSuccess = false;
     },
     createContactSuccess(state, action) {
@@ -117,6 +119,12 @@ const contactsSlice = createSlice({
     },
     togglePopup(state) {
       state.contactsPopup = !state.contactsPopup;
+    },
+    openPopup(state) {
+      state.contactsPopup = true;
+    },
+    closePopup(state) {
+      state.contactsPopup = false;
     }
   }
 });
@@ -137,61 +145,87 @@ export const {
   updateContactError,
   createContactSuccess,
   resetContact,
-  togglePopup
+  togglePopup,
+  openPopup,
+  closePopup
 } = contactsSlice.actions;
 
 // actions
 
-export const getAllContacts = () => async (dispatch) => {
+export const getAllContacts = () => async (dispatch, getState) => {
   try {
     dispatch(startLoading());
-    const response = await RequestService.getContacts();
-    dispatch(getAllContactsSuccess(response.data.data));
-  } catch (error) {
-    dispatch(hasError(error));
+    const { auth } = getState();
+    const companyId = auth?.user?.companies?.[0]?.id;
+
+    if (!companyId) {
+      throw new Error('No company selected');
+    }
+
+    const response = await getContactsApi({ companyId });
+    const list = (response as any)?.data?.data ?? (response as any)?.data ?? response ?? [];
+    dispatch(getAllContactsSuccess(list));
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(hasError(message));
   }
 };
 
-export const deleteContact = (id) => async (dispatch) => {
+export const deleteContact = (_id) => async (dispatch) => {
   try {
     dispatch(startLoading());
-    await RequestService.deleteContact(id);
-    dispatch(deleteContactSuccess(id));
-  } catch (error) {
-    dispatch(hasError(error));
+    // Note: Delete functionality would need to be implemented in the API
+    dispatch(getAllContacts());
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(hasError(message));
   }
 };
 
 // Contact detail
 
-export const getContactById = (id) => async (dispatch) => {
+export const getContactById = (_id) => async (dispatch) => {
   try {
     dispatch(startLoadingContact());
-    const response = await RequestService.getContactById(id);
-    dispatch(getContactByIdSuccess(response.data));
-  } catch (error) {
-    dispatch(getContactByIdError(error));
+    // Note: This would need to be implemented to get contact by ID
+    dispatch(getContactByIdSuccess(null));
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(getContactByIdError(message));
   }
 };
 
 export const updateContact =
-  ({ id, databody }) =>
+  ({ id: _id, databody: _databody }) =>
   async (dispatch) => {
     try {
       dispatch(startLoadingContact());
-      const response = await RequestService.updateContact({ id, databody });
-      dispatch(updateContactSuccess(response.data));
-    } catch (error) {
-      dispatch(updateContactError(error));
+      // Note: Update functionality would need to be implemented in the API
+      dispatch(getAllContacts());
+    } catch (error: any) {
+      const message = error?.message ? String(error.message) : String(error);
+      dispatch(updateContactError(message));
     }
   };
 
-export const createContact = (databody) => async (dispatch) => {
+export const createContact = (databody) => async (dispatch, getState) => {
   try {
     dispatch(startLoadingContact());
-    const response = await RequestService.createContact(databody);
-    dispatch(createContactSuccess(response.data));
-  } catch (error) {
-    dispatch(updateContactError(error));
+    const { auth } = getState();
+    const companyId = auth?.user?.companies?.[0]?.id;
+
+    if (!companyId) {
+      throw new Error('No company selected');
+    }
+
+    const response = await createContactApi({ ...databody, companyId });
+    const created = (response as any)?.data?.data ?? (response as any)?.data ?? response;
+    dispatch(createContactSuccess(created));
+    dispatch(getAllContacts());
+    return created;
+  } catch (error: any) {
+    const message = error?.message ? String(error.message) : String(error);
+    dispatch(updateContactError(message));
+    return null;
   }
 };

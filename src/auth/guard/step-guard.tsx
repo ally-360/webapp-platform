@@ -15,13 +15,23 @@ export default function StepGuard({ children }: { children: React.ReactNode }) {
 
   const returnTo = searchParams.get('returnTo') || paths.stepByStep.root;
 
-  const { authenticated, isFirstLogin } = useAuthContext();
+  const { authenticated, isFirstLogin, selectedCompany } = useAuthContext();
 
   const check = useCallback(() => {
     if (authenticated && isFirstLogin === true) {
       router.replace(returnTo);
     }
   }, [authenticated, returnTo, router, isFirstLogin]);
+
+  const checkBussiness = useCallback(() => {
+    if (!selectedCompany) {
+      router.replace(paths.select_business);
+    }
+  }, [router, selectedCompany]);
+
+  useEffect(() => {
+    checkBussiness();
+  }, [checkBussiness]);
 
   useEffect(() => {
     check();

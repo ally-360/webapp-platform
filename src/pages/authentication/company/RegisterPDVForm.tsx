@@ -52,16 +52,17 @@ export default function RegisterPDVForm() {
   const preValuesPDV: GetPDVResponse | undefined = useAppSelector((state) => state.stepByStep.preValuesPDV);
   const { locations } = useAppSelector((state) => state.locations);
 
-  console.log('preValuesPDV', preValuesPDV);
-
   const defaultValues: RegisterPDVFormValues = {
     name: preValuesPDV?.name ?? '',
     description: preValuesPDV?.description ?? '',
     departamento:
-      typeof preValuesPDV?.departamento === 'object' && preValuesPDV?.departamento !== null
+      typeof preValuesPDV?.departamento === 'object' &&
+      preValuesPDV?.departamento !== null &&
+      Object.keys(preValuesPDV.departamento).length > 0
         ? preValuesPDV.departamento
-        : {},
-    municipio: preValuesPDV?.location ?? {},
+        : ({} as any),
+    municipio:
+      preValuesPDV?.location && Object.keys(preValuesPDV.location).length > 0 ? preValuesPDV.location : ({} as any),
     address: preValuesPDV?.address ?? '',
     phoneNumber: preValuesPDV?.phoneNumber ?? '',
     main: true,
@@ -77,7 +78,7 @@ export default function RegisterPDVForm() {
     handleSubmit,
     setValue,
     watch,
-    formState: { isSubmitting, isValidating, isValid, errors }
+    formState: { isSubmitting }
   } = methods;
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -90,16 +91,20 @@ export default function RegisterPDVForm() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const databody: GetPDVResponse = {
-        ...data,
-        locationId: data.municipio.id
+      const municipio = data.municipio as any;
+      if (!municipio || Object.keys(municipio).length === 0 || !municipio.id) {
+        setErrorMsg('Por favor selecciona un municipio válido');
+        return;
+      }
+
+      const { departamento: _departamento, municipio: _, ...pdvData } = data;
+
+      const databody = {
+        ...pdvData,
+        location: municipio
       };
 
-      delete databody.municipio;
-      delete databody.departamento;
-
       if (preValuesPDV?.id) {
-        // TODO: validar que funcione el update
         await updatePDV(preValuesPDV.id, databody);
       } else {
         await createPDV(databody);
@@ -109,7 +114,7 @@ export default function RegisterPDVForm() {
         variant: 'success'
       });
 
-      dispatch(setPrevValuesPDV(databody));
+      dispatch(setPrevValuesPDV(databody as unknown as GetPDVResponse));
       dispatch(setStep(2));
     } catch (error) {
       console.error(error);
@@ -135,10 +140,19 @@ export default function RegisterPDVForm() {
   const departmentValue: Partial<Departamento> = watch('departamento');
   const [searchQueryMunicipio, setSearchQueryMunicipio] = React.useState('');
   const [searchQueryDepartamento, setSearchQueryDepartamento] = React.useState('');
-  const isOptionEqualToValue = (option: any, value: any = '') => {
-    if (option && value) {
-      return option.id === value.id && option.name === value.name;
+  const isOptionEqualToValue = (option: any, value: any) => {
+    if (!value || Object.keys(value).length === 0) {
+      return false;
     }
+
+    if (!option) {
+      return false;
+    }
+
+    if (option.id && value.id) {
+      return option.id === value.id;
+    }
+
     return false;
   };
 
@@ -146,18 +160,18 @@ export default function RegisterPDVForm() {
     if (departmentValue && Object.entries(departmentValue).length !== 0) {
       setMunicipios(departmentValue.towns ?? []);
       const selectedMunicipio = watch('municipio') as Partial<Municipio>;
-      if (selectedMunicipio) {
+      if (selectedMunicipio && Object.keys(selectedMunicipio).length > 0) {
         const municipioExist = (departmentValue.towns ?? []).filter(
           (municipio) => municipio.name === selectedMunicipio.name
         );
         if (municipioExist.length === 0) {
-          setValue('municipio', {});
+          setValue('municipio', {} as any);
           setSearchQueryMunicipio('');
         }
       }
     } else {
       setMunicipios([]);
-      setValue('municipio', {});
+      setValue('municipio', {} as any);
       setSearchQueryMunicipio('');
     }
   }, [departmentValue, locations, setValue, watch]);
@@ -194,8 +208,9 @@ export default function RegisterPDVForm() {
             label="Departamento"
             onInputChange={handleInputDepartamentoChange}
             isOptionEqualToValue={isOptionEqualToValue}
-            getOptionLabel={(option) => (option.name ? option.name : '')}
+            getOptionLabel={(option) => (option && option.name ? option.name : '')}
             options={locations}
+            value={watch('departamento') || null}
             renderOption={(props, option) => {
               const matches = match(option.name, searchQueryDepartamento);
               const parts = parse(option.name, matches);
@@ -233,8 +248,9 @@ export default function RegisterPDVForm() {
             label="Municipio"
             onInputChange={handleInputMunicipioChange}
             isOptionEqualToValue={isOptionEqualToValue}
-            getOptionLabel={(option) => (option.name ? option.name : '')}
+            getOptionLabel={(option) => (option && option.name ? option.name : '')}
             options={municipios}
+            value={watch('municipio') || null}
             renderOption={(props, option) => {
               const matches = match(option.name, searchQueryMunicipio);
               const parts = parse(option.name, matches);

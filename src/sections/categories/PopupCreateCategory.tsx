@@ -12,68 +12,76 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
-
-import React, { useEffect, useMemo, useState } from 'react';
+import { TransitionProps } from '@mui/material/transitions';
+import React, { useEffect, useMemo } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as Yup from 'yup';
 import { useSnackbar } from 'notistack';
 import { LoadingButton } from '@mui/lab';
 
-import { getCategories, switchPopupState } from 'src/redux/inventory/categoriesSlice';
+// RTK Query
+import {
+  useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation
+} from 'src/redux/services/categoriesApi';
+
+// Redux Legacy (para compatibilidad con el estado del popup)
+import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
+
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useTranslation } from 'react-i18next';
 import FormProvider from 'src/components/hook-form/form-provider';
 import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import { Icon } from '@iconify/react';
-import RequestService from '../../axios/services/service';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
-const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
+const Transition = React.forwardRef<unknown, TransitionProps & { children: React.ReactElement<any, any> }>(
+  (props, ref) => <Slide direction="up" ref={ref} {...props} />
+);
 
 function PopupCreateCategory() {
   const { enqueueSnackbar } = useSnackbar();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const theme = useTheme();
-  const categoryEdit = useSelector((state) => state.categories.categoryEdit);
-  const [categoryEditInfo, setCategoryEditInfo] = useState(null);
-  const open = useSelector((state) => state.categories.openPopup);
-  useEffect(() => {
-    const category = async () => {
-      if (categoryEdit) {
-        const { data } = await RequestService.getCategoryById(categoryEdit.id);
-        setCategoryEditInfo(data);
-      } else {
-        setCategoryEditInfo(null);
-      }
-    };
-    category();
-  }, [categoryEdit]);
+  const { categoryEdit, openPopup } = useAppSelector((state) => state.categories);
+
+  // RTK Query hooks
+  const { data: categories = [] } = useGetCategoriesQuery();
+  const [createCategory] = useCreateCategoryMutation();
+  const [updateCategory] = useUpdateCategoryMutation();
+
+  const categoryEditData = categoryEdit as any;
+  const categoriesList = categories || [];
 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { t } = useTranslation();
 
-  // create category schema
-  const createCategorySchema = Yup.object().shape(
-    {
-      name: Yup.string().required('Nombre requerido'),
-      description: Yup.string().required('Descripción requerida'),
-      categoryMainCategory: Yup.string().optional(),
-      company: Yup.string().optional()
-    }[categoryEditInfo]
-  );
+  // Validation schema (fixed)
+  const createCategorySchema = Yup.object().shape({
+    name: Yup.string().required('Nombre requerido'),
+    description: Yup.string().required('Descripción requerida'),
+    parent_id: Yup.string().nullable().optional()
+  });
 
-  // Memoriza el valor predeterminado para evitar que se vuelva a calcular en cada renderizado.
-  const defaultValues = useMemo(
-    () => ({
-      name: categoryEditInfo ? categoryEditInfo.name : '',
-      description: categoryEditInfo ? categoryEditInfo.description : '',
-      categoryMainCategory: categoryEditInfo ? categoryEditInfo.categoryMainCategory : null,
-      // TODO: agregar company id
-      company: 'f403346f-e91d-423d-9bbb-6a0168cd3f64'
-    }),
-    [categoryEditInfo]
-  );
+  // Default values based on edit state
+  const defaultValues = useMemo(() => {
+    let parentId: string | null = null;
+    if (categoryEditData) {
+      const parent: any = categoryEditData.categoryMainCategory || categoryEditData.parent;
+      if (typeof parent === 'object' && parent !== null) {
+        parentId = parent.id ?? null;
+      } else {
+        parentId = parent ?? null;
+      }
+    }
+    return {
+      name: categoryEditData ? categoryEditData.name : '',
+      description: categoryEditData ? categoryEditData.description : '',
+      parent_id: parentId
+    } as any;
+  }, [categoryEditData]);
 
   const methods = useForm({
     resolver: yupResolver(createCategorySchema),
@@ -87,40 +95,39 @@ function PopupCreateCategory() {
   } = methods;
 
   useEffect(() => {
-    if (categoryEditInfo) {
-      reset(defaultValues);
-    }
-  }, [categoryEditInfo, defaultValues, reset]);
-
-  useEffect(() => {
-    if (!categoryEditInfo) {
-      reset(defaultValues);
-    }
-  }, [categoryEditInfo, defaultValues, reset]);
-
-  const { categories } = useSelector((state) => state.categories);
+    reset(defaultValues);
+  }, [defaultValues, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      if (categoryEditInfo) {
-        await RequestService.editCategory({ id: categoryEditInfo.id, databody: data });
+      if (categoryEditData) {
+        // Actualizar categoría existente
+        await updateCategory({
+          id: categoryEditData.id,
+          data: {
+            name: data.name,
+            description: data.description,
+            parent_id: data.parent_id || null
+          }
+        }).unwrap();
+        enqueueSnackbar(t(`Categoria ${data.name} editada correctamente`), { variant: 'success' });
       } else {
-        await RequestService.createCategory(data);
+        // Crear nueva categoría
+        await createCategory({
+          name: data.name,
+          description: data.description,
+          parent_id: data.parent_id || null
+        }).unwrap();
+        enqueueSnackbar(t(`Categoria ${data.name} creada`), { variant: 'success' });
       }
-      dispatch(getCategories());
+
       reset();
-      enqueueSnackbar(
-        categoryEdit ? t(`Categoria ${data.name} editado correctamente`) : t(`Categoria ${data.name} Creado`),
-        {
-          variant: 'success'
-        }
-      );
-      dispatch(switchPopupState());
-    } catch (error) {
-      enqueueSnackbar(t('No se ha podido crear la categoria, verifica los datos nuevamente'), {
+      dispatch(switchPopupState(null));
+    } catch (error: any) {
+      console.error('Error with category operation:', error);
+      enqueueSnackbar(error?.data?.detail || t('No se ha podido crear la categoria, verifica los datos nuevamente'), {
         variant: 'error'
       });
-      console.log(error);
     }
   });
 
@@ -128,24 +135,23 @@ function PopupCreateCategory() {
     <Dialog
       fullWidth
       maxWidth="sm"
-      open={open}
-      onClose={switchPopupState}
+      open={openPopup as boolean}
+      onClose={() => dispatch(switchPopupState(null))}
       aria-labelledby="draggable-dialog-title"
       TransitionComponent={Transition}
     >
       <DialogTitle
         style={{ cursor: 'move' }}
         id="scroll-dialog-title"
-        boxShadow={2}
         sx={{ padding: '23px  40px 18px 40px!important' }}
       >
         <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
           <Icon icon="ic:round-store" width={24} height={24} />
-          <Box sx={{ fontSize: 18, fontWeight: 500 }}>Crear categoria</Box>
+          <Box sx={{ fontSize: 18, fontWeight: 500 }}>{categoryEditData ? 'Editar categoria' : 'Crear categoria'}</Box>
         </Box>
         <IconButton
           aria-label="close"
-          onClick={() => dispatch(switchPopupState())}
+          onClick={() => dispatch(switchPopupState(null))}
           sx={{
             position: 'absolute',
             right: 10,
@@ -161,8 +167,8 @@ function PopupCreateCategory() {
           <Stack spacing={2} mt={4} mb={3} direction="column" alignItems="center">
             <RHFTextField label="Nombre" name="name" required />
             <RHFTextField label="Descripción" name="description" required />
-            <RHFSelect label="Categoria padre" name="categoryMainCategory">
-              {categories.map((category) => (
+            <RHFSelect label="Categoria padre" name="parent_id">
+              {categoriesList.map((category: any) => (
                 <MenuItem key={category.id} value={category.id}>
                   {category.name}
                 </MenuItem>
@@ -171,8 +177,8 @@ function PopupCreateCategory() {
           </Stack>
         </DialogContent>
         <DialogActions
-          boxShadow={2}
           sx={{
+            boxShadow: 2,
             padding: '20px 35px 15px 40px!important',
             display: 'flex',
             flexWrap: isMobile ? 'wrap' : 'nowrap',
@@ -186,9 +192,9 @@ function PopupCreateCategory() {
           }}
         >
           <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
-            {categoryEdit ? 'Confirmar edición' : 'Crear Categoria'}
+            {categoryEditData ? 'Confirmar edición' : 'Crear Categoria'}
           </LoadingButton>
-          <Button color="primary" variant="outlined" onClick={() => dispatch(switchPopupState())}>
+          <Button color="primary" variant="outlined" onClick={() => dispatch(switchPopupState(null))}>
             Cancelar
           </Button>
         </DialogActions>

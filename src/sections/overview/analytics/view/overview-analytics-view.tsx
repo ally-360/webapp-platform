@@ -1,19 +1,18 @@
+import React from 'react';
 // @mui
 import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 // _mock
-import { _analyticTasks, _analyticPosts, _analyticTraffic, _analyticOrderTimeline } from 'src/_mock';
+import { _analyticPosts, _analyticOrderTimeline } from 'src/_mock';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
 import AnalyticsNews from '../analytics-news';
-import AnalyticsTasks from '../analytics-tasks';
 import AnalyticsCurrentVisits from '../analytics-current-visits';
 import AnalyticsOrderTimeline from '../analytics-order-timeline';
 import AnalyticsWebsiteVisits from '../analytics-website-visits';
 import AnalyticsWidgetSummary from '../analytics-widget-summary';
-import AnalyticsTrafficBySite from '../analytics-traffic-by-site';
 import AnalyticsCurrentSubject from '../analytics-current-subject';
 import AnalyticsConversionRates from '../analytics-conversion-rates';
 
@@ -30,22 +29,22 @@ export default function OverviewAnalyticsView() {
           mb: { xs: 3, md: 5 }
         }}
       >
-        Hi, Welcome back 👋
+        Hola, Bienvenido de vuelta 👋
       </Typography>
 
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Weekly Sales"
-            total={714000}
+            title="Ventas del Mes"
+            total={2840000}
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
           />
         </Grid>
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="New Users"
-            total={1352831}
+            title="Clientes Activos"
+            total={4521}
             color="info"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
           />
@@ -53,8 +52,8 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Item Orders"
-            total={1723315}
+            title="Órdenes Procesadas"
+            total={8976}
             color="warning"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_buy.png" />}
           />
@@ -62,8 +61,8 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AnalyticsWidgetSummary
-            title="Bug Reports"
-            total={234}
+            title="Productos en Stock"
+            total={15643}
             color="error"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_message.png" />}
           />
@@ -71,40 +70,41 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} md={6} lg={8}>
           <AnalyticsWebsiteVisits
-            title="Website Visits"
-            subheader="(+43%) than last year"
+            title="Ventas Mensuales"
+            subheader="(+18%) respecto al año anterior"
             chart={{
               labels: [
-                '01/01/2003',
-                '02/01/2003',
-                '03/01/2003',
-                '04/01/2003',
-                '05/01/2003',
-                '06/01/2003',
-                '07/01/2003',
-                '08/01/2003',
-                '09/01/2003',
-                '10/01/2003',
-                '11/01/2003'
+                'Ene 2024',
+                'Feb 2024',
+                'Mar 2024',
+                'Abr 2024',
+                'May 2024',
+                'Jun 2024',
+                'Jul 2024',
+                'Ago 2024',
+                'Sep 2024',
+                'Oct 2024',
+                'Nov 2024',
+                'Dic 2024'
               ],
               series: [
                 {
-                  name: 'Team A',
+                  name: 'Ventas Directas',
                   type: 'column',
                   fill: 'solid',
-                  data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30]
+                  data: [2800, 3100, 2900, 3400, 3200, 3600, 4100, 3800, 4200, 3900, 4300, 4500]
                 },
                 {
-                  name: 'Team B',
+                  name: 'Ventas Online',
                   type: 'area',
                   fill: 'gradient',
-                  data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43]
+                  data: [1200, 1400, 1600, 1800, 2100, 2300, 2500, 2700, 2900, 3100, 3300, 3500]
                 },
                 {
-                  name: 'Team C',
+                  name: 'Ventas B2B',
                   type: 'line',
                   fill: 'solid',
-                  data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39]
+                  data: [800, 950, 1100, 1250, 1400, 1550, 1700, 1850, 2000, 2150, 2300, 2450]
                 }
               ]
             }}
@@ -113,13 +113,13 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentVisits
-            title="Current Visits"
+            title="Ventas por Región"
             chart={{
               series: [
-                { label: 'America', value: 4344 },
-                { label: 'Asia', value: 5435 },
-                { label: 'Europe', value: 1443 },
-                { label: 'Africa', value: 4443 }
+                { label: 'Norte', value: 4850 },
+                { label: 'Centro', value: 6200 },
+                { label: 'Sur', value: 3100 },
+                { label: 'Oriente', value: 2890 }
               ]
             }}
           />
@@ -127,20 +127,20 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} md={6} lg={8}>
           <AnalyticsConversionRates
-            title="Conversion Rates"
-            subheader="(+43%) than last year"
+            title="Productos Más Vendidos"
+            subheader="(+25%) respecto al mes anterior"
             chart={{
               series: [
-                { label: 'Italy', value: 400 },
-                { label: 'Japan', value: 430 },
-                { label: 'China', value: 448 },
-                { label: 'Canada', value: 470 },
-                { label: 'France', value: 540 },
-                { label: 'Germany', value: 580 },
-                { label: 'South Korea', value: 690 },
-                { label: 'Netherlands', value: 1100 },
-                { label: 'United States', value: 1200 },
-                { label: 'United Kingdom', value: 1380 }
+                { label: 'Laptops Dell', value: 1850 },
+                { label: 'Smartphones Samsung', value: 2100 },
+                { label: 'Tablets iPad', value: 1650 },
+                { label: 'Monitores LG', value: 1200 },
+                { label: 'Impresoras HP', value: 980 },
+                { label: 'Teclados Logitech', value: 850 },
+                { label: 'Mouse Wireless', value: 750 },
+                { label: 'Auriculares Sony', value: 650 },
+                { label: 'Cámaras Canon', value: 500 },
+                { label: 'Discos SSD', value: 450 }
               ]
             }}
           />
@@ -148,33 +148,33 @@ export default function OverviewAnalyticsView() {
 
         <Grid xs={12} md={6} lg={4}>
           <AnalyticsCurrentSubject
-            title="Current Subject"
+            title="Rendimiento por Departamento"
             chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
+              categories: ['Ventas', 'Marketing', 'Producción', 'Logística', 'Finanzas', 'Recursos Humanos'],
               series: [
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] }
+                { name: 'Eficiencia', data: [85, 72, 88, 65, 92, 58] },
+                { name: 'Satisfacción', data: [78, 85, 70, 82, 75, 88] },
+                { name: 'Productividad', data: [90, 68, 85, 75, 80, 65] }
               ]
             }}
           />
         </Grid>
 
         <Grid xs={12} md={6} lg={8}>
-          <AnalyticsNews title="News" list={_analyticPosts} />
+          <AnalyticsNews title="Noticias Empresariales" list={_analyticPosts} />
         </Grid>
 
         <Grid xs={12} md={6} lg={4}>
-          <AnalyticsOrderTimeline title="Order Timeline" list={_analyticOrderTimeline} />
+          <AnalyticsOrderTimeline title="Cronograma de Órdenes" list={_analyticOrderTimeline} />
         </Grid>
 
-        <Grid xs={12} md={6} lg={4}>
-          <AnalyticsTrafficBySite title="Traffic by Site" list={_analyticTraffic} />
+        {/* <Grid xs={12} md={6} lg={4}>
+          <AnalyticsTrafficBySite title="Tráfico por Plataforma" list={_analyticTraffic} />
         </Grid>
 
         <Grid xs={12} md={6} lg={8}>
-          <AnalyticsTasks title="Tasks" list={_analyticTasks} />
-        </Grid>
+          <AnalyticsTasks title="Tareas Pendientes" list={_analyticTasks} />
+        </Grid> */}
       </Grid>
     </Container>
   );

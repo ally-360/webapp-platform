@@ -5,6 +5,8 @@ import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
 // components
 import { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
+import { useGetNextInvoiceNumberQuery } from 'src/redux/services/invoicesApi';
 import { useEffect } from 'react';
 
 // ----------------------------------------------------------------------
@@ -14,6 +16,12 @@ export default function InvoiceNewEditStatusDate() {
 
   const values = watch();
 
+  // Get PDVs and next invoice number
+  const { data: pdvs = [] } = useGetPDVsQuery();
+  const { data: nextNumberData } = useGetNextInvoiceNumberQuery(values.pdvId || '', {
+    skip: !values.pdvId
+  });
+
   useEffect(() => {
     if (values.method === 'Contado') {
       setValue('status', 'pagado');
@@ -22,23 +30,31 @@ export default function InvoiceNewEditStatusDate() {
     }
   }, [values.method, setValue]);
 
+  // Update invoice number when PDV changes
+  useEffect(() => {
+    if (nextNumberData?.number) {
+      setValue('invoiceNumber', nextNumberData.number);
+    }
+  }, [nextNumberData, setValue]);
+
   return (
     <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ p: 3, bgcolor: 'background.neutral' }}>
-      <RHFTextField disabled name="invoiceNumber" label="Número de factura" value={values.invoiceNumber} />
-
-      {/* <RHFSelect
+      {/* PDV Selection */}
+      <RHFSelect
         fullWidth
-        name="status"
-        label="Estado"
+        name="pdvId"
+        label="Punto de Venta"
         InputLabelProps={{ shrink: true }}
         PaperPropsSx={{ textTransform: 'capitalize' }}
       >
-        {['paid', 'pending', 'overdue', 'draft'].map((option) => (
-          <MenuItem key={option} value={option}>
-            {option}
+        {pdvs.map((pdv) => (
+          <MenuItem key={pdv.id} value={pdv.id}>
+            {pdv.name}
           </MenuItem>
         ))}
-      </RHFSelect> */}
+      </RHFSelect>
+
+      <RHFTextField disabled name="invoiceNumber" label="Número de factura" value={values.invoiceNumber} />
 
       <RHFSelect
         fullWidth
@@ -60,7 +76,7 @@ export default function InvoiceNewEditStatusDate() {
         render={({ field, fieldState: { error } }) => (
           <DatePicker
             label="Fecha"
-            value={field.value}
+            value={field.value || new Date()}
             onChange={(newValue) => {
               field.onChange(newValue);
             }}
@@ -119,7 +135,7 @@ export default function InvoiceNewEditStatusDate() {
             render={({ field, fieldState: { error } }) => (
               <DatePicker
                 label="Vencimiento"
-                value={field.value}
+                value={field.value || null}
                 onChange={(newValue) => {
                   field.onChange(newValue);
                 }}

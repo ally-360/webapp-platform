@@ -13,10 +13,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { useBoolean } from 'src/hooks/use-boolean';
 // routes
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
-import { useSearchParams, useRouter } from 'src/routes/hook';
-// config
-import { PATH_AFTER_LOGIN } from 'src/config-global';
+import { useRouter } from 'src/routes/hook';
 // auth
 import { useAuthContext } from 'src/auth/hooks';
 // components
@@ -33,10 +30,6 @@ export default function JwtRegisterView() {
   const router = useRouter();
 
   const [errorMsg, setErrorMsg] = useState('');
-
-  const searchParams = useSearchParams();
-
-  const returnTo = searchParams.get('returnTo');
 
   const password = useBoolean(false); // Pass a default value of false to useBoolean
 
@@ -67,8 +60,9 @@ export default function JwtRegisterView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await register(data);
-      router.push(returnTo || PATH_AFTER_LOGIN);
-      enqueueSnackbar('Registro del usuario completado', {
+      // Después del registro exitoso, redirigir al step-by-step para crear empresa y PDV
+      router.push(paths.stepByStep.root);
+      enqueueSnackbar('Registro del usuario completado. Ahora crea tu empresa', {
         variant: 'success'
       });
     } catch (error: any) {
@@ -88,7 +82,12 @@ export default function JwtRegisterView() {
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2"> ¿Ya tienes cuenta? </Typography>
 
-        <Link href={paths.auth.jwt.login} component={RouterLink} variant="subtitle2">
+        <Link
+          variant="subtitle2"
+          href={paths.auth.jwt.login}
+          sx={{ cursor: 'pointer' }}
+          onClick={() => router.push(paths.auth.jwt.login)}
+        >
           Iniciar sesión
         </Link>
       </Stack>

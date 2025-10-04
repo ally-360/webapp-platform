@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -12,13 +12,12 @@ import ListItemButton, { listItemButtonClasses } from '@mui/material/ListItemBut
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import SearchNotFound from 'src/components/search-not-found';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { getAllContacts } from 'src/redux/inventory/contactsSlice';
+import { useGetContactsQuery } from 'src/redux/services/contactsApi';
 // ----------------------------------------------------------------------
 
 export default function AddressListDialog({
-  title = 'Address Book',
-  list,
+  title = 'Directorio de Direcciones',
+  list: _list,
   action,
   //
   open,
@@ -28,14 +27,7 @@ export default function AddressListDialog({
   onSelect
 }) {
   const [searchAddress, setSearchAddress] = useState('');
-
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(getAllContacts());
-  }, [dispatch]);
-
-  const { contacts } = useAppSelector((state) => state.contacts);
+  const { data: contacts = [] } = useGetContactsQuery({});
 
   const dataFiltered = applyFilter({
     inputData: contacts,
@@ -90,18 +82,18 @@ export default function AddressListDialog({
           <Stack direction="row" alignItems="center" spacing={1}>
             <Typography variant="subtitle2">{contact.name}</Typography>
 
-            {contact.type === 2 && <Label color="info">Proveedor</Label>}
+            {contact.type?.includes('provider') && <Label color="info">Proveedor</Label>}
           </Stack>
 
           {contact.email && <Box sx={{ color: 'primary.main', typography: 'caption' }}>{contact.email}</Box>}
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {contact.address}
+            {contact.billing_address?.address || contact.shipping_address?.address || 'Sin dirección'}
           </Typography>
 
-          {contact.phoneNumber && (
+          {(contact.mobile || contact.phone_primary) && (
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              {contact.phoneNumber}
+              {contact.mobile || contact.phone_primary}
             </Typography>
           )}
         </Stack>
@@ -121,7 +113,7 @@ export default function AddressListDialog({
         <TextField
           value={searchAddress}
           onChange={handleSearchAddress}
-          placeholder="Search..."
+          placeholder="Buscar dirección..."
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -154,8 +146,9 @@ function applyFilter({ inputData, query }) {
     return inputData.filter(
       (contact) =>
         contact.name.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
-        contact.address.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
-        `${contact.email}`.toLowerCase().indexOf(query.toLowerCase()) !== -1
+        (contact.billing_address?.address || '').toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
+        (contact.shipping_address?.address || '').toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
+        `${contact.email || ''}`.toLowerCase().indexOf(query.toLowerCase()) !== -1
     );
   }
 

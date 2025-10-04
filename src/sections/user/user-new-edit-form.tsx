@@ -27,13 +27,122 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import parse from 'autosuggest-highlight/parse';
 import match from 'autosuggest-highlight/match';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
-import { useTheme } from '@emotion/react';
-import { createContact } from 'src/redux/inventory/contactsSlice';
-import { store } from 'src/redux/store';
+import { useTheme } from '@mui/material/styles';
+import { useCreateContactMutation, useUpdateContactMutation } from 'src/redux/services/contactsApi';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
+
+// Map UI form values to backend ContactCreateRequest payload
+import type { ContactCreateRequest, ContactType, PersonType, IdType } from 'src/redux/services/contactsApi';
+
+function mapFormToContactPayload(data: any): ContactCreateRequest {
+  // type mapping: 1 -> client, 2 -> provider
+  const type: ContactType[] = data?.type === 2 ? ['provider'] : ['client'];
+
+  // id_type mapping
+  let id_type: IdType | undefined;
+  if (data?.identity?.typeDocument === 2) {
+    id_type = 'NIT';
+  } else if (data?.identity?.typeDocument === 1) {
+    id_type = 'CC';
+  }
+
+  // person type mapping (only relevant for NIT)
+  let person_type: PersonType | undefined;
+  if (data?.identity?.typeDocument === 2) {
+    person_type = data?.identity?.typePerson === 2 ? 'juridica' : 'natural';
+  } else {
+    person_type = 'natural';
+  }
+
+  // name: if natural -> join name + lastname; if juridica -> use provided name as business name
+  const isJuridica = id_type === 'NIT' && person_type === 'juridica';
+  const joinedName = isJuridica
+    ? data?.name || ''
+    : [data?.name, data?.lastname]
+        .filter((p) => !!p)
+        .join(' ')
+        .trim();
+
+  // compose billing address
+  const billing_address = data?.address
+    ? {
+        address: data.address || undefined,
+        city: data?.town?.name || undefined,
+        state: data?.departamento?.name || undefined,
+        country: 'CO'
+      }
+    : undefined;
+
+  const rawNumber = data?.identity?.number as any;
+  const id_number =
+    rawNumber !== undefined && rawNumber !== null && String(rawNumber).trim() !== '' ? String(rawNumber) : undefined;
+  const rawDv = data?.identity?.dv as any;
+
+  const payload: ContactCreateRequest = {
+    name: joinedName,
+    type,
+    email: data?.email || undefined,
+    // map phones: mobile from phoneNumber, phone_primary from phoneNumber2
+    mobile: data?.phoneNumber || undefined,
+    phone_primary: data?.phoneNumber2 || undefined,
+    id_type,
+    id_number,
+    dv: isJuridica && rawDv !== undefined && rawDv !== null && String(rawDv).trim() !== '' ? Number(rawDv) : null,
+    person_type,
+    billing_address,
+    is_active: true
+  };
+
+  return payload;
+}
+
+// Helper to map contact back to form values for editing
+function mapContactToFormValues(contact: any) {
+  if (!contact) return {};
+
+  // Extract type: convert array back to number
+  const typeNum = contact.type?.includes('provider') ? 2 : 1;
+
+  // Extract identity info
+  const typeDocument = contact.id_type === 'NIT' ? 2 : 1;
+  const typePerson = contact.person_type === 'juridica' || contact.person_type === 'JURIDICA' ? 2 : 1;
+
+  // Parse name for natural persons (might have lastname)
+  let name = contact.name || '';
+  let lastname = '';
+
+  if (typeDocument === 1 || (typeDocument === 2 && typePerson === 1)) {
+    // Natural person - try to split name
+    const nameParts = (contact.name || '').split(' ');
+    if (nameParts.length > 1) {
+      name = nameParts[0];
+      lastname = nameParts.slice(1).join(' ');
+    }
+  }
+
+  return {
+    name,
+    lastname,
+    email: contact.email || '',
+    phoneNumber: contact.mobile || '',
+    phoneNumber2: contact.phone_primary || '',
+    address: contact.billing_address?.address || '',
+    type: typeNum,
+    identity: {
+      typeDocument,
+      number: contact.id_number ? Number(contact.id_number) : '',
+      dv: contact.dv || null,
+      typePerson
+    },
+    // For now, we don't reconstruct departamento/town from address
+    departamento: null,
+    town: null,
+    sendEmail: false // Default value
+  };
+}
 
 export default function UserNewEditForm({ currentUser }) {
   const router = useRouter();
@@ -49,6 +158,9 @@ export default function UserNewEditForm({ currentUser }) {
     phoneNumber2: Yup.string().optional(),
     address: Yup.string().required('Dirección es requerida'),
     type: Yup.number().required('Tipo de contacto es requerido'),
+    departamento: Yup.mixed().nullable().optional(),
+    town: Yup.mixed().nullable().optional(),
+    sendEmail: Yup.boolean().optional(),
     // not required
     identity: Yup.object().shape({
       typeDocument: Yup.number().required('Tipo de identificación es requerido'),
@@ -58,30 +170,46 @@ export default function UserNewEditForm({ currentUser }) {
     })
   });
 
-  const defaultValues = useMemo(
-    () => ({
-      name: currentUser?.name || '',
-      lastname: currentUser?.lastname || null,
-      email: currentUser?.email || '',
-      address: currentUser?.address || '',
-      phoneNumber: currentUser?.phoneNumber || null,
-      phoneNumber2: currentUser?.phoneNumber2 || null,
-      // Tipo de contacto
-      type: currentUser?.type || 1,
-      identity: currentUser?.identity || {
+  type FormValues = {
+    name: string;
+    lastname: string | null;
+    email: string;
+    address: string;
+    phoneNumber: string | null;
+    phoneNumber2: string | null;
+    type: number;
+    identity: { typeDocument: number; number: string | number | null; dv: number | null; typePerson: number };
+    departamento: any | null;
+    town: any | null;
+    sendEmail: boolean;
+  };
+
+  const defaultValues: FormValues = useMemo(() => {
+    if (currentUser) {
+      return mapContactToFormValues(currentUser) as FormValues;
+    }
+    return {
+      name: '',
+      lastname: '',
+      email: '',
+      address: '',
+      phoneNumber: '',
+      phoneNumber2: '',
+      type: 1,
+      identity: {
         typeDocument: 1,
-        number: null,
-        dv: 0,
+        number: '',
+        dv: null,
         typePerson: 1
       },
-      departamento: currentUser?.departamento || null,
-      town: currentUser?.town || null
-    }),
-    [currentUser]
-  );
+      departamento: null,
+      town: null,
+      sendEmail: false
+    };
+  }, [currentUser]);
   const dispatch = useAppDispatch();
 
-  const methods = useForm({
+  const methods = useForm<any>({
     resolver: yupResolver(NewUserSchema),
     defaultValues
   });
@@ -98,43 +226,40 @@ export default function UserNewEditForm({ currentUser }) {
 
   const values = watch();
 
+  const [createContact] = useCreateContactMutation();
+  const [updateContact] = useUpdateContactMutation();
+
   const onSubmit = handleSubmit(async (data) => {
-    console.log('data', data);
     try {
       // Remove department
-      const { departamento, ...rest } = data;
-      console.log('rest send', rest);
-      dispatch(createContact(rest));
+      const { departamento: _departamento, ...rest } = data;
 
-      while (store.getState().contacts.contactLoading) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-
-      if (store.getState().contacts.contactError) {
-        // enqueueSnackbar(store.getState().contacts.contactError, { variant: 'error' });
-        const errorMessages = store.getState().contacts.contactError.message;
-        if (errorMessages && errorMessages.length > 0) {
-          const translatedErrors = errorMessages.map((error) => t(error));
-          const combinedMessage = translatedErrors.join(' | ');
-          enqueueSnackbar(combinedMessage, { variant: 'error' });
-        }
+      if (currentUser?.id) {
+        // Update existing contact
+        await updateContact({
+          id: currentUser.id,
+          ...mapFormToContactPayload(rest)
+        }).unwrap();
       } else {
-        reset();
-        enqueueSnackbar(
-          currentUser ? 'Se ha actualizado correctamente el usuario!' : 'Se ha creado correctamente el contacto!'
-        );
-        router.push(paths.dashboard.user.list);
+        // Create new contact
+        await createContact(mapFormToContactPayload(rest)).unwrap();
       }
+
+      reset();
+      enqueueSnackbar(
+        currentUser ? 'Se ha actualizado correctamente el contacto!' : 'Se ha creado correctamente el contacto!'
+      );
+      router.push(paths.dashboard.user.list);
     } catch (error) {
       console.error(error);
+      const err = error as any;
+      const messages = err?.data?.detail || err?.data?.message || err?.error || 'Error al procesar contacto';
+      const msg = Array.isArray(messages) ? messages.map((m) => t(String(m))).join(' | ') : t(String(messages));
+      enqueueSnackbar(msg, { variant: 'error' });
     }
   });
 
-  useEffect(() => {
-    // Remove department
-    const { departamento, ...rest } = values;
-    console.log('rest', rest);
-  }, [values]);
+  // no-op
 
   // ----------------------------------------------------------------------
 
@@ -174,8 +299,9 @@ export default function UserNewEditForm({ currentUser }) {
     setSearchQueryMunicipio(value);
   };
 
-  const isOptionEqualToValue = (option, value = '') => {
-    if (option && value) {
+  const isOptionEqualToValue = (option: any, value: any) => {
+    if (!option || !value) return false;
+    if (typeof option === 'object' && typeof value === 'object') {
       return option.id === value.id && option.name === value.name;
     }
     return false;
@@ -345,7 +471,6 @@ export default function UserNewEditForm({ currentUser }) {
                 label="Celular"
                 name="phoneNumber"
                 type="string"
-                variant="outlined"
                 placeholder="Ej: 300 123 4567"
                 defaultCountry="co"
                 countryCodeEditable={false}
@@ -362,14 +487,18 @@ export default function UserNewEditForm({ currentUser }) {
             top: '50px',
             height: 'fit-content'
           }}
-          item
           xs={12}
           md={4}
         >
           <Stack spacing={3}>
             <Card sx={{ p: 3 }}>
               <Stack direction="row" alignItems="center">
-                <RHFSwitch sx={{ margin: 0 }} label="Enviar estado de cuenta al correo" name="sendEmail" />
+                <RHFSwitch
+                  sx={{ margin: 0 }}
+                  label="Enviar estado de cuenta al correo"
+                  name="sendEmail"
+                  helperText=" "
+                />
                 <Tooltip
                   title="En cada factura enviada por correo, tu cliente recibirá su estado de cuenta."
                   TransitionComponent={Zoom}

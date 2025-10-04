@@ -28,12 +28,12 @@ export default function AuthModernCompactLayout({ children }) {
             height: 1,
             zIndex: -1,
             content: "''",
-            opacity: 0.24,
+            opacity: 1,
             position: 'absolute',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center center',
-            backgroundImage: 'url(/assets/background/overlay_4.jpg)'
+            backgroundImage: 'url(/logo/Background.svg)'
           }
         }}
       >

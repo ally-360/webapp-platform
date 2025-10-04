@@ -20,7 +20,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   IconButton,
   Slide,
@@ -252,7 +251,7 @@ export default function FormPDVS() {
       onClose={() => dispatch(handleClose())}
     >
       <FormProvider methods={methods} onSubmit={onSubmit}>
-        <DialogTitle id="scroll-dialog-title" boxShadow={2} sx={{ padding: '23px  40px 18px 40px!important' }}>
+        <DialogTitle id="scroll-dialog-title" sx={{ padding: '23px  40px 18px 40px!important', boxShadow: 2 }}>
           <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
             <Icon icon="ic:round-store" width={24} height={24} />
             {editId && seePDV ? pdvEdit.name : editId ? t('Editar Punto De Venta') : t('Crear Punto De Venta')}
@@ -287,7 +286,7 @@ export default function FormPDVS() {
           }}
           dividers={scroll === 'paper'}
         >
-          <DialogContentText id="alert-dialog-slide-description" ref={descriptionElementRef} tabIndex={-1}>
+          <Box id="alert-dialog-slide-description" ref={descriptionElementRef} tabIndex={-1}>
             <Grid container spacing={3}>
               <Stack spacing={2} mt={1} sx={{ p: 3, width: '100%' }}>
                 <RHFTextField
@@ -398,7 +397,7 @@ export default function FormPDVS() {
                   countryCodeEditable={false}
                 />
                 <RHFTextField
-                  visible={false}
+                  style={{ display: 'none' }}
                   sx={{ display: 'none' }}
                   disabled={editDisabled}
                   name="phoneNumber"
@@ -407,16 +406,16 @@ export default function FormPDVS() {
                 />
               </Stack>
             </Grid>
-          </DialogContentText>
+          </Box>
         </DialogContent>
 
         <DialogActions
-          boxShadow={2}
           sx={{
             padding: '20px 35px 15px 40px!important',
             display: 'flex',
             flexWrap: isMobile ? 'wrap' : 'nowrap',
             flexDirection: isMobile ? 'column' : 'row',
+            boxShadow: 2,
             '& > button': {
               flexGrow: isMobile ? 1 : 0,
               minWidth: isMobile ? '100%' : 'auto',

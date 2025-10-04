@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -20,8 +20,7 @@ import Iconify from 'src/components/iconify';
 import EmptyContent from 'src/components/empty-content';
 import { useSettingsContext } from 'src/components/settings';
 //
-import { getProductById } from 'src/redux/inventory/productsSlice';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useGetProductByIdQuery } from 'src/redux/services/productsApi';
 import { defaultSettingsInterface } from 'src/components/settings/context/settings-provider';
 import { ProductDetailsSkeleton } from '../product-skeleton';
 import ProductDetailsSummary from '../product-details-summary';
@@ -32,38 +31,21 @@ import ProductDetailsDescription from '../product-details-description';
 
 // ----------------------------------------------------------------------
 
-const SUMMARY = [
-  {
-    title: '100% Original',
-    description: 'Chocolate bar candy canes ice cream toffee cookie halvah.',
-    icon: 'solar:verified-check-bold'
-  },
-  {
-    title: '10 Day Replacement',
-    description: 'Marshmallow biscuit donut dragée fruitcake wafer.',
-    icon: 'solar:clock-circle-bold'
-  },
-  {
-    title: 'Year Warranty',
-    description: 'Cotton candy gingerbread cake I love sugar sweet.',
-    icon: 'solar:shield-check-bold'
-  }
-];
+//
 
 // ----------------------------------------------------------------------
-interface SettingsInterface {
-  themeStretch: boolean;
-}
 export default function ProductDetailsView({ id }: { id: string }) {
-  // const { product, productsLoading, error } = useGetProduct(id);
+  // ========================================
+  // 🔥 RTK QUERY - PRODUCTO DETALLE
+  // ========================================
 
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(getProductById(id));
-  }, [dispatch, id]);
-
-  const { product, productsLoading, error } = useAppSelector((state) => state.products);
+  const {
+    data: product,
+    isLoading: productsLoading,
+    error
+  } = useGetProductByIdQuery(id, {
+    skip: !id
+  });
 
   const settings: defaultSettingsInterface = useSettingsContext() as defaultSettingsInterface;
 
@@ -78,7 +60,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
   const renderError = (
     <EmptyContent
       filled
-      title={`${error?.message}`}
+      title="Error al cargar el producto"
       action={
         <Button
           component={RouterLink}
@@ -99,9 +81,9 @@ export default function ProductDetailsView({ id }: { id: string }) {
         id={product.id}
         backLink={paths.dashboard.product.root}
         editLink={paths.dashboard.product.edit(`${product?.id}`)}
-        liveLink={paths.product.details(`${product?.id}`)}
+        liveLink={paths.dashboard.product.details(`${product?.id}`)}
         publishOptions={PRODUCT_PUBLISH_OPTIONS}
-        stateProduct={product.state}
+        stateProduct={!!product.state}
       />
       <Card sx={{ p: 3 }}>
         <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
@@ -161,7 +143,7 @@ export default function ProductDetailsView({ id }: { id: string }) {
           ))}
         </Tabs>
 
-        {currentTab === 'description' && <></>}
+        {currentTab === 'description' && null}
       </Card>
     </>
   );

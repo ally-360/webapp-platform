@@ -23,12 +23,10 @@ import UserQuickEditForm from './user-quick-edit-form';
 // ----------------------------------------------------------------------
 
 export default function UserTableRow({ row, selected, onEditRow, onSelectRow, onDeleteRow }) {
-  const { name, lastname, avatarUrl, address, town, type, email, phoneNumber } = row;
+  const { name, email, phone_primary, mobile, billing_address, type } = row;
 
   const confirm = useBoolean(false);
-
   const quickEdit = useBoolean(false);
-
   const popover = usePopover();
 
   return (
@@ -39,33 +37,36 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={name} src={avatarUrl} sx={{ mr: 2 }} />
+          <Avatar alt={name} sx={{ mr: 2 }}>
+            {name?.charAt(0)?.toUpperCase()}
+          </Avatar>
 
           <ListItemText
-            primary={name && type === 1 ? `${name} ${lastname}` : name}
+            primary={name}
             secondary={email}
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{ component: 'span', color: 'text.disabled' }}
           />
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{mobile || phone_primary}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{address}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{billing_address?.address}</TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-          {/* TODO: remplazar */}
-          {/* {town.name} */}
-        </TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{billing_address?.city}</TableCell>
 
         <TableCell>
           <Label
             variant="soft"
-            color={
-              (type === 1 && 'success') || (type === 2 && 'warning') || (type === 'banned' && 'error') || 'default'
-            }
+            color={(type?.includes('client') && 'success') || (type?.includes('provider') && 'warning') || 'default'}
           >
-            {type === 1 ? 'Cliente' : 'Proveedor'}
+            {(() => {
+              const isClient = type?.includes('client');
+              const isProvider = type?.includes('provider');
+              if (isClient && isProvider) return 'Cliente/Proveedor';
+              if (isClient) return 'Cliente';
+              return 'Proveedor';
+            })()}
           </Label>
         </TableCell>
 

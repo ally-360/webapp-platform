@@ -1,7 +1,7 @@
 import isEqual from 'lodash/isEqual';
 import React, { useState, useCallback, useEffect } from 'react';
 // @mui
-import { alpha } from '@mui/material/styles';
+import { alpha, useTheme } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
@@ -12,6 +12,7 @@ import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
+import { useMediaQuery } from '@mui/material';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -38,9 +39,8 @@ import {
   TablePaginationCustom
 } from 'src/components/table';
 //
-import { getAllContacts } from 'src/redux/inventory/contactsSlice';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { useMediaQuery } from '@mui/material';
+import { useGetContactsQuery, useDeleteContactMutation } from 'src/redux/services/contactsApi';
+import type { Contact } from 'src/redux/services/contactsApi';
 import UserTableRow from '../user-table-row';
 import UserTableToolbar from '../user-table-toolbar';
 import UserTableFiltersResult from '../user-table-filters-result';
@@ -68,30 +68,24 @@ const defaultFilters = {
 
 export default function UserListView() {
   const table = useTable(true);
-
   const settings = useSettingsContext();
-
   const router = useRouter();
-
   const confirm = useBoolean(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  // RTK Query hooks
+  const { data: contacts = [], isLoading: _isLoading, error: _error } = useGetContactsQuery({});
+  const [deleteContactMutation] = useDeleteContactMutation();
 
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(getAllContacts());
-  }, [dispatch]);
-
-  const { contacts } = useAppSelector((state) => state.contacts);
-
-  const [tableData, setTableData] = useState([]);
-
-  useEffect(() => {
-    setTableData(contacts);
-  }, [contacts]);
-
+  const [tableData, setTableData] = useState<Contact[]>([]);
   const [filters, setFilters] = useState(defaultFilters);
+
+  useEffect(() => {
+    if (Array.isArray(contacts)) {
+      setTableData(contacts);
+    }
+  }, [contacts]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -122,25 +116,33 @@ export default function UserListView() {
   );
 
   const handleDeleteRow = useCallback(
-    (id) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+    async (id) => {
+      try {
+        await deleteContactMutation(id).unwrap();
+        const deleteRow = tableData.filter((row) => row.id !== id);
+        setTableData(deleteRow);
+        table.onUpdatePageDeleteRow(dataInPage.length);
+      } catch (error) {
+        console.error('Error deleting contact:', error);
+      }
     },
-    [dataInPage.length, table, tableData]
+    [dataInPage.length, table, tableData, deleteContactMutation]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRows: tableData.length,
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  const handleDeleteRows = useCallback(async () => {
+    try {
+      await Promise.all(table.selected.map((id) => deleteContactMutation(id).unwrap()));
+      const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
+      setTableData(deleteRows);
+      table.onUpdatePageDeleteRows({
+        totalRows: tableData.length,
+        totalRowsInPage: dataInPage.length,
+        totalRowsFiltered: dataFiltered.length
+      });
+    } catch (error) {
+      console.error('Error deleting contacts:', error);
+    }
+  }, [dataFiltered.length, dataInPage.length, table, tableData, deleteContactMutation]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -177,7 +179,7 @@ export default function UserListView() {
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="mingcute:add-line" />}
-              sx={isMobile && { width: '100%' }}
+              sx={isMobile ? { width: '100%' } : undefined}
             >
               Crear contacto
             </Button>
@@ -194,7 +196,7 @@ export default function UserListView() {
             onChange={handleFilterStatus}
             sx={{
               px: 2.5,
-              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
+              boxShadow: (themeVar) => `inset 0 -2px 0 0 ${alpha(themeVar.palette.grey[500], 0.08)}`
             }}
           >
             {STATUS_OPTIONS.map((tab) => (
@@ -210,8 +212,8 @@ export default function UserListView() {
                     color={(tab.value === 1 && 'success') || (tab.value === 2 && 'warning') || 'primary'}
                   >
                     {tab.value === 'all' && tableData.length}
-                    {tab.value === 1 && tableData.filter((user) => user.type === 1).length}
-                    {tab.value === 2 && tableData.filter((user) => user.type === 2).length}
+                    {tab.value === 1 && tableData.filter((user) => user.type.includes('client')).length}
+                    {tab.value === 2 && tableData.filter((user) => user.type.includes('provider')).length}
                   </Label>
                 }
               />
@@ -343,6 +345,11 @@ export default function UserListView() {
 function applyFilter({ inputData, comparator, filters }) {
   const { name, status, municipio } = filters;
 
+  // Ensure inputData is an array
+  if (!Array.isArray(inputData)) {
+    return [];
+  }
+
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
@@ -358,13 +365,17 @@ function applyFilter({ inputData, comparator, filters }) {
   }
 
   if (status !== 'all') {
-    console.log(status);
-    inputData = inputData.filter((user) => user.type === status);
+    if (status === 1) {
+      inputData = inputData.filter((user) => user.type.includes('client'));
+    } else if (status === 2) {
+      inputData = inputData.filter((user) => user.type.includes('provider'));
+    }
   }
 
-  if (Object.entries(municipio).length !== 0) {
-    console.log(municipio);
-    inputData = inputData.filter((user) => user.town.id === municipio.id);
+  if (municipio && typeof municipio === 'object' && municipio.id) {
+    inputData = inputData.filter(
+      (user) => user.billing_address?.city === municipio.name || user.shipping_address?.city === municipio.name
+    );
   }
 
   return inputData;

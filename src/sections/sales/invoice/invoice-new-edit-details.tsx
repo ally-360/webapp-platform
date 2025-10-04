@@ -240,7 +240,7 @@ export default function InvoiceNewEditDetails() {
 
   const { pdvs } = useSelector((state) => state.pdvs);
   const PDVSoptions = [
-    { id: 0, name: 'Punto De Venta para cada producto' },
+    { id: 0, name: 'Punto bill De Venta para cada producto' },
     ...pdvs.map((pdv) => ({ id: pdv.id, name: pdv.name }))
   ];
   useEffect(() => {

@@ -1,0 +1,690 @@
+import React, { useMemo, useCallback, useState, memo, useEffect } from 'react';
+import { alpha } from '@mui/material/styles';
+import {
+  Box,
+  Card,
+  Container,
+  Stack,
+  Tabs,
+  Tab,
+  TextField,
+  Table,
+  TableBody,
+  TableContainer,
+  Typography,
+  Button,
+  IconButton,
+  Tooltip,
+  MenuItem,
+  TableRow,
+  TableCell,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider
+} from '@mui/material';
+import { useAppSelector } from 'src/hooks/store';
+import { format } from 'date-fns';
+import Iconify from 'src/components/iconify';
+import Scrollbar from 'src/components/scrollbar';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import {
+  TableEmptyRows,
+  TableHeadCustom,
+  TableNoData,
+  TablePaginationCustom,
+  emptyRows,
+  getComparator,
+  useTable
+} from 'src/components/table';
+import Label from 'src/components/label';
+import { paths } from 'src/routes/paths';
+import CustomPopover from 'src/components/custom-popover';
+import { fCurrency } from 'src/utils/format-number';
+import { PAYMENT_LABEL, escapeCsv, printSale } from 'src/sections/pos/components/sales-history/utils';
+import {
+  cancelSale as apiCancelSale,
+  createCreditNote as apiCreateCreditNote,
+  downloadSalePDF as apiDownloadSalePDF,
+  getPosSalesHistory
+} from 'src/api';
+import type { PosSaleHistoryItem } from 'src/api/types';
+import CustomDateRangePicker from 'src/components/custom-date-range-picker';
+import { fDate, fDateTime } from 'src/utils/format-time';
+
+const TABLE_HEAD = [
+  { id: 'created_at', label: 'Fecha', width: 160 },
+  { id: 'invoice_number', label: 'Factura', width: 120 },
+  { id: 'customer', label: 'Cliente' },
+  { id: 'items', label: 'Items', width: 100, align: 'center' as const },
+  { id: 'total', label: 'Total', width: 140 },
+  { id: 'payments', label: 'Pagos', width: 220 },
+  { id: 'seller', label: 'Vendedor', width: 180 },
+  { id: 'pos_type', label: 'Tipo POS', width: 120 },
+  { id: '', label: '', width: 80, align: 'right' as const }
+];
+
+const POS_TYPE_TABS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'simple', label: 'Simple' },
+  { value: 'electronic', label: 'Electrónico' }
+] as const;
+
+interface Filters {
+  query: string;
+  pos_type: 'all' | 'simple' | 'electronic';
+  startDate: string | null; // yyyy-MM-dd
+  endDate: string | null; // yyyy-MM-dd
+}
+
+const defaultFilters: Filters = {
+  query: '',
+  pos_type: 'all',
+  startDate: null,
+  endDate: null
+};
+
+// Memoized row component
+const SaleRow = memo(({ row, onOpenActions, active }: any) => {
+  const items = useMemo(() => row.products.reduce((sum: number, p: any) => sum + p.quantity, 0), [row.products]);
+  const payments = useMemo(
+    () => row.payments.map((p: any) => `${PAYMENT_LABEL[p.method] || p.method}: ${fCurrency(p.amount)}`).join(' | '),
+    [row.payments]
+  );
+  const dateStr = useMemo(() => fDateTime(row.created_at, 'dd MMM yyyy HH:mm'), [row.created_at]);
+
+  return (
+    <TableRow hover sx={{ opacity: row.status === 'cancelled' ? 0.6 : 1 }}>
+      <TableCell sx={{ width: 160 }}>{dateStr}</TableCell>
+      <TableCell sx={{ width: 120 }}>{row.invoice_number || '-'}</TableCell>
+      <TableCell>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <span>{row.customer?.name || 'Sin cliente'}</span>
+          {row.status === 'cancelled' && <Label color="error">Anulada</Label>}
+          {row.status === 'refunded' && <Label color="warning">Nota crédito</Label>}
+        </Stack>
+      </TableCell>
+      <TableCell sx={{ width: 100, textAlign: 'center' }}>{items}</TableCell>
+      <TableCell sx={{ width: 140 }}>{fCurrency(row.total)}</TableCell>
+      <TableCell sx={{ width: 220 }}>{payments}</TableCell>
+      <TableCell sx={{ width: 180 }}>{row.seller_name || '-'}</TableCell>
+      <TableCell sx={{ width: 120 }}>{row.pos_type === 'electronic' ? 'Electrónico' : 'Simple'}</TableCell>
+      <TableCell align="right" sx={{ width: 80, px: 1 }}>
+        <Tooltip title="Acciones">
+          <IconButton color={active ? 'inherit' : 'default'} onClick={(e) => onOpenActions(e, row)}>
+            <Iconify icon="eva:more-vertical-fill" />
+          </IconButton>
+        </Tooltip>
+      </TableCell>
+    </TableRow>
+  );
+});
+
+// Fix indentation/formatting by converting to named memoized component with explicit props
+type FiltersBarProps = {
+  filters: Filters;
+  onFilters: (name: keyof Filters, value: any) => void;
+  canReset: boolean;
+  dateError: boolean;
+};
+
+const FiltersBar = memo(({ filters, onFilters, canReset, dateError }: FiltersBarProps) => {
+  // Local dialog state for the custom date range picker
+  const [open, setOpen] = useState(false);
+
+  const label = useMemo(() => {
+    if (filters.startDate && filters.endDate) {
+      return `${fDate(filters.startDate, 'dd MMM yy')} - ${fDate(filters.endDate, 'dd MMM yy')}`;
+    }
+    return 'Rango de fechas';
+  }, [filters.startDate, filters.endDate]);
+
+  const handleChangeStart = useCallback(
+    (newValue: Date | string | null) => {
+      const v = newValue ? new Date(newValue as any) : null;
+      onFilters('startDate', v ? v.toISOString().slice(0, 10) : null);
+    },
+    [onFilters]
+  );
+
+  const handleChangeEnd = useCallback(
+    (newValue: Date | string | null) => {
+      const v = newValue ? new Date(newValue as any) : null;
+      onFilters('endDate', v ? v.toISOString().slice(0, 10) : null);
+    },
+    [onFilters]
+  );
+
+  return (
+    <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ p: 2.5, pr: { xs: 2.5, md: 1 } }}>
+      <TextField
+        fullWidth
+        value={filters.query}
+        onChange={(e) => onFilters('query', e.target.value)}
+        placeholder="Buscar por factura, cliente o vendedor"
+        InputProps={{
+          startAdornment: (
+            <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', color: 'text.disabled', mr: 1 }}>
+              <Iconify icon="eva:search-fill" />
+            </Box>
+          )
+        }}
+      />
+
+      {/* Read-only text field that opens the custom date range picker */}
+      <TextField
+        value={label}
+        onClick={() => setOpen(true)}
+        label="Rango de fechas"
+        InputProps={{
+          readOnly: true,
+          startAdornment: (
+            <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', color: 'text.disabled', mr: 1 }}>
+              <Iconify icon="solar:calendar-broken" />
+            </Box>
+          )
+        }}
+        sx={{ width: { xs: 1, md: 260 } }}
+      />
+
+      {dateError && (
+        <Typography color="error" variant="caption">
+          Rango de fechas inválido
+        </Typography>
+      )}
+
+      {canReset && (
+        <Box sx={{ ml: { xs: 0, md: 'auto' } }}>
+          <Button
+            color="inherit"
+            onClick={() => onFilters('query', '')}
+            startIcon={<Iconify icon="solar:refresh-bold" />}
+          >
+            Limpiar filtros
+          </Button>
+        </Box>
+      )}
+
+      <CustomDateRangePicker
+        open={open}
+        onClose={() => setOpen(false)}
+        variant="calendar"
+        title="Seleccionar rango"
+        startDate={filters.startDate ? new Date(filters.startDate) : null}
+        endDate={filters.endDate ? new Date(filters.endDate) : null}
+        onChangeStartDate={handleChangeStart}
+        onChangeEndDate={handleChangeEnd}
+        error={dateError}
+      />
+    </Stack>
+  );
+});
+
+const DetailsDialog = memo(({ open, onClose, sale, onPrint }: any) => (
+  <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <DialogTitle>Detalle de venta</DialogTitle>
+    <DialogContent dividers>
+      {sale && (
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={2} flexWrap="wrap">
+            <Info label="Factura" value={sale.invoice_number || '-'} />
+            <Info label="Fecha" value={fDateTime(sale.created_at, 'dd MMM yyyy HH:mm')} />
+            <Info label="Cliente" value={sale.customer?.name || 'Sin cliente'} />
+            <Info label="Vendedor" value={sale.seller_name || '-'} />
+            <Info label="Tipo" value={sale.pos_type === 'electronic' ? 'Electrónico' : 'Simple'} />
+          </Stack>
+
+          <Divider />
+
+          <Typography variant="subtitle2">Productos</Typography>
+          <Stack spacing={0.5}>
+            {sale.products.map((p: any) => (
+              <Typography key={p.id} variant="body2">
+                {p.name} — x{p.quantity} · {fCurrency(p.price)}
+              </Typography>
+            ))}
+          </Stack>
+
+          <Divider />
+
+          <Typography variant="subtitle2">Pagos</Typography>
+          <Stack spacing={0.5}>
+            {sale.payments.map((p: any, idx: number) => (
+              <Typography key={idx} variant="body2">
+                {PAYMENT_LABEL[p.method] || p.method}: {fCurrency(p.amount)}
+              </Typography>
+            ))}
+          </Stack>
+
+          <Divider />
+
+          <Stack direction="row" justifyContent="space-between">
+            <Typography variant="subtitle2">Subtotal</Typography>
+            <Typography variant="subtitle2">{fCurrency(sale.subtotal)}</Typography>
+          </Stack>
+          <Stack direction="row" justifyContent="space-between">
+            <Typography variant="subtitle2">Impuesto</Typography>
+            <Typography variant="subtitle2">{fCurrency(sale.tax_amount)}</Typography>
+          </Stack>
+          {sale.discount_amount ? (
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="subtitle2">Descuento</Typography>
+              <Typography variant="subtitle2">- {fCurrency(sale.discount_amount)}</Typography>
+            </Stack>
+          ) : null}
+          <Stack direction="row" justifyContent="space-between">
+            <Typography variant="h6">Total</Typography>
+            <Typography variant="h6">{fCurrency(sale.total)}</Typography>
+          </Stack>
+        </Stack>
+      )}
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={onClose}>Cerrar</Button>
+      <Button onClick={onPrint} startIcon={<Iconify icon="solar:printer-minimalistic-bold" />} variant="contained">
+        Imprimir
+      </Button>
+    </DialogActions>
+  </Dialog>
+));
+
+export default function PosSalesHistoryView() {
+  const { completedSales } = useAppSelector((s) => s.pos);
+
+  const table = useTable({ defaultOrderBy: 'created_at' });
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
+
+  // actions state
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [selectedSale, setSelectedSale] = useState<PosSaleHistoryItem | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // data state
+  const [rowsAll, setRowsAll] = useState<PosSaleHistoryItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await getPosSalesHistory({
+          query: filters.query || undefined,
+          pos_type: filters.pos_type,
+          dateFrom: filters.startDate || undefined,
+          dateTo: filters.endDate || undefined,
+          page: 0,
+          limit: 1000
+        } as any);
+        if (!ignore) {
+          const list = res.data.data || res.data?.data || [];
+          setRowsAll(list as PosSaleHistoryItem[]);
+        }
+      } catch (e) {
+        if (!ignore) {
+          // Fallback a datos locales si existen
+          setRowsAll((completedSales as unknown as PosSaleHistoryItem[]) || []);
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      ignore = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.query, filters.pos_type, filters.startDate, filters.endDate]);
+
+  const dateError = useMemo(() => {
+    if (filters.startDate && filters.endDate) {
+      return new Date(filters.startDate).getTime() > new Date(filters.endDate).getTime();
+    }
+    return false;
+  }, [filters.startDate, filters.endDate]);
+
+  const dataFiltered = useMemo(
+    () =>
+      applyFilter({
+        inputData: rowsAll,
+        comparator: getComparator(table.order, table.orderBy),
+        filters,
+        dateError
+      }),
+    [rowsAll, table.order, table.orderBy, filters, dateError]
+  );
+
+  const denseHeight = table.dense ? 52 : 72;
+
+  const canReset = !!filters.query || filters.pos_type !== 'all' || (!!filters.startDate && !!filters.endDate);
+
+  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+
+  const handleFilters = useCallback(
+    (name: keyof Filters, value: any) => {
+      table.onResetPage();
+      if (name === 'query' && value === '') {
+        setFilters((prev) => ({ ...prev, query: '', pos_type: 'all', startDate: null, endDate: null }));
+      } else {
+        setFilters((prev) => ({ ...prev, [name]: value }));
+      }
+    },
+    [table]
+  );
+
+  const handleFilterPosType = useCallback(
+    (_e: any, newValue: any) => {
+      handleFilters('pos_type', newValue);
+    },
+    [handleFilters]
+  );
+
+  // Local any-cast to satisfy Scrollbar typing in this file
+  const ScrollbarAny: any = Scrollbar;
+
+  const openActions = (event: React.MouseEvent<HTMLElement>, sale: PosSaleHistoryItem) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedSale(sale);
+  };
+  const closeActions = () => setAnchorEl(null);
+
+  const handleViewDetails = () => {
+    setDetailsOpen(true);
+    closeActions();
+  };
+  const handleCloseDetails = () => setDetailsOpen(false);
+
+  const handleReprint = () => {
+    if (!selectedSale) return;
+    printSale(selectedSale);
+    closeActions();
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!selectedSale) return;
+    try {
+      setActionLoading(true);
+      const res = await apiDownloadSalePDF(selectedSale.id);
+      const url = (res as any)?.data?.url || (res as any)?.data?.downloadUrl;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      // noop; could add snackbar
+    } finally {
+      setActionLoading(false);
+      closeActions();
+    }
+  };
+
+  const updateRowOptimistic = (id: string, patch: Partial<PosSaleHistoryItem>) => {
+    setRowsAll((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+    if (selectedSale && selectedSale.id === id) {
+      setSelectedSale({ ...selectedSale, ...patch });
+    }
+  };
+
+  const handleCancelSale = async () => {
+    if (!selectedSale) return;
+    const { id } = selectedSale;
+    const prev = selectedSale;
+    updateRowOptimistic(id, { status: 'cancelled' });
+    setActionLoading(true);
+    try {
+      await apiCancelSale(id);
+    } catch (e) {
+      // revert on failure
+      updateRowOptimistic(id, { status: prev.status });
+    } finally {
+      setActionLoading(false);
+      closeActions();
+    }
+  };
+
+  const handleCreateCreditNote = async () => {
+    if (!selectedSale) return;
+    const reason = window.prompt('Motivo de la nota crédito:') || 'Ajuste';
+    const { id } = selectedSale;
+    const prev = selectedSale;
+    updateRowOptimistic(id, { status: 'refunded' });
+    setActionLoading(true);
+    try {
+      await apiCreateCreditNote(id, { reason } as any);
+    } catch (e) {
+      // revert on failure
+      updateRowOptimistic(id, { status: prev.status });
+    } finally {
+      setActionLoading(false);
+      closeActions();
+    }
+  };
+
+  const handleExportSingle = () => {
+    if (!selectedSale) return;
+    exportCsv([selectedSale]);
+    closeActions();
+  };
+
+  const exportCsv = (rows: any[]) => {
+    const headers = ['Fecha', 'Factura', 'Cliente', 'Items', 'Total', 'Pagos', 'Vendedor', 'Tipo POS'];
+    const lines = rows.map((row) => {
+      const dateStr = format(new Date(row.created_at), 'yyyy-MM-dd HH:mm');
+      const items = row.products.reduce((sum: number, p: any) => sum + p.quantity, 0);
+      const payments = row.payments.map((p: any) => `${PAYMENT_LABEL[p.method] || p.method}: ${p.amount}`).join(' | ');
+      const posType = row.pos_type === 'electronic' ? 'Electrónico' : 'Simple';
+      const values = [
+        dateStr,
+        row.invoice_number || '-',
+        row.customer?.name || 'Sin cliente',
+        String(items),
+        String(row.total),
+        payments,
+        row.seller_name || '-',
+        posType
+      ];
+      return values.map(escapeCsv).join(',');
+    });
+
+    const csv = [headers.join(','), ...lines].join('\n');
+    const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `historial_ventas_pos_${format(new Date(), 'yyyyMMdd_HHmm')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <Container maxWidth={false}>
+      <CustomBreadcrumbs
+        heading="Historial de ventas"
+        icon="mdi:history"
+        links={[{ name: 'POS', href: paths.dashboard.pos }, { name: 'Historial' }]}
+        action={
+          <Button
+            variant="outlined"
+            startIcon={<Iconify icon="eva:download-outline" />}
+            onClick={() => exportCsv(dataFiltered)}
+          >
+            Exportar CSV
+          </Button>
+        }
+        sx={{ mb: { xs: 3, md: 5 } }}
+      />
+
+      <Card>
+        <Tabs
+          value={filters.pos_type}
+          onChange={handleFilterPosType}
+          sx={{ px: 2.5, boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}` }}
+        >
+          {POS_TYPE_TABS.map((tab) => (
+            <Tab
+              key={tab.value}
+              iconPosition="end"
+              value={tab.value}
+              label={tab.label}
+              icon={
+                <Label
+                  variant={((tab.value === 'all' || tab.value === filters.pos_type) && 'filled') || 'soft'}
+                  color={(tab.value === 'electronic' && 'info') || (tab.value === 'simple' && 'default') || 'default'}
+                >
+                  {tab.value === 'all' ? rowsAll.length : rowsAll.filter((s) => s.pos_type === tab.value).length}
+                </Label>
+              }
+            />
+          ))}
+        </Tabs>
+
+        <FiltersBar filters={filters} onFilters={handleFilters} canReset={canReset} dateError={dateError} />
+
+        <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+          <ScrollbarAny>
+            <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 1100 }}>
+              <TableHeadCustom
+                order={table.order}
+                orderBy={table.orderBy}
+                headLabel={TABLE_HEAD}
+                rowCount={dataFiltered.length}
+                numSelected={0}
+                onSort={table.onSort}
+              />
+
+              <TableBody>
+                {loading && (
+                  <TableRow>
+                    <TableCell colSpan={9}>
+                      <Stack spacing={2} sx={{ p: 2 }}>
+                        <Box height={16} bgcolor={(t) => alpha(t.palette.grey[500], 0.24)} borderRadius={1} />
+                        <Box height={16} bgcolor={(t) => alpha(t.palette.grey[500], 0.24)} borderRadius={1} />
+                        <Box height={16} bgcolor={(t) => alpha(t.palette.grey[500], 0.24)} borderRadius={1} />
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {dataFiltered
+                  .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
+                  .map((row) => (
+                    <SaleRow
+                      key={row.id}
+                      row={row}
+                      onOpenActions={openActions}
+                      active={Boolean(anchorEl && selectedSale?.id === row.id)}
+                    />
+                  ))}
+
+                <TableEmptyRows
+                  height={denseHeight}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                />
+                <TableNoData notFound={notFound} text="No hay ventas registradas" />
+              </TableBody>
+            </Table>
+          </ScrollbarAny>
+        </TableContainer>
+
+        <TablePaginationCustom
+          count={dataFiltered.length}
+          page={table.page}
+          rowsPerPage={table.rowsPerPage}
+          onPageChange={table.onChangePage}
+          onRowsPerPageChange={table.onChangeRowsPerPage}
+          dense={table.dense}
+          onChangeDense={table.onChangeDense}
+        />
+      </Card>
+
+      <CustomPopover open={anchorEl} onClose={closeActions} arrow="right-top" sx={{ width: 220 }}>
+        <MenuItem onClick={handleViewDetails} disabled={!selectedSale || actionLoading}>
+          <Iconify icon="solar:eye-bold" /> Ver detalles
+        </MenuItem>
+        <MenuItem onClick={handleDownloadPDF} disabled={!selectedSale || actionLoading}>
+          <Iconify icon="mdi:file-pdf-box" /> Descargar PDF
+        </MenuItem>
+        <MenuItem onClick={handleReprint} disabled={!selectedSale || actionLoading}>
+          <Iconify icon="solar:printer-minimalistic-bold" /> Reimprimir
+        </MenuItem>
+        <Divider sx={{ borderStyle: 'dashed' }} />
+        <MenuItem
+          onClick={handleCancelSale}
+          disabled={!selectedSale || selectedSale?.status === 'cancelled' || actionLoading}
+        >
+          <Iconify icon="mdi:cancel" /> Anular
+        </MenuItem>
+        <MenuItem
+          onClick={handleCreateCreditNote}
+          disabled={!selectedSale || selectedSale?.status === 'cancelled' || actionLoading}
+        >
+          <Iconify icon="mdi:note-outline" /> Emitir nota crédito
+        </MenuItem>
+        <Divider sx={{ borderStyle: 'dashed' }} />
+        <MenuItem onClick={handleExportSingle} disabled={!selectedSale || actionLoading}>
+          <Iconify icon="eva:download-outline" /> Exportar CSV
+        </MenuItem>
+      </CustomPopover>
+
+      <DetailsDialog open={detailsOpen} onClose={handleCloseDetails} sale={selectedSale} onPrint={handleReprint} />
+    </Container>
+  );
+}
+
+function applyFilter({ inputData, comparator, filters, dateError }: any) {
+  const { query, pos_type, startDate, endDate } = filters as Filters;
+  let data = [...inputData];
+
+  // sort
+  const stabilizedThis = data.map((el, index) => [el, index] as const);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+  data = stabilizedThis.map((el) => el[0]);
+
+  // query search
+  if (query) {
+    const q = query.toLowerCase();
+    data = data.filter((row: any) => {
+      const inInvoice = (row.invoice_number || '').toLowerCase().includes(q);
+      const inCustomer = (row.customer?.name || '').toLowerCase().includes(q);
+      const inSeller = (row.seller_name || '').toLowerCase().includes(q);
+      return inInvoice || inCustomer || inSeller;
+    });
+  }
+
+  // pos type
+  if (pos_type !== 'all') {
+    data = data.filter((row: any) => row.pos_type === pos_type);
+  }
+
+  // dates (inclusive for whole days)
+  if (!dateError && startDate && endDate) {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    const startMs = start.getTime();
+    const endMs = end.getTime();
+    data = data.filter((row: any) => {
+      const created = new Date(row.created_at).getTime();
+      return created >= startMs && created <= endMs;
+    });
+  }
+
+  return data;
+}
+
+function Info({ label, value }: { label: string; value: string }) {
+  return (
+    <Stack spacing={0.25}>
+      <Typography variant="caption" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="body2">{value}</Typography>
+    </Stack>
+  );
+}

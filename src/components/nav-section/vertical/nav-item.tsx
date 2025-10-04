@@ -38,7 +38,9 @@ export default function NavItem({ item, open, depth, active, config, externalLin
         item.openPopup && (
           <IconButton
             aria-label="close"
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
               item.openPopup();
             }}
             sx={{

@@ -25,6 +25,12 @@ export interface AuthContextType {
    * Retorna true si el usuario es nuevo y es su primera vez iniciando sesión.
    */
   isFirstLogin: boolean;
+
+  /**
+   * Retorna true si se está cambiando de empresa actualmente.
+   */
+  changingCompany: boolean;
+
   /**
    * Datos de la empresa a la que pertenece el usuario.
    */
@@ -51,6 +57,12 @@ export interface AuthContextType {
    * Cierra la sesión del usuario actual y limpia la sesión.
    */
   logout: () => void;
+
+  /**
+   * Selecciona una empresa y actualiza el token JWT.
+   * @param companyId ID de la empresa a seleccionar.
+   */
+  selectCompany: (companyId: string) => Promise<any>;
 
   // TODO: agregar interfaz de todos los de aqui abajo
 

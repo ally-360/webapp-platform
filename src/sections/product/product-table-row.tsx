@@ -25,20 +25,10 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // ----------------------------------------------------------------------
 
-export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow }) {
-  const { name, priceSale, state, images, sku, quantityStock, productPdv, barCode } = row;
-
+export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow, loading }) {
   const { t } = useTranslation();
-
   const confirm = useBoolean(false);
-
-  const minQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.minQuantity + acc, 0);
-  const maxQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.maxQuantity + acc, 0);
-  const inventoryType =
-    // eslint-disable-next-line no-nested-ternary
-    quantityStock > minQuantityAllPdvs ? 'Existencias' : quantityStock === 0 ? 'Sin exitencias' : 'Pocas existencias';
   const popover = usePopover();
-
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handlePopoverOpen = (event) => {
@@ -48,6 +38,47 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
   const handlePopoverClose = () => {
     setAnchorEl(null);
   };
+
+  // Si está en modo loading o row es null, mostrar skeleton
+  if (loading || !row) {
+    return (
+      <TableRow hover>
+        <TableCell padding="checkbox">
+          <Checkbox disabled />
+        </TableCell>
+        <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar variant="rounded" sx={{ width: 64, height: 64, mr: 2 }} />
+          <ListItemText
+            primary={<LinearProgress sx={{ width: 120, height: 8 }} />}
+            secondary={<LinearProgress sx={{ width: 80, height: 6, mt: 1 }} />}
+          />
+        </TableCell>
+        <TableCell>
+          <LinearProgress sx={{ width: 60, height: 8 }} />
+        </TableCell>
+        <TableCell>
+          <LinearProgress sx={{ width: 40, height: 8 }} />
+        </TableCell>
+        <TableCell>
+          <LinearProgress sx={{ width: 60, height: 8 }} />
+        </TableCell>
+        <TableCell>
+          <LinearProgress sx={{ width: 80, height: 8 }} />
+        </TableCell>
+        <TableCell align="right">
+          <LinearProgress sx={{ width: 30, height: 8 }} />
+        </TableCell>
+      </TableRow>
+    );
+  }
+
+  const { name, priceSale, state, images, sku, quantityStock, productPdv, barCode } = row;
+
+  const minQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.min_quantity + acc, 0);
+  const maxQuantityAllPdvs = productPdv.reduce((acc, pdv) => pdv.quantity + acc, 0);
+  const inventoryType =
+    // eslint-disable-next-line no-nested-ternary
+    quantityStock > minQuantityAllPdvs ? 'Existencias' : quantityStock === 0 ? 'Sin exitencias' : 'Pocas existencias';
 
   const open = Boolean(anchorEl);
 
@@ -59,7 +90,12 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
         </TableCell>
 
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={name} src={images[0]} variant="rounded" sx={{ width: 64, height: 64, mr: 2 }} />
+          <Avatar
+            alt={name}
+            src={Array.isArray(images) && images.length > 0 ? images[0] : undefined}
+            variant="rounded"
+            sx={{ width: 64, height: 64, mr: 2 }}
+          />
           <ListItemText
             disableTypography
             primary={
@@ -127,7 +163,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
               productPdv.map((element, index) => (
                 <Box key={index} sx={{ p: 0.2 }}>
                   <Typography sx={{ typography: 'caption', color: 'text.secondary' }}>
-                    {element.pdv.name}: {element.quantity} {t('productos')}
+                    {element.pdv_name}: {element.quantity} {t('productos')}
                   </Typography>
                 </Box>
               ))}
@@ -203,5 +239,6 @@ ProductTableRow.propTypes = {
   onSelectRow: PropTypes.func,
   onViewRow: PropTypes.func,
   row: PropTypes.object,
-  selected: PropTypes.bool
+  selected: PropTypes.bool,
+  loading: PropTypes.bool
 };

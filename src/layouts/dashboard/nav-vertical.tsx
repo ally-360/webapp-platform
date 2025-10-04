@@ -89,7 +89,7 @@ export default function NavVertical({ openNav, onCloseNav }) {
               {user?.profile?.name}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: 12 }}>
-              {user?.company[0]?.name}
+              {user?.company?.name}
             </Typography>
           </Box>
           {/* </Paper> */}

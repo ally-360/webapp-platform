@@ -14,7 +14,7 @@ export default function ProductDetailsPage() {
   return (
     <>
       <Helmet>
-        <title> Ally360: Detalle del producto</title>
+        <title>Ally360: Detalle del producto</title>
       </Helmet>
 
       <ProductDetailsView id={`${id}`} />
