@@ -32,6 +32,7 @@ export const paths = {
       forgotPassword: `${ROOTS.AUTH}/jwt/forgot-password`
     }
   },
+  acceptInvitation: '/accept-invitation',
   verifyEmail: '/verify-email',
   stepByStep: {
     root: `${ROOTS.AUTH}/step-by-step`
@@ -86,6 +87,7 @@ export const paths = {
       list: `${ROOTS.DASHBOARD}/user/list`,
       cards: `${ROOTS.DASHBOARD}/user/cards`,
       profile: `${ROOTS.DASHBOARD}/user/profile`,
+      invitations: `${ROOTS.DASHBOARD}/user/invitations`,
       account: `${ROOTS.DASHBOARD}/user/account`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/user/${id}/edit`,
       demo: {
@@ -96,11 +98,7 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/product`,
       new: `${ROOTS.DASHBOARD}/product/new`,
       details: (id: string) => `${ROOTS.DASHBOARD}/product/${id}`,
-      edit: (id: string) => `${ROOTS.DASHBOARD}/product/${id}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/product/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/product/${MOCK_ID}/edit`
-      }
+      edit: (id: string) => `${ROOTS.DASHBOARD}/product/${id}/edit`
     },
     post: {
       root: `${ROOTS.DASHBOARD}/post`,

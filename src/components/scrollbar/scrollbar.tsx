@@ -7,7 +7,13 @@ import { StyledRootScrollbar, StyledScrollbar } from './styles';
 
 // ----------------------------------------------------------------------
 
-const Scrollbar = forwardRef(({ children, sx, ...other }, ref) => {
+interface ScrollbarProps {
+  children?: React.ReactNode;
+  sx?: object;
+  [key: string]: any;
+}
+
+const Scrollbar = forwardRef<HTMLDivElement, ScrollbarProps>(({ children, sx, ...other }, ref) => {
   const userAgent = typeof navigator === 'undefined' ? 'SSR' : navigator.userAgent;
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);

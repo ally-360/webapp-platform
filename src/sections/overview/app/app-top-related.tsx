@@ -2,17 +2,15 @@ import PropTypes from 'prop-types';
 // @mui
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Rating from '@mui/material/Rating';
-import Avatar from '@mui/material/Avatar';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 // utils
-import { fCurrency, fShortenNumber } from 'src/utils/format-number';
 // components
 import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
+import { useNavigate } from 'react-router';
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
@@ -41,41 +39,35 @@ AppTopRelated.propTypes = {
 // ----------------------------------------------------------------------
 
 function ApplicationItem({ app }) {
-  const { shortcut, system, price, ratingNumber, totalReviews, name } = app;
-
+  const { name, min_stock, current_stock, pdv_name, sku } = app;
+  const navigate = useNavigate();
   return (
     <Stack direction="row" alignItems="center" spacing={2}>
-      <Avatar
-        variant="rounded"
-        sx={{
-          width: 48,
-          height: 48,
-          bgcolor: 'background.neutral'
-        }}
-      >
-        <Box component="img" src={shortcut} sx={{ width: 24, height: 24 }} />
-      </Avatar>
-
       <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-        <Typography variant="subtitle2" noWrap>
+        <Typography
+          variant="subtitle2"
+          onClick={() => navigate(paths.dashboard.product.details(app.id))}
+          sx={{ cursor: 'pointer' }}
+        >
           {name}
         </Typography>
 
-        <Stack direction="row" alignItems="center" sx={{ mt: 0.5, color: 'text.secondary' }}>
-          <Iconify width={14} icon={system === 'Mac' ? 'mingcute:apple-fill' : 'mingcute:windows-fill'} />
-
-          <Typography variant="caption" sx={{ ml: 0.5, mr: 1 }}>
-            {system}
+        <Stack direction="row" alignItems="center" sx={{ mt: 0.5, color: 'text.secondary', flexWrap: 'wrap', flex: 1 }}>
+          {/* <Typography variant="subtitle2">{sku}</Typography> */}
+          <Typography variant="body2" noWrap>
+            Inventario actual: {current_stock}
           </Typography>
-
-          <Label color={price === 0 ? 'success' : 'error'}>{price === 0 ? 'Free' : fCurrency(price)}</Label>
+          &nbsp;|&nbsp;
+          <Typography variant="body2" noWrap>
+            Mínimo: &nbsp;
+            <Label color="error">{min_stock}</Label>
+          </Typography>
         </Stack>
       </Box>
 
-      <Stack alignItems="flex-end">
-        <Rating readOnly size="small" precision={0.5} name="reviews" value={ratingNumber} />
-        <Typography variant="caption" sx={{ mt: 0.5, color: 'text.secondary' }}>
-          {fShortenNumber(totalReviews)} reviews
+      <Stack alignItems="flex-end" flex={1}>
+        <Typography variant="caption" sx={{ mt: 0.5, color: 'text.secondary', display: 'block' }}>
+          {pdv_name}
         </Typography>
       </Stack>
     </Stack>

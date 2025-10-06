@@ -20,16 +20,21 @@ import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { TableHeadCustom } from 'src/components/table';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { paths } from 'src/routes/paths';
 
 // ----------------------------------------------------------------------
 
 export default function AppNewInvoice({ title, subheader, tableData, tableLabels, ...other }) {
+  const navigate = useNavigate();
+
   return (
     <Card {...other}>
       <CardHeader title={title} subheader={subheader} sx={{ mb: 3 }} />
 
       <TableContainer sx={{ overflow: 'unset' }}>
-        <Scrollbar>
+        <Scrollbar autoHeight>
           <Table sx={{ minWidth: 680 }}>
             <TableHeadCustom headLabel={tableLabels} />
 
@@ -47,10 +52,11 @@ export default function AppNewInvoice({ title, subheader, tableData, tableLabels
       <Box sx={{ p: 2, textAlign: 'right' }}>
         <Button
           size="small"
+          onClick={() => navigate(paths.dashboard.sales.root)}
           color="inherit"
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" width={18} sx={{ ml: -0.5 }} />}
         >
-          View All
+          Ver todas las facturas
         </Button>
       </Box>
     </Card>
@@ -68,6 +74,9 @@ AppNewInvoice.propTypes = {
 
 function AppNewInvoiceRow({ row }) {
   const popover = usePopover();
+  const { t } = useTranslation();
+
+  console.log('ROW INVOICE:', row);
 
   const handleDownload = () => {
     popover.onClose();
@@ -92,18 +101,18 @@ function AppNewInvoiceRow({ row }) {
   return (
     <>
       <TableRow>
-        <TableCell>{row.invoiceNumber}</TableCell>
+        <TableCell>{row.number}</TableCell>
 
-        <TableCell>{row.category}</TableCell>
+        <TableCell>{row.customer_name}</TableCell>
 
-        <TableCell>{fCurrency(row.price)}</TableCell>
+        <TableCell>{fCurrency(row.total_amount)}</TableCell>
 
-        <TableCell>
+        <TableCell flex={1}>
           <Label
             variant="soft"
-            color={(row.status === 'progress' && 'warning') || (row.status === 'out of date' && 'error') || 'success'}
+            color={(row.status === 'OPEN' && 'warning') || (row.status === 'VOID' && 'error') || 'success'}
           >
-            {row.status}
+            {t(`invoice.status.${row.status}`)}
           </Label>
         </TableCell>
 

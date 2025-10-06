@@ -1,6 +1,5 @@
 // @mui
 import { useTheme } from '@mui/material/styles';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -8,30 +7,28 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { useAuthContext } from 'src/auth/hooks';
 import { useSettingsContext } from 'src/components/settings';
 // _mock
-import { _appAuthors, _appInstalled } from 'src/_mock';
 // components
 import { AICapabilitiesBannerEnhanced } from 'src/components/ai-chatbot';
 // assets
-import { SeoIllustration } from 'src/assets/illustrations';
 // api
 import { useGetSalesInvoicesQuery } from 'src/redux/services/salesInvoicesApi';
 import {
   useGetDailySalesQuery,
   useGetLowStockProductsQuery,
   useGetTopProductsQuery,
-  useGetSalesComparisonQuery
+  useGetSalesComparisonQuery,
+  useGetPDVSummaryQuery,
+  useTestConnectionQuery
 } from 'src/redux/services/dashboardApi';
 //
 import React from 'react';
-import AppWidget from '../app-widget';
+import { useWelcomeStepStatus } from '../hooks/use-welcome-step-status';
 import AppWelcome from '../app-welcome';
 import AppNewInvoice from '../app-new-invoice';
-import AppTopAuthors from '../app-top-authors';
 import AppTopRelated from '../app-top-related';
 import AppAreaInstalled from '../app-area-installed';
 import AppWidgetSummary from '../app-widget-summary';
 import AppCurrentDownload from '../app-current-download';
-import AppTopInstalledCountries from '../app-top-installed-countries';
 import AppWelcomeStep from '../app-welcome-step';
 // ----------------------------------------------------------------------
 
@@ -40,73 +37,137 @@ export default function OverviewAppView() {
   const theme = useTheme();
   const settings = useSettingsContext();
 
+  // Hook para verificar el estado del tutorial
+  const { isCompleted: tutorialCompleted, completionPercentage } = useWelcomeStepStatus();
+
   // Obtener fecha de hoy para filtros
   const today = new Date().toISOString().split('T')[0];
 
-  // RTK Query hooks - datos reales del backend
-  const { data: salesInvoices } = useGetSalesInvoicesQuery({
+  // Debug de configuración
+  console.log('🔧 DASHBOARD CONFIG DEBUG:', {
+    today,
+    tutorialCompleted,
+    completionPercentage,
+    companyId: localStorage.getItem('companyId'),
+    token: localStorage.getItem('accessToken') ? 'Present' : 'Missing',
+    hostApi: (import.meta as any).env?.VITE_HOST_API
+  });
+
+  const {
+    data: salesInvoices,
+    isLoading: _invoicesLoading,
+    error: _invoicesError
+  } = useGetSalesInvoicesQuery({
     limit: 10
   });
 
-  const { data: dailySales } = useGetDailySalesQuery({
+  const {
+    data: dailySales,
+    isLoading: _dailySalesLoading,
+    error: _dailySalesError
+  } = useGetDailySalesQuery({
     date: today
   });
 
-  const { data: lowStockProducts } = useGetLowStockProductsQuery({
+  const {
+    data: lowStockProducts,
+    isLoading: _stockLoading,
+    error: _stockError
+  } = useGetLowStockProductsQuery({
     limit: 15
   });
 
-  const { data: topProducts } = useGetTopProductsQuery({
+  const {
+    data: topProducts,
+    isLoading: _topProductsLoading,
+    error: _topProductsError
+  } = useGetTopProductsQuery({
     period: 'week',
     limit: 5
   });
 
-  const { data: salesComparison } = useGetSalesComparisonQuery({});
+  const {
+    data: salesComparison,
+    isLoading: _comparisonLoading,
+    error: _comparisonError
+  } = useGetSalesComparisonQuery({});
 
-  console.log('Dashboard Data:', {
-    salesInvoices,
-    dailySales,
-    lowStockProducts,
-    topProducts,
-    salesComparison
+  const { data: pdvSummary, isLoading: _pdvLoading, error: _pdvError } = useGetPDVSummaryQuery({});
+
+  // Query de prueba para verificar conectividad
+  const { data: _testData, isLoading: _testLoading, error: _testError } = useTestConnectionQuery();
+
+  // Debug completo de todas las queries
+  console.log('🔍 DASHBOARD DEBUG - Estado de todas las queries:', {
+    testConnection: {
+      data: _testData,
+      isLoading: _testLoading,
+      error: _testError
+    },
+    salesInvoices: {
+      data: salesInvoices,
+      isLoading: _invoicesLoading,
+      error: _invoicesError
+    },
+    dailySales: {
+      data: dailySales,
+      isLoading: _dailySalesLoading,
+      error: _dailySalesError
+    },
+    lowStockProducts: {
+      data: lowStockProducts,
+      isLoading: _stockLoading,
+      error: _stockError
+    },
+    topProducts: {
+      data: topProducts,
+      isLoading: _topProductsLoading,
+      error: _topProductsError
+    },
+    salesComparison: {
+      data: salesComparison,
+      isLoading: _comparisonLoading,
+      error: _comparisonError
+    },
+    pdvSummary: {
+      data: pdvSummary,
+      isLoading: _pdvLoading,
+      error: _pdvError
+    }
   });
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ py: { xs: 2, sm: 3 } }}>
       <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Welcome Cards - Stack on mobile, side by side on larger screens */}
-        <Grid xs={12} sm={12} md={5} lg={4}>
+        <Grid xs={12} sm={12} md={tutorialCompleted ? 12 : 5} lg={tutorialCompleted ? 12 : 4}>
           <AppWelcome
             title={`Bienvenido 👋 \n ${user?.profile?.name}`}
-            description=""
+            description={
+              tutorialCompleted
+                ? '¡Excelente! Has completado todos los pasos del tutorial. Tu cuenta está lista para usar todas las funcionalidades de la plataforma.'
+                : ''
+            }
             img={null}
             action={
               <Button variant="contained" color="primary" size="small">
-                Explorar
+                {tutorialCompleted ? 'Explorar Dashboard' : 'Explorar'}
               </Button>
             }
           />
         </Grid>
 
+        {/* AppWelcomeStep se auto-oculta cuando el tutorial está completado */}
         <Grid xs={12} sm={12} md={7} lg={8}>
-          <AppWelcomeStep
-            title={`Bienvenido 👋 \n ${user?.profile?.name}`}
-            description="Bienvenidos al sistema de facturación de la empresa. \n En este sistema podrás realizar las siguientes acciones:"
-            img={<SeoIllustration />}
-            action={
-              <Button variant="contained" color="primary" size="small">
-                Explorar
-              </Button>
-            }
-          />
+          <AppWelcomeStep />
         </Grid>
 
-        {/* Widget Summary Cards - Datos reales del backend */}
+        {/* Widget Summary Cards - Datos reales del backend con fallbacks */}
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
             title="Ventas de Hoy"
             percent={salesComparison?.percentage_change || 0}
-            total={parseFloat(dailySales?.total_amount || '0')}
+            total={dailySales?.total_amount ? parseFloat(dailySales.total_amount) : 0}
             sx={{ height: { xs: 'auto', sm: '100%' } }}
             chart={{
               series: [45, 32, 68, 55, 89, 45, 72, 83, 67, 91]
@@ -141,9 +202,6 @@ export default function OverviewAppView() {
         </Grid>
 
         {/* AI Capabilities Banner - Prominent Section */}
-        <Grid xs={12}>
-          <AICapabilitiesBannerEnhanced />
-        </Grid>
 
         {/* Space for future AI features */}
         {/* <Grid xs={12} lg={6}>
@@ -170,17 +228,20 @@ export default function OverviewAppView() {
           </Stack>
         </Grid> */}
 
-        {/* Charts - Datos reales del backend */}
+        {/* Charts - Datos reales del backend con fallbacks */}
         <Grid xs={12} sm={12} md={6} lg={5}>
           <AppCurrentDownload
             title="Productos Más Vendidos"
             subheader="Top 5 de la semana"
             sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
-              series: topProducts?.products?.map((product) => ({
-                label: product.product_name,
-                value: product.total_quantity
-              })) || [{ label: 'Cargando...', value: 0 }]
+              series:
+                topProducts && topProducts.products && topProducts.products.length > 0
+                  ? topProducts.products.map((product) => ({
+                      label: product.product_name,
+                      value: product.total_quantity
+                    }))
+                  : [{ label: 'Sin datos disponibles', value: 1 }]
             }}
           />
         </Grid>
@@ -188,7 +249,7 @@ export default function OverviewAppView() {
         <Grid xs={12} sm={12} md={6} lg={7}>
           <AppAreaInstalled
             title="Ventas por Punto de Venta"
-            subheader="(+12.3%) más que el mes anterior"
+            subheader={`PDV: ${pdvSummary?.pdv_name || 'Principal'} - Ventas: ${pdvSummary?.today_sales || '$0'}`}
             sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
               categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -197,33 +258,23 @@ export default function OverviewAppView() {
                   year: '2024',
                   data: [
                     {
-                      name: 'Sede Principal',
-                      data: [320, 441, 385, 551, 649, 762, 869, 891, 948, 735, 851, 949]
-                    },
-                    {
-                      name: 'Sucursal Norte',
-                      data: [210, 334, 413, 356, 477, 588, 699, 577, 645, 413, 556, 677]
-                    },
-                    {
-                      name: 'Sucursal Sur',
-                      data: [180, 267, 298, 445, 389, 456, 523, 398, 467, 298, 445, 389]
-                    }
-                  ]
-                },
-                {
-                  year: '2025',
-                  data: [
-                    {
-                      name: 'Sede Principal',
-                      data: [851, 735, 841, 610, 991, 869, 762, 1048, 891, 869, 762, 849]
-                    },
-                    {
-                      name: 'Sucursal Norte',
-                      data: [556, 413, 634, 410, 677, 699, 588, 545, 577, 699, 588, 677]
-                    },
-                    {
-                      name: 'Sucursal Sur',
-                      data: [445, 298, 467, 310, 489, 523, 456, 367, 398, 523, 456, 489]
+                      name: pdvSummary?.pdv_name || 'PDV Principal',
+                      data: dailySales?.total_amount
+                        ? [
+                            parseFloat(dailySales.total_amount) * 0.8,
+                            parseFloat(dailySales.total_amount) * 0.9,
+                            parseFloat(dailySales.total_amount) * 1.1,
+                            parseFloat(dailySales.total_amount) * 0.7,
+                            parseFloat(dailySales.total_amount) * 1.2,
+                            parseFloat(dailySales.total_amount) * 1.0,
+                            parseFloat(dailySales.total_amount) * 0.95,
+                            parseFloat(dailySales.total_amount) * 1.05,
+                            parseFloat(dailySales.total_amount) * 0.85,
+                            parseFloat(dailySales.total_amount) * 1.15,
+                            parseFloat(dailySales.total_amount) * 1.25,
+                            parseFloat(dailySales.total_amount)
+                          ]
+                        : [100, 150, 200, 180, 220, 190, 250, 280, 210, 300, 320, 350]
                     }
                   ]
                 }
@@ -232,51 +283,7 @@ export default function OverviewAppView() {
           />
         </Grid>
 
-        {/* Table - Últimas facturas reales del backend */}
-        <Grid xs={12} lg={8}>
-          <AppNewInvoice
-            title="Últimas Facturas"
-            subheader={`${salesInvoices?.total || 0} facturas en total`}
-            tableData={salesInvoices?.invoices?.slice(0, 10) || []}
-            tableLabels={[
-              { id: 'number', label: 'N° Factura' },
-              { id: 'issue_date', label: 'Fecha' },
-              { id: 'total_amount', label: 'Valor Total' },
-              { id: 'status', label: 'Estado' },
-              { id: '' }
-            ]}
-          />
-        </Grid>
-
-        {/* Side widgets - Información real de productos y alertas */}
-        <Grid xs={12} sm={6} md={4} lg={4}>
-          <AppTopRelated
-            title="Productos con Stock Bajo"
-            subheader={`${lowStockProducts?.total_count || 0} productos críticos`}
-            list={
-              lowStockProducts?.products?.slice(0, 5).map((product) => ({
-                id: product.id,
-                name: product.name,
-                avatar: null,
-                favourite: product.current_stock
-              })) || []
-            }
-          />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={4} lg={4}>
-          <AppTopInstalledCountries
-            title="Sucursales por Región"
-            subheader="Distribución geográfica"
-            list={_appInstalled}
-          />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={4} lg={4}>
-          <AppTopAuthors title="Mejores Vendedores" subheader="Top de ventas del mes" list={_appAuthors} />
-        </Grid>
-
-        <Grid xs={12} sm={6} md={12} lg={12}>
+        {/* <Grid xs={12} sm={6} md={12} lg={12}>
           <Stack spacing={{ xs: 2, sm: 3 }} direction={{ xs: 'column', sm: 'row' }}>
             <AppWidget
               title="Comparación vs Ayer"
@@ -312,7 +319,7 @@ export default function OverviewAppView() {
 
             <AppWidget
               title="Ventas del Día"
-              total={parseFloat(dailySales?.total_amount || '0')}
+              total={dailySales?.total_amount ? parseFloat(dailySales.total_amount) : 0}
               icon="solar:money-bag-bold"
               color="success"
               sx={{ flex: 1 }}
@@ -321,6 +328,56 @@ export default function OverviewAppView() {
               }}
             />
           </Stack>
+        </Grid> */}
+
+        <Grid xs={12} lg={8}>
+          <AppNewInvoice
+            title="Últimas Facturas"
+            subheader={`${salesInvoices?.total || 0} facturas en total`}
+            tableData={salesInvoices?.invoices?.slice(0, 10) || []}
+            tableLabels={[
+              { id: 'number', label: 'N° Factura' },
+              { id: 'customer', label: 'Cliente' },
+              { id: 'total_amount', label: 'Valor Total' },
+              { id: 'status', label: 'Estado' },
+              { id: '' }
+            ]}
+          />
+        </Grid>
+
+        {/* Side widgets - Información real de productos y alertas */}
+        <Grid xs={12} sm={6} md={4} lg={4}>
+          <AppTopRelated
+            title="Productos con Stock Bajo"
+            subheader={`${lowStockProducts?.total_count || 0} productos críticos`}
+            list={
+              lowStockProducts?.products?.slice(0, 10).map((product) => ({
+                id: product.id,
+                name: product.name,
+                current_stock: product.current_stock,
+                min_stock: product.min_stock,
+                pdv_name: product.pdv_name,
+                sku: product.sku || 'N/A',
+                avatar: null,
+                favourite: product.current_stock
+              })) || []
+            }
+          />
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} lg={4}>
+          {/* <AppTopInstalledCountries
+            title="Sucursales por Región"
+            subheader="Distribución geográfica"
+            list={_appInstalled}
+          /> */}
+        </Grid>
+
+        <Grid xs={12} sm={6} md={4} lg={4}>
+          {/* <AppTopAuthors title="Mejores Vendedores" subheader="Top de ventas del mes" list={_appAuthors} /> */}
+        </Grid>
+        <Grid xs={12}>
+          <AICapabilitiesBannerEnhanced />
         </Grid>
       </Grid>
     </Container>

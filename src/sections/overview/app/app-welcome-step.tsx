@@ -1,41 +1,55 @@
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Typography, Stepper, Step, StepLabel, StepConnector, styled, Box, Button, useMediaQuery } from '@mui/material';
-import React, { useState } from 'react';
-
-interface AppWelcomeStepProps {
-  title: string;
-  description: string;
-  action: React.ReactNode;
-  img: React.ReactNode;
-}
+import {
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  StepConnector,
+  styled,
+  Box,
+  Button,
+  useMediaQuery,
+  Chip
+} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+// hooks
+import { useGetProductsQuery } from 'src/redux/services/productsApi';
+import { useGetContactsQuery } from 'src/redux/services/contactsApi';
+import { useGetSalesInvoicesQuery } from 'src/redux/services/salesInvoicesApi';
+// routes
+import { paths } from 'src/routes/paths';
+// components
+import Iconify from 'src/components/iconify';
+import { useWelcomeStepStatus } from './hooks/use-welcome-step-status';
 
 const steps = [
   {
     title: 'Crea tu primer producto',
     description:
       'Puedes crear tu primer producto haciendo click en el botón "Nuevo producto" o en el menú lateral. Puedes crear categorías, marcas y asociarlas a tu producto.',
-    icon: 'ic:round-add-box',
+    icon: 'solar:box-bold-duotone',
     action: 'Crear producto',
     img: '/assets/icons/faqs/ic_package.svg',
-    url: '/products/new'
+    url: paths.dashboard.inventory.newProduct
   },
   {
     title: 'Agrega tu primer cliente',
     description: 'Ve a la sección de contactos y registra tu primer cliente. Así podrás asociarlo a tus ventas.',
-    icon: 'ic:round-person-add',
+    icon: 'solar:user-plus-bold-duotone',
     action: 'Agregar cliente',
     img: '/assets/icons/faqs/ic_account.svg',
-    url: '/contacts/new'
+    url: '/dashboard/contacts'
   },
   {
     title: 'Genera tu primera factura',
     description:
       'Haz tu primera venta desde el POS o desde la sección de ventas y genera tu primera factura compatible con la DIAN.',
-    icon: 'ic:round-receipt-long',
+    icon: 'solar:document-add-bold-duotone',
     action: 'Generar factura',
     img: '/assets/icons/faqs/ic_assurances.svg',
-    url: '/sales/new'
+    url: paths.dashboard.sales.newSale
   }
 ];
 
@@ -47,16 +61,86 @@ const CustomConnector = styled(StepConnector)(({ theme }) => ({
   }
 }));
 
-export default function AppWelcomeStep({
-  title: _title,
-  description: _description,
-  action: _action,
-  img: _img,
-  ...other
-}: AppWelcomeStepProps) {
+export default function AppWelcomeStep() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeStep, setActiveStep] = useState(0);
+
+  // Usar el hook personalizado para obtener el estado
+  const { isCompleted: allStepsCompleted, hasProducts, hasContacts, hasInvoices, isLoading } = useWelcomeStepStatus();
+
+  // También mantener las queries individuales para obtener el estado de loading
+  const { isLoading: loadingProducts } = useGetProductsQuery({ limit: 1 });
+  const { isLoading: loadingContacts } = useGetContactsQuery({ limit: 1 });
+  const { isLoading: loadingInvoices } = useGetSalesInvoicesQuery({ limit: 1 });
+
+  // Auto-avanzar al siguiente paso si el actual está completado
+  useEffect(() => {
+    if (loadingProducts || loadingContacts || loadingInvoices) return;
+
+    let nextStep = 0;
+
+    if (hasProducts) nextStep = 1;
+    if (hasProducts && hasContacts) nextStep = 2;
+    if (hasProducts && hasContacts && hasInvoices) nextStep = 3; // Completado
+
+    setActiveStep(Math.min(nextStep, steps.length - 1));
+  }, [hasProducts, hasContacts, hasInvoices, loadingProducts, loadingContacts, loadingInvoices]);
+
+  // Función para manejar el clic en el botón principal
+  const handleStepAction = () => {
+    const currentStep = steps[activeStep];
+    if (currentStep.url) {
+      navigate(currentStep.url);
+    }
+  };
+
+  // Determinar si un paso está completado
+  const isStepCompleted = (stepIndex: number) => {
+    switch (stepIndex) {
+      case 0:
+        return hasProducts;
+      case 1:
+        return hasContacts;
+      case 2:
+        return hasInvoices;
+      default:
+        return false;
+    }
+  };
+
+  // Determinar el estado del paso actual
+  const getCurrentStepStatus = () => {
+    if (activeStep >= steps.length) {
+      return { completed: true, message: '¡Felicidades! Has completado todos los pasos.' };
+    }
+
+    const isCompleted = isStepCompleted(activeStep);
+    if (isCompleted) {
+      return { completed: true, message: '¡Paso completado! Continúa con el siguiente.' };
+    }
+
+    return { completed: false, message: 'Completa este paso para continuar.' };
+  };
+
+  const stepStatus = getCurrentStepStatus();
+
+  // Debug para desarrollo
+  console.log('🎯 Welcome Step Debug:', {
+    activeStep,
+    hasProducts,
+    hasContacts,
+    hasInvoices,
+    stepStatus,
+    allStepsCompleted,
+    currentStepUrl: steps[activeStep]?.url
+  });
+
+  // Si todos los pasos están completados, no renderizar el componente
+  if (allStepsCompleted && !isLoading) {
+    return null;
+  }
 
   return (
     <Box
@@ -68,7 +152,6 @@ export default function AppWelcomeStep({
         minHeight: { xs: 280, sm: 320, md: 400 },
         height: 'fit-content'
       }}
-      {...other}
     >
       <Stepper
         activeStep={activeStep}
@@ -100,8 +183,11 @@ export default function AppWelcomeStep({
                     width: { xs: 28, sm: 34, md: 42 },
                     height: { xs: 28, sm: 34, md: 42 },
                     borderRadius: '50%',
-                    bgcolor:
-                      activeStep === index || activeStep > index ? theme.palette.primary.main : theme.palette.grey[500],
+                    bgcolor: (() => {
+                      if (isStepCompleted(index)) return theme.palette.success.main;
+                      if (activeStep === index) return theme.palette.primary.main;
+                      return theme.palette.grey[400];
+                    })(),
                     boxShadow: activeStep === index ? 3 : 1,
                     color: 'white',
                     display: 'flex',
@@ -112,7 +198,7 @@ export default function AppWelcomeStep({
                     transition: 'all 0.3s ease'
                   }}
                 >
-                  {index + 1}
+                  {isStepCompleted(index) ? <Iconify icon="solar:check-circle-bold" width={20} /> : index + 1}
                 </Box>
               }
             >
@@ -160,10 +246,22 @@ export default function AppWelcomeStep({
                 fontWeight: 600,
                 mb: { xs: 0.8, sm: 1, md: 1.5 },
                 color: 'text.primary',
-                lineHeight: { xs: 1.3, sm: 1.4 }
+                lineHeight: { xs: 1.3, sm: 1.4 },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                justifyContent: { xs: 'center', sm: 'flex-start' }
               }}
             >
               {steps[activeStep].title}
+              {isStepCompleted(activeStep) && (
+                <Chip
+                  label="Completado"
+                  color="success"
+                  size="small"
+                  icon={<Iconify icon="solar:check-circle-bold" width={16} />}
+                />
+              )}
             </Typography>
 
             <Typography
@@ -188,9 +286,7 @@ export default function AppWelcomeStep({
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => {
-                  console.log(`Navigating to: ${steps[activeStep].url}`);
-                }}
+                onClick={handleStepAction}
                 sx={{
                   fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.875rem' },
                   py: { xs: 0.8, sm: 1, md: 1.2 },
@@ -198,10 +294,19 @@ export default function AppWelcomeStep({
                   borderRadius: 2,
                   textTransform: 'none',
                   fontWeight: 500,
-                  minHeight: { xs: 32, sm: 36, md: 40 }
+                  minHeight: { xs: 32, sm: 36, md: 40 },
+                  background: isStepCompleted(activeStep) ? theme.palette.success.main : theme.palette.primary.main,
+                  '&:hover': {
+                    background: isStepCompleted(activeStep) ? theme.palette.success.dark : theme.palette.primary.dark
+                  }
                 }}
               >
-                {steps[activeStep].action}
+                {(() => {
+                  if (isStepCompleted(activeStep)) {
+                    return activeStep === steps.length - 1 ? 'Ir al Dashboard' : 'Siguiente Paso';
+                  }
+                  return steps[activeStep].action;
+                })()}
               </Button>
 
               <Box

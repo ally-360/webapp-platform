@@ -18,6 +18,7 @@ import AccountBilling from '../account-billing';
 import AccountSocialLinks from '../account-social-links';
 import AccountNotifications from '../account-notifications';
 import AccountChangePassword from '../account-change-password';
+import AccountInvitations from '../account-invitations';
 
 // ----------------------------------------------------------------------
 
@@ -26,6 +27,11 @@ const TABS = [
     value: 'general',
     label: 'General',
     icon: <Iconify icon="solar:user-id-bold" width={24} />
+  },
+  {
+    value: 'invitations',
+    label: 'Gestión de Usuarios',
+    icon: <Iconify icon="tabler:mail-forward" width={24} />
   },
   {
     value: 'company',
@@ -62,6 +68,7 @@ export default function AccountView() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'Usuario', href: paths.dashboard.user.root },
+          { name: 'Gestión de Usuarios', href: paths.dashboard.user.invitations },
           { name: 'Mi cuenta' }
         ]}
         sx={{
@@ -93,6 +100,8 @@ export default function AccountView() {
           addressBook={_userAddressBook}
         />
       )}
+
+      {currentTab === 'invitations' && <AccountInvitations />}
 
       {currentTab === 'notifications' && <AccountNotifications />}
 

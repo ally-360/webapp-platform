@@ -14,6 +14,8 @@ import { useRouter } from 'src/routes/hook';
 // hooks
 // auth
 import { useAuthContext } from 'src/auth/hooks';
+// api
+import { useGetUserAvatarQuery } from 'src/redux/services/userProfileApi';
 // components
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
@@ -46,6 +48,7 @@ export default function AccountPopover() {
 
   const { user } = useAuthContext();
   const { logout } = useAuthContext();
+  const { data: avatarData } = useGetUserAvatarQuery();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -88,7 +91,7 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={user?.profile?.photo}
+          src={avatarData?.avatar_url || user?.profile?.photo}
           alt={user?.profile?.name}
           sx={{
             width: 36,

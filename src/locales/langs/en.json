@@ -23,7 +23,6 @@
   "profile": "profile",
   "account": "account",
   "product": "product",
-  "invoice": "invoice",
   "details": "details",
   "checkout": "checkout",
   "calendar": "calendar",
@@ -72,5 +71,12 @@
   "Inactivo": "Inactive",
   "demo": {
     "title": "English"
+  }
+  ,"invoice": {
+    "status": {
+      "OPEN": "Open",
+      "PAID": "Paid",
+      "VOID": "Void"
+    }
   }
 }
