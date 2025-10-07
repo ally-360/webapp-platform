@@ -33,23 +33,50 @@ export const RegisterSchema = object().shape({
 
 export const RegisterCompanySchema = object().shape({
   name: string().min(1, 'Ingrese un nombre valido').required('Ingrese el nombre'),
-  address: string().nullable().min(3, 'Ingrese una dirección valida'),
-  nit: string().required('Ingrese un número de NIT valido'),
-  phoneNumber: string().required('Ingrese un número de teléfono valido'),
-  quantityEmployees: string().nullable(),
-  economicActivity: string().nullable(),
-  website: string().nullable() // Campo removido del backend pero mantenido para compatibilidad
+  description: string().required('Ingrese una descripción'),
+  address: string().min(3, 'Ingrese una dirección valida').required('Ingrese la dirección'),
+  phone_number: string()
+    .required('Ingrese un número de teléfono')
+    .test(
+      'phone-format',
+      'Número de teléfono inválido. Use formato colombiano: +573XXXXXXXXX (móvil) o +571XXXXXXX (fijo)',
+      (value) => {
+        if (!value) return false;
+        // Regex para formato colombiano con o sin +57
+        const phoneRegex = /^(\+57)?[13]\d{9}$/;
+        return phoneRegex.test(value.replace(/\s+/g, ''));
+      }
+    ),
+  nit: string()
+    .required('Ingrese un número de NIT valido')
+    .test('nit-format', 'NIT inválido. Debe ser un NIT colombiano válido de 8-9 dígitos', (value) => {
+      if (!value) return false;
+      // Regex para NIT colombiano (8-9 dígitos, no puede empezar con 0)
+      const nitRegex = /^[1-9]\d{7,8}$/;
+      return nitRegex.test(value);
+    }),
+  economic_activity: string().required('Seleccione la actividad económica'),
+  quantity_employees: string().required('Seleccione la cantidad de empleados'),
+  social_reason: string().required('Ingrese la razón social'),
+  logo: string().nullable(),
+  uniquePDV: yup.boolean().default(false)
 });
 
 export const RegisterPDVSchema = object().shape({
   name: yup.string().required('Nombre requerido'),
-  description: yup.string().required('Descripción requerida'),
   departamento: yup.object().nullable().default(null).required('Departamento requerido'),
   municipio: yup.object().nullable().default(null).required('Ciudad requerida'),
   address: yup.string().required('Dirección requerida'),
-  phoneNumber: yup.string().required('Teléfono requerido'),
+  phone_number: yup.string().required('Teléfono requerido'),
   main: yup.boolean().default(true),
-  companyId: yup.string().nullable().required('La empresa es requerida')
+  company_id: yup.string().required('ID de empresa requerido')
+});
+
+export const PlanSelectionSchema = object().shape({
+  plan_id: yup.string().required('Selecciona un plan'),
+  trial_days: yup.number().nullable().min(0, 'Los días de prueba deben ser positivos'),
+  auto_renewal: yup.boolean().default(true),
+  payment_method: yup.string().nullable()
 });
 
 export const ChangePassWordSchema = object().shape({

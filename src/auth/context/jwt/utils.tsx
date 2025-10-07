@@ -10,17 +10,27 @@ import axios from 'src/utils/axios';
  * @returns user information
  */
 function jwtDecode(token: string) {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(
-    window
-      .atob(base64)
-      .split('')
-      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
-      .join('')
-  );
+  try {
+    // Validar que el token existe y tiene el formato correcto
+    if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+      throw new Error('Invalid token format');
+    }
 
-  return JSON.parse(jsonPayload);
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window
+        .atob(base64)
+        .split('')
+        .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decoding JWT token:', error);
+    return null;
+  }
 }
 
 /**
@@ -40,11 +50,20 @@ export const isValidToken = (accessToken: string) => {
     return false;
   }
 
-  const decoded = jwtDecode(accessToken);
+  try {
+    const decoded = jwtDecode(accessToken);
 
-  const currentTime = Date.now() / 1000;
+    // Si jwtDecode retorna null, el token es inválido
+    if (!decoded) {
+      return false;
+    }
 
-  return decoded.exp > currentTime;
+    const currentTime = Date.now() / 1000;
+    return decoded.exp > currentTime;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return false;
+  }
 };
 
 // ----------------------------------------------------------------------
@@ -56,12 +75,15 @@ export const isValidToken = (accessToken: string) => {
 export const setSession = (accessToken: string | null) => {
   if (accessToken) {
     localStorage.setItem('accessToken', accessToken);
-
     axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   } else {
+    // Limpiar todos los elementos relacionados con la sesión
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('companyId');
+    localStorage.removeItem('refreshToken');
 
     delete axios.defaults.headers.common.Authorization;
+    delete axios.defaults.headers['company-id'];
   }
 };
 

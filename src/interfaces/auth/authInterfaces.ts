@@ -61,15 +61,16 @@ export interface AuthContextType {
   /**
    * Selecciona una empresa y actualiza el token JWT.
    * @param companyId ID de la empresa a seleccionar.
+   * @param showLoading Indica si se debe mostrar la pantalla de loading. Por defecto true.
    */
-  selectCompany: (companyId: string) => Promise<any>;
+  selectCompany: (companyId: string, showLoading?: boolean) => Promise<any>;
 
   // TODO: agregar interfaz de todos los de aqui abajo
 
   /**
    * Actualiza los datos de la empresa a la que pertenece el usuario.
    */
-  updateCompany: (data: object) => Promise<void>;
+  updateCompany: (id: string, data: object) => Promise<any>;
 
   // /**
   //  * Actualiza los datos de los puntos de venta de la empresa a la que pertenece el usuario.

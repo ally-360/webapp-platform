@@ -1,6 +1,6 @@
 import { useSnackbar } from 'notistack';
 import React, { useState } from 'react';
-import { Alert, IconButton, MenuItem, Stack, Typography } from '@mui/material';
+import { Alert, IconButton, MenuItem, Stack, Typography, FormControlLabel, Switch, Box, Divider } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { Icon } from '@iconify/react';
 import { useAuthContext } from 'src/auth/hooks';
@@ -12,7 +12,7 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterCompanySchema } from 'src/interfaces/auth/yupSchemas';
 import { RegisterCompany } from 'src/interfaces/auth/userInterfaces';
 import { useDispatch } from 'react-redux';
-import { setPrevValuesCompany } from 'src/redux/inventory/stepByStepSlice';
+import { setPrevValuesCompany, setStep } from 'src/redux/inventory/stepByStepSlice';
 import { useAppSelector } from 'src/hooks/store';
 import RequestService from '../../../axios/services/service';
 import { economicActivityOptions, quantityEmployeesOptions } from './optionsCommon';
@@ -31,7 +31,8 @@ export default function RegisterCompanyForm() {
     phoneNumber: prevValuesCompany?.phoneNumber || '',
     website: prevValuesCompany?.website || '',
     quantityEmployees: prevValuesCompany?.quantityEmployees || '',
-    economicActivity: prevValuesCompany?.economicActivity || ''
+    economicActivity: prevValuesCompany?.economicActivity || '',
+    uniquePDV: prevValuesCompany?.uniquePDV || false
   };
 
   const methods = useForm({
@@ -42,14 +43,19 @@ export default function RegisterCompanyForm() {
 
   const {
     handleSubmit,
+    watch,
     formState: { isSubmitting }
   } = methods;
+
+  // Watch uniquePDV value for UI changes
+  const uniquePDV = watch('uniquePDV');
   const [errorMsg, setErrorMsg] = useState('');
   console.log(prevValuesCompany);
 
   const onSubmit = handleSubmit(async (data: RegisterCompany) => {
     try {
-      console.log(`Aqui registra la empresa ${prevValuesCompany}`);
+      console.log(`Registrando empresa:`, data);
+
       if (prevValuesCompany?.id) {
         await RequestService.updateCompany({ databody: data, id: prevValuesCompany.id });
         enqueueSnackbar('Actualización de la empresa completado', {
@@ -60,20 +66,40 @@ export default function RegisterCompanyForm() {
             </IconButton>
           )
         });
-        // agregar el id
-        console.log('Previous values company:', prevValuesCompany);
-        console.log('Data submitted:', data);
-        dispatch(setPrevValuesCompany({ ...data, id: prevValuesCompany.id }));
+        // Mantener el ID y agregar los nuevos datos
+        dispatch(
+          setPrevValuesCompany({
+            ...data,
+            id: prevValuesCompany.id,
+            address: data.address || '',
+            website: data.website || '',
+            quantityEmployees: data.quantityEmployees || '',
+            economicActivity: data.economicActivity || ''
+          })
+        );
       } else {
         await createCompany(data);
-        enqueueSnackbar('Registro de la empresa completado', {
-          variant: 'success',
-          action: (key) => (
-            <IconButton onClick={() => closeSnackbar(key)}>
-              <Icon icon="eva:close-fill" />
-            </IconButton>
-          )
-        });
+
+        enqueueSnackbar(
+          data.uniquePDV
+            ? 'Empresa creada exitosamente. PDV principal generado automáticamente.'
+            : 'Empresa creada exitosamente.',
+          {
+            variant: 'success',
+            action: (key) => (
+              <IconButton onClick={() => closeSnackbar(key)}>
+                <Icon icon="eva:close-fill" />
+              </IconButton>
+            )
+          }
+        );
+
+        // Si uniquePDV es true, saltar al paso 2 (plan), si no, ir al paso 1 (PDV)
+        if (data.uniquePDV) {
+          dispatch(setStep(2)); // Saltar a selección de plan
+        } else {
+          dispatch(setStep(1)); // Ir a configuración de PDV
+        }
       }
     } catch (error: any) {
       console.error(error);
@@ -108,14 +134,14 @@ export default function RegisterCompanyForm() {
           <RHFTextField fullWidth label="Sitio web" name="website" />
         </Stack>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFSelect fullWidth label="Cantidad de empleados" name="quantityEmployees">
+          <RHFSelect fullWidth label="Cantidad de empleados" name="quantity_employees">
             {quantityEmployeesOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.value}
               </MenuItem>
             ))}
           </RHFSelect>
-          <RHFSelect fullWidth label="Actividad económica" name="economicActivity">
+          <RHFSelect fullWidth label="Actividad económica" name="economic_activity">
             {economicActivityOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.value}
@@ -123,6 +149,28 @@ export default function RegisterCompanyForm() {
             ))}
           </RHFSelect>
         </Stack>
+
+        {/* Unique PDV Option */}
+        <Box sx={{ mt: 2 }}>
+          <Divider sx={{ mb: 2 }} />
+
+          <FormControlLabel
+            control={<Switch {...methods.register('uniquePDV')} checked={uniquePDV} color="primary" />}
+            label={
+              <Box>
+                <Typography variant="body1" fontWeight="medium">
+                  Punto de venta únicoooo
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {uniquePDV
+                    ? 'Tu empresa tendrá un solo punto de venta que se creará automáticamente'
+                    : 'Podrás configurar múltiples puntos de venta después'}
+                </Typography>
+              </Box>
+            }
+            sx={{ alignItems: 'flex-start', ml: 0 }}
+          />
+        </Box>
       </Stack>
       <LoadingButton
         color="primary"
@@ -133,7 +181,7 @@ export default function RegisterCompanyForm() {
         variant="contained"
         loading={isSubmitting}
       >
-        Siguiente paso
+        {uniquePDV ? 'Crear empresa y continuar' : 'Siguiente paso'}
       </LoadingButton>
     </FormProvider>
   );

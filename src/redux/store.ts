@@ -6,7 +6,7 @@ import categoriesReducer from './inventory/categoriesSlice';
 import brandsReducer from './inventory/brandsSlice';
 import userReducer from './inventory/user';
 import contactsReducer from './inventory/contactsSlice';
-import stepByStepReducer from './inventory/stepByStepSlice';
+import stepByStepReducer from './slices/stepByStepSlice';
 import posReducer from './pos/posSlice';
 // RTK Query & Auth
 import { authApi } from './services/authApi';
@@ -21,6 +21,7 @@ import { billsApi } from './services/billsApi';
 import { pdvsApi } from './services/pdvsApi';
 import { dashboardApi } from './services/dashboardApi';
 import { userProfileApi } from './services/userProfileApi';
+import { locationsApi } from './services/locationsApi';
 import authReducer from './slices/authSlice';
 
 export const store = configureStore({
@@ -39,6 +40,7 @@ export const store = configureStore({
     [pdvsApi.reducerPath]: pdvsApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
     [userProfileApi.reducerPath]: userProfileApi.reducer,
+    [locationsApi.reducerPath]: locationsApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -63,7 +65,8 @@ export const store = configureStore({
       billsApi.middleware,
       pdvsApi.middleware,
       dashboardApi.middleware,
-      userProfileApi.middleware
+      userProfileApi.middleware,
+      locationsApi.middleware
     )
 });
 

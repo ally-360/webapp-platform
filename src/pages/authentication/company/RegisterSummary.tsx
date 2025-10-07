@@ -4,8 +4,7 @@ import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import { paths } from 'src/routes/paths';
 import { useAuthContext } from 'src/auth/hooks';
-import { useAppDispatch } from 'src/hooks/store';
-import { setStep } from 'src/redux/inventory/stepByStepSlice';
+import { useAppSelector } from 'src/hooks/store';
 
 /**
  * Renderiza un bloque de información con título y contenido.
@@ -28,7 +27,24 @@ function InfoBlock({ title, value }: { title: string; value?: string | number })
  */
 export default function RegisterSummary() {
   const { updateProfile, company, pdvCompany, user } = useAuthContext();
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // Obtener datos del store
+  const companyData = useAppSelector((state) => state.stepByStep.companyData);
+  const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
+  const pdvData = useAppSelector((state) => state.stepByStep.pdvData);
+  const planData = useAppSelector((state) => state.stepByStep.planData);
+
+  const handleFinish = useCallback(async () => {
+    try {
+      enqueueSnackbar('¡Registro completado exitosamente!', { variant: 'success' });
+      navigate(paths.dashboard.root);
+    } catch (error) {
+      console.error('Error al finalizar el registro:', error);
+      enqueueSnackbar('Error al finalizar el registro', { variant: 'error' });
+    }
+  }, [navigate, enqueueSnackbar]);
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 

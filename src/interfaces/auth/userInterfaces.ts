@@ -43,6 +43,7 @@ export interface GetCompanyResponse {
   website: string;
   quantityEmployees: string;
   economicActivity: string;
+  uniquePDV?: boolean;
 }
 
 export interface UpdateProfile {

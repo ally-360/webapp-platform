@@ -29,7 +29,7 @@ export default function JwtRegisterView() {
 
   const router = useRouter();
 
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, _setErrorMsg] = useState('');
 
   const password = useBoolean(false); // Pass a default value of false to useBoolean
 
@@ -41,7 +41,6 @@ export default function JwtRegisterView() {
       dni: '',
       name: '',
       lastname: '',
-      // agregar un avatar generico de internet
       photo: 'https://i.pravatar.cc/300'
     }
   };
@@ -60,18 +59,19 @@ export default function JwtRegisterView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await register(data);
-      // Después del registro exitoso, redirigir al step-by-step para crear empresa y PDV
-      router.push(paths.stepByStep.root);
-      enqueueSnackbar('Registro del usuario completado. Ahora crea tu empresa', {
+      // Después del registro exitoso, mostrar mensaje y redirigir a página de información
+      enqueueSnackbar('Registro completado. Revisa tu email para verificar tu cuenta.', {
         variant: 'success'
       });
+
+      // Redirigir a una página informativa sobre verificación de email
+      router.push(paths.auth.jwt.login);
     } catch (error: any) {
       console.error(error);
-      enqueueSnackbar(`Error al registrar el usuario ${error.message}`, {
+      enqueueSnackbar(`${error.data.detail[0].msg}`, {
         variant: 'error'
       });
       // reset();
-      setErrorMsg(typeof error === 'string' ? error : error.message);
     }
   });
 

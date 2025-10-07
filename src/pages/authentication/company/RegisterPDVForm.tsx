@@ -3,23 +3,22 @@ import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { Alert, Stack, Typography } from '@mui/material';
 import Button from '@mui/material/Button';
-import { useAuthContext } from 'src/auth/hooks';
 import { LoadingButton } from '@mui/lab';
 import { RHFAutocomplete, RHFTextField } from 'src/components/hook-form';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormProvider from 'src/components/hook-form/form-provider';
-import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import { Box, useTheme } from '@mui/system';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { GetPDVResponse } from 'src/interfaces/auth/userInterfaces';
-import { setStep, setPrevValuesPDV } from 'src/redux/inventory/stepByStepSlice';
 import { RegisterPDVSchema } from 'src/interfaces/auth/yupSchemas';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import type { InferType } from 'yup';
-import { useNavigate } from 'react-router';
+import { setStep, setPDVResponse } from 'src/redux/slices/stepByStepSlice';
+import { useCreatePDVMutation, useUpdatePDVMutation, useGetAllPDVsQuery } from 'src/redux/services/authApi';
+import { useGetDepartmentsQuery, useGetCitiesQuery } from 'src/redux/services/locationsApi';
+import type { Department, City } from 'src/redux/services/locationsApi';
 
 // ----------------------------------------------------------------------
 
@@ -28,45 +27,40 @@ interface Municipio {
   name: string;
 }
 
-interface Departamento {
-  id: string;
-  name: string;
-  towns: Array<Municipio>;
-}
-
 type RegisterPDVFormValues = InferType<typeof RegisterPDVSchema>;
 
 export default function RegisterPDVForm() {
   const { enqueueSnackbar } = useSnackbar();
-  const { createPDV, updatePDV } = useAuthContext();
-  const navigator = useNavigate();
-  const { prevValuesCompany } = useAppSelector((state) => state.stepByStep);
-
-  if (!prevValuesCompany) {
-    throw new Error('prevValuesCompany is required');
-    navigator('/404');
-  }
-
   const theme = useTheme();
+  const dispatch = useAppDispatch();
 
-  const preValuesPDV: GetPDVResponse | undefined = useAppSelector((state) => state.stepByStep.preValuesPDV);
-  const { locations } = useAppSelector((state) => state.locations);
+  // Redux state
+  const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
+  const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
+
+  // Location queries
+  const { data: departments } = useGetDepartmentsQuery();
+
+  // RTK Query hooks
+  const { data: allPDVs } = useGetAllPDVsQuery();
+  const [createPDV] = useCreatePDVMutation();
+  const [updatePDV] = useUpdatePDVMutation();
+
+  // Determine if editing (has PDV from API) or creating new
+  const firstPDV = allPDVs?.pdvs?.[0];
+  const isEditing = !!firstPDV;
 
   const defaultValues: RegisterPDVFormValues = {
-    name: preValuesPDV?.name ?? '',
-    description: preValuesPDV?.description ?? '',
+    name: firstPDV?.name || pdvResponse?.name || '',
     departamento:
-      typeof preValuesPDV?.departamento === 'object' &&
-      preValuesPDV?.departamento !== null &&
-      Object.keys(preValuesPDV.departamento).length > 0
-        ? preValuesPDV.departamento
+      firstPDV?.department_id || pdvResponse?.department_id
+        ? departments?.departments?.find((dept) => dept.id === (firstPDV?.department_id || pdvResponse?.department_id))
         : ({} as any),
-    municipio:
-      preValuesPDV?.location && Object.keys(preValuesPDV.location).length > 0 ? preValuesPDV.location : ({} as any),
-    address: preValuesPDV?.address ?? '',
-    phoneNumber: preValuesPDV?.phoneNumber ?? '',
+    municipio: {} as any, // Will be set after department is selected
+    address: firstPDV?.address || pdvResponse?.address || '',
+    phone_number: firstPDV?.phone_number || pdvResponse?.phone_number || '',
     main: true,
-    companyId: prevValuesCompany?.id
+    company_id: companyResponse?.id || ''
   };
 
   const methods = useForm<RegisterPDVFormValues>({
@@ -78,241 +72,284 @@ export default function RegisterPDVForm() {
     handleSubmit,
     setValue,
     watch,
+    setError: setFormError,
     formState: { isSubmitting }
   } = methods;
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [municipios, setMunicipios] = useState<Array<Municipio>>([]);
+  // Watch for department changes
+  const selectedDepartment = watch('departamento');
 
-  const dispatch = useAppDispatch();
+  // Get cities for selected department
+  const departmentId = selectedDepartment && 'id' in selectedDepartment ? Number(selectedDepartment.id) : null;
+  const { data: cities } = useGetCitiesQuery(departmentId ? { department_id: departmentId } : { limit: 0 }, {
+    skip: !departmentId
+  });
+
+  // Filter cities based on selected department (redundant with query but kept for safety)
+  const filteredCities = cities?.cities || [];
+
+  // Load PDV data into Redux when API data arrives
   useEffect(() => {
-    dispatch(getAllMunicipios());
-  }, [dispatch]);
+    if (firstPDV && !pdvResponse) {
+      console.log('🔄 Loading PDV from API:', firstPDV);
+
+      // Set PDV response to indicate it exists
+      dispatch(
+        setPDVResponse({
+          id: firstPDV.id,
+          name: firstPDV.name,
+          address: firstPDV.address,
+          phone_number: firstPDV.phone_number || '',
+          location: {} as any, // Will be populated by user selection
+          departamento: {} as any, // Will be populated by user selection
+          main: true,
+          company_id: companyResponse?.id || '',
+          created_at: firstPDV.created_at,
+          updated_at: firstPDV.updated_at
+        })
+      );
+    }
+  }, [firstPDV, pdvResponse, dispatch, companyResponse]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
+      setErrorMsg('');
       const municipio = data.municipio as any;
+      const departamento = data.departamento as any;
+
       if (!municipio || Object.keys(municipio).length === 0 || !municipio.id) {
         setErrorMsg('Por favor selecciona un municipio válido');
         return;
       }
 
-      const { departamento: _departamento, municipio: _, ...pdvData } = data;
-
-      const databody = {
-        ...pdvData,
-        location: municipio
-      };
-
-      if (preValuesPDV?.id) {
-        await updatePDV(preValuesPDV.id, databody);
-      } else {
-        await createPDV(databody);
+      if (!departamento || Object.keys(departamento).length === 0 || !departamento.id) {
+        setErrorMsg('Por favor selecciona un departamento válido');
+        return;
       }
 
-      enqueueSnackbar('Registro del punto de venta completado', {
-        variant: 'success'
-      });
+      const pdvPayload = {
+        name: data.name,
+        address: data.address,
+        phone_number: data.phone_number || null,
+        department_id: departamento.id,
+        city_id: municipio.id,
+        is_active: true
+      };
 
-      dispatch(setPrevValuesPDV(databody as unknown as GetPDVResponse));
-      dispatch(setStep(2));
-    } catch (error) {
-      console.error(error);
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+      let result;
+      if (isEditing && firstPDV?.id) {
+        // Actualizar PDV existente
+        result = await updatePDV({ id: firstPDV.id, data: pdvPayload }).unwrap();
+        enqueueSnackbar('Punto de venta actualizado exitosamente', { variant: 'success' });
+      } else {
+        // Crear nuevo PDV
+        result = await createPDV(pdvPayload).unwrap();
+        enqueueSnackbar('Punto de venta creado exitosamente', { variant: 'success' });
+      }
+
+      dispatch(
+        setPDVResponse({
+          id: result.id,
+          name: result.name,
+          address: result.address,
+          phone_number: result.phone_number || '',
+          department_id: departamento.id,
+          city_id: municipio.id,
+          main: true,
+          company_id: companyResponse?.id || '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+      );
+    } catch (error: any) {
+      console.error('❌ PDV error:', error);
+
+      let errorMessage = isEditing ? 'Error actualizando el punto de venta' : 'Error creando el punto de venta';
+
+      if (error?.data?.detail && Array.isArray(error.data.detail)) {
+        error.data.detail.forEach((err: any) => {
+          if (err.loc && err.loc[1]) {
+            const fieldName = err.loc[1];
+            const fieldError = err.msg || 'Error de validación';
+            setFormError(fieldName, { message: fieldError });
+          }
+        });
+
+        const validationErrors = error.data.detail.map((err: any) => err.msg || 'Error de validación').join(', ');
+        errorMessage = `Errores de validación: ${validationErrors}`;
+      } else if (error?.data?.detail && typeof error.data.detail === 'string') {
+        errorMessage = error.data.detail;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      setErrorMsg(errorMessage);
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   });
 
-  // TODO: validar que el departamento tenga municipios
+  const departamento = watch('departamento') as Department | any;
 
-  // useEffect(() => {
-  //   if (company !== undefined && company !== null) {
-  //     setFieldValue('company', { id: company[0] ? company[0].id : company.id });
-  //     console.log(company);
-  //   }
-  // }, [company, setFieldValue]);
-  // useEffect(() => {
-  //   // setMunicipios(department?.towns);
-  //   const towns = department?.towns ? department.towns : [];
-  //   setMunicipios(towns);
-  //   // setMunicipios(municipiosOfDepartment);
-  // }, [values.departamento, department]);
-
-  const departmentValue: Partial<Departamento> = watch('departamento');
-  const [searchQueryMunicipio, setSearchQueryMunicipio] = React.useState('');
-  const [searchQueryDepartamento, setSearchQueryDepartamento] = React.useState('');
-  const isOptionEqualToValue = (option: any, value: any) => {
-    if (!value || Object.keys(value).length === 0) {
-      return false;
-    }
-
-    if (!option) {
-      return false;
-    }
-
-    if (option.id && value.id) {
-      return option.id === value.id;
-    }
-
-    return false;
-  };
-
+  // Reset city when department changes and set initial city if editing
   useEffect(() => {
-    if (departmentValue && Object.entries(departmentValue).length !== 0) {
-      setMunicipios(departmentValue.towns ?? []);
-      const selectedMunicipio = watch('municipio') as Partial<Municipio>;
-      if (selectedMunicipio && Object.keys(selectedMunicipio).length > 0) {
-        const municipioExist = (departmentValue.towns ?? []).filter(
-          (municipio) => municipio.name === selectedMunicipio.name
-        );
-        if (municipioExist.length === 0) {
-          setValue('municipio', {} as any);
-          setSearchQueryMunicipio('');
+    if (departamento && departamento.id) {
+      // If editing and have city_id from API data, set the city
+      const cityId = firstPDV?.city_id || pdvResponse?.city_id;
+      if (cityId && cities?.cities) {
+        const foundCity = cities.cities.find((city) => city.id === cityId);
+        if (foundCity) {
+          setValue('municipio', foundCity);
+          return;
         }
       }
-    } else {
-      setMunicipios([]);
+
+      // Otherwise reset to empty
       setValue('municipio', {} as any);
-      setSearchQueryMunicipio('');
     }
-  }, [departmentValue, locations, setValue, watch]);
+  }, [departamento, setValue, cities, firstPDV, pdvResponse]);
 
-  const handleInputDepartamentoChange = (event, value) => {
-    setSearchQueryDepartamento(value || '');
-    console.log(value);
-    console.log(departmentValue);
+  const hasEmptyFields = () => {
+    const values = methods.getValues();
+    console.log(values);
+    return (
+      !values.name ||
+      !values.address ||
+      !values.departamento ||
+      Object.keys(values.departamento).length === 0 ||
+      !values.municipio ||
+      Object.keys(values.municipio).length === 0
+    );
   };
 
-  const handleInputMunicipioChange = (event, value) => {
-    setSearchQueryMunicipio(value || '');
-    console.log(value);
-    console.log(departmentValue);
+  const handleBack = () => {
+    dispatch(setStep(0));
   };
+
+  const renderHead = (
+    <Stack spacing={2} sx={{ mb: 5 }}>
+      <Typography variant="h4">{isEditing ? 'Editar Punto de Venta' : 'Registrar Punto de Venta'}</Typography>
+      <Stack direction="row" spacing={0.5}>
+        <Typography variant="body2">Datos del punto de venta principal</Typography>
+      </Stack>
+    </Stack>
+  );
+
+  const renderForm = (
+    <Stack spacing={2.5}>
+      {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
+      <RHFTextField name="name" label="Nombre del punto de venta" />
+
+      <RHFAutocomplete
+        name="departamento"
+        label="Departamento"
+        options={departments?.departments || []}
+        getOptionLabel={(option: Department | any) => {
+          if (typeof option === 'string') return option;
+          return option.name || '';
+        }}
+        isOptionEqualToValue={(option: Department | any, value: Department | any) => {
+          if (!value || Object.keys(value).length === 0) return false;
+          return option.id === value.id;
+        }}
+        renderOption={(props, option: Department, { inputValue }) => {
+          const matches = match(option.name, inputValue);
+          const parts = parse(option.name, matches);
+
+          return (
+            <Box component="li" {...props}>
+              <div>
+                {parts.map((part, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      fontWeight: part.highlight ? 700 : 400,
+                      color: part.highlight ? theme.palette.primary.main : theme.palette.text.primary
+                    }}
+                  >
+                    {part.text}
+                  </span>
+                ))}
+              </div>
+            </Box>
+          );
+        }}
+        onChange={(event, newValue) => {
+          setValue('departamento', newValue || ({} as Department), { shouldValidate: true });
+          setValue('municipio', {} as City, { shouldValidate: false });
+        }}
+      />
+
+      <RHFAutocomplete
+        name="municipio"
+        label="Municipio"
+        options={filteredCities || []}
+        getOptionLabel={(option: City | any) => {
+          if (typeof option === 'string') return option;
+          return option.name || '';
+        }}
+        isOptionEqualToValue={(option: City | any, value: City | any) => {
+          if (!value || Object.keys(value).length === 0) return false;
+          return option.id === value.id;
+        }}
+        renderOption={(props, option: City, { inputValue }) => {
+          const matches = match(option.name, inputValue);
+          const parts = parse(option.name, matches);
+
+          return (
+            <Box component="li" {...props}>
+              <div>
+                {parts.map((part, index) => (
+                  <span
+                    key={index}
+                    style={{
+                      fontWeight: part.highlight ? 700 : 400,
+                      color: part.highlight ? theme.palette.primary.main : theme.palette.text.primary
+                    }}
+                  >
+                    {part.text}
+                  </span>
+                ))}
+              </div>
+            </Box>
+          );
+        }}
+        onChange={(event, newValue) => {
+          setValue('municipio', newValue || ({} as City), { shouldValidate: true });
+        }}
+        disabled={!departamento || Object.keys(departamento).length === 0}
+      />
+
+      <RHFTextField name="address" label="Dirección" />
+
+      <RHFPhoneNumber
+        type="string"
+        defaultCountry="co"
+        countryCodeEditable={false}
+        onlyCountries={['co']}
+        name="phone_number"
+        label="Teléfono"
+        helperText="Ingrese el número de teléfono del punto de venta"
+      />
+
+      <Stack direction="row" spacing={2}>
+        <Button fullWidth size="large" color="inherit" variant="outlined" onClick={handleBack}>
+          Volver
+        </Button>
+
+        <LoadingButton fullWidth color="primary" size="large" type="submit" variant="contained" loading={isSubmitting}>
+          {isEditing ? 'Actualizar' : 'Continuar'}
+        </LoadingButton>
+      </Stack>
+    </Stack>
+  );
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
-      <Stack sx={{ marginTop: 1 }} spacing={3}>
-        {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+      {renderHead}
 
-        <Typography sx={{ mb: 3 }} variant="subtitle1" textAlign="center">
-          Agrega tu punto de venta principal, despues podrás agregar más puntos de venta.
-        </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="Nombre Punto De Venta" name="name" />
-          <RHFTextField fullWidth label="Descripción" name="description" />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFAutocomplete
-            name="departamento"
-            placeholder="Ej: Valle del Cauca"
-            fullWidth
-            label="Departamento"
-            onInputChange={handleInputDepartamentoChange}
-            isOptionEqualToValue={isOptionEqualToValue}
-            getOptionLabel={(option) => (option && option.name ? option.name : '')}
-            options={locations}
-            value={watch('departamento') || null}
-            renderOption={(props, option) => {
-              const matches = match(option.name, searchQueryDepartamento);
-              const parts = parse(option.name, matches);
-
-              return (
-                <li {...props}>
-                  <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.primary">
-                      {parts.map((part, index) => (
-                        <span
-                          key={index}
-                          style={{
-                            fontWeight: part.highlight ? 700 : 400,
-                            color: part.highlight ? theme.palette.primary.main : 'inherit'
-                          }}
-                        >
-                          {part.text}
-                        </span>
-                      ))}
-                    </Typography>
-                  </Box>
-                </li>
-              );
-            }}
-            noOptionsText={
-              <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                No hay resultados para {searchQueryMunicipio}
-              </Typography>
-            }
-          />
-          <RHFAutocomplete
-            name="municipio"
-            fullWidth
-            placeholder="Ej: Cali"
-            label="Municipio"
-            onInputChange={handleInputMunicipioChange}
-            isOptionEqualToValue={isOptionEqualToValue}
-            getOptionLabel={(option) => (option && option.name ? option.name : '')}
-            options={municipios}
-            value={watch('municipio') || null}
-            renderOption={(props, option) => {
-              const matches = match(option.name, searchQueryMunicipio);
-              const parts = parse(option.name, matches);
-
-              return (
-                <li {...props}>
-                  <Box sx={{ typography: 'body2', display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.primary">
-                      {parts.map((part, index) => (
-                        <span
-                          key={index}
-                          style={{
-                            fontWeight: part.highlight ? 700 : 400,
-                            color: part.highlight ? theme.palette.primary.main : 'inherit'
-                          }}
-                        >
-                          {part.text}
-                        </span>
-                      ))}
-                    </Typography>
-                  </Box>
-                </li>
-              );
-            }}
-            noOptionsText={
-              <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                {departmentValue && Object.keys(departmentValue).length === 0
-                  ? 'Seleciona un departamento'
-                  : searchQueryMunicipio.length > 0
-                  ? `No hay resultados para ${searchQueryMunicipio}`
-                  : 'Seleciona un departamento primero'}
-              </Typography>
-            }
-          />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="Dirección" name="address" />
-          <RHFPhoneNumber
-            type="string"
-            defaultCountry="co"
-            countryCodeEditable={false}
-            onlyCountries={['co']}
-            label="Teléfono"
-            name="phoneNumber"
-          />
-        </Stack>
-        <Stack sx={{ marginTop: 8 }} direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Button color="primary" onClick={() => dispatch(setStep(0))} variant="outlined" component="label">
-            Anterior
-          </Button>
-          <LoadingButton
-            color="primary"
-            fullWidth
-            size="large"
-            type="submit"
-            variant="contained"
-            loading={isSubmitting}
-          >
-            Siguiente paso
-          </LoadingButton>
-        </Stack>
-      </Stack>
+      {renderForm}
     </FormProvider>
   );
 }

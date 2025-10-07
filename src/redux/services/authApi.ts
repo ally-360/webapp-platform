@@ -72,7 +72,7 @@ export interface CompanyCreate {
   phone_number: string;
   nit: string;
   economic_activity?: string | null;
-  quantity_employees?: number;
+  quantity_employees?: string | null;
   social_reason?: string | null;
   logo?: string | null;
 }
@@ -88,6 +88,7 @@ export interface CompanyOut {
   quantity_employees: number;
   social_reason?: string | null;
   logo?: string | null;
+  uniquePDV?: boolean;
 }
 
 export interface PDVCreate {
@@ -102,12 +103,61 @@ export interface PDVOutput {
   name: string;
   address: string;
   phone_number?: string | null;
+  department_id?: string | null;
+  city_id?: string | null;
   is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  department?: any | null;
+  city?: any | null;
+}
+
+export interface PDVsResponse {
+  pdvs: PDVOutput[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface SubscriptionOut {
+  id: string;
+  plan_name: string;
+  plan_code: string;
+  plan_type: string;
+  status: string;
+  billing_cycle: string;
+  is_trial: boolean;
+  days_remaining: number;
+  next_billing_date?: string | null;
+  max_users: number;
+  max_pdvs: number;
+  max_products: number;
+  has_advanced_reports: boolean;
+  has_api_access: boolean;
 }
 
 export interface RegisterResponse {
   message?: string;
   [key: string]: any;
+}
+
+// Nueva interfaz para verificación de email con auto-login
+export interface EmailVerificationWithAutoLogin {
+  token: string;
+  auto_login?: boolean;
+}
+
+export interface EmailVerificationResponse {
+  message: string;
+  user_id: string;
+  is_active: boolean;
+  access_token?: string;
+  refresh_token?: string;
+  token_type?: string;
+  expires_in?: number;
+  tenant_id?: string;
+  user?: UserOut;
+  companies?: UserCompanyOut[];
 }
 
 // ========================================
@@ -117,7 +167,7 @@ export interface RegisterResponse {
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_HOST_API || 'http://localhost:8000',
+    baseUrl: (import.meta as any).env?.VITE_HOST_API || 'http://localhost:8000',
     prepareHeaders: (headers, { getState }) => {
       // Obtener token del estado global
       const token = (getState() as RootState).auth?.token || localStorage.getItem('accessToken');
@@ -129,7 +179,7 @@ export const authApi = createApi({
       return headers;
     }
   }),
-  tagTypes: ['Auth', 'User', 'Company', 'PDV'],
+  tagTypes: ['Auth', 'User', 'Company', 'PDV', 'Subscription'],
   endpoints: (builder) => ({
     // ========================================
     // 🔐 AUTHENTICATION ENDPOINTS
@@ -176,6 +226,29 @@ export const authApi = createApi({
         body: { token }
       }),
       invalidatesTags: ['Auth']
+    }),
+
+    /**
+     * Verify Email with Auto-Login - POST /auth/verify-email (with auto_login)
+     */
+    verifyEmailWithAutoLogin: builder.mutation<EmailVerificationResponse, EmailVerificationWithAutoLogin>({
+      query: ({ token, auto_login = false }) => ({
+        url: '/auth/verify-email',
+        method: 'POST',
+        body: { token, auto_login }
+      }),
+      invalidatesTags: ['Auth', 'User']
+    }),
+
+    /**
+     * Verify Email via GET - GET /auth/verify-email?token=...&auto_login=true
+     */
+    verifyEmailViaGet: builder.query<EmailVerificationResponse, { token: string; auto_login?: boolean }>({
+      query: ({ token, auto_login = false }) => ({
+        url: `/auth/verify-email?token=${encodeURIComponent(token)}&auto_login=${auto_login}`,
+        method: 'GET'
+      }),
+      providesTags: ['Auth', 'User']
     }),
 
     /**
@@ -233,6 +306,18 @@ export const authApi = createApi({
       providesTags: ['Company']
     }),
 
+    /**
+     * Update company - PATCH /company/{id}
+     */
+    updateCompany: builder.mutation<CompanyOut, { id: string; data: Partial<CompanyCreate> }>({
+      query: ({ id, data }) => ({
+        url: `/company/${id}`,
+        method: 'PATCH',
+        body: data
+      }),
+      invalidatesTags: ['Company']
+    }),
+
     // ========================================
     // 🏪 PDV ENDPOINTS
     // ========================================
@@ -255,6 +340,38 @@ export const authApi = createApi({
     getCurrentPDV: builder.query<PDVOutput, void>({
       query: () => '/pdvs/current',
       providesTags: ['PDV']
+    }),
+
+    /**
+     * Get all PDVs - GET /pdvs/
+     */
+    getAllPDVs: builder.query<PDVsResponse, void>({
+      query: () => '/pdvs/',
+      providesTags: ['PDV']
+    }),
+
+    /**
+     * Update PDV - PATCH /pdvs/{id}
+     */
+    updatePDV: builder.mutation<PDVOutput, { id: string; data: Partial<PDVCreate> }>({
+      query: ({ id, data }) => ({
+        url: `/pdvs/${id}`,
+        method: 'PATCH',
+        body: data
+      }),
+      invalidatesTags: ['PDV']
+    }),
+
+    // ========================================
+    // 💳 SUBSCRIPTION ENDPOINTS
+    // ========================================
+
+    /**
+     * Get current subscription - GET /subscriptions/current
+     */
+    getCurrentSubscription: builder.query<SubscriptionOut, void>({
+      query: () => '/subscriptions/current',
+      providesTags: ['Subscription']
     })
   })
 });
@@ -268,17 +385,25 @@ export const {
   useLoginMutation,
   useRegisterMutation,
   useVerifyEmailMutation,
+  useVerifyEmailWithAutoLoginMutation,
   useLogoutMutation,
   useSelectCompanyMutation,
 
   // Auth queries
   useGetCurrentUserQuery,
+  useVerifyEmailViaGetQuery,
 
   // Company mutations & queries
   useCreateCompanyMutation,
+  useUpdateCompanyMutation,
   useGetMyCompaniesQuery,
 
   // PDV mutations & queries
   useCreatePDVMutation,
-  useGetCurrentPDVQuery
+  useUpdatePDVMutation,
+  useGetCurrentPDVQuery,
+  useGetAllPDVsQuery,
+
+  // Subscription queries
+  useGetCurrentSubscriptionQuery
 } = authApi;

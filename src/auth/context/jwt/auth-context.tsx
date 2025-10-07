@@ -25,7 +25,7 @@ export const defaultAuthContext: AuthContextType = {
   selectCompany: async () => {
     throw new Error('selectCompany method not implemented');
   },
-  updateCompany: async () => {
+  updateCompany: async (_id: string, data: any) => {
     throw new Error('updateCompany method not implemented');
   },
   updatePDV: async () => {

@@ -3,12 +3,16 @@ import { useTheme } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Skeleton from '@mui/material/Skeleton';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
 import { useSettingsContext } from 'src/components/settings';
-// _mock
 // components
 import { AICapabilitiesBannerEnhanced } from 'src/components/ai-chatbot';
+import DateRangeSelector, { DateRangeValue, getDateRangeFromSelection } from 'src/components/date-range-selector';
 // assets
 // api
 import { useGetSalesInvoicesQuery } from 'src/redux/services/salesInvoicesApi';
@@ -21,7 +25,7 @@ import {
   useTestConnectionQuery
 } from 'src/redux/services/dashboardApi';
 //
-import React from 'react';
+import React, { useState } from 'react';
 import { useWelcomeStepStatus } from '../hooks/use-welcome-step-status';
 import AppWelcome from '../app-welcome';
 import AppNewInvoice from '../app-new-invoice';
@@ -37,16 +41,39 @@ export default function OverviewAppView() {
   const theme = useTheme();
   const settings = useSettingsContext();
 
-  // Hook para verificar el estado del tutorial
-  const { isCompleted: tutorialCompleted, completionPercentage } = useWelcomeStepStatus();
+  // Estado para el selector de período de tiempo
+  const [dateRange, setDateRange] = useState<DateRangeValue>('today');
+  const dateParams = getDateRangeFromSelection(dateRange);
 
-  // Obtener fecha de hoy para filtros
-  const today = new Date().toISOString().split('T')[0];
+  // Hook para verificar el estado del tutorial con control de carga inicial
+  const { isCompleted: tutorialCompleted, isInitialLoad, completionPercentage } = useWelcomeStepStatus();
+
+  // Helper para obtener el label del período
+  const getPeriodLabel = () => {
+    switch (dateRange) {
+      case 'today':
+        return 'Hoy';
+      case 'week':
+        return 'Esta Semana';
+      case 'month':
+        return 'Este Mes';
+      case 'year':
+        return 'Este Año';
+      default:
+        return 'Hoy';
+    }
+  };
+
+  // Obtener fecha de hoy para filtros - ahora usando el selector de fecha
+  const today = dateParams.startDate;
 
   // Debug de configuración
   console.log('🔧 DASHBOARD CONFIG DEBUG:', {
     today,
+    dateRange,
+    dateParams,
     tutorialCompleted,
+    isInitialLoad,
     completionPercentage,
     companyId: localStorage.getItem('companyId'),
     token: localStorage.getItem('accessToken') ? 'Present' : 'Missing',
@@ -82,7 +109,7 @@ export default function OverviewAppView() {
     isLoading: _topProductsLoading,
     error: _topProductsError
   } = useGetTopProductsQuery({
-    period: 'week',
+    period: dateParams.period as 'day' | 'week' | 'month',
     limit: 5
   });
 
@@ -138,34 +165,87 @@ export default function OverviewAppView() {
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'xl'} sx={{ py: { xs: 2, sm: 3 } }}>
-      <Grid container spacing={{ xs: 2, sm: 3 }}>
-        {/* Welcome Cards - Stack on mobile, side by side on larger screens */}
-        <Grid xs={12} sm={12} md={tutorialCompleted ? 12 : 5} lg={tutorialCompleted ? 12 : 4}>
-          <AppWelcome
-            title={`Bienvenido 👋 \n ${user?.profile?.name}`}
-            description={
-              tutorialCompleted
-                ? '¡Excelente! Has completado todos los pasos del tutorial. Tu cuenta está lista para usar todas las funcionalidades de la plataforma.'
-                : ''
-            }
-            img={null}
-            action={
-              <Button variant="contained" color="primary" size="small">
-                {tutorialCompleted ? 'Explorar Dashboard' : 'Explorar'}
-              </Button>
-            }
-          />
-        </Grid>
+      {/* Header con selector de período */}
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: { xs: 2, sm: 3 } }}>
+        <Typography variant="h5">Dashboard</Typography>
+        <DateRangeSelector value={dateRange} onChange={setDateRange} size="small" />
+      </Stack>
 
-        {/* AppWelcomeStep se auto-oculta cuando el tutorial está completado */}
-        <Grid xs={12} sm={12} md={7} lg={8}>
-          <AppWelcomeStep />
-        </Grid>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
+        {/* Welcome Cards - Evitar parpadeo con lógica condicional */}
+        {isInitialLoad && (
+          // Mientras carga, mantener el layout fijo
+          <>
+            <Grid xs={12} sm={12} md={5} lg={4}>
+              <AppWelcome
+                title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+                description=""
+                img={null}
+                action={
+                  <Button variant="contained" color="primary" size="small">
+                    Explorar
+                  </Button>
+                }
+              />
+            </Grid>
+            <Grid xs={12} sm={12} md={7} lg={8}>
+              <Box
+                sx={{
+                  p: { xs: 1.5, sm: 2.5, md: 3 },
+                  bgcolor: 'background.paper',
+                  borderRadius: { xs: 1.5, sm: 2 },
+                  boxShadow: 2,
+                  minHeight: { xs: 280, sm: 320, md: 400 },
+                  height: 'fit-content'
+                }}
+              >
+                <Skeleton variant="rectangular" width="100%" height="100%" />
+              </Box>
+            </Grid>
+          </>
+        )}
+
+        {!isInitialLoad && tutorialCompleted && (
+          // Tutorial completado: AppWelcome toma el ancho completo
+          <Grid xs={12}>
+            <AppWelcome
+              title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+              description="¡Excelente! Has completado todos los pasos del tutorial. Tu cuenta está lista para usar todas las funcionalidades de la plataforma."
+              img={null}
+              action={
+                <Button variant="contained" color="primary" size="small">
+                  Explorar Dashboard
+                </Button>
+              }
+            />
+          </Grid>
+        )}
+
+        {!isInitialLoad && !tutorialCompleted && (
+          // Tutorial no completado: layout normal
+          <>
+            <Grid xs={12} sm={12} md={5} lg={4}>
+              <AppWelcome
+                title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+                description=""
+                img={null}
+                action={
+                  <Button variant="contained" color="primary" size="small">
+                    Explorar
+                  </Button>
+                }
+              />
+            </Grid>
+            <Grid xs={12} sm={12} md={7} lg={8}>
+              <AppWelcomeStep />
+            </Grid>
+          </>
+        )}
 
         {/* Widget Summary Cards - Datos reales del backend con fallbacks */}
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
-            title="Ventas de Hoy"
+            title={`Ventas de ${getPeriodLabel()}`}
             percent={salesComparison?.percentage_change || 0}
             total={dailySales?.total_amount ? parseFloat(dailySales.total_amount) : 0}
             sx={{ height: { xs: 'auto', sm: '100%' } }}
@@ -177,7 +257,7 @@ export default function OverviewAppView() {
 
         <Grid xs={12} sm={6} md={4}>
           <AppWidgetSummary
-            title="Facturas Emitidas Hoy"
+            title={`Facturas Emitidas ${getPeriodLabel()}`}
             percent={8.2}
             sx={{ height: { xs: 'auto', sm: '100%' } }}
             total={dailySales?.total_invoices || 0}
@@ -232,7 +312,7 @@ export default function OverviewAppView() {
         <Grid xs={12} sm={12} md={6} lg={5}>
           <AppCurrentDownload
             title="Productos Más Vendidos"
-            subheader="Top 5 de la semana"
+            subheader={`Top 5 de ${getPeriodLabel().toLowerCase()}`}
             sx={{ height: { xs: 'auto', md: '100%' } }}
             chart={{
               series:

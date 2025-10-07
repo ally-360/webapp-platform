@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import {
   Box,
   Stepper,
@@ -16,14 +16,32 @@ import {
 import { useNavigate } from 'react-router';
 import { useSnackbar } from 'notistack';
 import { useAuthContext } from 'src/auth/hooks';
-import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyForm';
+import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyFormRefactored';
 import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
-import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
+import { PlanSelectionForm } from 'src/pages/authentication/company/PlanSelectionForm';
+import RegisterSummary from 'src/pages/authentication/company/RegisterSummaryRefactored';
+import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { paths } from 'src/routes/paths';
+import { StepType } from 'src/interfaces/stepByStep';
+import { setStep, setCompanyResponse, setPDVResponse, setPlanData } from 'src/redux/slices/stepByStepSlice';
+import { useGetMyCompaniesQuery, useGetAllPDVsQuery, useGetCurrentSubscriptionQuery } from 'src/redux/services/authApi';
 
-const steps = ['Crear empresa', 'Puntos de venta', 'Resumen'];
+// Configuración de pasos basada en uniquePDV
+const getStepsConfig = (isUniquePDV: boolean | undefined) => {
+  if (isUniquePDV) {
+    return [
+      { key: StepType.COMPANY, label: 'Crear empresa' },
+      { key: StepType.PLAN, label: 'Seleccionar plan' },
+      { key: StepType.SUMMARY, label: 'Resumen' }
+    ];
+  }
+  return [
+    { key: StepType.COMPANY, label: 'Crear empresa' },
+    { key: StepType.PDV, label: 'Puntos de venta' },
+    { key: StepType.PLAN, label: 'Seleccionar plan' },
+    { key: StepType.SUMMARY, label: 'Resumen' }
+  ];
+};
 
 // Estilo contenedor principal
 const RootStyle = styled(Container)(({ theme }) => ({
@@ -49,34 +67,140 @@ const ContentStyle = styled('div')(({ theme }) => ({
  * Componente de registro paso a paso para crear una empresa, agregar PDV y ver resumen.
  */
 export default function StepByStep() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { logout, company, pdvCompany } = useAuthContext();
+  const { logout } = useAuthContext();
+  const dispatch = useAppDispatch();
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-  const { activeStep } = useAppSelector((state) => state.stepByStep);
+  const activeStep = useAppSelector((state) => state.stepByStep.activeStep);
+  const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
+  const isUniquePDV = companyResponse?.uniquePDV;
 
-  const [skippedSteps, setSkippedSteps] = useState<Set<number>>(new Set());
+  const stepsConfig = useMemo(() => getStepsConfig(isUniquePDV), [isUniquePDV]);
 
-  const isStepOptional = (step: number) => step === 3;
-  const isStepSkipped = (step: number) => skippedSteps.has(step);
+  // Consultar backend para determinar el paso inicial
+  const { data: companies, isLoading: loadingCompanies, isSuccess: companiesLoaded } = useGetMyCompaniesQuery();
+  const shouldLoadPDV = !loadingCompanies && companies && companies.length > 0;
+  const {
+    data: allPDVs,
+    isLoading: loadingPDV,
+    isSuccess: pdvLoaded
+  } = useGetAllPDVsQuery(undefined, {
+    skip: !shouldLoadPDV
+  });
+  const { data: currentSubscription, isLoading: loadingSubscription } = useGetCurrentSubscriptionQuery(undefined, {
+    skip: !shouldLoadPDV
+  });
 
+  // Efecto inicial: cargar datos del backend y determinar paso correcto
   useEffect(() => {
-    console.log('Company information:', company);
-    if (company?.id) {
-      console.log('Company already registered:', company);
-      dispatch(setPrevValuesCompany(company));
-      dispatch(setStep(1));
+    // Esperar a que terminen las consultas iniciales
+    if (loadingCompanies || (shouldLoadPDV && loadingPDV) || (shouldLoadPDV && loadingSubscription)) {
+      return;
     }
-  }, [company, dispatch]);
 
-  // Sincroniza el paso activo si ya existe un PDV registrado
-  useEffect(() => {
-    if (pdvCompany) {
-      dispatch(setPrevValuesPDV(pdvCompany[0]));
-      dispatch(setStep(2));
+    // Solo ejecutar una vez
+    if (initialLoadComplete) {
+      return;
     }
-  }, [pdvCompany, dispatch]);
+
+    console.log('🔍 Iniciando validación de paso desde backend...');
+    console.log('📦 Empresas:', companies);
+    console.log('🏪 PDVs:', allPDVs);
+    console.log('💳 Suscripción:', currentSubscription);
+
+    // Caso 1: No hay empresa -> ir a paso de empresa
+    if (!companies || companies.length === 0) {
+      console.log('❌ No hay empresa, ir a paso COMPANY');
+      dispatch(setStep(StepType.COMPANY));
+      setInitialLoadComplete(true);
+      return;
+    }
+
+    // Caso 2: Hay empresa -> cargar en Redux y determinar siguiente paso
+    const company = companies[0];
+    console.log('✅ Empresa encontrada:', company);
+
+    // Actualizar Redux con data del backend
+    dispatch(
+      setCompanyResponse({
+        id: company.id,
+        name: company.name,
+        description: company.description || '',
+        address: company.address || '',
+        phone_number: company.phone_number,
+        nit: company.nit,
+        economic_activity: company.economic_activity || '',
+        quantity_employees: String(company.quantity_employees || ''),
+        social_reason: company.social_reason || '',
+        logo: company.logo || '',
+        uniquePDV: company.uniquePDV || false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+    );
+
+    // Caso 3: Verificar PDVs
+    const hasPDVs = allPDVs && allPDVs.pdvs && allPDVs.pdvs.length > 0;
+    if (hasPDVs) {
+      console.log('✅ PDVs encontrados:', allPDVs.pdvs);
+      // Cargar el primer PDV en Redux (o el principal si existe)
+      const mainPDV = allPDVs.pdvs.find((pdv) => pdv.is_active) || allPDVs.pdvs[0];
+      dispatch(
+        setPDVResponse({
+          id: mainPDV.id,
+          name: mainPDV.name,
+          address: mainPDV.address,
+          phone_number: mainPDV.phone_number || '',
+          location: { id: '', name: '' },
+          main: true,
+          company_id: company.id,
+          created_at: mainPDV.created_at,
+          updated_at: mainPDV.updated_at
+        })
+      );
+
+      // Caso 4: Verificar suscripción
+      if (currentSubscription && currentSubscription.id) {
+        console.log('✅ Suscripción encontrada, ir a SUMMARY');
+        dispatch(
+          setPlanData({
+            plan_id: currentSubscription.plan_code,
+            trial_days: currentSubscription.days_remaining,
+            auto_renewal: true,
+            payment_method: null
+          })
+        );
+        dispatch(setStep(StepType.SUMMARY));
+      } else {
+        // Si hay empresa y PDV pero no suscripción, ir a plan
+        console.log('🎯 Empresa y PDV completos, ir a PLAN');
+        dispatch(setStep(StepType.PLAN));
+      }
+    } else {
+      // No hay PDV, ir a crearlo
+      console.log('📍 Empresa sin PDV, ir a PDV');
+      dispatch(setStep(StepType.PDV));
+    }
+
+    setInitialLoadComplete(true);
+  }, [
+    companies,
+    allPDVs,
+    currentSubscription,
+    loadingCompanies,
+    loadingPDV,
+    loadingSubscription,
+    shouldLoadPDV,
+    initialLoadComplete,
+    dispatch,
+    companiesLoaded,
+    pdvLoaded
+  ]);
+
+  const isStepOptional = (_step: number) => false;
+  const isStepSkipped = (_step: number) => false;
 
   const handleLogout = async () => {
     try {
@@ -91,11 +215,13 @@ export default function StepByStep() {
   // Mapeo de componentes por paso
   const StepComponent = useMemo(() => {
     switch (activeStep) {
-      case 0:
+      case StepType.COMPANY:
         return <RegisterCompanyForm />;
-      case 1:
+      case StepType.PDV:
         return <RegisterPDVForm />;
-      case 2:
+      case StepType.PLAN:
+        return <PlanSelectionForm />;
+      case StepType.SUMMARY:
         return <RegisterSummary />;
       default:
         return <Typography>Paso desconocido</Typography>;
@@ -108,7 +234,7 @@ export default function StepByStep() {
         <ContentStyle>
           <Box sx={{ width: '100%' }}>
             <Stepper activeStep={activeStep} alternativeLabel>
-              {steps.map((label, index) => {
+              {stepsConfig.map((stepConfig, index) => {
                 const stepProps: Partial<StepProps> = {};
                 const labelProps: Partial<StepLabelProps> = {};
 
@@ -121,8 +247,8 @@ export default function StepByStep() {
                 }
 
                 return (
-                  <Step key={label} {...stepProps}>
-                    <StepLabel {...labelProps}>{label}</StepLabel>
+                  <Step key={stepConfig.key} {...stepProps}>
+                    <StepLabel {...labelProps}>{stepConfig.label}</StepLabel>
                   </Step>
                 );
               })}

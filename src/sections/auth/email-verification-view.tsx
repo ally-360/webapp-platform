@@ -1,80 +1,263 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Box, Card, Container, Typography, CircularProgress, Alert, Button, Stack } from '@mui/material';
-
-import { useVerifyEmailMutation } from 'src/redux/services/authApi';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+// @mui
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+// hooks
+import { useRouter } from 'src/routes/hook';
+// routes
 import { paths } from 'src/routes/paths';
+// api
+import { useVerifyEmailWithAutoLoginMutation } from 'src/redux/services/authApi';
+// components
+import Iconify from 'src/components/iconify';
 import Logo from 'src/components/logo';
+import { useAppDispatch } from 'src/hooks/store';
+import { setCredentials } from 'src/redux/slices/authSlice';
+import { setSession } from 'src/auth/context/jwt/utils';
+import { enqueueSnackbar } from 'notistack';
 
-// ========================================
-// 🎯 EMAIL VERIFICATION VIEW
-// ========================================
+// ----------------------------------------------------------------------
 
 export default function EmailVerificationView() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [verifyEmail] = useVerifyEmailMutation();
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('');
+  const [verificationState, setVerificationState] = useState<{
+    loading: boolean;
+    success: boolean;
+    autoLogin: boolean;
+    error: string | null;
+  }>({
+    loading: true,
+    success: false,
+    autoLogin: false,
+    error: null
+  });
 
+  // Obtener parámetros de la URL
   const token = searchParams.get('token');
 
+  const [verifyEmailMutation] = useVerifyEmailWithAutoLoginMutation();
+
+  // Verificar email automáticamente al cargar el componente
   useEffect(() => {
-    const handleVerification = async () => {
+    const verifyEmail = async () => {
       if (!token) {
-        setStatus('error');
-        setMessage('Token de verificación no encontrado en la URL');
+        setVerificationState({
+          loading: false,
+          success: false,
+          autoLogin: false,
+          error: 'Token de verificación no encontrado'
+        });
         return;
       }
 
       try {
-        console.log('🔐 Verifying email with token:', token);
+        const result = await verifyEmailMutation({
+          token,
+          auto_login: true // Siempre intentamos auto-login
+        }).unwrap();
 
-        const result = await verifyEmail({ token }).unwrap();
-        console.log('✅ Email verification successful:', result);
+        console.log('✅ Verificación exitosa:', result);
 
-        setStatus('success');
-        setMessage(result.message || 'Email verificado exitosamente');
+        if (result.access_token && result.user_id) {
+          setSession(result.access_token);
 
-        // Redirigir al login después de 3 segundos
-        setTimeout(() => {
-          navigate(paths.auth.jwt.login, { replace: true });
-        }, 3000);
+          dispatch(
+            setCredentials({
+              token: result.access_token,
+              user: result.user || {
+                id: result.user_id,
+                email: '',
+                is_active: result.is_active,
+                email_verified: true,
+                profile: {} as any
+              },
+              companies: result.companies || []
+            })
+          );
+
+          setVerificationState({
+            loading: false,
+            success: true,
+            autoLogin: true,
+            error: null
+          });
+
+          enqueueSnackbar('Email verificado', { variant: 'success' });
+
+          setTimeout(() => {
+            if (result.companies && result.companies.length > 0) {
+              router.push(paths.dashboard.root);
+            } else {
+              router.push(paths.stepByStep.root);
+            }
+          }, 8000);
+        } else {
+          setVerificationState({
+            loading: false,
+            success: true,
+            autoLogin: false,
+            error: null
+          });
+
+          enqueueSnackbar('Email verificado exitosamente. Por favor, inicia sesión.', { variant: 'success' });
+        }
       } catch (error: any) {
-        console.error('❌ Email verification error:', error);
-        setStatus('error');
-        setMessage(
-          error?.data?.detail || error?.message || 'Error al verificar el email. El token puede haber expirado.'
-        );
+        const errorMessage = error?.data?.detail || error?.message || 'Error verificando email';
+
+        setVerificationState({
+          loading: false,
+          success: false,
+          autoLogin: false,
+          error: errorMessage
+        });
+
+        enqueueSnackbar(errorMessage, { variant: 'error' });
       }
     };
 
-    handleVerification();
-  }, [token, verifyEmail, navigate]);
+    verifyEmail();
+  }, [token, verifyEmailMutation, dispatch, router]);
 
   const handleGoToLogin = () => {
-    navigate(paths.auth.jwt.login, { replace: true });
+    router.push(paths.auth.jwt.login);
   };
 
-  const handleGoToRegister = () => {
-    navigate(paths.auth.jwt.register, { replace: true });
+  const handleGoToDashboard = () => {
+    router.push(paths.dashboard.root);
   };
+
+  const renderLoading = (
+    <Stack spacing={3} alignItems="center">
+      <CircularProgress size={64} />
+      <Typography variant="h6">Verificando email...</Typography>
+      <Typography variant="body2" color="text.secondary" textAlign="center">
+        Por favor espera mientras verificamos tu dirección de correo electrónico.
+      </Typography>
+    </Stack>
+  );
+
+  const renderSuccess = (
+    <Stack spacing={3} alignItems="center">
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          bgcolor: 'success.lighter',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Iconify icon="solar:check-circle-bold" width={48} sx={{ color: 'success.main' }} />
+      </Box>
+
+      <Typography variant="h5" textAlign="center">
+        {verificationState.autoLogin ? '¡Email verificado e ingreso completado!' : '¡Email verificado exitosamente!'}
+      </Typography>
+
+      <Typography variant="body2" color="text.secondary" textAlign="center">
+        {verificationState.autoLogin
+          ? 'Tu cuenta ha sido verificada y has ingresado automáticamente. Te redirigiremos en un momento.'
+          : 'Tu dirección de correo electrónico ha sido verificada. Ya puedes iniciar sesión con tu cuenta.'}
+      </Typography>
+
+      {!verificationState.autoLogin && (
+        <Button
+          variant="contained"
+          size="large"
+          onClick={handleGoToLogin}
+          startIcon={<Iconify icon="solar:login-2-bold" />}
+          fullWidth
+        >
+          Iniciar Sesión
+        </Button>
+      )}
+
+      {verificationState.autoLogin && (
+        <Button
+          variant="contained"
+          size="large"
+          onClick={handleGoToDashboard}
+          startIcon={<Iconify icon="solar:home-bold" />}
+          fullWidth
+        >
+          Ir al Dashboard
+        </Button>
+      )}
+    </Stack>
+  );
+
+  const renderError = (
+    <Stack spacing={3} alignItems="center">
+      <Box
+        sx={{
+          width: 80,
+          height: 80,
+          borderRadius: '50%',
+          bgcolor: 'error.lighter',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <Iconify icon="solar:close-circle-bold" width={48} sx={{ color: 'error.main' }} />
+      </Box>
+
+      <Typography variant="h5" textAlign="center">
+        Error en la verificación
+      </Typography>
+
+      <Alert severity="error" sx={{ width: '100%' }}>
+        {verificationState.error}
+      </Alert>
+
+      <Stack direction="row" spacing={2} sx={{ width: '100%' }}>
+        <Button
+          variant="outlined"
+          onClick={handleGoToLogin}
+          startIcon={<Iconify icon="solar:login-2-bold" />}
+          fullWidth
+        >
+          Ir al Login
+        </Button>
+        <Button
+          variant="contained"
+          onClick={() => window.location.reload()}
+          startIcon={<Iconify icon="solar:refresh-bold" />}
+          fullWidth
+        >
+          Intentar de nuevo
+        </Button>
+      </Stack>
+    </Stack>
+  );
 
   return (
     <Container maxWidth="sm">
       <Box
         sx={{
-          minHeight: '100vh',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
+          minHeight: '100vh',
           py: 3
         }}
       >
         <Card
           sx={{
-            p: 4,
+            p: 5,
             width: '100%',
             maxWidth: 480,
             textAlign: 'center'
@@ -85,51 +268,12 @@ export default function EmailVerificationView() {
             <Logo sx={{ width: 64, height: 64 }} />
 
             {/* Título */}
-            <Typography variant="h4" gutterBottom>
-              Verificación de Email
-            </Typography>
+            <Typography variant="h4">Verificación de Email</Typography>
 
-            {/* Estado de carga */}
-            {status === 'loading' && (
-              <>
-                <CircularProgress size={48} />
-                <Typography variant="body1" color="text.secondary">
-                  Verificando tu cuenta...
-                </Typography>
-              </>
-            )}
-
-            {/* Estado de éxito */}
-            {status === 'success' && (
-              <>
-                <Alert severity="success" sx={{ width: '100%' }}>
-                  {message}
-                </Alert>
-                <Typography variant="body2" color="text.secondary">
-                  Serás redirigido al login en unos segundos...
-                </Typography>
-                <Button variant="contained" size="large" onClick={handleGoToLogin} fullWidth>
-                  Ir al Login
-                </Button>
-              </>
-            )}
-
-            {/* Estado de error */}
-            {status === 'error' && (
-              <>
-                <Alert severity="error" sx={{ width: '100%' }}>
-                  {message}
-                </Alert>
-                <Stack spacing={2} sx={{ width: '100%' }}>
-                  <Button variant="contained" size="large" onClick={handleGoToLogin} fullWidth>
-                    Ir al Login
-                  </Button>
-                  <Button variant="outlined" size="large" onClick={handleGoToRegister} fullWidth>
-                    Crear Nueva Cuenta
-                  </Button>
-                </Stack>
-              </>
-            )}
+            {/* Estados */}
+            {verificationState.loading && renderLoading}
+            {!verificationState.loading && verificationState.success && renderSuccess}
+            {!verificationState.loading && !verificationState.success && renderError}
           </Stack>
         </Card>
       </Box>

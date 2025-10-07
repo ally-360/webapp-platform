@@ -9,8 +9,7 @@ import {
   RegisterUser,
   GetCompanyResponse,
   GetUserResponse,
-  GetPDVResponse,
-  UpdateProfile
+  GetPDVResponse
 } from 'src/interfaces/auth/userInterfaces';
 
 // 🎯 RTK Query Integration
@@ -21,6 +20,7 @@ import {
   useGetCurrentUserQuery,
   useGetMyCompaniesQuery,
   useCreateCompanyMutation,
+  useUpdateCompanyMutation,
   useCreatePDVMutation,
   useSelectCompanyMutation,
   type RegisterUserData,
@@ -31,7 +31,8 @@ import {
 import { useAppDispatch } from 'src/hooks/store';
 import { clearAllStateOnCompanySwitch } from 'src/redux/actions/companySwitch';
 import { setCredentials, clearCredentials } from 'src/redux/slices/authSlice';
-import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
+// TODO: Actualizar al nuevo stepByStep slice
+// import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 
@@ -70,6 +71,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const [registerMutation] = useRegisterMutation();
   const [logoutMutation] = useLogoutMutation();
   const [createCompanyMutation] = useCreateCompanyMutation();
+  const [updateCompanyMutation] = useUpdateCompanyMutation();
   const [createPDVMutation] = useCreatePDVMutation();
   const [selectCompanyMutation] = useSelectCompanyMutation();
 
@@ -112,7 +114,18 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   const decodeToken = (token: string) => {
     try {
+      // Validar que el token existe y tiene el formato correcto
+      if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+        return null;
+      }
+
       const payload = token.split('.')[1];
+
+      // Validar que el payload existe
+      if (!payload) {
+        return null;
+      }
+
       const decodedPayload = atob(payload);
       return JSON.parse(decodedPayload);
     } catch (error) {
@@ -149,7 +162,8 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   // Actualizar estado cuando se obtienen las empresas
   useEffect(() => {
-    const decodedToken = decodeToken(localStorage.getItem('accessToken') || '');
+    const token = localStorage.getItem('accessToken');
+    const decodedToken = token ? decodeToken(token) : null;
 
     if (decodedToken) {
       setState((prev) => ({
@@ -301,7 +315,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const register = useCallback(
     async (data: RegisterUser) => {
       try {
-        console.log('📝 Register attempt with RTK Query:', data.email);
+        console.log('📝 Register attempt:', data.email);
 
         // Transformar datos al formato esperado por el backend
         const backendData: RegisterUserData = {
@@ -317,7 +331,10 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
         await registerMutation(backendData).unwrap();
         console.log('✅ Register successful');
-        enqueueSnackbar('Registro exitoso. Continúa con la configuración de tu empresa.', { variant: 'success' });
+        enqueueSnackbar(
+          'Registro exitoso. Te hemos enviado un email de verificación que te permitirá ingresar automáticamente.',
+          { variant: 'success' }
+        );
       } catch (error: any) {
         console.error('❌ Register error:', error);
         const errorMessage = error?.data?.detail || error?.message || 'Error en el registro';
@@ -329,9 +346,11 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   );
 
   const selectCompany = useCallback(
-    async (companyId: string) => {
+    async (companyId: string, showLoading = true) => {
       try {
-        setState((prev) => ({ ...prev, changingCompany: true }));
+        if (showLoading) {
+          setState((prev) => ({ ...prev, changingCompany: true }));
+        }
 
         await dispatch(clearAllStateOnCompanySwitch());
 
@@ -360,7 +379,9 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
               selectedCompany: true
             }));
 
-            enqueueSnackbar(`Empresa seleccionada: ${selectedCompany.name}`, { variant: 'success' });
+            if (showLoading) {
+              enqueueSnackbar(`Empresa seleccionada: ${selectedCompany.name}`, { variant: 'success' });
+            }
           }
         }
 
@@ -385,13 +406,13 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         const backendData: CompanyCreate = {
           name: databody.name,
           nit: databody.nit,
-          phone_number: databody.phoneNumber,
+          phone_number: databody.phone_number || '',
           address: databody.address || null,
-          description: null,
-          economic_activity: databody.economicActivity || null,
-          quantity_employees: databody.quantityEmployees ? parseInt(databody.quantityEmployees, 10) : undefined,
-          social_reason: null,
-          logo: null
+          description: databody.description || null,
+          economic_activity: databody.economic_activity || null,
+          quantity_employees: databody.quantity_employees || null,
+          social_reason: databody.social_reason || null,
+          logo: databody.logo || null
         };
 
         const result = await createCompanyMutation(backendData).unwrap();
@@ -401,7 +422,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           id: result.id,
           name: result.name,
           nit: result.nit,
-          phoneNumber: result.phone_number,
+          phoneNumber: result.phone_number || '',
           address: result.address || '',
           website: '',
           economicActivity: result.economic_activity || '',
@@ -410,10 +431,11 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
         setState((prev) => ({ ...prev, company: adaptedCompany }));
 
-        dispatch(setPrevValuesCompany(adaptedCompany));
-        dispatch(setStep(1));
+        // TODO: Adaptar estas acciones al nuevo stepByStep slice
+        // dispatch(setPrevValuesCompany(adaptedCompany));
+        // dispatch(setStep(1));
 
-        await selectCompany(adaptedCompany.id);
+        await selectCompany(adaptedCompany.id, false); // No mostrar loading durante registro
 
         enqueueSnackbar('Empresa creada exitosamente', { variant: 'success' });
       } catch (error: any) {
@@ -423,7 +445,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         throw error;
       }
     },
-    [createCompanyMutation, dispatch, enqueueSnackbar, selectCompany]
+    [createCompanyMutation, enqueueSnackbar, selectCompany]
   );
 
   const createPDV = useCallback(
@@ -433,7 +455,8 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         enqueueSnackbar('PDV registrado exitosamente', { variant: 'success' });
 
         // Mapear PDVOutput a GetPDVResponse para el step-by-step
-        const mappedPDV: GetPDVResponse = {
+        // TODO: Adaptar al nuevo slice - variable sin usar por ahora
+        const _mappedPDV: GetPDVResponse = {
           id: result.id,
           name: result.name,
           description: '', // PDVOutput no tiene description
@@ -442,20 +465,30 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           main: false // Se puede configurar más tarde
         };
 
-        dispatch(setPrevValuesPDV(mappedPDV));
-        dispatch(setStep(2));
+        // TODO: Adaptar estas acciones al nuevo stepByStep slice
+        // dispatch(setPrevValuesPDV(mappedPDV));
+        // dispatch(setStep(2));
       } catch (error: any) {
         console.error('Error registering PDV:', error);
         enqueueSnackbar(error?.data?.detail || 'Error registrando PDV', { variant: 'error' });
         throw error;
       }
     },
-    [createPDVMutation, enqueueSnackbar, dispatch]
+    [createPDVMutation, enqueueSnackbar]
   );
 
-  const updateCompany = useCallback(async (_databody: UpdateProfile) => {
-    console.warn('updateCompany not implemented yet');
-  }, []);
+  const updateCompany = useCallback(
+    async (id: string, data: Partial<CompanyCreate>) => {
+      try {
+        const result = await updateCompanyMutation({ id, data }).unwrap();
+        return result;
+      } catch (error) {
+        console.error('Error updating company:', error);
+        throw error;
+      }
+    },
+    [updateCompanyMutation]
+  );
 
   const updatePDV = useCallback(async (_id: string, _databody: any) => {
     console.warn('updatePDV not implemented yet');
@@ -475,6 +508,11 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     } catch (error) {
       console.warn('Logout error:', error);
     }
+
+    // Limpiar completamente el localStorage para evitar tokens corruptos
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('companyId');
+    localStorage.removeItem('refreshToken');
 
     setSession(null);
     dispatch(clearCredentials());

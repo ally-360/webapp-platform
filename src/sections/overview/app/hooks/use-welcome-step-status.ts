@@ -8,6 +8,7 @@ export interface WelcomeStepStatus {
   hasContacts: boolean;
   hasInvoices: boolean;
   isLoading: boolean;
+  isInitialLoad: boolean;
   completionPercentage: number;
 }
 
@@ -26,7 +27,8 @@ export function useWelcomeStepStatus(): WelcomeStepStatus {
   const isCompleted = hasProducts && hasContacts && hasInvoices;
   const isLoading = loadingProducts || loadingContacts || loadingInvoices;
 
-  // Calcular porcentaje de completado
+  const isInitialLoad = isLoading || (!products && !contacts && !invoices);
+
   const completedSteps = [hasProducts, hasContacts, hasInvoices].filter(Boolean).length;
   const completionPercentage = (completedSteps / 3) * 100;
 
@@ -36,6 +38,7 @@ export function useWelcomeStepStatus(): WelcomeStepStatus {
     hasContacts: Boolean(hasContacts),
     hasInvoices: Boolean(hasInvoices),
     isLoading,
+    isInitialLoad,
     completionPercentage
   };
 }
