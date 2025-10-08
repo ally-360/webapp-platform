@@ -44,6 +44,7 @@ export interface UserOut {
   email: string;
   is_active: boolean;
   email_verified: boolean;
+  first_login: boolean;
   profile: ProfileOut;
 }
 
@@ -82,10 +83,10 @@ export interface CompanyOut {
   name: string;
   description?: string | null;
   address?: string | null;
-  phone_number: string;
+  phone_number: string | null;
   nit: string;
   economic_activity?: string | null;
-  quantity_employees: number;
+  quantity_employees: string | null;
   social_reason?: string | null;
   logo?: string | null;
   uniquePDV?: boolean;

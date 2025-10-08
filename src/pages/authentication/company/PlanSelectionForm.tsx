@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
@@ -13,137 +13,300 @@ import {
   Alert,
   Switch,
   FormControlLabel,
-  CircularProgress
+  CircularProgress,
+  Skeleton
 } from '@mui/material';
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
-import { useAppDispatch } from 'src/hooks/store';
-import { setStep, setPlanData, goToPreviousStep } from 'src/redux/slices/stepByStepSlice';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { setStep, setPlanData, goToPreviousStep, setSubscriptionResponse } from 'src/redux/slices/stepByStepSlice';
 import { PlanSelectionSchema } from 'src/interfaces/auth/yupSchemas';
 import { PlanFormData } from 'src/interfaces/stepByStep';
-
-// Plan options actualizados Ally360
-const PLAN_OPTIONS = [
-  {
-    id: 'kickstart',
-    name: 'Ally Kickstart',
-    price: 50000,
-    currency: 'COP',
-    features: [
-      'Facturación electrónica ilimitada DIAN',
-      'Hasta 2 usuarios (Admin + Contador)',
-      '1 bodega',
-      'POS básico para ventas simples',
-      'Contabilidad básica integrada',
-      'Soporte vía chat estándar',
-      '1 GB de almacenamiento',
-      'Prueba gratis 30 días'
-    ],
-    recommended: false
-  },
-  {
-    id: 'boost',
-    name: 'Ally Boost',
-    price: 75000,
-    currency: 'COP',
-    features: [
-      'Todo lo de Kickstart +',
-      'Chatbot IA Ally360 (asistente virtual inteligente)',
-      'Hasta 600 facturas electrónicas/mes',
-      'Hasta 5 usuarios (todos los roles)',
-      'Hasta 3 bodegas + traslados',
-      'POS avanzado',
-      'Reportes avanzados y analítica',
-      'Envío de facturas por WhatsApp',
-      'Soporte prioritario',
-      '3 GB de almacenamiento',
-      'Solicitar demo'
-    ],
-    recommended: true
-  },
-  {
-    id: 'supreme',
-    name: 'Ally Supreme',
-    price: 116000,
-    currency: 'COP',
-    features: [
-      'Todo lo de Boost +',
-      'Chatbot IA Ally360 Premium (análisis predictivos y recomendaciones)',
-      'Facturación electrónica ilimitada',
-      'Hasta 10 usuarios (todos los roles)',
-      'Hasta 10 bodegas + traslados',
-      'POS completo',
-      'Integraciones y API abierta',
-      'Envío masivo por WhatsApp',
-      'Soporte personalizado + onboarding',
-      '5 GB de almacenamiento',
-      'Agendar llamada'
-    ],
-    recommended: false
-  }
-];
+import {
+  useGetPlansQuery,
+  useCreateSubscriptionMutation,
+  useUpdateSubscriptionMutation,
+  useGetCurrentSubscriptionQuery,
+  Plan
+} from 'src/redux/services/subscriptionsApi';
 
 export function PlanSelectionForm() {
   const dispatch = useAppDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { handleSubmit, watch, setValue } = useForm<PlanFormData>({
+  // API Hooks
+  const {
+    data: plansData,
+    isLoading: plansLoading,
+    error: plansError
+  } = useGetPlansQuery({
+    is_active: true,
+    limit: 50
+  });
+  const { data: currentSubscription } = useGetCurrentSubscriptionQuery();
+  const [createSubscription] = useCreateSubscriptionMutation();
+  const [updateSubscription] = useUpdateSubscriptionMutation();
+
+  // Redux state
+  const subscriptionResponse = useAppSelector((state) => state.stepByStep.subscriptionResponse);
+
+  const { handleSubmit, watch, setValue, reset } = useForm<PlanFormData>({
     resolver: yupResolver(PlanSelectionSchema),
     defaultValues: {
-      plan_id: 'professional',
-      trial_days: 15,
-      auto_renewal: true,
-      payment_method: null
+      plan_id: '',
+      billing_cycle: 'monthly',
+      auto_renew: true,
+      currency: 'COP'
     }
   });
 
   const selectedPlanId = watch('plan_id');
-  const trialDays = watch('trial_days');
-  const autoRenewal = watch('auto_renewal');
+  const autoRenew = watch('auto_renew');
 
-  const selectedPlan = PLAN_OPTIONS.find((plan) => plan.id === selectedPlanId);
+  const plans = useMemo(() => plansData || [], [plansData]);
+  const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
+
+  // Also consider subscription response when detecting selected plan
+  useEffect(() => {
+    if (subscriptionResponse && plans.length > 0 && !selectedPlanId) {
+      // Find and select the plan that matches the current subscription
+      const currentPlan = plans.find((plan) => plan.code === subscriptionResponse.plan_code);
+      if (currentPlan) {
+        setValue('plan_id', currentPlan.id);
+      }
+    }
+  }, [subscriptionResponse, selectedPlanId, setValue, plans]);
+
+  // Auto-load existing subscription data
+  useEffect(() => {
+    if (currentSubscription && !subscriptionResponse) {
+      console.log('🔄 Loading subscription from API:', currentSubscription);
+
+      // Update Redux state with current subscription
+      dispatch(setSubscriptionResponse(currentSubscription));
+
+      // Find the plan_id from the plan_code in the subscription
+      const planForSubscription = plans.find((plan) => plan.code === currentSubscription.plan_code);
+
+      if (planForSubscription) {
+        // Update form with existing data - set the plan that matches the current subscription
+        reset({
+          plan_id: planForSubscription.id,
+          billing_cycle: currentSubscription.billing_cycle,
+          auto_renew: true, // Default value since it's not in the response
+          currency: 'COP'
+        });
+      }
+    }
+  }, [currentSubscription, subscriptionResponse, dispatch, reset, plans]);
 
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const hasExistingSubscription = !!currentSubscription?.id;
+      let result;
 
-      enqueueSnackbar(`Plan ${selectedPlan?.name} activado exitosamente. ${trialDays} días de prueba gratis.`, {
-        variant: 'success'
+      console.log('🔄 Submitting plan selection:', {
+        hasExistingSubscription,
+        planId: data.plan_id,
+        planCode: selectedPlan?.code,
+        currentSubscriptionId: currentSubscription?.id,
+        action: hasExistingSubscription ? 'UPDATE (PATCH)' : 'CREATE (POST)'
       });
 
-      dispatch(setPlanData(data));
-      dispatch(setStep(3));
-    } catch (error) {
-      enqueueSnackbar('Error al activar el plan', { variant: 'error' });
+      if (hasExistingSubscription) {
+        // Use PATCH for existing subscriptions
+        const updatePayload = {
+          plan_id: data.plan_id,
+          billing_cycle: data.billing_cycle || 'monthly',
+          auto_renew: data.auto_renew || true,
+          notes: data.notes
+        };
+
+        result = await updateSubscription({
+          id: currentSubscription.id,
+          data: updatePayload
+        }).unwrap();
+
+        const planName = selectedPlan?.name || 'plan';
+        enqueueSnackbar(`Plan actualizado a ${planName} exitosamente`, { variant: 'success' });
+      } else {
+        // Use POST for new subscriptions
+        const subscriptionPayload = {
+          plan_id: data.plan_id,
+          billing_cycle: data.billing_cycle || 'monthly',
+          auto_renew: data.auto_renew || true,
+          currency: data.currency || 'COP',
+          amount: selectedPlan?.monthly_price ? parseFloat(selectedPlan.monthly_price) : undefined,
+          notes: data.notes
+        };
+
+        result = await createSubscription(subscriptionPayload).unwrap();
+
+        const planName = selectedPlan?.name || 'plan';
+        const isFreePlan = selectedPlan?.type === 'free';
+
+        if (isFreePlan) {
+          enqueueSnackbar(`${planName} activado exitosamente`, { variant: 'success' });
+        } else {
+          enqueueSnackbar(`${planName} activado exitosamente. Periodo de prueba iniciado.`, {
+            variant: 'success'
+          });
+        }
+      }
+
+      // Update Redux state with the subscription response
+      dispatch(setSubscriptionResponse(result));
+
+      // Cast data to PlanFormData since we know it has the right structure
+      const planData: PlanFormData = {
+        plan_id: data.plan_id,
+        billing_cycle: data.billing_cycle || 'monthly',
+        auto_renew: data.auto_renew || true,
+        currency: data.currency || 'COP',
+        start_date: data.start_date,
+        end_date: data.end_date,
+        trial_end_date: data.trial_end_date,
+        amount: data.amount,
+        notes: data.notes
+      };
+
+      dispatch(setPlanData(planData));
+      dispatch(setStep(3)); // Go to summary
+    } catch (error: any) {
+      console.error('Error creating/updating subscription:', error);
+      let errorMessage = 'Error al activar el plan';
+
+      if (error?.data?.detail) {
+        errorMessage = error.data.detail;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     } finally {
       setIsSubmitting(false);
     }
   });
 
-  const formatPrice = (price: number, currency: string) =>
-    new Intl.NumberFormat('es-CO', {
+  const formatPrice = (price: string) => {
+    const numPrice = parseFloat(price);
+    return new Intl.NumberFormat('es-CO', {
       style: 'currency',
-      currency: currency === 'COP' ? 'COP' : currency
-    }).format(price);
+      currency: 'COP'
+    }).format(numPrice);
+  };
+
+  const getPlanFeatures = (plan: Plan): string[] => {
+    const features: string[] = [];
+
+    if (plan.max_users) {
+      features.push(`Hasta ${plan.max_users} usuarios`);
+    } else if (plan.max_users === null) {
+      features.push('Usuarios ilimitados');
+    }
+
+    if (plan.max_pdvs) {
+      features.push(`${plan.max_pdvs} puntos de venta`);
+    } else if (plan.max_pdvs === null) {
+      features.push('Puntos de venta ilimitados');
+    }
+
+    if (plan.max_products) {
+      features.push(`Hasta ${plan.max_products} productos`);
+    } else if (plan.max_products === null) {
+      features.push('Productos ilimitados');
+    }
+
+    features.push(`${plan.max_storage_gb}GB de almacenamiento`);
+
+    if (plan.max_invoices_month) {
+      features.push(`${plan.max_invoices_month} facturas/mes`);
+    } else if (plan.max_invoices_month === null) {
+      features.push('Facturas ilimitadas');
+    }
+
+    if (plan.has_advanced_reports) features.push('Reportes avanzados');
+    if (plan.has_api_access) features.push('Acceso API');
+    if (plan.has_multi_currency) features.push('Multi-moneda');
+    if (plan.has_inventory_alerts) features.push('Alertas de inventario');
+    if (plan.has_email_support) features.push('Soporte por email');
+    if (plan.has_phone_support) features.push('Soporte telefónico');
+    if (plan.has_priority_support) features.push('Soporte prioritario');
+
+    return features;
+  };
+
+  // Show loading state
+  if (plansLoading) {
+    return (
+      <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
+        <Typography variant="h4" sx={{ mb: 2, textAlign: 'center' }}>
+          Elige tu Plan
+        </Typography>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {[1, 2, 3].map((index) => (
+            <Grid item xs={12} md={6} lg={3} key={index}>
+              <Card sx={{ p: 3 }}>
+                <Skeleton variant="text" width="60%" height={32} />
+                <Skeleton variant="text" width="40%" height={48} sx={{ mb: 2 }} />
+                <Stack spacing={1}>
+                  {[1, 2, 3].map((featureIndex) => (
+                    <Skeleton key={featureIndex} variant="text" width="80%" />
+                  ))}
+                </Stack>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
+  }
+
+  // Show error state
+  if (plansError) {
+    return (
+      <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Error al cargar los planes. Por favor, inténtalo de nuevo.
+        </Alert>
+        <Button variant="outlined" onClick={() => dispatch(goToPreviousStep())}>
+          Volver
+        </Button>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
       <Typography variant="h4" sx={{ mb: 2, textAlign: 'center' }}>
-        Elige tu Plan
+        {currentSubscription ? 'Cambiar Plan' : 'Elige tu Plan'}
       </Typography>
 
-      <Alert severity="info" sx={{ mb: 4 }}>
-        🎉 <strong>15 días gratis</strong> para que pruebes todas las funciones. Cancela cuando quieras, sin
-        compromisos.
-      </Alert>
+      {currentSubscription && !currentSubscription.is_trial && (
+        <Alert severity="success" sx={{ mb: 4 }}>
+          <strong>Plan activo:</strong> {currentSubscription.plan_name}
+        </Alert>
+      )}
+
+      {currentSubscription && (
+        <Alert severity="warning" sx={{ mb: 4 }}>
+          Al cambiar de plan, tu suscripción actual será actualizada inmediatamente.
+        </Alert>
+      )}
+
+      {!currentSubscription && plans.some((plan) => plan.type !== 'free') && (
+        <Alert severity="info" sx={{ mb: 4 }}>
+          🎉 <strong>15 días gratis</strong> para que pruebes todas las funciones de los planes pagos. Cancela cuando
+          quieras, sin compromisos.
+        </Alert>
+      )}
 
       <form onSubmit={onSubmit}>
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {PLAN_OPTIONS.map((plan) => (
-            <Grid item xs={12} md={4} key={plan.id}>
+          {plans.map((plan) => (
+            <Grid item xs={12} md={6} lg={4} key={plan.id}>
               <Card
                 sx={{
                   position: 'relative',
@@ -153,11 +316,27 @@ export function PlanSelectionForm() {
                   '&:hover': {
                     borderColor: 'primary.main',
                     boxShadow: 2
-                  }
+                  },
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  // Highlight current subscription plan
+                  ...(currentSubscription?.plan_code === plan.code && {
+                    backgroundColor: 'action.selected',
+                    '&:before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 4,
+                      backgroundColor: 'success.main'
+                    }
+                  })
                 }}
                 onClick={() => setValue('plan_id', plan.id)}
               >
-                {plan.recommended && (
+                {plan.is_popular && (
                   <Chip
                     label="Recomendado"
                     color="primary"
@@ -165,31 +344,71 @@ export function PlanSelectionForm() {
                     sx={{
                       position: 'absolute',
                       top: 12,
-                      right: 12
+                      right: 12,
+                      zIndex: 1
                     }}
                   />
                 )}
 
-                <CardContent sx={{ p: 3 }}>
+                {currentSubscription?.plan_code === plan.code && (
+                  <Chip
+                    label="Plan Actual"
+                    color="success"
+                    size="small"
+                    sx={{
+                      position: 'absolute',
+                      top: plan.is_popular ? 44 : 12,
+                      right: 12,
+                      zIndex: 1
+                    }}
+                  />
+                )}
+
+                <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                   <Typography variant="h6" sx={{ mb: 1 }}>
                     {plan.name}
                   </Typography>
 
-                  <Typography variant="h4" color="primary" sx={{ mb: 2 }}>
-                    {formatPrice(plan.price, plan.currency)}
-                    <Typography component="span" variant="body2" color="text.secondary">
-                      /mes
+                  {plan.description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {plan.description}
                     </Typography>
-                  </Typography>
+                  )}
 
-                  <Stack spacing={1}>
-                    {plan.features.map((feature, index) => (
-                      <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Iconify icon="eva:checkmark-circle-2-fill" sx={{ color: 'success.main' }} width={16} />
-                        <Typography variant="body2">{feature}</Typography>
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="h4" color="primary" sx={{ mb: 0.5 }}>
+                      {formatPrice(plan.monthly_price)}
+                      <Typography component="span" variant="body2" color="text.secondary">
+                        /mes
+                      </Typography>
+                    </Typography>
+                    {parseFloat(plan.yearly_price) > 0 && (
+                      <Typography variant="body2" color="text.secondary">
+                        {formatPrice(plan.yearly_price)}/año (ahorra 2 meses)
+                      </Typography>
+                    )}
+                  </Box>
+
+                  <Stack spacing={1} sx={{ flexGrow: 1 }}>
+                    {getPlanFeatures(plan).map((feature, index) => (
+                      <Box key={index} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <Iconify
+                          icon="eva:checkmark-circle-2-fill"
+                          sx={{ color: 'success.main', mt: 0.5, flexShrink: 0 }}
+                          width={16}
+                        />
+                        <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
+                          {feature}
+                        </Typography>
                       </Box>
                     ))}
                   </Stack>
+
+                  {plan.type === 'free' && (
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      🎉 Plan gratuito para siempre
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -198,29 +417,65 @@ export function PlanSelectionForm() {
 
         <Card sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Configuración del Plan
+            {currentSubscription ? 'Configuración de Actualización' : 'Configuración del Plan'}
           </Typography>
 
-          <FormControlLabel
-            control={<Switch checked={autoRenewal} onChange={(e) => setValue('auto_renewal', e.target.checked)} />}
-            label="Renovación automática después del período de prueba"
-            sx={{ mb: 2 }}
-          />
+          {selectedPlan?.type !== 'free' && (
+            <>
+              <FormControlLabel
+                control={<Switch checked={autoRenew} onChange={(e) => setValue('auto_renew', e.target.checked)} />}
+                label="Renovación automática"
+                sx={{ mb: 2 }}
+              />
 
-          <Alert severity="warning">
-            Durante los primeros {trialDays} días no se realizará ningún cobro. Puedes cancelar en cualquier momento.
-          </Alert>
+              {currentSubscription?.is_trial && (
+                <Alert severity="info">
+                  {currentSubscription && selectedPlan?.code === currentSubscription.plan_code
+                    ? `Mantienes tu plan actual con ${currentSubscription.days_remaining} días restantes de prueba.`
+                    : `Al cambiar de plan, conservarás los ${currentSubscription.days_remaining} días restantes de tu período de prueba.`}
+                </Alert>
+              )}
+
+              {currentSubscription && !currentSubscription.is_trial && (
+                <Alert severity="info">
+                  {selectedPlan?.code === currentSubscription.plan_code
+                    ? 'El plan se renovará automáticamente según el ciclo de facturación configurado.'
+                    : 'El cambio de plan será efectivo inmediatamente y se ajustará la facturación.'}
+                </Alert>
+              )}
+
+              {!currentSubscription && (
+                <Alert severity="info">
+                  El plan se renovará automáticamente según el ciclo de facturación seleccionado.
+                </Alert>
+              )}
+            </>
+          )}
+
+          {selectedPlan?.type === 'free' && (
+            <Alert severity="info">
+              ✨ El plan gratuito no requiere configuración adicional. Puedes actualizarlo en cualquier momento.
+            </Alert>
+          )}
         </Card>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
           <Button variant="outlined" onClick={() => dispatch(goToPreviousStep())} disabled={isSubmitting}>
             Volver
           </Button>
 
-          <Button type="submit" variant="contained" size="large" disabled={isSubmitting}>
-            {isSubmitting ? <CircularProgress size={24} /> : 'Activar Plan'}
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{ flexGrow: 1 }}
+            size="large"
+            disabled={isSubmitting || !selectedPlanId}
+          >
+            {isSubmitting && <CircularProgress size={24} />}
+            {!isSubmitting && currentSubscription && 'Cambiar Plan'}
+            {!isSubmitting && !currentSubscription && 'Activar Plan'}
           </Button>
-        </Box>
+        </Stack>
       </form>
     </Box>
   );

@@ -178,7 +178,7 @@ export default function OverviewAppView() {
           <>
             <Grid xs={12} sm={12} md={5} lg={4}>
               <AppWelcome
-                title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+                title={`Bienvenido 👋 \n ${user?.profile?.first_name}`}
                 description=""
                 img={null}
                 action={
@@ -209,7 +209,7 @@ export default function OverviewAppView() {
           // Tutorial completado: AppWelcome toma el ancho completo
           <Grid xs={12}>
             <AppWelcome
-              title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+              title={`Bienvenido 👋 \n ${user?.profile?.first_name}`}
               description="¡Excelente! Has completado todos los pasos del tutorial. Tu cuenta está lista para usar todas las funcionalidades de la plataforma."
               img={null}
               action={
@@ -226,7 +226,7 @@ export default function OverviewAppView() {
           <>
             <Grid xs={12} sm={12} md={5} lg={4}>
               <AppWelcome
-                title={`Bienvenido 👋 \n ${user?.profile?.name}`}
+                title={`Bienvenido 👋 \n ${user?.profile?.first_name}`}
                 description=""
                 img={null}
                 action={

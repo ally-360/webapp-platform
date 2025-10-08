@@ -25,6 +25,16 @@ import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 
+// types
+interface AccountFormData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  photo?: any;
+  phone_number: string;
+  dni?: string;
+}
+
 // ----------------------------------------------------------------------
 
 export default function AccountGeneral() {
@@ -37,27 +47,29 @@ export default function AccountGeneral() {
   const { data: avatarData } = useGetUserAvatarQuery();
 
   const UpdateUserSchema = Yup.object().shape({
-    name: Yup.string().required('Nombre es requerido'),
-    lastname: Yup.string().required('Apellido es requerido'),
-    email: Yup.string().required('Email es requerido').email('Email debe ser válido'),
-    photo: Yup.mixed().nullable(),
-    personalPhoneNumber: Yup.string().required('Teléfono es requerido'),
-    dni: Yup.string().required('DNI es requerido')
+    first_name: Yup.string().required('First name is required'),
+    last_name: Yup.string().required('Last name is required'),
+    email: Yup.string().email('Invalid email').required('Email is required'),
+    phone_number: Yup.string().required('Phone number is required'),
+    dni: Yup.string(),
+    photo: Yup.mixed().nullable()
   });
 
   const defaultValues = {
-    name: user?.profile?.name ?? '',
-    lastname: user?.profile?.lastname ?? '',
+    first_name: user?.profile?.first_name ?? '',
+    last_name: user?.profile?.last_name ?? '',
     email: user?.email ?? '',
-    photo: (avatarData?.avatar_url || user?.profile?.photo) ?? '',
-    personalPhoneNumber: user?.profile?.personalPhoneNumber ?? '',
+    photo: (avatarData?.avatar_url || user?.profile?.avatar_url) ?? '',
+    phone_number: user?.profile?.phone_number ?? '',
     dni: user?.profile?.dni ?? ''
   };
 
-  const methods = useForm({
+  const methods = useForm<AccountFormData>({
     resolver: yupResolver(UpdateUserSchema),
     defaultValues
   });
+
+  console.log(user);
 
   const {
     setValue,
@@ -67,7 +79,6 @@ export default function AccountGeneral() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // 1. Subir avatar si hay una nueva imagen
       if (data.photo && typeof data.photo === 'object' && 'preview' in data.photo) {
         const formData = new FormData();
         formData.append('file', data.photo as unknown as File);
@@ -76,12 +87,12 @@ export default function AccountGeneral() {
         enqueueSnackbar('Avatar actualizado correctamente', { variant: 'success' });
       }
 
-      // 2. Actualizar perfil
       const profileData = {
         profile: {
-          first_name: data.name,
-          last_name: data.lastname,
-          phone_number: data.personalPhoneNumber
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone_number: data.phone_number,
+          ...(data.dni && { dni: data.dni })
         }
       };
 
@@ -89,8 +100,7 @@ export default function AccountGeneral() {
 
       enqueueSnackbar('Perfil actualizado correctamente', { variant: 'success' });
 
-      // Recargar página para actualizar contexto
-      window.location.reload();
+      // window.location.reload();
     } catch (error: any) {
       console.error('Error updating profile:', error);
       const errorMessage = error?.data?.message || 'No se pudo actualizar el perfil';
@@ -132,7 +142,7 @@ export default function AccountGeneral() {
                     color: 'text.disabled'
                   }}
                 >
-                  permitidos *.jpeg, *.jpg, *.png, *.gif
+                  permitidos *.jpeg, *.jpg, *.png
                   <br /> tamaño maximo {fData(3145728)}
                 </Typography>
               }
@@ -151,8 +161,8 @@ export default function AccountGeneral() {
                 sm: 'repeat(2, 1fr)'
               }}
             >
-              <RHFTextField name="name" label="Nombre" />
-              <RHFTextField name="lastname" label="Apellido" />
+              <RHFTextField name="first_name" label="Nombre" />
+              <RHFTextField name="last_name" label="Apellido" />
               <RHFTextField name="email" label={t('Email Address')} />
               <RHFPhoneNumber
                 type="string"
@@ -160,7 +170,7 @@ export default function AccountGeneral() {
                 defaultCountry="co"
                 countryCodeEditable={false}
                 onlyCountries={['co']}
-                name="personalPhoneNumber"
+                name="phone_number"
                 label="Télefono"
               />
               <RHFTextField name="dni" label="Cédula de ciudadania" disabled />

@@ -7,9 +7,9 @@ import {
   AuthCredentials,
   RegisterCompany,
   RegisterUser,
-  GetCompanyResponse,
-  GetUserResponse,
-  GetPDVResponse
+  BackendUser,
+  BackendCompany,
+  BackendPDV
 } from 'src/interfaces/auth/userInterfaces';
 
 // 🎯 RTK Query Integration
@@ -31,18 +31,16 @@ import {
 import { useAppDispatch } from 'src/hooks/store';
 import { clearAllStateOnCompanySwitch } from 'src/redux/actions/companySwitch';
 import { setCredentials, clearCredentials } from 'src/redux/slices/authSlice';
-// TODO: Actualizar al nuevo stepByStep slice
-// import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 
 interface InitialState {
-  user: GetUserResponse | null;
+  user: BackendUser | null;
   loading: boolean;
   isAuthenticated: boolean;
   isFirstLogin: boolean;
-  company: GetCompanyResponse | null;
-  pdvCompany: any;
+  company: BackendCompany | null;
+  pdvCompany: BackendPDV | null;
   changingCompany: boolean;
   selectedCompany: boolean;
 }
@@ -136,31 +134,15 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   useEffect(() => {
     if (currentUser) {
-      const adaptedUser = {
-        id: currentUser.id,
-        email: currentUser.email,
-        verified: currentUser.email_verified,
-        authId: currentUser.id,
-        firstLogin: false, // El backend no maneja firstLogin aún
-        profile: {
-          name: currentUser.profile.first_name,
-          lastname: currentUser.profile.last_name,
-          personalPhoneNumber: currentUser.profile.phone_number,
-          dni: currentUser.profile.dni,
-          photo: currentUser.profile.avatar_url
-        }
-      } as GetUserResponse;
-
       setState((prev) => ({
         ...prev,
-        user: adaptedUser,
+        user: currentUser,
         isAuthenticated: true,
         loading: false
       }));
     }
   }, [currentUser]);
 
-  // Actualizar estado cuando se obtienen las empresas
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     const decodedToken = token ? decodeToken(token) : null;
@@ -171,46 +153,24 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         selectedCompany: !!decodedToken?.tenant_id
       }));
     }
-    if (userCompanies && userCompanies.length > 0) {
-      const adaptedCompanies = userCompanies.map((company) => ({
-        id: company.id,
-        name: company.name,
-        nit: company.nit,
-        phoneNumber: company.phone_number,
-        address: company.address || '',
-        website: '',
-        economicActivity: company.economic_activity || '',
-        quantityEmployees: company.quantity_employees?.toString() || ''
-      })) as GetCompanyResponse[];
 
+    if (userCompanies && userCompanies.length > 0) {
+      // Use backend companies directly without adaptation
       setState((prev) => ({
         ...prev,
-        company: adaptedCompanies[0] || null,
-        isFirstLogin: adaptedCompanies.length === 0,
+        company: userCompanies[0] || null,
+        isFirstLogin: currentUser ? currentUser.first_login : false,
         loading: false
       }));
-
-      // Guardar empresas en Redux para el step-by-step
-      if (adaptedCompanies.length > 0 && currentUser) {
-        dispatch(
-          setCredentials({
-            token: localStorage.getItem('accessToken') || '',
-            user: currentUser,
-            companies: adaptedCompanies as any // Temporal casting para evitar problemas de tipos
-          })
-        );
-      }
     } else if (userCompanies && userCompanies.length === 0) {
-      // Usuario no tiene empresas - es su primer login
       setState((prev) => ({
         ...prev,
-        isFirstLogin: true,
+        isFirstLogin: currentUser ? currentUser.first_login : false,
         loading: false
       }));
     }
   }, [userCompanies, currentUser, dispatch]);
 
-  // Manejar errores de carga del usuario
   useEffect(() => {
     if (userError) {
       console.warn('User loading error:', userError);
@@ -218,7 +178,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     }
   }, [userError]);
 
-  // Manejar errores de carga de empresas
   useEffect(() => {
     if (companiesError) {
       console.warn('Companies loading error:', companiesError);
@@ -229,47 +188,16 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const login = useCallback(
     async ({ email, password }: AuthCredentials) => {
       try {
-        console.log('🔑 Login attempt with RTK Query:', { email });
-
         const result = await loginMutation({ email, password }).unwrap();
         const { access_token, user, companies } = result;
 
-        console.log('✅ Login successful:', { user: user?.email, companies: companies?.length });
-
-        // Guardar token y configurar sesión
         setSession(access_token);
         dispatch(setCredentials({ token: access_token, user, companies }));
 
-        // Adaptar datos del backend al formato frontend
-        const adaptedUser = {
-          id: user.id,
-          email: user.email,
-          verified: user.email_verified,
-          authId: user.id,
-          firstLogin: companies.length === 0,
-          profile: {
-            name: user.profile.first_name,
-            lastname: user.profile.last_name,
-            personalPhoneNumber: user.profile.phone_number,
-            dni: user.profile.dni,
-            photo: user.profile.avatar_url
-          }
-        } as GetUserResponse;
-
-        // Adaptar companies si existen
-        const adaptedCompanies = companies.map((uc) => ({
-          id: uc.company_id,
-          name: uc.company_name,
-          // Otros campos se cargarán después
-          website: '',
-          phoneNumber: '',
-          address: '',
-          nit: ''
-        })) as GetCompanyResponse[];
-
+        // Use backend data directly without adaptation
         setState({
-          user: adaptedUser,
-          company: adaptedCompanies[0] || null,
+          user,
+          company: null, // Will be set when companies are loaded
           pdvCompany: null,
           isAuthenticated: true,
           isFirstLogin: companies.length === 0,
@@ -278,12 +206,10 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           selectedCompany: !!(companies.length === 1)
         });
 
-        // Si solo hay una empresa, seleccionarla automáticamente
         if (companies.length === 1) {
           try {
             const companyResult = await selectCompanyMutation({ company_id: companies[0].company_id }).unwrap();
 
-            // Actualizar token con el nuevo token de empresa
             if (companyResult.access_token) {
               setSession(companyResult.access_token);
               dispatch(
@@ -297,7 +223,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
             }
           } catch (selectError) {
             console.error('❌ Error auto-selecting company:', selectError);
-            // No lanzar error, el login fue exitoso
           }
         }
 
@@ -315,9 +240,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const register = useCallback(
     async (data: RegisterUser) => {
       try {
-        console.log('📝 Register attempt:', data.email);
-
-        // Transformar datos al formato esperado por el backend
         const backendData: RegisterUserData = {
           email: data.email,
           password: data.password,
@@ -330,7 +252,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         };
 
         await registerMutation(backendData).unwrap();
-        console.log('✅ Register successful');
         enqueueSnackbar(
           'Registro exitoso. Te hemos enviado un email de verificación que te permitirá ingresar automáticamente.',
           { variant: 'success' }
@@ -361,20 +282,10 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
           const selectedCompany = userCompanies?.find((comp) => comp.id === companyId);
           if (selectedCompany) {
-            const adaptedCompany = {
-              id: selectedCompany.id,
-              name: selectedCompany.name,
-              nit: selectedCompany.nit,
-              phoneNumber: selectedCompany.phone_number,
-              address: selectedCompany.address || '',
-              website: '',
-              economicActivity: selectedCompany.economic_activity || '',
-              quantityEmployees: selectedCompany.quantity_employees?.toString() || ''
-            };
-
+            // Use backend company directly without adaptation
             setState((prev) => ({
               ...prev,
-              company: adaptedCompany,
+              company: selectedCompany,
               changingCompany: false,
               selectedCompany: true
             }));
@@ -402,7 +313,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       try {
         console.log('🏢 Create company attempt with RTK Query:', databody.name);
 
-        // Transformar datos al formato esperado por el backend
+        // Transform data to backend format
         const backendData: CompanyCreate = {
           name: databody.name,
           nit: databody.nit,
@@ -417,25 +328,10 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
         const result = await createCompanyMutation(backendData).unwrap();
 
-        // Adaptar respuesta del backend al formato frontend
-        const adaptedCompany = {
-          id: result.id,
-          name: result.name,
-          nit: result.nit,
-          phoneNumber: result.phone_number || '',
-          address: result.address || '',
-          website: '',
-          economicActivity: result.economic_activity || '',
-          quantityEmployees: result.quantity_employees?.toString() || ''
-        } as GetCompanyResponse;
+        // Use backend company directly without adaptation
+        setState((prev) => ({ ...prev, company: result }));
 
-        setState((prev) => ({ ...prev, company: adaptedCompany }));
-
-        // TODO: Adaptar estas acciones al nuevo stepByStep slice
-        // dispatch(setPrevValuesCompany(adaptedCompany));
-        // dispatch(setStep(1));
-
-        await selectCompany(adaptedCompany.id, false); // No mostrar loading durante registro
+        await selectCompany(result.id, false); // No mostrar loading durante registro
 
         enqueueSnackbar('Empresa creada exitosamente', { variant: 'success' });
       } catch (error: any) {
@@ -454,19 +350,11 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         const result = await createPDVMutation(pdvData).unwrap();
         enqueueSnackbar('PDV registrado exitosamente', { variant: 'success' });
 
-        // Mapear PDVOutput a GetPDVResponse para el step-by-step
-        // TODO: Adaptar al nuevo slice - variable sin usar por ahora
-        const _mappedPDV: GetPDVResponse = {
-          id: result.id,
-          name: result.name,
-          description: '', // PDVOutput no tiene description
-          address: result.address,
-          phoneNumber: result.phone_number || '',
-          main: false // Se puede configurar más tarde
-        };
+        // Use backend PDV directly - no adaptation needed
+        console.log('✅ PDV created:', result);
 
         // TODO: Adaptar estas acciones al nuevo stepByStep slice
-        // dispatch(setPrevValuesPDV(mappedPDV));
+        // dispatch(setPrevValuesPDV(result));
         // dispatch(setStep(2));
       } catch (error: any) {
         console.error('Error registering PDV:', error);

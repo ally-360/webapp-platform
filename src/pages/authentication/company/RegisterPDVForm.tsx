@@ -22,11 +22,6 @@ import type { Department, City } from 'src/redux/services/locationsApi';
 
 // ----------------------------------------------------------------------
 
-interface Municipio {
-  id: string;
-  name: string;
-}
-
 type RegisterPDVFormValues = InferType<typeof RegisterPDVSchema>;
 
 export default function RegisterPDVForm() {
@@ -34,19 +29,15 @@ export default function RegisterPDVForm() {
   const theme = useTheme();
   const dispatch = useAppDispatch();
 
-  // Redux state
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
   const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
 
-  // Location queries
   const { data: departments } = useGetDepartmentsQuery();
 
-  // RTK Query hooks
   const { data: allPDVs } = useGetAllPDVsQuery();
   const [createPDV] = useCreatePDVMutation();
   const [updatePDV] = useUpdatePDVMutation();
 
-  // Determine if editing (has PDV from API) or creating new
   const firstPDV = allPDVs?.pdvs?.[0];
   const isEditing = !!firstPDV;
 
@@ -56,7 +47,7 @@ export default function RegisterPDVForm() {
       firstPDV?.department_id || pdvResponse?.department_id
         ? departments?.departments?.find((dept) => dept.id === (firstPDV?.department_id || pdvResponse?.department_id))
         : ({} as any),
-    municipio: {} as any, // Will be set after department is selected
+    municipio: {} as any,
     address: firstPDV?.address || pdvResponse?.address || '',
     phone_number: firstPDV?.phone_number || pdvResponse?.phone_number || '',
     main: true,
@@ -77,24 +68,17 @@ export default function RegisterPDVForm() {
   } = methods;
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Watch for department changes
   const selectedDepartment = watch('departamento');
 
-  // Get cities for selected department
   const departmentId = selectedDepartment && 'id' in selectedDepartment ? Number(selectedDepartment.id) : null;
   const { data: cities } = useGetCitiesQuery(departmentId ? { department_id: departmentId } : { limit: 0 }, {
     skip: !departmentId
   });
 
-  // Filter cities based on selected department (redundant with query but kept for safety)
   const filteredCities = cities?.cities || [];
 
-  // Load PDV data into Redux when API data arrives
   useEffect(() => {
     if (firstPDV && !pdvResponse) {
-      console.log('🔄 Loading PDV from API:', firstPDV);
-
-      // Set PDV response to indicate it exists
       dispatch(
         setPDVResponse({
           id: firstPDV.id,
@@ -139,11 +123,9 @@ export default function RegisterPDVForm() {
 
       let result;
       if (isEditing && firstPDV?.id) {
-        // Actualizar PDV existente
         result = await updatePDV({ id: firstPDV.id, data: pdvPayload }).unwrap();
         enqueueSnackbar('Punto de venta actualizado exitosamente', { variant: 'success' });
       } else {
-        // Crear nuevo PDV
         result = await createPDV(pdvPayload).unwrap();
         enqueueSnackbar('Punto de venta creado exitosamente', { variant: 'success' });
       }
@@ -191,10 +173,8 @@ export default function RegisterPDVForm() {
 
   const departamento = watch('departamento') as Department | any;
 
-  // Reset city when department changes and set initial city if editing
   useEffect(() => {
     if (departamento && departamento.id) {
-      // If editing and have city_id from API data, set the city
       const cityId = firstPDV?.city_id || pdvResponse?.city_id;
       if (cityId && cities?.cities) {
         const foundCity = cities.cities.find((city) => city.id === cityId);
@@ -204,7 +184,6 @@ export default function RegisterPDVForm() {
         }
       }
 
-      // Otherwise reset to empty
       setValue('municipio', {} as any);
     }
   }, [departamento, setValue, cities, firstPDV, pdvResponse]);
@@ -241,100 +220,104 @@ export default function RegisterPDVForm() {
 
       <RHFTextField name="name" label="Nombre del punto de venta" />
 
-      <RHFAutocomplete
-        name="departamento"
-        label="Departamento"
-        options={departments?.departments || []}
-        getOptionLabel={(option: Department | any) => {
-          if (typeof option === 'string') return option;
-          return option.name || '';
-        }}
-        isOptionEqualToValue={(option: Department | any, value: Department | any) => {
-          if (!value || Object.keys(value).length === 0) return false;
-          return option.id === value.id;
-        }}
-        renderOption={(props, option: Department, { inputValue }) => {
-          const matches = match(option.name, inputValue);
-          const parts = parse(option.name, matches);
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <RHFAutocomplete
+          fullWidth
+          name="departamento"
+          label="Departamento"
+          options={departments?.departments || []}
+          getOptionLabel={(option: Department | any) => {
+            if (typeof option === 'string') return option;
+            return option.name || '';
+          }}
+          isOptionEqualToValue={(option: Department | any, value: Department | any) => {
+            if (!value || Object.keys(value).length === 0) return false;
+            return option.id === value.id;
+          }}
+          renderOption={(props, option: Department, { inputValue }) => {
+            const matches = match(option.name, inputValue);
+            const parts = parse(option.name, matches);
 
-          return (
-            <Box component="li" {...props}>
-              <div>
-                {parts.map((part, index) => (
-                  <span
-                    key={index}
-                    style={{
-                      fontWeight: part.highlight ? 700 : 400,
-                      color: part.highlight ? theme.palette.primary.main : theme.palette.text.primary
-                    }}
-                  >
-                    {part.text}
-                  </span>
-                ))}
-              </div>
-            </Box>
-          );
-        }}
-        onChange={(event, newValue) => {
-          setValue('departamento', newValue || ({} as Department), { shouldValidate: true });
-          setValue('municipio', {} as City, { shouldValidate: false });
-        }}
-      />
+            return (
+              <Box component="li" {...props}>
+                <div>
+                  {parts.map((part, index) => (
+                    <span
+                      key={index}
+                      style={{
+                        fontWeight: part.highlight ? 700 : 400,
+                        color: part.highlight ? theme.palette.primary.main : theme.palette.text.primary
+                      }}
+                    >
+                      {part.text}
+                    </span>
+                  ))}
+                </div>
+              </Box>
+            );
+          }}
+          onChange={(event, newValue) => {
+            setValue('departamento', newValue || ({} as Department), { shouldValidate: true });
+            setValue('municipio', {} as City, { shouldValidate: false });
+          }}
+        />
 
-      <RHFAutocomplete
-        name="municipio"
-        label="Municipio"
-        options={filteredCities || []}
-        getOptionLabel={(option: City | any) => {
-          if (typeof option === 'string') return option;
-          return option.name || '';
-        }}
-        isOptionEqualToValue={(option: City | any, value: City | any) => {
-          if (!value || Object.keys(value).length === 0) return false;
-          return option.id === value.id;
-        }}
-        renderOption={(props, option: City, { inputValue }) => {
-          const matches = match(option.name, inputValue);
-          const parts = parse(option.name, matches);
+        <RHFAutocomplete
+          fullWidth
+          name="municipio"
+          label="Municipio"
+          options={filteredCities || []}
+          getOptionLabel={(option: City | any) => {
+            if (typeof option === 'string') return option;
+            return option.name || '';
+          }}
+          isOptionEqualToValue={(option: City | any, value: City | any) => {
+            if (!value || Object.keys(value).length === 0) return false;
+            return option.id === value.id;
+          }}
+          renderOption={(props, option: City, { inputValue }) => {
+            const matches = match(option.name, inputValue);
+            const parts = parse(option.name, matches);
 
-          return (
-            <Box component="li" {...props}>
-              <div>
-                {parts.map((part, index) => (
-                  <span
-                    key={index}
-                    style={{
-                      fontWeight: part.highlight ? 700 : 400,
-                      color: part.highlight ? theme.palette.primary.main : theme.palette.text.primary
-                    }}
-                  >
-                    {part.text}
-                  </span>
-                ))}
-              </div>
-            </Box>
-          );
-        }}
-        onChange={(event, newValue) => {
-          setValue('municipio', newValue || ({} as City), { shouldValidate: true });
-        }}
-        disabled={!departamento || Object.keys(departamento).length === 0}
-      />
+            return (
+              <Box component="li" {...props}>
+                <div>
+                  {parts.map((part, index) => (
+                    <span
+                      key={index}
+                      style={{
+                        fontWeight: part.highlight ? 700 : 400,
+                        color: part.highlight ? theme.palette.primary.main : theme.palette.text.primary
+                      }}
+                    >
+                      {part.text}
+                    </span>
+                  ))}
+                </div>
+              </Box>
+            );
+          }}
+          onChange={(event, newValue) => {
+            setValue('municipio', newValue || ({} as City), { shouldValidate: true });
+          }}
+          disabled={!departamento || Object.keys(departamento).length === 0}
+        />
+      </Stack>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <RHFTextField name="address" label="Dirección" />
+        <RHFPhoneNumber
+          type="string"
+          defaultCountry="co"
+          countryCodeEditable={false}
+          onlyCountries={['co']}
+          name="phone_number"
+          label="Teléfono"
+          helperText="Ingrese el número de teléfono del punto de venta"
+        />
+      </Stack>
 
-      <RHFTextField name="address" label="Dirección" />
-
-      <RHFPhoneNumber
-        type="string"
-        defaultCountry="co"
-        countryCodeEditable={false}
-        onlyCountries={['co']}
-        name="phone_number"
-        label="Teléfono"
-        helperText="Ingrese el número de teléfono del punto de venta"
-      />
-
-      <Stack direction="row" spacing={2}>
-        <Button fullWidth size="large" color="inherit" variant="outlined" onClick={handleBack}>
+      <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
+        <Button variant="outlined" onClick={handleBack}>
           Volver
         </Button>
 

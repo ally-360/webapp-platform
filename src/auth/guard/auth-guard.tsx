@@ -19,7 +19,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { authenticated, method, isFirstLogin } = useAuthContext();
 
-  // 🔒 Configurar validación automática de token
   useTokenValidation({
     warningMinutes: 5,
     autoRefresh: false,

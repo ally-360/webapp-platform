@@ -9,7 +9,12 @@ function MyAvatar() {
   const { user } = useAuthContext();
   const { data: avatarData } = useGetUserAvatarQuery();
 
-  return <Avatar alt={user?.profile?.name || 'User'} src={avatarData?.avatar_url || user?.profile?.photo} />;
+  return (
+    <Avatar
+      alt={user?.profile?.first_name || 'User'}
+      src={avatarData?.avatar_url || user?.profile?.avatar_url || undefined}
+    />
+  );
 }
 
 export default MyAvatar;

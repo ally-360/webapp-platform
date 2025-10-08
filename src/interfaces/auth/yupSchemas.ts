@@ -74,9 +74,14 @@ export const RegisterPDVSchema = object().shape({
 
 export const PlanSelectionSchema = object().shape({
   plan_id: yup.string().required('Selecciona un plan'),
-  trial_days: yup.number().nullable().min(0, 'Los días de prueba deben ser positivos'),
-  auto_renewal: yup.boolean().default(true),
-  payment_method: yup.string().nullable()
+  billing_cycle: yup.string().oneOf(['monthly', 'yearly'], 'Ciclo de facturación inválido').default('monthly'),
+  auto_renew: yup.boolean().default(true),
+  start_date: yup.string().optional(),
+  end_date: yup.string().optional(),
+  trial_end_date: yup.string().optional(),
+  amount: yup.number().optional().min(0, 'El monto debe ser positivo'),
+  currency: yup.string().default('COP'),
+  notes: yup.string().optional()
 });
 
 export const ChangePassWordSchema = object().shape({

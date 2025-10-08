@@ -23,8 +23,6 @@ import {
   Typography
 } from '@mui/material';
 // redux
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from 'src/redux/slices/authSlice';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -59,6 +57,7 @@ import {
   useGetMonthlyStatusReportQuery
 } from 'src/redux/services/salesInvoicesApi';
 //
+import { useAuthContext } from 'src/auth/hooks';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -66,6 +65,20 @@ import InvoiceTableFiltersResult from '../invoice-table-filters-result';
 import InvoicePDF from '../invoice-pdf';
 
 // ----------------------------------------------------------------------
+const MONTH_NAMES = [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre'
+];
 
 const TABLE_HEAD = [
   { id: 'number', label: 'Número' },
@@ -99,53 +112,48 @@ export default function InvoiceListView() {
   const { t } = useTranslation();
 
   // Redux selectors
-  const user = useSelector(selectCurrentUser);
+  const { user } = useAuthContext();
 
   const [filters, setFilters] = useState(defaultFilters);
   const [isProcessing, setIsProcessing] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  // Calcular dateError
   const dateError =
     filters.startDate && filters.endDate ? filters.startDate.getTime() > filters.endDate.getTime() : false;
 
-  // Debounce para búsqueda - solo buscar si tiene al menos 2 caracteres
   useEffect(() => {
     const timer = setTimeout(() => {
       if (filters.name.length >= 2 || filters.name.length === 0) {
         setDebouncedSearch(filters.name);
       }
-    }, 500); // 500ms de debounce
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [filters.name]);
 
-  // ========================================
-  // 🔥 RTK QUERY - INVOICES & STATISTICS
+  // RTK QUERY - INVOICES & STATISTICS
   // ========================================
 
-  // RTK Query hooks para obtener facturas
   const { data: invoicesData, isLoading } = useGetSalesInvoicesQuery(
     {
-      page: table.page + 1, // RTK Query usa paginación desde 1
+      page: table.page + 1,
       limit: table.rowsPerPage,
       status: filters.status === 'all' ? undefined : filters.status,
       start_date: filters.startDate?.toISOString().split('T')[0],
       end_date: filters.endDate?.toISOString().split('T')[0],
-      search: debouncedSearch || undefined // Usar búsqueda con debounce
+      search: debouncedSearch || undefined
     },
     {
-      skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
+      skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2)
     }
   );
 
-  // RTK Query hook para obtener estadísticas mensuales
   const {
     data: monthlyStats,
     isLoading: monthlyStatsLoading,
     error: _monthlyStatsError
   } = useGetMonthlyStatusReportQuery(
-    {}, // Usa mes y año actual por defecto
+    {},
     {
       skip: !user
     }
@@ -153,38 +161,15 @@ export default function InvoiceListView() {
 
   const [cancelSalesInvoice] = useCancelSalesInvoiceMutation();
 
-  // ========================================
-  // 📊 DATOS PROCESADOS
+  // DATOS PROCESADOS
   // ========================================
 
-  // Data processing - Extraer datos de la respuesta paginada del servidor
   const tableData = useMemo(() => invoicesData?.invoices || [], [invoicesData]);
   const totalCount = invoicesData?.total || 0;
 
-  // ========================================
-  // 📊 CONSTANTES Y CONFIGURACIÓN
-  // ========================================
-
-  const MONTH_NAMES = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre'
-  ];
-
-  // ========================================
-  // 📊 ESTADÍSTICAS DESDE API
+  // ESTADÍSTICAS DESDE API
   // ========================================
 
-  // Optimizar función para obtener conteos desde API
   const getInvoiceCountFromAPI = useCallback(
     (status: string) => {
       const countsByStatus = invoicesData?.counts_by_status;
@@ -200,16 +185,13 @@ export default function InvoiceListView() {
     [invoicesData?.counts_by_status]
   );
 
-  // Función optimizada para obtener datos de estadísticas
   const getInvoiceLength = useCallback(
     (status: string) => {
-      // Priorizar counts_by_status del response actual para tabs
       const apiCount = getInvoiceCountFromAPI(status);
       if (apiCount !== null && apiCount !== undefined) {
         return apiCount;
       }
 
-      // Fallback a estadísticas mensuales si está disponible
       if (monthlyStats) {
         const statusMap = {
           OPEN: monthlyStats.open.count,
@@ -221,7 +203,6 @@ export default function InvoiceListView() {
         return statusMap[status] || statusMap.default;
       }
 
-      // Fallback final a datos locales
       return tableData.filter((item) => item.status === status).length;
     },
     [getInvoiceCountFromAPI, monthlyStats, tableData]
@@ -237,14 +218,12 @@ export default function InvoiceListView() {
     [getInvoiceLength]
   );
 
-  // ========================================
-  // 📅 NAVEGACIÓN DE MESES
+  // NAVEGACIÓN DE MESES
   // ========================================
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  // Funciones para navegación de meses con restricción de fechas futuras
   const handlePreviousMonth = useCallback(() => {
     if (selectedMonth === 1) {
       setSelectedMonth(12);
@@ -267,7 +246,6 @@ export default function InvoiceListView() {
       nextYear = selectedYear + 1;
     }
 
-    // No permitir navegar a meses futuros
     if (nextYear > currentYear || (nextYear === currentYear && nextMonth > currentMonth)) {
       return;
     }
@@ -276,7 +254,6 @@ export default function InvoiceListView() {
     setSelectedYear(nextYear);
   }, [selectedMonth, selectedYear]);
 
-  // Verificar si el botón "siguiente" debe estar deshabilitado
   const isNextMonthDisabled = useMemo(() => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
@@ -293,7 +270,6 @@ export default function InvoiceListView() {
     return nextYear > currentYear || (nextYear === currentYear && nextMonth > currentMonth);
   }, [selectedMonth, selectedYear]);
 
-  // Actualizar query de estadísticas mensuales cuando cambie mes/año
   const { data: monthlyStatsForPeriod } = useGetMonthlyStatusReportQuery(
     {
       year: selectedYear,
@@ -304,12 +280,10 @@ export default function InvoiceListView() {
     }
   );
 
-  // Usar la constante MONTH_NAMES definida arriba
   const currentMonthName = selectedMonth ? MONTH_NAMES[selectedMonth - 1] : '';
 
   const currentMonthlyStats = monthlyStatsForPeriod || monthlyStats;
 
-  // Función optimizada para obtener datos del período seleccionado
   const getPeriodData = useCallback(
     (status: string) => {
       if (currentMonthlyStats) {
@@ -340,7 +314,6 @@ export default function InvoiceListView() {
         return statusMap[status] || statusMap.default;
       }
 
-      // Fallback a datos locales
       const filteredData = tableData.filter((item) => item.status === status);
       return {
         count: filteredData.length,
@@ -351,15 +324,13 @@ export default function InvoiceListView() {
     [currentMonthlyStats, tableData]
   );
 
-  // ========================================
-  // 📊 DATOS OPTIMIZADOS CON MEMOIZACIÓN
+  // DATOS OPTIMIZADOS CON MEMOIZACIÓN
   // ========================================
 
-  // Memoizar datos procesados para evitar recálculos
   const processedData = useMemo(() => {
     const data = tableData;
     const total = totalCount;
-    const filtered = data; // Ya no necesitamos filtros del lado cliente
+    const filtered = data;
     const inPage = filtered;
 
     const resetConditions = {
@@ -382,13 +353,11 @@ export default function InvoiceListView() {
     };
   }, [tableData, totalCount, filters]);
 
-  // Obtener información del mes seleccionado para mostrar en el título
   const selectedMonthName = useMemo(() => {
     const selectedDate = new Date(selectedYear, selectedMonth - 1);
     return selectedDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
   }, [selectedYear, selectedMonth]);
 
-  // Destructuring de datos procesados para uso en el componente
   const {
     tableData: _tableDataProcessed,
     totalCount: _totalCountProcessed,
@@ -398,7 +367,6 @@ export default function InvoiceListView() {
     notFound
   } = processedData;
 
-  // Altura de las filas según densidad
   const denseHeight = table.dense ? 56 : 76;
   const TABS = useMemo(
     () => [
@@ -411,8 +379,7 @@ export default function InvoiceListView() {
     [getInvoiceLength]
   );
 
-  // ========================================
-  // 🔧 HANDLERS OPTIMIZADOS
+  // HANDLERS OPTIMIZADOS
   // ========================================
 
   const handleFilters = useCallback(
@@ -431,13 +398,14 @@ export default function InvoiceListView() {
       try {
         await cancelSalesInvoice({ id, reason: 'Cancelada desde el listado' }).unwrap();
         enqueueSnackbar('Factura cancelada correctamente', { variant: 'success' });
+        confirm.onFalse();
         table.onUpdatePageDeleteRow(dataInPage.length);
       } catch (error) {
         console.error('Error canceling invoice:', error);
         enqueueSnackbar('Error al cancelar la factura', { variant: 'error' });
       }
     },
-    [cancelSalesInvoice, table, dataInPage]
+    [cancelSalesInvoice, table, dataInPage.length, confirm]
   );
 
   const handleDeleteRows = useCallback(async () => {
@@ -483,7 +451,6 @@ export default function InvoiceListView() {
     setFilters(defaultFilters);
   }, []);
 
-  // Función para exportar a Excel
   const handleExportExcel = useCallback(() => {
     try {
       const selectedInvoices =
@@ -515,7 +482,6 @@ export default function InvoiceListView() {
     }
   }, [table.selected, tableData]);
 
-  // Función para descargar PDFs seleccionados
   const handleDownloadPDFs = useCallback(async () => {
     setIsProcessing(true);
     try {
@@ -570,7 +536,6 @@ export default function InvoiceListView() {
     }
   }, [table.selected, tableData]);
 
-  // Función para enviar emails masivos
   const handleSendEmails = useCallback(async () => {
     setIsProcessing(true);
     try {
@@ -653,7 +618,6 @@ export default function InvoiceListView() {
     }
   }, [table.selected, tableData]);
 
-  // Función para imprimir (abre todas en nuevas ventanas)
   const handlePrintInvoices = useCallback(async () => {
     setIsProcessing(true);
     try {
@@ -694,7 +658,6 @@ export default function InvoiceListView() {
     }
   }, [table.selected, tableData]);
 
-  // Show loading screen
   if (isLoading) {
     return <LoadingScreen />;
   }

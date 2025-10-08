@@ -50,7 +50,7 @@ export default function InvoiceNewEditAddress() {
           <Stack spacing={1}>
             <Typography variant="h6">{company?.name || ''}</Typography>
             <Typography variant="body2">Identificación: {company?.nit || ''}</Typography>
-            <Typography variant="body2">Teléfono: {company?.phoneNumber || ''}</Typography>
+            <Typography variant="body2">Teléfono: {company?.phone_number || ''}</Typography>
           </Stack>
         </Stack>
         <Divider flexItem orientation={upMd ? 'vertical' : 'horizontal'} sx={{ borderStyle: 'dashed' }} />

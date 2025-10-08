@@ -99,19 +99,35 @@ export interface PaymentMethod {
 
 export interface PlanFormData {
   plan_id: string;
-  payment_method?: string | null;
-  trial_days?: number | null;
-  auto_renewal: boolean;
+  billing_cycle: 'monthly' | 'yearly';
+  auto_renew: boolean;
+  start_date?: string;
+  end_date?: string;
+  trial_end_date?: string;
+  amount?: number;
+  currency: string;
+  notes?: string;
 }
 
 export interface SubscriptionResponse {
   id: string;
-  plan: PlanOption;
-  status: 'trial' | 'active' | 'cancelled' | 'expired';
-  trial_ends_at?: string;
-  current_period_start: string;
-  current_period_end: string;
-  auto_renewal: boolean;
+  plan_name: string;
+  plan_code: string;
+  plan_type: 'free' | 'basic' | 'professional' | 'enterprise';
+  status: 'trial' | 'active' | 'cancelled' | 'expired' | 'inactive';
+  billing_cycle: 'monthly' | 'yearly';
+  is_trial: boolean;
+  days_remaining: number;
+  next_billing_date: string;
+  max_users: number;
+  max_pdvs: number;
+  max_products: number;
+  max_storage_gb: number;
+  max_invoices_month: number;
+  has_advanced_reports: boolean;
+  has_api_access: boolean;
+  has_multi_currency: boolean;
+  has_inventory_alerts: boolean;
 }
 
 // ========================================

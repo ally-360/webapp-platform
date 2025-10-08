@@ -5,8 +5,6 @@ import Tabs from '@mui/material/Tabs';
 import Container from '@mui/material/Container';
 // routes
 import { paths } from 'src/routes/paths';
-// _mock
-import { _userAbout, _userPlans, _userPayment, _userInvoices, _userAddressBook } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 import { useSettingsContext } from 'src/components/settings';
@@ -65,6 +63,7 @@ export default function AccountView() {
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
         heading="Mi cuenta"
+        icon="ic:round-account-circle"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'Usuario', href: paths.dashboard.user.root },
@@ -92,20 +91,13 @@ export default function AccountView() {
 
       {currentTab === 'company' && <AccountCompany />}
 
-      {currentTab === 'billing' && (
-        <AccountBilling
-          plans={_userPlans}
-          cards={_userPayment}
-          invoices={_userInvoices}
-          addressBook={_userAddressBook}
-        />
-      )}
+      {currentTab === 'billing' && <AccountBilling />}
 
       {currentTab === 'invitations' && <AccountInvitations />}
 
       {currentTab === 'notifications' && <AccountNotifications />}
 
-      {currentTab === 'social' && <AccountSocialLinks socialLinks={_userAbout.socialLinks} />}
+      {currentTab === 'social' && <AccountSocialLinks socialLinks={[]} />}
 
       {currentTab === 'security' && <AccountChangePassword />}
     </Container>

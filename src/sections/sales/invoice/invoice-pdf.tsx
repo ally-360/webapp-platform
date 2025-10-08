@@ -382,8 +382,8 @@ export default function InvoicePDF({ invoice, currentStatus }) {
           <Image source={logoUrl} style={{ width: 48, height: 48 }} />
           <View style={{ alignItems: 'flex-start', marginLeft: 16 }}>
             <Text style={styles.companyName}>{company?.name || 'Nombre Empresa'}</Text>
-            <Text style={styles.companyInfo}>{company?.website || 'www.empresa.com'}</Text>
-            <Text style={styles.companyInfo}>{company?.phoneNumber || '+57 300 000 0000'}</Text>
+            <Text style={styles.companyInfo}>www.empresa.com</Text>
+            <Text style={styles.companyInfo}>{company?.phone_number || '+57 300 000 0000'}</Text>
           </View>
         </View>
 

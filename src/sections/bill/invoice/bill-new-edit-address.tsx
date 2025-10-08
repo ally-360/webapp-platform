@@ -52,7 +52,7 @@ export default function BillNewEditAddress({ isSupplier = false }) {
           <Stack spacing={1}>
             <Typography variant="h6">{company?.name || 'Mi Empresa'}</Typography>
             <Typography variant="body2">NIT: {company?.nit || 'N/A'}</Typography>
-            <Typography variant="body2">Teléfono: {company?.phoneNumber || 'N/A'}</Typography>
+            <Typography variant="body2">Teléfono: {company?.phone_number || 'N/A'}</Typography>
           </Stack>
         </Stack>
 

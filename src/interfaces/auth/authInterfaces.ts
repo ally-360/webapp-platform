@@ -1,10 +1,10 @@
-import { AuthCredentials, RegisterUser, GetCompanyResponse, GetPDVResponse, GetUserResponse } from './userInterfaces';
+import { AuthCredentials, RegisterUser, BackendUser, BackendCompany, BackendPDV } from './userInterfaces';
 
 export interface AuthContextType {
   /**
    * Datos del usuario autenticado.
    */
-  user: GetUserResponse | null;
+  user: BackendUser | null;
 
   /**
    * Retorna true si la aplicación está cargando el estado de autenticación.
@@ -32,13 +32,20 @@ export interface AuthContextType {
   changingCompany: boolean;
 
   /**
+   * Retorna true si ya se seleccionó una empresa.
+   */
+  selectedCompany: boolean;
+
+  /**
    * Datos de la empresa a la que pertenece el usuario.
    */
-  company: GetCompanyResponse | null;
+  company: BackendCompany | null;
+
   /**
    * Datos de los puntos de venta de la empresa a la que pertenece el usuario.
    */
-  pdvCompany: GetPDVResponse; // TODO: agregar interfaz de pdvCompany
+  pdvCompany: BackendPDV | null;
+
   method: string;
 
   /**

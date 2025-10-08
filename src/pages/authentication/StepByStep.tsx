@@ -23,10 +23,16 @@ import RegisterSummary from 'src/pages/authentication/company/RegisterSummaryRef
 import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { paths } from 'src/routes/paths';
 import { StepType } from 'src/interfaces/stepByStep';
-import { setStep, setCompanyResponse, setPDVResponse, setPlanData } from 'src/redux/slices/stepByStepSlice';
-import { useGetMyCompaniesQuery, useGetAllPDVsQuery, useGetCurrentSubscriptionQuery } from 'src/redux/services/authApi';
+import {
+  setStep,
+  setCompanyResponse,
+  setPDVResponse,
+  setPlanData,
+  setSubscriptionResponse
+} from 'src/redux/slices/stepByStepSlice';
+import { useGetMyCompaniesQuery, useGetAllPDVsQuery } from 'src/redux/services/authApi';
+import { useGetCurrentSubscriptionQuery } from 'src/redux/services/subscriptionsApi';
 
-// Configuración de pasos basada en uniquePDV
 const getStepsConfig = (isUniquePDV: boolean | undefined) => {
   if (isUniquePDV) {
     return [
@@ -50,7 +56,6 @@ const RootStyle = styled(Container)(({ theme }) => ({
   }
 }));
 
-// Estilo del contenido interno
 const ContentStyle = styled('div')(({ theme }) => ({
   maxWidth: 900,
   margin: 'auto',
@@ -59,7 +64,6 @@ const ContentStyle = styled('div')(({ theme }) => ({
   flexDirection: 'column',
   justifyContent: 'flex-start',
   padding: theme.spacing(6, 0),
-  paddingTop: '10vh !important',
   gap: '2rem'
 }));
 
@@ -79,7 +83,6 @@ export default function StepByStep() {
 
   const stepsConfig = useMemo(() => getStepsConfig(isUniquePDV), [isUniquePDV]);
 
-  // Consultar backend para determinar el paso inicial
   const { data: companies, isLoading: loadingCompanies, isSuccess: companiesLoaded } = useGetMyCompaniesQuery();
   const shouldLoadPDV = !loadingCompanies && companies && companies.length > 0;
   const {
@@ -93,14 +96,11 @@ export default function StepByStep() {
     skip: !shouldLoadPDV
   });
 
-  // Efecto inicial: cargar datos del backend y determinar paso correcto
   useEffect(() => {
-    // Esperar a que terminen las consultas iniciales
     if (loadingCompanies || (shouldLoadPDV && loadingPDV) || (shouldLoadPDV && loadingSubscription)) {
       return;
     }
 
-    // Solo ejecutar una vez
     if (initialLoadComplete) {
       return;
     }
@@ -110,7 +110,6 @@ export default function StepByStep() {
     console.log('🏪 PDVs:', allPDVs);
     console.log('💳 Suscripción:', currentSubscription);
 
-    // Caso 1: No hay empresa -> ir a paso de empresa
     if (!companies || companies.length === 0) {
       console.log('❌ No hay empresa, ir a paso COMPANY');
       dispatch(setStep(StepType.COMPANY));
@@ -118,11 +117,9 @@ export default function StepByStep() {
       return;
     }
 
-    // Caso 2: Hay empresa -> cargar en Redux y determinar siguiente paso
     const company = companies[0];
     console.log('✅ Empresa encontrada:', company);
 
-    // Actualizar Redux con data del backend
     dispatch(
       setCompanyResponse({
         id: company.id,
@@ -141,11 +138,9 @@ export default function StepByStep() {
       })
     );
 
-    // Caso 3: Verificar PDVs
     const hasPDVs = allPDVs && allPDVs.pdvs && allPDVs.pdvs.length > 0;
     if (hasPDVs) {
       console.log('✅ PDVs encontrados:', allPDVs.pdvs);
-      // Cargar el primer PDV en Redux (o el principal si existe)
       const mainPDV = allPDVs.pdvs.find((pdv) => pdv.is_active) || allPDVs.pdvs[0];
       dispatch(
         setPDVResponse({
@@ -161,25 +156,25 @@ export default function StepByStep() {
         })
       );
 
-      // Caso 4: Verificar suscripción
       if (currentSubscription && currentSubscription.id) {
         console.log('✅ Suscripción encontrada, ir a SUMMARY');
+
+        dispatch(setSubscriptionResponse(currentSubscription));
+
         dispatch(
           setPlanData({
-            plan_id: currentSubscription.plan_code,
-            trial_days: currentSubscription.days_remaining,
-            auto_renewal: true,
-            payment_method: null
+            plan_id: currentSubscription.plan_code, // Use plan_code as fallback since we need to match with plans
+            billing_cycle: currentSubscription.billing_cycle,
+            auto_renew: true, // Default since not provided in response
+            currency: 'COP' // Default currency
           })
         );
         dispatch(setStep(StepType.SUMMARY));
       } else {
-        // Si hay empresa y PDV pero no suscripción, ir a plan
         console.log('🎯 Empresa y PDV completos, ir a PLAN');
         dispatch(setStep(StepType.PLAN));
       }
     } else {
-      // No hay PDV, ir a crearlo
       console.log('📍 Empresa sin PDV, ir a PDV');
       dispatch(setStep(StepType.PDV));
     }
@@ -212,7 +207,6 @@ export default function StepByStep() {
     }
   };
 
-  // Mapeo de componentes por paso
   const StepComponent = useMemo(() => {
     switch (activeStep) {
       case StepType.COMPANY:

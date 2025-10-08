@@ -69,12 +69,14 @@ export default function RegisterCompanyForm() {
         // Mantener el ID y agregar los nuevos datos
         dispatch(
           setPrevValuesCompany({
-            ...data,
             id: prevValuesCompany.id,
+            name: data.name,
+            nit: data.nit,
             address: data.address || '',
-            website: data.website || '',
-            quantityEmployees: data.quantityEmployees || '',
-            economicActivity: data.economicActivity || ''
+            phoneNumber: data.phone_number,
+            quantityEmployees: data.quantity_employees || '',
+            economicActivity: data.economic_activity || '',
+            uniquePDV: data.uniquePDV
           })
         );
       } else {
@@ -94,11 +96,10 @@ export default function RegisterCompanyForm() {
           }
         );
 
-        // Si uniquePDV es true, saltar al paso 2 (plan), si no, ir al paso 1 (PDV)
         if (data.uniquePDV) {
-          dispatch(setStep(2)); // Saltar a selección de plan
+          dispatch(setStep(2));
         } else {
-          dispatch(setStep(1)); // Ir a configuración de PDV
+          dispatch(setStep(1));
         }
       }
     } catch (error: any) {
@@ -150,7 +151,6 @@ export default function RegisterCompanyForm() {
           </RHFSelect>
         </Stack>
 
-        {/* Unique PDV Option */}
         <Box sx={{ mt: 2 }}>
           <Divider sx={{ mb: 2 }} />
 

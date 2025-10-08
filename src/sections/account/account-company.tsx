@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -10,7 +10,6 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useAuthContext } from 'src/auth/hooks';
 // utils
 import { fData } from 'src/utils/format-number';
 // components
@@ -27,18 +26,31 @@ import {
 
 // ----------------------------------------------------------------------
 
+interface CompanyFormData {
+  name: string;
+  nit?: string;
+  address: string;
+  phone_number: string;
+  description?: string;
+  social_reason?: string;
+  quantity_employees: string;
+  economic_activity: string;
+  logo?: any;
+}
+
+// ----------------------------------------------------------------------
+
 export default function AccountCompany() {
   const { enqueueSnackbar } = useSnackbar();
-  const { company } = useAuthContext();
 
-  // RTK Query hooks
-  const { data: companyData, refetch: refetchCompany } = useGetCompanyProfileQuery();
-  const { data: logoData } = useGetCompanyLogoQuery();
+  const { data: companyData, refetch: refetchCompany, isLoading: _isLoadingCompany } = useGetCompanyProfileQuery();
+  const { data: logoData, refetch: refetchLogo } = useGetCompanyLogoQuery();
   const [updateCompany, { isLoading: _isUpdatingCompany }] = useUpdateCompanyMutation();
   const [uploadLogo, { isLoading: _isUploadingLogo }] = useUploadCompanyLogoMutation();
 
-  // Usar datos de la API si están disponibles, sino usar del contexto
-  const currentCompany = companyData || company;
+  const currentCompany = companyData;
+  console.log('Current Company:', currentCompany);
+  console.log('Logo Data:', logoData);
 
   const UpdateCompanySchema = Yup.object().shape({
     name: Yup.string().required('Nombre es requerido'),
@@ -47,60 +59,89 @@ export default function AccountCompany() {
     phone_number: Yup.string().required('Teléfono es requerido'),
     description: Yup.string(),
     social_reason: Yup.string(),
-    quantity_employees: Yup.number().min(1, 'Debe ser mayor a 0'),
+    quantity_employees: Yup.string().required('Cantidad de empleados es requerida'),
     economic_activity: Yup.string().required('Actividad económica es requerida'),
     logo: Yup.mixed()
   });
 
-  const defaultValues = {
-    name: currentCompany?.name || '',
-    nit: currentCompany?.nit || '',
-    address: (currentCompany as any)?.address || '',
-    phone_number: (currentCompany as any)?.phone_number || '',
-    description: (currentCompany as any)?.description || '',
-    social_reason: (currentCompany as any)?.social_reason || '',
-    quantity_employees: (currentCompany as any)?.quantity_employees || 0,
-    economic_activity: (currentCompany as any)?.economic_activity || '',
-    logo: logoData?.logo_url || (currentCompany as any)?.logo_url || null
-  };
-
-  const methods = useForm<any>({
+  const methods = useForm<CompanyFormData>({
     resolver: yupResolver(UpdateCompanySchema),
-    defaultValues
+    defaultValues: {
+      name: '',
+      nit: '',
+      address: '',
+      phone_number: '',
+      description: '',
+      social_reason: '',
+      quantity_employees: '',
+      economic_activity: '',
+      logo: null
+    }
   });
 
   const {
+    reset,
     setValue,
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
 
+  useEffect(() => {
+    if (currentCompany) {
+      const defaultValues = {
+        name: currentCompany.name || '',
+        nit: currentCompany.nit || '',
+        address: currentCompany.address || '',
+        phone_number: currentCompany.phone_number || '',
+        description: currentCompany.description || '',
+        social_reason: currentCompany.social_reason || '',
+        quantity_employees: currentCompany.quantity_employees?.toString() || '',
+        economic_activity: currentCompany.economic_activity || '',
+        logo: logoData?.logo_url || currentCompany.logo_url || null
+      };
+
+      console.log('Resetting form with values:', defaultValues);
+      reset(defaultValues);
+    }
+  }, [currentCompany, logoData, reset]);
+
+  // Update logo specifically when logoData changes
+  useEffect(() => {
+    if (logoData?.logo_url) {
+      console.log('Setting logo from logoData:', logoData.logo_url);
+      setValue('logo', logoData.logo_url);
+    }
+  }, [logoData, setValue]);
+
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // 1. Subir logo si hay una nueva imagen
       if (data.logo && typeof data.logo === 'object' && 'preview' in data.logo) {
         const formData = new FormData();
         formData.append('file', data.logo as unknown as File);
 
         await uploadLogo(formData).unwrap();
         enqueueSnackbar('Logo actualizado correctamente', { variant: 'success' });
+
+        // Refetch logo data to get the new URL
+        await refetchLogo();
       }
 
-      // 2. Actualizar información de la empresa
       const updateData = {
         name: data.name,
         address: data.address,
         phone_number: data.phone_number,
         description: data.description,
         social_reason: data.social_reason,
-        quantity_employees: Number(data.quantity_employees),
-        economic_activity: data.economic_activity
+        economic_activity: data.economic_activity,
+        // Only include quantity_employees if it's a valid number
+        ...(Number.isInteger(Number(data.quantity_employees)) && {
+          quantity_employees: Number(data.quantity_employees)
+        })
       };
 
       await updateCompany(updateData).unwrap();
       enqueueSnackbar('Información de la empresa actualizada correctamente', { variant: 'success' });
 
-      // Refrescar datos
       refetchCompany();
     } catch (error: any) {
       console.error('Error updating company:', error);
@@ -178,8 +219,7 @@ export default function AccountCompany() {
               <RHFTextField
                 name="quantity_employees"
                 label="Cantidad de Empleados"
-                type="number"
-                inputProps={{ min: 1 }}
+                placeholder="Ej: 1-10, 11-50, 51-100"
               />
               <RHFTextField name="economic_activity" label="Actividad Económica" />
             </Box>
@@ -189,7 +229,7 @@ export default function AccountCompany() {
                 color="primary"
                 type="submit"
                 variant="contained"
-                loading={isSubmitting || _isUpdatingCompany || _isUploadingLogo}
+                loading={isSubmitting || _isUpdatingCompany || _isUploadingLogo || _isLoadingCompany}
               >
                 Guardar Cambios
               </LoadingButton>

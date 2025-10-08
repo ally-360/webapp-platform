@@ -22,7 +22,7 @@ import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { t } from 'i18next';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // ----------------------------------------------------------------------
 
@@ -46,9 +46,15 @@ const OPTIONS = [
 export default function AccountPopover() {
   const router = useRouter();
 
-  const { user } = useAuthContext();
+  const { user, company } = useAuthContext();
   const { logout } = useAuthContext();
   const { data: avatarData } = useGetUserAvatarQuery();
+
+  useEffect(() => {
+    console.log('Company in AccountPopover:', company);
+    console.log('User in AccountPopover:', user);
+    console.log('Avatar Data in AccountPopover:', avatarData);
+  }, [company, user, avatarData]);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -91,8 +97,8 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={avatarData?.avatar_url || user?.profile?.photo}
-          alt={user?.profile?.name}
+          src={avatarData?.avatar_url}
+          alt={user?.profile?.first_name}
           sx={{
             width: 36,
             height: 36,
@@ -104,11 +110,11 @@ export default function AccountPopover() {
       <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 200, p: 0 }}>
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {`${user?.profile?.name} ${user?.profile?.lastname}`}
+            {`${user?.profile?.first_name} ${user?.profile?.last_name}`}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {user?.company?.name}
+            {company?.name}
           </Typography>
         </Box>
 

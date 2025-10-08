@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import isEqual from 'lodash/isEqual';
 // @mui
 import Card from '@mui/material/Card';
@@ -13,8 +13,6 @@ import TableContainer from '@mui/material/TableContainer';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 // redux
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from 'src/redux/slices/authSlice';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -38,10 +36,10 @@ import {
 } from 'src/components/table';
 //
 import { useGetProductsQuery, useDeleteProductMutation } from 'src/redux/services/productsApi';
+import { useAuthContext } from 'src/auth/hooks';
 import ProductTableRow from '../product-table-row';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
-// RTK Query
 
 // ----------------------------------------------------------------------
 
@@ -69,18 +67,16 @@ const defaultFilters = {
 // ----------------------------------------------------------------------
 
 interface ProductListViewProps {
-  categoryView?: boolean | any; // Puede ser boolean o un objeto categoría/marca
-  brandView?: any; // Objeto marca para filtrar
+  categoryView?: boolean | any;
+  brandView?: any;
 }
 
 export default function ProductListView({ categoryView = false, brandView }: ProductListViewProps) {
   const theme = useTheme();
   const router = useRouter();
 
-  // Redux selectors
-  const user = useSelector(selectCurrentUser);
+  const { user } = useAuthContext();
 
-  // Ref component to print
   const componentRef = useRef<HTMLDivElement>(null);
   const table = useTable(true);
   const settings = useSettingsContext();
@@ -92,23 +88,20 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
 
   const confirm = useBoolean(false);
 
-  // Determinar filtros de categoría y marca
   const categoryId = typeof categoryView === 'object' && categoryView?.id ? categoryView.id : undefined;
   const brandId = brandView?.id || undefined;
 
-  // Debounce para búsqueda - solo buscar si tiene al menos 2 caracteres
   useEffect(() => {
     const timer = setTimeout(() => {
       if (filters.name.length >= 2 || filters.name.length === 0) {
         setDebouncedSearch(filters.name);
       }
-    }, 500); // 500ms de debounce
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [filters.name]);
 
-  // ========================================
-  // 🔥 RTK QUERY - PRODUCTOS
+  // RTK QUERY - PRODUCTOS
   // ========================================
 
   const {
@@ -117,11 +110,11 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
     refetch: refetchProducts
   } = useGetProductsQuery(
     {
-      page: table.page + 1, // RTK Query usa paginación desde 1
+      page: table.page + 1,
       limit: table.rowsPerPage,
-      search: debouncedSearch || undefined, // Usar búsqueda con debounce
-      categoryId, // Filtrar por categoría si está presente
-      brandId // Filtrar por marca si está presente
+      search: debouncedSearch || undefined,
+      categoryId,
+      brandId
     },
     {
       skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
@@ -130,20 +123,16 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
 
   const [deleteProduct] = useDeleteProductMutation();
 
-  // Solo resetear página cuando cambian props externas (categoría/marca)
-  // No incluimos debouncedSearch porque se maneja en handleFilters
-  React.useEffect(() => {
+  useEffect(() => {
     if (categoryId !== undefined || brandId !== undefined) {
       table.onResetPage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId, brandId]); // No incluir table para evitar bucles infinitos
+  }, [categoryId, brandId]);
 
-  // ========================================
-  // 📊 DATOS PROCESADOS
+  // DATOS PROCESADOS
   // ========================================
 
-  // Extraer datos de la respuesta paginada del servidor
   const tableData = productsData?.data || [];
   const totalProducts = productsData?.total || 0;
   const productsEmpty = !productsLoading && tableData.length === 0;
@@ -230,7 +219,6 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
     async (id: string) => {
       try {
         await deleteProduct(id).unwrap();
-        // El refetch manejará la actualización de la paginación automáticamente
         refetchProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
