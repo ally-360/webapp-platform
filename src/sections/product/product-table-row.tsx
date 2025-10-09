@@ -39,7 +39,6 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
     setAnchorEl(null);
   };
 
-  // Si está en modo loading o row es null, mostrar skeleton
   if (loading || !row) {
     return (
       <TableRow hover>

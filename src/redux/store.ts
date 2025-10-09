@@ -23,6 +23,7 @@ import { dashboardApi } from './services/dashboardApi';
 import { userProfileApi } from './services/userProfileApi';
 import { locationsApi } from './services/locationsApi';
 import { subscriptionsApi } from './services/subscriptionsApi';
+import { posApi } from './services/posApi';
 import authReducer from './slices/authSlice';
 
 export const store = configureStore({
@@ -43,6 +44,7 @@ export const store = configureStore({
     [userProfileApi.reducerPath]: userProfileApi.reducer,
     [locationsApi.reducerPath]: locationsApi.reducer,
     [subscriptionsApi.reducerPath]: subscriptionsApi.reducer,
+    [posApi.reducerPath]: posApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -69,7 +71,8 @@ export const store = configureStore({
       dashboardApi.middleware,
       userProfileApi.middleware,
       locationsApi.middleware,
-      subscriptionsApi.middleware
+      subscriptionsApi.middleware,
+      posApi.middleware
     )
 });
 

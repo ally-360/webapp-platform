@@ -11,22 +11,78 @@ export const LoginSchema = object().shape({
 });
 
 export const RegisterSchema = object().shape({
-  email: string().email('Ingrese un correo valido').required('Correo es requerido'),
+  email: string()
+    .email('Ingrese un correo válido')
+    .required('Correo es requerido')
+    .test('email-domain', 'El correo debe tener un dominio válido (.com, .co, .net, etc.)', (value) => {
+      if (!value) return false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+      return emailRegex.test(value);
+    }),
   password: string()
     .required('La contraseña es requerida')
-    .min(8, 'La contraseña debe tener al menos 8 caracteres') // Backend requiere min 8
-    .max(50, 'La contraseña debe tener menos de 50 caracteres'),
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .max(50, 'La contraseña debe tener menos de 50 caracteres')
+    .test('password-strength', 'La contraseña debe contener al menos una letra y un número', (value) => {
+      if (!value) return false;
+      const hasLetter = /[a-zA-Z]/.test(value);
+      const hasNumber = /\d/.test(value);
+      return hasLetter && hasNumber;
+    }),
   profile: object().shape({
     lastname: string()
-      .min(2, 'Ingrese un apellido valido') // Backend requiere min 2
-      .max(50, 'Ingrese un apellido más corto')
-      .required('Ingrese el apellido'),
+      .min(2, 'El apellido debe tener al menos 2 caracteres')
+      .max(50, 'El apellido debe tener menos de 50 caracteres')
+      .required('El apellido es requerido')
+      .test('lastname-format', 'El apellido solo debe contener letras y espacios', (value) => {
+        if (!value) return false;
+        const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+        return nameRegex.test(value);
+      }),
     name: string()
-      .min(2, 'Ingrese un nombre valido') // Backend requiere min 2
-      .max(50, 'Ingrese un nombre valido')
-      .required('Ingrese el nombre'),
-    personalPhoneNumber: string().nullable().max(20, 'Número de teléfono muy largo'), // Backend permite hasta 20 chars
-    dni: string().nullable().max(20, 'Número de identificación muy largo'), // Backend permite hasta 20 chars
+      .min(2, 'El nombre debe tener al menos 2 caracteres')
+      .max(50, 'El nombre debe tener menos de 50 caracteres')
+      .required('El nombre es requerido')
+      .test('name-format', 'El nombre solo debe contener letras y espacios', (value) => {
+        if (!value) return false;
+        const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+        return nameRegex.test(value);
+      }),
+    personalPhoneNumber: string()
+      .required('El número de teléfono es requerido')
+      .test(
+        'phone-format',
+        'Usa un número correcto. Formato válido: +573XXXXXXXXX (móvil) o +571XXXXXXX (fijo)',
+        (value) => {
+          if (!value) return false;
+          // Remove spaces and normalize
+          const cleanPhone = value.replace(/\s+/g, '');
+
+          // Colombian phone patterns
+          // Mobile: +573XXXXXXXXX or 3XXXXXXXXX (10 digits starting with 3)
+          // Landline: +571XXXXXXX or 1XXXXXXX (8 digits starting with 1)
+          const mobileRegex = /^(\+57)?3\d{9}$/;
+          const landlineRegex = /^(\+57)?[124567]\d{7}$/;
+
+          return mobileRegex.test(cleanPhone) || landlineRegex.test(cleanPhone);
+        }
+      ),
+    dni: string()
+      .required('La cédula de ciudadanía es requerida')
+      .test('dni-format', 'Ingresa una cédula válida (entre 6 y 10 dígitos)', (value) => {
+        if (!value) return false;
+        // Colombian ID (cédula) validation: 6-10 digits, no leading zeros for short numbers
+        const dniRegex = /^\d{6,10}$/;
+        const isValidLength = dniRegex.test(value);
+
+        if (!isValidLength) return false;
+
+        // Additional validation: should not be all zeros or sequential numbers
+        const allZeros = /^0+$/.test(value);
+        const sequential = /^(0123456789|1234567890|9876543210)/.test(value);
+
+        return !allZeros && !sequential;
+      }),
     photo: string().nullable()
   })
 });

@@ -2,11 +2,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Types para el POS
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   quantity: number;
   sku: string;
+  barCode?: string;
+  description?: string;
+  brand?: string;
+  sellInNegative?: boolean;
   tax_rate?: number;
   category?: string;
   stock?: number;
@@ -14,7 +18,7 @@ interface Product {
 }
 
 interface Customer {
-  id?: number;
+  id: string;
   name: string;
   document?: string;
   email?: string;

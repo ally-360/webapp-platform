@@ -11,16 +11,30 @@ const scannerPulse = keyframes`
   100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
 `;
 
+// Animation for loading spinner
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
 interface ProductSearchBarProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   onBarcodeDetected?: (barcode: string) => void;
+  minSearchLength?: number;
+  isLoading?: boolean;
 }
 
 /**
- * Enhanced search bar with barcode scanner integration
+ * Enhanced search bar with barcode scanner integration and debounced search
  */
-const ProductSearchBar: React.FC<ProductSearchBarProps> = ({ searchTerm, onSearchChange, onBarcodeDetected }) => {
+const ProductSearchBar: React.FC<ProductSearchBarProps> = ({
+  searchTerm,
+  onSearchChange,
+  onBarcodeDetected,
+  minSearchLength = 2,
+  isLoading = false
+}) => {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [lastScannedCode, setLastScannedCode] = useState<string | null>(null);
 
@@ -43,6 +57,17 @@ const ProductSearchBar: React.FC<ProductSearchBarProps> = ({ searchTerm, onSearc
     onSearchChange('');
   };
 
+  // Determinar el estado de validación de la búsqueda
+  const isSearchTooShort = searchTerm.length > 0 && searchTerm.length < minSearchLength;
+  const showValidationError = isSearchTooShort;
+
+  let helperText = '';
+  if (showValidationError) {
+    helperText = `Mínimo ${minSearchLength} caracteres para buscar`;
+  } else if (isLoading) {
+    helperText = 'Buscando productos...';
+  }
+
   return (
     <>
       <Box sx={{ width: '100%', maxWidth: 600 }}>
@@ -53,10 +78,22 @@ const ProductSearchBar: React.FC<ProductSearchBarProps> = ({ searchTerm, onSearc
             placeholder="Buscar productos por nombre, código o categoría..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
+            error={showValidationError}
+            helperText={helperText}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Icon icon="mdi:magnify" style={{ color: '#666' }} />
+                  {isLoading ? (
+                    <Icon
+                      icon="mdi:loading"
+                      style={{
+                        color: '#2196f3',
+                        animation: `${spin} 1s linear infinite`
+                      }}
+                    />
+                  ) : (
+                    <Icon icon="mdi:magnify" style={{ color: '#666' }} />
+                  )}
                 </InputAdornment>
               ),
               endAdornment: (
@@ -98,6 +135,9 @@ const ProductSearchBar: React.FC<ProductSearchBarProps> = ({ searchTerm, onSearc
                 },
                 '&.Mui-focused': {
                   boxShadow: '0 4px 12px rgba(33, 150, 243, 0.2)'
+                },
+                '&.Mui-error': {
+                  boxShadow: '0 4px 12px rgba(244, 67, 54, 0.2)'
                 }
               }
             }}

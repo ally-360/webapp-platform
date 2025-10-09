@@ -12,19 +12,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
-import Divider from '@mui/material/Divider';
-import {
-  Avatar,
-  IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  TextField,
-  Tooltip,
-  Zoom
-} from '@mui/material';
-import { Icon } from '@iconify/react';
+
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -32,30 +20,16 @@ import { useRouter } from 'src/routes/hook';
 import { useResponsive } from 'src/hooks/use-responsive';
 import { useSnackbar } from 'src/components/snackbar';
 // components
-import FormProvider, { 
-  RHFUpload, 
-  RHFSwitch, 
-  RHFTextField, 
-  RHFSelect,
-  RHFAutocomplete 
-} from 'src/components/hook-form';
+import FormProvider, { RHFUpload, RHFSwitch, RHFTextField, RHFSelect } from 'src/components/hook-form';
 // RTK Query
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
   type CreateProductRequest
 } from 'src/redux/services/productsApi';
-import {
-  useGetTaxesQuery,
-  useGetPDVsQuery,
-  useGetCategoriesQuery,
-  useGetBrandsQuery,
-  type Tax,
-  type PDV
-} from 'src/redux/services/catalogApi';
+import { useGetCategoriesQuery, useGetBrandsQuery } from 'src/redux/services/catalogApi';
 import type { Product } from 'src/api/types';
 // utils
-import { fNumber } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 

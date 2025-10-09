@@ -67,6 +67,7 @@ export const productsApi = createApi({
         if (filters.brandId) searchParams.set('brand_id', filters.brandId);
         if (filters.page) searchParams.set('page', filters.page.toString());
         if (filters.limit) searchParams.set('limit', filters.limit.toString());
+        if (typeof filters.isActive === 'boolean') searchParams.set('is_active', filters.isActive.toString());
 
         return `/products/?${searchParams.toString()}`;
       },

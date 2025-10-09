@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 //
 import App from './App';
-import { MockIndicator } from './components/MockIndicator';
 
 // ----------------------------------------------------------------------
 
@@ -15,7 +14,6 @@ root.render(
     <BrowserRouter>
       <Suspense>
         <App />
-        <MockIndicator />
       </Suspense>
     </BrowserRouter>
   </HelmetProvider>

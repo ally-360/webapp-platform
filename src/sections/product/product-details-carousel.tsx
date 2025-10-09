@@ -188,7 +188,7 @@ export default function ProductDetailsCarousel({ product }) {
             Teléfono
           </Typography>
           <Typography variant="body2" gutterBottom>
-            {company?.phoneNumber}
+            {company?.phone_number}
           </Typography>
         </Grid>
         <Grid item xs={12} md={4}>
