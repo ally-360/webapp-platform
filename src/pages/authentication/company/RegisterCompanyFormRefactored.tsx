@@ -30,6 +30,7 @@ import {
 
 // RTK Query
 import { useGetMyCompaniesQuery, useCreateCompanyMutation, useUpdateCompanyMutation } from 'src/redux/services/authApi';
+import { useAuthContext } from 'src/auth/hooks';
 
 // options
 import { useEffect } from 'react';
@@ -42,9 +43,16 @@ import { economicActivityOptions, quantityEmployeesOptions } from './optionsComm
 export default function RegisterCompanyForm() {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
+  const { isFirstLogin } = useAuthContext();
 
   // RTK Query hooks
-  const { data: myCompanies } = useGetMyCompaniesQuery();
+  // Evitar consultas de empresas en onboarding (first_login) para no disparar 404 y re-montajes
+  const { data: myCompanies } = useGetMyCompaniesQuery(undefined, {
+    skip: isFirstLogin === true,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMountOrArgChange: false
+  });
   const [createCompany] = useCreateCompanyMutation();
   const [updateCompany] = useUpdateCompanyMutation();
 

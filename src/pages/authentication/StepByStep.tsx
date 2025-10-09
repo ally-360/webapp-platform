@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import {
   Box,
   Stepper,
@@ -30,8 +30,7 @@ import {
   setPlanData,
   setSubscriptionResponse
 } from 'src/redux/slices/stepByStepSlice';
-import { useGetMyCompaniesQuery, useGetAllPDVsQuery } from 'src/redux/services/authApi';
-import { useGetCurrentSubscriptionQuery } from 'src/redux/services/subscriptionsApi';
+import { useStepByStepData } from 'src/hooks/use-step-by-step-data';
 
 const getStepsConfig = (isUniquePDV: boolean | undefined) => {
   if (isUniquePDV) {
@@ -75,7 +74,6 @@ export default function StepByStep() {
   const { enqueueSnackbar } = useSnackbar();
   const { logout } = useAuthContext();
   const dispatch = useAppDispatch();
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const activeStep = useAppSelector((state) => state.stepByStep.activeStep);
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
@@ -83,25 +81,12 @@ export default function StepByStep() {
 
   const stepsConfig = useMemo(() => getStepsConfig(isUniquePDV), [isUniquePDV]);
 
-  const { data: companies, isLoading: loadingCompanies, isSuccess: companiesLoaded } = useGetMyCompaniesQuery();
-  const shouldLoadPDV = !loadingCompanies && companies && companies.length > 0;
-  const {
-    data: allPDVs,
-    isLoading: loadingPDV,
-    isSuccess: pdvLoaded
-  } = useGetAllPDVsQuery(undefined, {
-    skip: !shouldLoadPDV
-  });
-  const { data: currentSubscription, isLoading: loadingSubscription } = useGetCurrentSubscriptionQuery(undefined, {
-    skip: !shouldLoadPDV
-  });
+  // 🔧 Hook optimizado para obtener datos sin bucles infinitos
+  const { companies, allPDVs, currentSubscription, isLoading, isReady, hasError } = useStepByStepData();
 
+  //  Efecto para validar y establecer el paso correcto
   useEffect(() => {
-    if (loadingCompanies || (shouldLoadPDV && loadingPDV) || (shouldLoadPDV && loadingSubscription)) {
-      return;
-    }
-
-    if (initialLoadComplete) {
+    if (!isReady || hasError) {
       return;
     }
 
@@ -110,13 +95,14 @@ export default function StepByStep() {
     console.log('🏪 PDVs:', allPDVs);
     console.log('💳 Suscripción:', currentSubscription);
 
+    // 📌 PASO 1: Sin empresa → ir a crear empresa
     if (!companies || companies.length === 0) {
       console.log('❌ No hay empresa, ir a paso COMPANY');
       dispatch(setStep(StepType.COMPANY));
-      setInitialLoadComplete(true);
       return;
     }
 
+    // 📌 PASO 2: Empresa encontrada → configurar estado
     const company = companies[0];
     console.log('✅ Empresa encontrada:', company);
 
@@ -126,7 +112,7 @@ export default function StepByStep() {
         name: company.name,
         description: company.description || '',
         address: company.address || '',
-        phone_number: company.phone_number,
+        phone_number: company.phone_number || '',
         nit: company.nit,
         economic_activity: company.economic_activity || '',
         quantity_employees: String(company.quantity_employees || ''),
@@ -138,6 +124,7 @@ export default function StepByStep() {
       })
     );
 
+    // 📌 PASO 3: Validar PDVs
     const hasPDVs = allPDVs && allPDVs.pdvs && allPDVs.pdvs.length > 0;
     if (hasPDVs) {
       console.log('✅ PDVs encontrados:', allPDVs.pdvs);
@@ -156,6 +143,7 @@ export default function StepByStep() {
         })
       );
 
+      // 📌 PASO 4: Validar suscripción
       if (currentSubscription && currentSubscription.id) {
         console.log('✅ Suscripción encontrada, ir a SUMMARY');
 
@@ -163,10 +151,10 @@ export default function StepByStep() {
 
         dispatch(
           setPlanData({
-            plan_id: currentSubscription.plan_code, // Use plan_code as fallback since we need to match with plans
+            plan_id: currentSubscription.plan_code,
             billing_cycle: currentSubscription.billing_cycle,
-            auto_renew: true, // Default since not provided in response
-            currency: 'COP' // Default currency
+            auto_renew: true,
+            currency: 'COP'
           })
         );
         dispatch(setStep(StepType.SUMMARY));
@@ -178,21 +166,7 @@ export default function StepByStep() {
       console.log('📍 Empresa sin PDV, ir a PDV');
       dispatch(setStep(StepType.PDV));
     }
-
-    setInitialLoadComplete(true);
-  }, [
-    companies,
-    allPDVs,
-    currentSubscription,
-    loadingCompanies,
-    loadingPDV,
-    loadingSubscription,
-    shouldLoadPDV,
-    initialLoadComplete,
-    dispatch,
-    companiesLoaded,
-    pdvLoaded
-  ]);
+  }, [isReady, hasError, companies, allPDVs, currentSubscription, dispatch]);
 
   const isStepOptional = (_step: number) => false;
   const isStepSkipped = (_step: number) => false;
@@ -221,6 +195,44 @@ export default function StepByStep() {
         return <Typography>Paso desconocido</Typography>;
     }
   }, [activeStep]);
+
+  // 🔄 Mostrar loading mientras se cargan los datos iniciales
+  if (isLoading && !isReady) {
+    return (
+      <RootStyle>
+        <Container>
+          <ContentStyle>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+              <Typography variant="h6">Cargando configuración...</Typography>
+            </Box>
+          </ContentStyle>
+        </Container>
+      </RootStyle>
+    );
+  }
+
+  // ⚠️ Mostrar error si hay problemas de conectividad
+  if (hasError) {
+    return (
+      <RootStyle>
+        <Container>
+          <ContentStyle>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '50vh' }}>
+              <Typography variant="h6" color="error" gutterBottom>
+                Error de conexión
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                No se pudo cargar la configuración. Verifica tu conexión e intenta nuevamente.
+              </Typography>
+              <Button variant="outlined" onClick={() => window.location.reload()}>
+                Reintentar
+              </Button>
+            </Box>
+          </ContentStyle>
+        </Container>
+      </RootStyle>
+    );
+  }
 
   return (
     <RootStyle>

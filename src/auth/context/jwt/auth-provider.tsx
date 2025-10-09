@@ -86,7 +86,12 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     isLoading: companiesLoading,
     error: companiesError
   } = useGetMyCompaniesQuery(undefined, {
-    skip: !localStorage.getItem('accessToken')
+    // Evitar consultas de empresas en onboarding para no disparar 404 ni antes de cargar el usuario
+    skip: !localStorage.getItem('accessToken') || userLoading || currentUser?.first_login === true,
+    // 🔧 Configuración para reducir refetch automático
+    refetchOnMountOrArgChange: false,
+    refetchOnFocus: false,
+    refetchOnReconnect: false
   });
 
   const initialize = useCallback(async () => {
@@ -138,6 +143,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         ...prev,
         user: currentUser,
         isAuthenticated: true,
+        isFirstLogin: currentUser.first_login,
         loading: false
       }));
     }
@@ -155,7 +161,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     }
 
     if (userCompanies && userCompanies.length > 0) {
-      // Use backend companies directly without adaptation
       setState((prev) => ({
         ...prev,
         company: userCompanies[0] || null,
@@ -181,6 +186,13 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   useEffect(() => {
     if (companiesError) {
       console.warn('Companies loading error:', companiesError);
+
+      // 🔧 Si es un error 404 (no hay empresas), continuar normalmente
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((companiesError as any)?.status === 404) {
+        console.log('📄 404: Usuario sin empresas (normal para usuarios nuevos)');
+      }
+
       setState((prev) => ({ ...prev, loading: false }));
     }
   }, [companiesError]);
@@ -200,7 +212,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           company: null, // Will be set when companies are loaded
           pdvCompany: null,
           isAuthenticated: true,
-          isFirstLogin: companies.length === 0,
+          isFirstLogin: user.first_login,
           loading: false,
           changingCompany: false,
           selectedCompany: !!(companies.length === 1)

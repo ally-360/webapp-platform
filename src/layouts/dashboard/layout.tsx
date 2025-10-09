@@ -10,6 +10,7 @@ import { useSettingsContext } from 'src/components/settings';
 import React, { useEffect } from 'react';
 import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
 import { useAppDispatch } from 'src/hooks/store';
+import { useAuthContext } from 'src/auth/hooks';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -22,10 +23,14 @@ export default function DashboardLayout({ children }) {
   const settings = useSettingsContext();
 
   const dispatch = useAppDispatch();
+  const { isFirstLogin, authenticated, selectedCompany } = useAuthContext();
 
   useEffect(() => {
-    dispatch(getAllPDVS());
-  }, [dispatch]);
+    // Evitar cargar PDVs si es first_login o no hay company seleccionada
+    if (authenticated && isFirstLogin === false && selectedCompany) {
+      dispatch(getAllPDVS());
+    }
+  }, [dispatch, authenticated, isFirstLogin, selectedCompany]);
 
   const lgUp = useResponsive('up', 'lg');
 

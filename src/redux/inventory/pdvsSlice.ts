@@ -1,11 +1,40 @@
 import { createSlice } from '@reduxjs/toolkit';
 import RequestService from '../../axios/services/service';
 
-const initialState = {
+// Ensure we only store serializable errors in Redux state
+const serializeError = (err: any): string | null => {
+  if (!err) return null;
+  if (typeof err === 'string') return err;
+  if (err?.data?.detail) {
+    if (Array.isArray(err.data.detail)) {
+      return err.data.detail.map((e: any) => e?.msg || 'Error').join(', ');
+    }
+    if (typeof err.data.detail === 'string') return err.data.detail;
+  }
+  if (err?.message) return err.message;
+  try {
+    return JSON.stringify(err);
+  } catch {
+    return String(err);
+  }
+};
+
+interface PDVState {
+  pdvs: any[];
+  pdvsLoading: boolean;
+  error: string | null;
+  success: boolean;
+  pdvsEmpty: boolean;
+  openPopup: boolean;
+  editId: string | false;
+  seePDV: boolean;
+}
+
+const initialState: PDVState = {
   pdvs: [],
   pdvsLoading: false,
   error: null,
-  success: null,
+  success: false,
   pdvsEmpty: false,
   openPopup: false,
   editId: false,
@@ -21,7 +50,7 @@ const pdvsSlice = createSlice({
     },
     hasError(state, action) {
       state.pdvsLoading = false;
-      state.error = action.payload;
+      state.error = serializeError(action.payload);
       state.success = false;
       state.pdvsEmpty = true;
     },
@@ -35,12 +64,12 @@ const pdvsSlice = createSlice({
     getAllPDVSError(state, action) {
       state.pdvs = [];
       state.pdvsLoading = false;
-      state.error = action.payload;
+      state.error = serializeError(action.payload);
       state.success = false;
       state.pdvsEmpty = true;
     },
     deletePDVSuccess(state, action) {
-      state.pdvs = state.pdvs.filter((pdv) => pdv.id !== action.payload);
+      state.pdvs = state.pdvs.filter((pdv: any) => pdv.id !== action.payload);
       state.pdvsLoading = false;
       state.error = null;
       state.success = true;
@@ -48,7 +77,7 @@ const pdvsSlice = createSlice({
     },
     deletePDVError(state, action) {
       state.pdvsLoading = false;
-      state.error = action.payload;
+      state.error = serializeError(action.payload);
       state.success = false;
       state.pdvsEmpty = true;
     },

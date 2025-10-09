@@ -335,21 +335,26 @@ const posSlice = createSlice({
       const window = state.salesWindows.find((w) => w.id === action.payload);
       if (!window) return;
 
-      const subtotal = window.products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+      // Función helper para redondear a 2 decimales
+      const roundToTwo = (num: number): number => Math.round(num * 100) / 100;
 
-      const tax_amount = window.products.reduce((sum, product) => {
-        const tax_rate = product.tax_rate || state.settings.default_tax_rate;
-        return sum + product.price * product.quantity * tax_rate;
-      }, 0);
+      const subtotal = roundToTwo(window.products.reduce((sum, product) => sum + product.price * product.quantity, 0));
 
-      let total = subtotal + tax_amount;
+      const tax_amount = roundToTwo(
+        window.products.reduce((sum, product) => {
+          const tax_rate = product.tax_rate || state.settings.default_tax_rate;
+          return sum + product.price * product.quantity * tax_rate;
+        }, 0)
+      );
+
+      let total = roundToTwo(subtotal + tax_amount);
 
       // Apply discounts
       if (window.discount_percentage) {
-        window.discount_amount = total * (window.discount_percentage / 100);
+        window.discount_amount = roundToTwo(total * (window.discount_percentage / 100));
       }
       if (window.discount_amount) {
-        total -= window.discount_amount;
+        total = roundToTwo(total - window.discount_amount);
       }
 
       window.subtotal = subtotal;

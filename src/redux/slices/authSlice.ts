@@ -58,15 +58,12 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.loading = false;
 
-      // Si solo hay una empresa, seleccionarla automáticamente
       if (companies.length === 1) {
         state.selectedCompany = companies[0];
       }
 
-      // Detectar si es el primer login (se puede ajustar según el backend)
-      state.isFirstLogin = companies.length === 0;
+      state.isFirstLogin = user.first_login;
 
-      // Guardar token en localStorage
       localStorage.setItem('accessToken', token);
     },
 

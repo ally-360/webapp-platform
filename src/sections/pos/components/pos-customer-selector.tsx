@@ -1,9 +1,14 @@
 import React, { memo, useState } from 'react';
 // @mui
-import { Box, Typography, TextField, Autocomplete, Button, CircularProgress, Chip } from '@mui/material';
+import { Box, Typography, TextField, Autocomplete, CircularProgress, Chip } from '@mui/material';
 import { Icon } from '@iconify/react';
 // types & data
 import type { Customer } from 'src/redux/pos/posSlice';
+
+// Tipo extendido para incluir la opción de crear cliente
+interface CustomerOption extends Customer {
+  isCreateOption?: boolean;
+}
 
 interface Props {
   selectedCustomer: Customer | null;
@@ -25,11 +30,25 @@ const PosCustomerSelector = memo(
     onSearchCustomers,
     onCreateCustomer,
     isLoading = false,
-    searchTerm = '',
     minSearchLength = 4,
     isWritingButNotReady = false
   }: Props) => {
     const [inputValue, setInputValue] = useState('');
+
+    // Cliente especial para crear nuevo
+    const createNewOption: CustomerOption = {
+      id: 'create-new',
+      name: '+ Crear nuevo cliente',
+      document_type: undefined,
+      document: '',
+      email: '',
+      phone: '',
+      address: '',
+      isCreateOption: true
+    };
+
+    // Opciones combinadas: clientes + opción de crear (siempre al final)
+    const allOptions: CustomerOption[] = [...customers, createNewOption];
 
     const handleInputChange = (event: any, newInputValue: string) => {
       setInputValue(newInputValue);
@@ -38,17 +57,27 @@ const PosCustomerSelector = memo(
       }
     };
 
+    const handleSelectionChange = (event: any, newValue: CustomerOption | null) => {
+      // Si selecciona la opción de crear cliente
+      if (newValue && newValue.id === 'create-new') {
+        if (onCreateCustomer) {
+          onCreateCustomer();
+        }
+        // No cambiar la selección, mantener la anterior
+        return;
+      }
+
+      // Limpiar input cuando se selecciona un cliente real
+      setInputValue('');
+      onCustomerChange(newValue);
+    };
+
     const getHelperText = () => {
       if (isWritingButNotReady) {
         return `Mínimo ${minSearchLength} caracteres para buscar`;
       }
-      if (searchTerm && customers.length === 1 && customers[0]?.id === 0) {
-        return 'No se encontraron clientes. ¿Crear nuevo cliente?';
-      }
       return '';
     };
-
-    const showCreateOption = searchTerm && customers.length === 1 && customers[0]?.id === 0 && onCreateCustomer;
 
     return (
       <Box sx={{ p: 2 }}>
@@ -57,21 +86,30 @@ const PosCustomerSelector = memo(
         </Typography>
         <Autocomplete
           size="small"
-          options={customers}
+          options={allOptions}
           getOptionLabel={(option) => option.name}
           value={selectedCustomer}
           inputValue={inputValue}
-          onChange={(_, newValue) => onCustomerChange(newValue)}
+          onChange={handleSelectionChange}
           onInputChange={handleInputChange}
           loading={isLoading}
-          filterOptions={(options, state) => {
-            if (onSearchCustomers) {
-              return options;
+          filterOptions={(options, { inputValue: searchValue }) => {
+            if (!searchValue.trim()) {
+              // Sin búsqueda, mostrar solo la opción de crear
+              return allOptions.filter((option) => (option as CustomerOption).isCreateOption);
             }
-            const filtered = options.filter((option) =>
-              option.name.toLowerCase().includes(state.inputValue.toLowerCase())
+
+            // Con búsqueda, filtrar clientes reales y agregar opción crear
+            const filtered = (allOptions as CustomerOption[]).filter((option) => !option.isCreateOption);
+            const matchingCustomers = filtered.filter((customer) =>
+              customer.name.toLowerCase().includes(searchValue.toLowerCase())
             );
-            return filtered;
+
+            // Siempre incluir la opción crear al final
+            if ((allOptions as CustomerOption[]).find((option) => option.isCreateOption)) {
+              return [...matchingCustomers, createNewOption];
+            }
+            return matchingCustomers;
           }}
           renderInput={(params) => (
             <TextField
@@ -94,22 +132,33 @@ const PosCustomerSelector = memo(
           renderOption={(props, option) => (
             <li {...props}>
               <Box sx={{ width: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box>
-                    <Typography variant="body2">{option.name}</Typography>
-                    {option.document && (
-                      <Typography variant="caption" color="text.secondary">
-                        {option.document_type}: {option.document}
-                      </Typography>
-                    )}
-                    {option.email && (
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                        {option.email}
-                      </Typography>
-                    )}
+                {(option as any).isCreateOption ? (
+                  // Opción especial para crear cliente
+                  <Box sx={{ display: 'flex', alignItems: 'center', py: 1 }}>
+                    <Icon icon="mdi:plus" style={{ marginRight: 8, color: 'primary.main' }} />
+                    <Typography variant="body2" color="primary.main" fontWeight="medium">
+                      {option.name}
+                    </Typography>
                   </Box>
-                  {option.id === 0 && <Chip label="Por defecto" size="small" color="default" variant="outlined" />}
-                </Box>
+                ) : (
+                  // Cliente normal
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box>
+                      <Typography variant="body2">{option.name}</Typography>
+                      {option.document && (
+                        <Typography variant="caption" color="text.secondary">
+                          {option.document_type}: {option.document}
+                        </Typography>
+                      )}
+                      {option.email && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          {option.email}
+                        </Typography>
+                      )}
+                    </Box>
+                    {option.id === '0' && <Chip label="Por defecto" size="small" color="default" variant="outlined" />}
+                  </Box>
+                )}
               </Box>
             </li>
           )}
@@ -117,21 +166,6 @@ const PosCustomerSelector = memo(
             isWritingButNotReady ? `Escribe al menos ${minSearchLength} caracteres` : 'No se encontraron clientes'
           }
         />
-
-        {showCreateOption && (
-          <Box sx={{ mt: 1 }}>
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<Icon icon="mdi:plus" />}
-              onClick={onCreateCustomer}
-              size="small"
-              fullWidth
-            >
-              Crear nuevo cliente
-            </Button>
-          </Box>
-        )}
       </Box>
     );
   }

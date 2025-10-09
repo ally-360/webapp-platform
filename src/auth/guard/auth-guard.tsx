@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useCallback, useState } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hook';
+import { useRouter, usePathname } from 'src/routes/hook';
 // hooks
 import { useAuthContext } from '../hooks';
 import { useTokenValidation } from '../hooks/use-token-validation';
@@ -17,7 +17,8 @@ const loginPaths = {
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { authenticated, method, isFirstLogin } = useAuthContext();
+  const pathname = usePathname();
+  const { authenticated, method, isFirstLogin, loading } = useAuthContext();
 
   useTokenValidation({
     warningMinutes: 5,
@@ -31,29 +32,31 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [checked, setChecked] = useState(false);
 
   const check = useCallback(() => {
+    // Esperar a que cargue el estado de autenticación para evitar redirecciones prematuras
+    if (loading) return;
+
     if (!authenticated) {
-      const searchParams = new URLSearchParams({ returnTo: window.location.pathname }).toString();
-
+      // Evitar redirigir si ya estamos en el login
       const loginPath = loginPaths[method];
+      const onLogin = pathname.startsWith(loginPath);
+      if (onLogin) {
+        return;
+      }
 
+      const searchParams = new URLSearchParams({ returnTo: pathname }).toString();
       const href = `${loginPath}?${searchParams}`;
-
       router.replace(href);
-    } else {
-      setChecked(true);
+      return;
     }
-  }, [authenticated, method, router]);
+
+    setChecked(true);
+  }, [authenticated, method, router, pathname, loading]);
 
   useEffect(() => {
     check();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [check]);
 
-  useEffect(() => {
-    if (isFirstLogin === true) {
-      router.push(paths.stepByStep.root);
-    }
-  }, [isFirstLogin, router]);
+  // Nota: la redirección al StepByStep se maneja en GuestGuard/StepGuard para evitar conflictos
 
   if (!checked) {
     return null;
