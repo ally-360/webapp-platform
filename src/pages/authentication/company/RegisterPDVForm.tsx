@@ -15,7 +15,7 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterPDVSchema } from 'src/interfaces/auth/yupSchemas';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import type { InferType } from 'yup';
-import { setStep, setPDVResponse } from 'src/redux/slices/stepByStepSlice';
+import { setPDVResponse, goToNextStep, goToPreviousStep } from 'src/redux/slices/stepByStepSlice';
 import { useCreatePDVMutation, useUpdatePDVMutation, useGetAllPDVsQuery } from 'src/redux/services/authApi';
 import { useGetDepartmentsQuery, useGetCitiesQuery } from 'src/redux/services/locationsApi';
 import type { Department, City } from 'src/redux/services/locationsApi';
@@ -144,6 +144,9 @@ export default function RegisterPDVForm() {
           updated_at: new Date().toISOString()
         })
       );
+
+      // Navegar al siguiente paso
+      dispatch(goToNextStep());
     } catch (error: any) {
       console.error('❌ PDV error:', error);
 
@@ -202,7 +205,7 @@ export default function RegisterPDVForm() {
   };
 
   const handleBack = () => {
-    dispatch(setStep(0));
+    dispatch(goToPreviousStep());
   };
 
   const renderHead = (

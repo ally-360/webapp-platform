@@ -32,7 +32,7 @@ export default function PaymentCardItem({ card, sx, ...other }) {
         <Stack direction="row" alignItems="center" spacing={1}>
           <Iconify icon={(card.cardType === 'visa' && 'logos:visa') || 'logos:mastercard'} width={36} />
 
-          {card.primary && <Label color="info">Default</Label>}
+          {card.primary && <Label color="info">Principal</Label>}
         </Stack>
 
         <Typography variant="subtitle2">{card.cardNumber}</Typography>
@@ -52,17 +52,17 @@ export default function PaymentCardItem({ card, sx, ...other }) {
       <CustomPopover open={popover.open} onClose={popover.onClose}>
         <MenuItem onClick={popover.onClose}>
           <Iconify icon="eva:star-fill" />
-          Set as primary
+          Establecer como principal
         </MenuItem>
 
         <MenuItem onClick={popover.onClose}>
           <Iconify icon="solar:pen-bold" />
-          Edit
+          Editar
         </MenuItem>
 
         <MenuItem onClick={popover.onClose} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
+          Eliminar
         </MenuItem>
       </CustomPopover>
     </>

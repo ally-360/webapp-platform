@@ -72,63 +72,70 @@ const ContentStyle = styled('div')(({ theme }) => ({
 export default function StepByStep() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { logout } = useAuthContext();
+  const { logout, isFirstLogin } = useAuthContext();
   const dispatch = useAppDispatch();
 
   const activeStep = useAppSelector((state) => state.stepByStep.activeStep);
+  const completedSteps = useAppSelector((state) => state.stepByStep.completedSteps);
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
   const isUniquePDV = companyResponse?.uniquePDV;
 
   const stepsConfig = useMemo(() => getStepsConfig(isUniquePDV), [isUniquePDV]);
 
-  // 🔧 Hook optimizado para obtener datos sin bucles infinitos
-  const { companies, allPDVs, currentSubscription, isLoading, isReady, hasError } = useStepByStepData();
+  const { companies, allPDVs, currentSubscription, isLoading, isReady, hasError, currentStep } = useStepByStepData();
 
-  //  Efecto para validar y establecer el paso correcto
+  // 🚫 Redirigir si no es first_login
+  useEffect(() => {
+    if (isFirstLogin === false) {
+      console.log('❌ No es first_login, redirigiendo al dashboard');
+      navigate(paths.dashboard.root);
+    }
+  }, [isFirstLogin, navigate]);
+
+  // 🔄 Inicializar datos en Redux cuando estén listos
   useEffect(() => {
     if (!isReady || hasError) {
       return;
     }
 
-    console.log('🔍 Iniciando validación de paso desde backend...');
+    console.log('🔍 Inicializando datos del step-by-step...');
     console.log('📦 Empresas:', companies);
     console.log('🏪 PDVs:', allPDVs);
     console.log('💳 Suscripción:', currentSubscription);
+    console.log('� Paso actual:', currentStep);
 
-    // 📌 PASO 1: Sin empresa → ir a crear empresa
-    if (!companies || companies.length === 0) {
-      console.log('❌ No hay empresa, ir a paso COMPANY');
-      dispatch(setStep(StepType.COMPANY));
-      return;
+    // Establecer el paso actual detectado
+    dispatch(setStep(currentStep));
+
+    // 📌 CARGAR EMPRESA SI EXISTE
+    if (companies && companies.length > 0) {
+      const company = companies[0];
+      console.log('✅ Cargando empresa:', company);
+
+      dispatch(
+        setCompanyResponse({
+          id: company.id,
+          name: company.name,
+          description: company.description || '',
+          address: company.address || '',
+          phone_number: company.phone_number || '',
+          nit: company.nit,
+          economic_activity: company.economic_activity || '',
+          quantity_employees: String(company.quantity_employees || ''),
+          social_reason: company.social_reason || '',
+          logo: company.logo || '',
+          uniquePDV: company.uniquePDV || false,
+          created_at: company.created_at || new Date().toISOString(),
+          updated_at: company.updated_at || new Date().toISOString()
+        })
+      );
     }
 
-    // 📌 PASO 2: Empresa encontrada → configurar estado
-    const company = companies[0];
-    console.log('✅ Empresa encontrada:', company);
-
-    dispatch(
-      setCompanyResponse({
-        id: company.id,
-        name: company.name,
-        description: company.description || '',
-        address: company.address || '',
-        phone_number: company.phone_number || '',
-        nit: company.nit,
-        economic_activity: company.economic_activity || '',
-        quantity_employees: String(company.quantity_employees || ''),
-        social_reason: company.social_reason || '',
-        logo: company.logo || '',
-        uniquePDV: company.uniquePDV || false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-    );
-
-    // 📌 PASO 3: Validar PDVs
-    const hasPDVs = allPDVs && allPDVs.pdvs && allPDVs.pdvs.length > 0;
-    if (hasPDVs) {
-      console.log('✅ PDVs encontrados:', allPDVs.pdvs);
+    // 📌 CARGAR PDV SI EXISTE
+    if (allPDVs && allPDVs.pdvs && allPDVs.pdvs.length > 0) {
       const mainPDV = allPDVs.pdvs.find((pdv) => pdv.is_active) || allPDVs.pdvs[0];
+      console.log('✅ Cargando PDV:', mainPDV);
+
       dispatch(
         setPDVResponse({
           id: mainPDV.id,
@@ -137,39 +144,41 @@ export default function StepByStep() {
           phone_number: mainPDV.phone_number || '',
           location: { id: '', name: '' },
           main: true,
-          company_id: company.id,
+          company_id: companies?.[0]?.id || '',
           created_at: mainPDV.created_at,
           updated_at: mainPDV.updated_at
         })
       );
-
-      // 📌 PASO 4: Validar suscripción
-      if (currentSubscription && currentSubscription.id) {
-        console.log('✅ Suscripción encontrada, ir a SUMMARY');
-
-        dispatch(setSubscriptionResponse(currentSubscription));
-
-        dispatch(
-          setPlanData({
-            plan_id: currentSubscription.plan_code,
-            billing_cycle: currentSubscription.billing_cycle,
-            auto_renew: true,
-            currency: 'COP'
-          })
-        );
-        dispatch(setStep(StepType.SUMMARY));
-      } else {
-        console.log('🎯 Empresa y PDV completos, ir a PLAN');
-        dispatch(setStep(StepType.PLAN));
-      }
-    } else {
-      console.log('📍 Empresa sin PDV, ir a PDV');
-      dispatch(setStep(StepType.PDV));
     }
-  }, [isReady, hasError, companies, allPDVs, currentSubscription, dispatch]);
+
+    // 📌 CARGAR SUSCRIPCIÓN SI EXISTE
+    if (currentSubscription && currentSubscription.id) {
+      console.log('✅ Cargando suscripción:', currentSubscription);
+
+      dispatch(setSubscriptionResponse(currentSubscription));
+      dispatch(
+        setPlanData({
+          plan_id: currentSubscription.plan_code,
+          billing_cycle: currentSubscription.billing_cycle,
+          auto_renew: true,
+          currency: 'COP'
+        })
+      );
+    }
+  }, [isReady, hasError, companies, allPDVs, currentSubscription, currentStep, dispatch]);
 
   const isStepOptional = (_step: number) => false;
   const isStepSkipped = (_step: number) => false;
+  const isStepCompleted = (step: number) => completedSteps.includes(step);
+
+  const handleStepClick = (step: number) => {
+    // Solo permitir navegación a pasos completados o al paso siguiente inmediato
+    const maxAllowedStep = Math.max(...completedSteps, 0) + 1;
+
+    if (step <= maxAllowedStep || isStepCompleted(step)) {
+      dispatch(setStep(step));
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -211,7 +220,6 @@ export default function StepByStep() {
     );
   }
 
-  // ⚠️ Mostrar error si hay problemas de conectividad
   if (hasError) {
     return (
       <RootStyle>
@@ -250,11 +258,25 @@ export default function StepByStep() {
 
                 if (isStepSkipped(index)) {
                   stepProps.completed = false;
+                } else if (isStepCompleted(index)) {
+                  stepProps.completed = true;
                 }
 
                 return (
                   <Step key={stepConfig.key} {...stepProps}>
-                    <StepLabel {...labelProps}>{stepConfig.label}</StepLabel>
+                    <StepLabel
+                      {...labelProps}
+                      sx={{
+                        cursor:
+                          isStepCompleted(index) || index <= Math.max(...completedSteps, 0) + 1 ? 'pointer' : 'default',
+                        '& .MuiStepLabel-label': {
+                          color: isStepCompleted(index) || index === activeStep ? 'primary.main' : 'text.secondary'
+                        }
+                      }}
+                      onClick={() => handleStepClick(index)}
+                    >
+                      {stepConfig.label}
+                    </StepLabel>
                   </Step>
                 );
               })}

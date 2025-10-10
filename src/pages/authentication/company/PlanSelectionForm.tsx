@@ -19,7 +19,7 @@ import {
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { setStep, setPlanData, goToPreviousStep, setSubscriptionResponse } from 'src/redux/slices/stepByStepSlice';
+import { setPlanData, goToPreviousStep, setSubscriptionResponse, goToNextStep } from 'src/redux/slices/stepByStepSlice';
 import { PlanSelectionSchema } from 'src/interfaces/auth/yupSchemas';
 import { PlanFormData } from 'src/interfaces/stepByStep';
 import {
@@ -173,7 +173,7 @@ export function PlanSelectionForm() {
       };
 
       dispatch(setPlanData(planData));
-      dispatch(setStep(3)); // Go to summary
+      dispatch(goToNextStep()); // Go to summary
     } catch (error: any) {
       console.error('Error creating/updating subscription:', error);
       let errorMessage = 'Error al activar el plan';

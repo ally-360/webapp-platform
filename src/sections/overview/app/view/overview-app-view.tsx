@@ -46,7 +46,7 @@ export default function OverviewAppView() {
   const dateParams = getDateRangeFromSelection(dateRange);
 
   // Hook para verificar el estado del tutorial con control de carga inicial
-  const { isCompleted: tutorialCompleted, isInitialLoad, completionPercentage } = useWelcomeStepStatus();
+  const { isCompleted: tutorialCompleted, isInitialLoad, completionPercentage, isLoading } = useWelcomeStepStatus();
 
   // Helper para obtener el label del período
   const getPeriodLabel = () => {
@@ -66,19 +66,6 @@ export default function OverviewAppView() {
 
   // Obtener fecha de hoy para filtros - ahora usando el selector de fecha
   const today = dateParams.startDate;
-
-  // Debug de configuración
-  console.log('🔧 DASHBOARD CONFIG DEBUG:', {
-    today,
-    dateRange,
-    dateParams,
-    tutorialCompleted,
-    isInitialLoad,
-    completionPercentage,
-    companyId: localStorage.getItem('companyId'),
-    token: localStorage.getItem('accessToken') ? 'Present' : 'Missing',
-    hostApi: (import.meta as any).env?.VITE_HOST_API
-  });
 
   const {
     data: salesInvoices,
@@ -174,7 +161,6 @@ export default function OverviewAppView() {
       <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Welcome Cards - Evitar parpadeo con lógica condicional */}
         {isInitialLoad && (
-          // Mientras carga, mantener el layout fijo
           <>
             <Grid xs={12} sm={12} md={5} lg={4}>
               <AppWelcome

@@ -1,18 +1,27 @@
-import { useCallback } from 'react';
-import { Button, Divider, Grid, Typography, Stack, Box, Alert, Card } from '@mui/material';
+import { useCallback, useState, useEffect } from 'react';
+import { Button, Divider, Grid, Typography, Stack, Box, Alert, Card, CircularProgress } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 import { paths } from 'src/routes/paths';
 import { useAuthContext } from 'src/auth/hooks';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { goToPreviousStep } from 'src/redux/slices/stepByStepSlice';
-import { useGetAllPDVsQuery } from 'src/redux/services/authApi';
-import { useUpdateFirstLoginMutation } from 'src/redux/services/subscriptionsApi';
+import {
+  goToPreviousStep,
+  completeOnboarding,
+  setSubscriptionResponse,
+  setPlanData
+} from 'src/redux/slices/stepByStepSlice';
+import { useGetAllPDVsQuery, authApi } from 'src/redux/services/authApi';
+import {
+  useUpdateFirstLoginMutation,
+  useGetCurrentSubscriptionQuery,
+  subscriptionsApi
+} from 'src/redux/services/subscriptionsApi';
 
 /**
  * Renderiza un bloque de información con título y contenido.
  */
-function InfoBlock({ title, value }: { title: string; value?: string | number }) {
+function InfoBlock({ title, value }: { title: string; value?: string | number | null }) {
   return (
     <Grid item xs={12} md={4}>
       <Typography variant="subtitle1" gutterBottom>
@@ -38,10 +47,11 @@ function getBillingCycleText(billingCycle?: string) {
  * Componente resumen del registro para empresa y PDV principal.
  */
 export default function RegisterSummary() {
-  const { updateProfile, company, pdvCompany, user } = useAuthContext();
+  const { company, pdvCompany } = useAuthContext();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const [isFinishing, setIsFinishing] = useState(false);
 
   const companyData = useAppSelector((state) => state.stepByStep.companyData);
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
@@ -54,20 +64,69 @@ export default function RegisterSummary() {
   const { data: apiPDVs } = useGetAllPDVsQuery();
   const firstApiPDV = apiPDVs?.pdvs?.[0];
 
+  // Get current subscription to show in summary
+  const { data: apiSubscription } = useGetCurrentSubscriptionQuery(undefined, {
+    skip: false // Always try to load subscription in summary
+  });
+
   // API for updating first_login
   const [updateFirstLogin] = useUpdateFirstLoginMutation();
 
-  const handleFinish = useCallback(async () => {
-    try {
-      const resp = await updateFirstLogin({ first_login: false }).unwrap();
-      navigate(paths.dashboard.root);
-      console.log('First login updated:', resp);
-      enqueueSnackbar('¡Registro completado exitosamente!', { variant: 'success' });
-    } catch (error) {
-      console.error('Error al finalizar el registro:', error);
-      enqueueSnackbar('Error al finalizar el registro', { variant: 'error' });
+  // Load subscription data if available and not already in Redux
+  useEffect(() => {
+    if (apiSubscription && !subscriptionResponse) {
+      console.log('🔄 Loading subscription from API in Summary:', apiSubscription);
+
+      dispatch(setSubscriptionResponse(apiSubscription));
+
+      if (!planData) {
+        dispatch(
+          setPlanData({
+            plan_id: apiSubscription.plan_code || '',
+            billing_cycle: apiSubscription.billing_cycle || 'monthly',
+            auto_renew: true,
+            currency: 'COP'
+          })
+        );
+      }
     }
-  }, [navigate, enqueueSnackbar, updateFirstLogin]);
+  }, [apiSubscription, subscriptionResponse, planData, dispatch]);
+
+  const handleFinish = useCallback(async () => {
+    if (isFinishing) return;
+
+    setIsFinishing(true);
+    try {
+      console.log('🎯 Finalizando onboarding...');
+
+      dispatch(completeOnboarding());
+
+      const resp = await updateFirstLogin({ first_login: false }).unwrap();
+      console.log('✅ First login updated:', resp);
+
+      // Force invalidate user data to ensure immediate state update
+      console.log('🔄 Invalidating user cache...');
+      dispatch(authApi.util.invalidateTags(['User']));
+      dispatch(subscriptionsApi.util.invalidateTags(['User']));
+
+      // Small delay to ensure cache invalidation completes
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      navigate(paths.dashboard.root);
+
+      enqueueSnackbar('¡Registro completado exitosamente! Bienvenido a Ally360', {
+        variant: 'success',
+        autoHideDuration: 5000
+      });
+    } catch (error) {
+      console.error('❌ Error al finalizar el registro:', error);
+      enqueueSnackbar('Error al finalizar el registro. Por favor, intenta nuevamente.', {
+        variant: 'error'
+      });
+    } finally {
+      setIsFinishing(false);
+    }
+  }, [dispatch, navigate, enqueueSnackbar, updateFirstLogin, isFinishing]);
 
   return (
     <Stack spacing={3}>
@@ -154,11 +213,18 @@ export default function RegisterSummary() {
       )}
 
       <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
-        <Button variant="outlined" onClick={() => dispatch(goToPreviousStep())}>
+        <Button variant="outlined" onClick={() => dispatch(goToPreviousStep())} disabled={isFinishing}>
           Volver
         </Button>
-        <Button variant="contained" size="large" sx={{ flexGrow: 1 }} onClick={handleFinish}>
-          Finalizar y acceder al dashboard
+        <Button
+          variant="contained"
+          size="large"
+          sx={{ flexGrow: 1 }}
+          onClick={handleFinish}
+          disabled={isFinishing}
+          startIcon={isFinishing ? <CircularProgress size={20} color="inherit" /> : undefined}
+        >
+          {isFinishing ? 'Finalizando...' : 'Finalizar y acceder al dashboard'}
         </Button>
       </Stack>
     </Stack>

@@ -54,12 +54,14 @@ export default function AccountBillingPlan({
   const [selectedCard, setSelectedCard] = useState(primaryCard);
 
   const handleSelectPlan = useCallback(
-    (planCode: string) => {
-      if (currentSubscription?.plan_code !== planCode) {
-        setSelectedPlan(planCode);
+    (planId: string) => {
+      // Find the plan by id to get its code for comparison
+      const plan = plans.find((p) => p.id === planId);
+      if (plan && currentSubscription?.plan_code !== plan.code) {
+        setSelectedPlan(planId);
       }
     },
-    [currentSubscription]
+    [currentSubscription, plans]
   );
 
   const handleSelectAddress = useCallback((newValue: BillingAddress) => {
@@ -127,14 +129,14 @@ export default function AccountBillingPlan({
 
   const renderPlans = plans.map((plan) => {
     const isCurrentPlan = currentSubscription?.plan_code === plan.code;
-    const isSelected = selectedPlan === plan.code;
+    const isSelected = selectedPlan === plan.id;
 
     return (
       <Grid xs={12} md={4} key={plan.id}>
         <Stack
           component={Paper}
           variant="outlined"
-          onClick={() => handleSelectPlan(plan.code)}
+          onClick={() => handleSelectPlan(plan.id)}
           sx={{
             p: 2.5,
             position: 'relative',
@@ -252,7 +254,7 @@ export default function AccountBillingPlan({
               Dirección de facturación
             </Grid>
             <Grid xs={12} md={8} sx={{ color: 'text.secondary' }}>
-              {selectedAddress?.fullAddress || 'No configurado'}
+              {selectedAddress?.fullAddress || 'No configurada'}
             </Grid>
           </Grid>
 

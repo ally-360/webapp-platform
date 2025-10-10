@@ -16,13 +16,13 @@ import PaymentNewCardDialog from '../payment/payment-new-card-dialog';
 // ----------------------------------------------------------------------
 
 export default function AccountBillingPayment({ cards }) {
-  const newCard = useBoolean();
+  const newCard = useBoolean(false);
 
   return (
     <>
       <Card sx={{ my: 3 }}>
         <CardHeader
-          title="Payment Method"
+          title="Métodos de Pago"
           action={
             <Button
               size="small"
@@ -30,7 +30,7 @@ export default function AccountBillingPayment({ cards }) {
               startIcon={<Iconify icon="mingcute:add-line" />}
               onClick={newCard.onTrue}
             >
-              New Card
+              Nueva Tarjeta
             </Button>
           }
         />
@@ -46,7 +46,7 @@ export default function AccountBillingPayment({ cards }) {
           sx={{ p: 3 }}
         >
           {cards.map((card) => (
-            <PaymentCardItem key={card.id} card={card} />
+            <PaymentCardItem key={card.id} card={card} sx={{}} />
           ))}
         </Box>
       </Card>

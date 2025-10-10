@@ -76,6 +76,7 @@ export interface CompanyCreate {
   quantity_employees?: string | null;
   social_reason?: string | null;
   logo?: string | null;
+  uniquePDV?: boolean;
 }
 
 export interface CompanyOut {
@@ -373,6 +374,20 @@ export const authApi = createApi({
     getCurrentSubscription: builder.query<SubscriptionOut, void>({
       query: () => '/subscriptions/current',
       providesTags: ['Subscription']
+    }),
+
+    /**
+     * Change password - POST /auth/change-password
+     */
+    changePassword: builder.mutation<
+      { message: string },
+      { current_password: string; new_password: string; confirm_password: string }
+    >({
+      query: (data) => ({
+        url: '/auth/change-password',
+        method: 'POST',
+        body: data
+      })
     })
   })
 });
@@ -389,6 +404,7 @@ export const {
   useVerifyEmailWithAutoLoginMutation,
   useLogoutMutation,
   useSelectCompanyMutation,
+  useChangePasswordMutation,
 
   // Auth queries
   useGetCurrentUserQuery,

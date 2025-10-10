@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
 // @mui
 import LoadingButton from '@mui/lab/LoadingButton';
 import Card from '@mui/material/Card';
@@ -14,24 +15,44 @@ import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { t } from 'i18next';
 import React from 'react';
-import { ChangePassWordSchema } from 'src/interfaces/auth/yupSchemas';
-import RequestService from '../../axios/services/service';
+// api
+import { useChangePasswordMutation } from 'src/redux/services/authApi';
+
+// types
+interface ChangePasswordFormData {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+// validation schema
+const ChangePasswordSchema = Yup.object().shape({
+  current_password: Yup.string().required('Contraseña actual es requerida'),
+  new_password: Yup.string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .required('Nueva contraseña es requerida'),
+  confirm_password: Yup.string()
+    .oneOf([Yup.ref('new_password')], 'Las contraseñas deben coincidir')
+    .required('Confirmación de contraseña es requerida')
+});
 
 // ----------------------------------------------------------------------
 
 export default function AccountChangePassword() {
   const { enqueueSnackbar } = useSnackbar();
-
   const password = useBoolean(true);
 
+  // RTK Query mutation
+  const [changePassword, { isLoading: _isLoading }] = useChangePasswordMutation();
+
   const defaultValues = {
-    oldPassword: '',
-    newPassword: '',
-    confirmNewPassword: ''
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
   };
 
-  const methods = useForm({
-    resolver: yupResolver(ChangePassWordSchema),
+  const methods = useForm<ChangePasswordFormData>({
+    resolver: yupResolver(ChangePasswordSchema),
     defaultValues
   });
 
@@ -43,11 +64,13 @@ export default function AccountChangePassword() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      await RequestService.changePassword(data);
+      await changePassword(data).unwrap();
       reset();
-      enqueueSnackbar('Update success!');
-    } catch (error) {
-      console.error(error);
+      enqueueSnackbar('Contraseña actualizada correctamente', { variant: 'success' });
+    } catch (error: any) {
+      console.error('Error changing password:', error);
+      const errorMessage = error?.data?.detail || error?.data?.message || 'Error al cambiar la contraseña';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   });
 
@@ -55,14 +78,14 @@ export default function AccountChangePassword() {
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Stack component={Card} spacing={3} sx={{ p: 3 }}>
         <RHFTextField
-          name="oldPassword"
-          type={password.value ? 'text' : 'password'}
+          name="current_password"
+          type={password.value ? 'password' : 'text'}
           label={t('Old Password')}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={password.onToggle} edge="end">
-                  <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                  <Iconify icon={password.value ? 'solar:eye-closed-bold' : 'solar:eye-bold'} />
                 </IconButton>
               </InputAdornment>
             )
@@ -70,41 +93,37 @@ export default function AccountChangePassword() {
         />
 
         <RHFTextField
-          name="newPassword"
+          name="new_password"
           label={t('New Password')}
-          type={password.value ? 'text' : 'password'}
+          type={password.value ? 'password' : 'text'}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={password.onToggle} edge="end">
-                  <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                  <Iconify icon={password.value ? 'solar:eye-closed-bold' : 'solar:eye-bold'} />
                 </IconButton>
               </InputAdornment>
             )
           }}
-          helperText={
-            <Stack component="span" direction="row" alignItems="center">
-              <Iconify icon="eva:info-fill" width={16} sx={{ mr: 0.5 }} /> {t('Password must be minimum 6+')}
-            </Stack>
-          }
+          helperText="La contraseña debe tener al menos 8 caracteres"
         />
 
         <RHFTextField
-          name="confirmNewPassword"
-          type={password.value ? 'text' : 'password'}
+          name="confirm_password"
+          type={password.value ? 'password' : 'text'}
           label={t('Confirm New Password')}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={password.onToggle} edge="end">
-                  <Iconify icon={password.value ? 'solar:eye-bold' : 'solar:eye-closed-bold'} />
+                  <Iconify icon={password.value ? 'solar:eye-closed-bold' : 'solar:eye-bold'} />
                 </IconButton>
               </InputAdornment>
             )
           }}
         />
 
-        <LoadingButton type="submit" variant="contained" loading={isSubmitting} sx={{ ml: 'auto' }}>
+        <LoadingButton type="submit" variant="contained" loading={isSubmitting || _isLoading} sx={{ ml: 'auto' }}>
           {t('Save Change')}
         </LoadingButton>
       </Stack>

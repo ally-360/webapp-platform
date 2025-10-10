@@ -25,12 +25,12 @@ import {
   clearError,
   selectCompanyData,
   selectLoading,
-  selectErrors
+  selectErrors,
+  goToNextStep
 } from 'src/redux/slices/stepByStepSlice';
 
 // RTK Query
 import { useGetMyCompaniesQuery, useCreateCompanyMutation, useUpdateCompanyMutation } from 'src/redux/services/authApi';
-import { useAuthContext } from 'src/auth/hooks';
 
 // options
 import { useEffect } from 'react';
@@ -43,12 +43,11 @@ import { economicActivityOptions, quantityEmployeesOptions } from './optionsComm
 export default function RegisterCompanyForm() {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
-  const { isFirstLogin } = useAuthContext();
 
   // RTK Query hooks
-  // Evitar consultas de empresas en onboarding (first_login) para no disparar 404 y re-montajes
+  // En step-by-step, permitir la consulta para cargar datos existentes
   const { data: myCompanies } = useGetMyCompaniesQuery(undefined, {
-    skip: isFirstLogin === true,
+    skip: false, // Permitir la consulta para detectar si hay empresa existente
     refetchOnFocus: false,
     refetchOnReconnect: false,
     refetchOnMountOrArgChange: false
@@ -80,26 +79,43 @@ export default function RegisterCompanyForm() {
     uniquePDV: firstCompany?.uniquePDV ?? companyData?.uniquePDV ?? false
   };
 
+  const methods = useForm({
+    resolver: yupResolver(RegisterCompanySchema),
+    defaultValues,
+    shouldFocusError: false
+  });
+
+  const {
+    handleSubmit,
+    watch,
+    reset,
+    setError: setFormError,
+    formState: { isSubmitting }
+  } = methods;
+
   // Load company data into Redux when API data arrives
   useEffect(() => {
     if (firstCompany && !companyResponse) {
       console.log('🔄 Loading company from API:', firstCompany);
 
+      const companyFormData = {
+        name: firstCompany.name || '',
+        description: firstCompany.description || '',
+        address: firstCompany.address || '',
+        phone_number: firstCompany.phone_number || '',
+        nit: firstCompany.nit || '',
+        economic_activity: firstCompany.economic_activity || '',
+        quantity_employees: String(firstCompany.quantity_employees || ''),
+        social_reason: firstCompany.social_reason || '',
+        logo: firstCompany.logo || '',
+        uniquePDV: firstCompany.uniquePDV ?? false
+      };
+
       // Set form data in Redux
-      dispatch(
-        setCompanyData({
-          name: firstCompany.name || '',
-          description: firstCompany.description || '',
-          address: firstCompany.address || '',
-          phone_number: firstCompany.phone_number || '',
-          nit: firstCompany.nit || '',
-          economic_activity: firstCompany.economic_activity || '',
-          quantity_employees: String(firstCompany.quantity_employees || ''),
-          social_reason: firstCompany.social_reason || '',
-          logo: firstCompany.logo || '',
-          uniquePDV: firstCompany.uniquePDV ?? false
-        })
-      );
+      dispatch(setCompanyData(companyFormData));
+
+      // Reset form with new data
+      reset(companyFormData);
 
       // Set company response to indicate it exists
       dispatch(
@@ -120,24 +136,7 @@ export default function RegisterCompanyForm() {
         })
       );
     }
-  }, [firstCompany, companyResponse, dispatch]);
-
-  useEffect(() => {
-    console.log('Company data changed:', companyData);
-  }, [companyData]);
-
-  const methods = useForm({
-    resolver: yupResolver(RegisterCompanySchema),
-    defaultValues,
-    shouldFocusError: false
-  });
-
-  const {
-    handleSubmit,
-    watch,
-    setError: setFormError,
-    formState: { isSubmitting }
-  } = methods;
+  }, [firstCompany, companyResponse, dispatch, reset]);
 
   // Watch uniquePDV value for UI changes
   const uniquePDV = watch('uniquePDV');
@@ -218,6 +217,9 @@ export default function RegisterCompanyForm() {
         };
         dispatch(setCompanyResponse(mockResponse));
       }
+
+      // Navegar al siguiente paso
+      dispatch(goToNextStep());
     } catch (error: any) {
       console.error('❌ Company creation error:', error);
 

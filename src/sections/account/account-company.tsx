@@ -214,7 +214,7 @@ export default function AccountCompany() {
                 name="phone_number"
                 label="Teléfono"
               />
-              <RHFTextField name="description" label="Descripción" multiline rows={3} />
+              <RHFTextField name="description" label="Descripción" multiline />
               <RHFTextField name="social_reason" label="Razón Social" />
               <RHFTextField
                 name="quantity_employees"

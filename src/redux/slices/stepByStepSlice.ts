@@ -83,17 +83,8 @@ const stepByStepSlice = createSlice({
         state.completedSteps.push(StepType.COMPANY);
       }
 
-      // If uniquePDV is true, skip PDV step and mark it as completed
-      if (action.payload.uniquePDV) {
-        console.log('🚀 uniquePDV is true, skipping to PLAN step');
-        if (!state.completedSteps.includes(StepType.PDV)) {
-          state.completedSteps.push(StepType.PDV);
-        }
-        state.activeStep = StepType.PLAN;
-      } else {
-        console.log('📍 uniquePDV is false, going to PDV step');
-        state.activeStep = StepType.PDV;
-      }
+      // No cambiar automáticamente el paso activo aquí
+      // Permitir navegación manual entre pasos
     },
 
     // ========================================
@@ -109,7 +100,7 @@ const stepByStepSlice = createSlice({
       if (!state.completedSteps.includes(StepType.PDV)) {
         state.completedSteps.push(StepType.PDV);
       }
-      state.activeStep = StepType.PLAN;
+      // No cambiar automáticamente el paso activo
     },
 
     // ========================================
@@ -125,7 +116,7 @@ const stepByStepSlice = createSlice({
       if (!state.completedSteps.includes(StepType.PLAN)) {
         state.completedSteps.push(StepType.PLAN);
       }
-      state.activeStep = StepType.SUMMARY;
+      // No cambiar automáticamente el paso activo
     },
 
     // ========================================
@@ -231,6 +222,16 @@ const stepByStepSlice = createSlice({
         default:
           break;
       }
+    },
+
+    // ========================================
+    // 🎯 ONBOARDING COMPLETION
+    // ========================================
+
+    completeOnboarding: (state) => {
+      // Marcar todos los pasos como completados
+      state.completedSteps = [StepType.COMPANY, StepType.PDV, StepType.PLAN, StepType.SUMMARY];
+      state.activeStep = StepType.SUMMARY;
     }
   }
 });
@@ -266,7 +267,10 @@ export const {
 
   // Reset
   resetStep,
-  resetAll
+  resetAll,
+
+  // Onboarding
+  completeOnboarding
 } = stepByStepSlice.actions;
 
 export default stepByStepSlice.reducer;

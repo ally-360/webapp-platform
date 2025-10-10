@@ -31,6 +31,8 @@ import {
 import { useAppDispatch } from 'src/hooks/store';
 import { clearAllStateOnCompanySwitch } from 'src/redux/actions/companySwitch';
 import { setCredentials, clearCredentials } from 'src/redux/slices/authSlice';
+import { useNavigate } from 'react-router';
+import { paths } from 'src/routes/paths';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 
@@ -86,9 +88,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     isLoading: companiesLoading,
     error: companiesError
   } = useGetMyCompaniesQuery(undefined, {
-    // Evitar consultas de empresas en onboarding para no disparar 404 ni antes de cargar el usuario
     skip: !localStorage.getItem('accessToken') || userLoading || currentUser?.first_login === true,
-    // 🔧 Configuración para reducir refetch automático
     refetchOnMountOrArgChange: false,
     refetchOnFocus: false,
     refetchOnReconnect: false
@@ -343,6 +343,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         // Use backend company directly without adaptation
         setState((prev) => ({ ...prev, company: result }));
 
+        // Seleccionar la empresa creada para establecer el tenant en el token
         await selectCompany(result.id, false); // No mostrar loading durante registro
 
         enqueueSnackbar('Empresa creada exitosamente', { variant: 'success' });
@@ -377,6 +378,8 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     [createPDVMutation, enqueueSnackbar]
   );
 
+  const navigate = useNavigate();
+
   const updateCompany = useCallback(
     async (id: string, data: Partial<CompanyCreate>) => {
       try {
@@ -405,6 +408,8 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const logout = useCallback(async () => {
     try {
       await logoutMutation().unwrap();
+      setSession(null);
+      navigate(paths.auth.jwt.login);
     } catch (error) {
       console.warn('Logout error:', error);
     }
@@ -418,7 +423,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     dispatch(clearCredentials());
     setState(initialState);
     enqueueSnackbar('Sesión cerrada', { variant: 'info' });
-  }, [logoutMutation, dispatch, enqueueSnackbar]);
+  }, [logoutMutation, dispatch, enqueueSnackbar, navigate]);
 
   const status = state.loading ? 'loading' : state.user ? 'authenticated' : 'unauthenticated';
 

@@ -11,6 +11,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
+import { useAppDispatch } from 'src/hooks/store';
 // utils
 import { fData } from 'src/utils/format-number';
 import { t } from 'i18next';
@@ -18,8 +19,10 @@ import { t } from 'i18next';
 import {
   useUpdateUserProfileMutation,
   useUploadUserAvatarMutation,
-  useGetUserAvatarQuery
+  useGetUserAvatarQuery,
+  userProfileApi
 } from 'src/redux/services/userProfileApi';
+import { authApi } from 'src/redux/services/authApi';
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
@@ -40,6 +43,7 @@ interface AccountFormData {
 export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuthContext();
+  const dispatch = useAppDispatch();
 
   // RTK Query mutations
   const [updateProfile, { isLoading: _isUpdatingProfile }] = useUpdateUserProfileMutation();
@@ -98,9 +102,14 @@ export default function AccountGeneral() {
 
       await updateProfile(profileData).unwrap();
 
+      // Invalidate user cache to update profile across the app
+      dispatch(userProfileApi.util.invalidateTags(['UserProfile']));
+      dispatch(authApi.util.invalidateTags(['User']));
+
       enqueueSnackbar('Perfil actualizado correctamente', { variant: 'success' });
 
-      // window.location.reload();
+      // Force a small delay to ensure cache invalidation
+      await new Promise((resolve) => setTimeout(resolve, 200));
     } catch (error: any) {
       console.error('Error updating profile:', error);
       const errorMessage = error?.data?.message || 'No se pudo actualizar el perfil';
