@@ -24,7 +24,9 @@ import { Icon } from '@iconify/react';
 // ----------------------------------------------------------------------
 
 export default function PDVSTableRow({ row, selected, onSelectRow, onDeleteRow, onEditRow, onViewRow }) {
-  const { name, address, location, main, phoneNumber } = row;
+  const { name, address, location, main, phone_number } = row;
+
+  console.log('Row data:', row);
 
   const { t } = useTranslation();
 
@@ -49,7 +51,7 @@ export default function PDVSTableRow({ row, selected, onSelectRow, onDeleteRow, 
             }
             secondary={
               <Box component="div" sx={{ typography: 'body2', color: 'text.disabled' }}>
-                {t('Número: ')} {phoneNumber}
+                {t('Tel: ')} {phone_number}
               </Box>
             }
           />

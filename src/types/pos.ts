@@ -190,22 +190,20 @@ export interface POSPayment {
 
 export interface ShiftCurrent {
   id: string;
-  cash_register: CashRegister;
-  start_time: string;
-  end_time?: string;
-  status: 'active' | 'closed';
-  summary: {
-    total_sales: number;
-    total_amount: number;
-    payments: Record<
-      string,
-      {
-        count: number;
-        amount: number;
-      }
-    >;
-    cashInDrawer: number;
-  };
+  pdv_id: string;
+  seller_id?: string;
+  name: string;
+  status: 'open' | 'closed';
+  opening_balance: string;
+  closing_balance?: string;
+  opened_by: string;
+  closed_by?: string;
+  opened_at: string;
+  closed_at?: string;
+  opening_notes?: string;
+  closing_notes?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ShiftClose {

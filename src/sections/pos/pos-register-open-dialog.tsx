@@ -65,7 +65,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
   const [notes, setNotes] = useState('');
   const [createSellerDialogOpen, setCreateSellerDialogOpen] = useState(false);
 
-  const { availablePDVs, isLoadingPDVs, availableSellers, isLoadingSellers } = useCashRegister();
+  const { availablePDVs, isLoadingPDVs, availableSellers, isLoadingSellers, refetchSellers } = useCashRegister();
 
   useEffect(() => {
     if (open) {
@@ -74,8 +74,22 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
       setSelectedSeller(null); // Se seleccionará desde el dropdown
       setOpeningAmount(defaultValues?.opening_amount ?? 0);
       setNotes(defaultValues?.notes ?? '');
+      // Refrescar vendedores al abrir el modal para asegurar datos actualizados
+      try {
+        refetchSellers?.();
+      } catch (_e) {
+        // no-op
+      }
     }
-  }, [open, defaultValues]);
+  }, [open, defaultValues, refetchSellers]);
+
+  // Si se provee un seller_id por defecto, seleccionarlo cuando lleguen los vendedores
+  useEffect(() => {
+    if (open && !selectedSeller && defaultValues?.seller_id && Array.isArray(availableSellers)) {
+      const match = (availableSellers as any[]).find((s: any) => s?.id === defaultValues.seller_id);
+      if (match) setSelectedSeller(match);
+    }
+  }, [open, selectedSeller, defaultValues?.seller_id, availableSellers]);
 
   const handleClose = () => {
     onClose();
@@ -106,23 +120,51 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
   };
 
   const handleSellerCreated = (newSeller: { id: string; name: string; email?: string }) => {
+    // Seleccionamos el nuevo vendedor inmediatamente
     setSelectedSeller(newSeller);
     setCreateSellerDialogOpen(false);
+    // Intentamos refrescar la lista de vendedores en segundo plano para incorporarlo a las opciones
+    try {
+      refetchSellers?.();
+    } catch (_e) {
+      // no-op
+    }
   };
 
   const sellersWithCreateOption = React.useMemo(() => {
-    if (availableSellers.length === 0 && !isLoadingSellers) {
-      return [
-        {
-          id: '__create_new__',
-          name: '+ Crear nuevo vendedor',
-          email: undefined,
-          isCreateOption: true
-        }
-      ];
+    const createOption = {
+      id: '__create_new__',
+      name: '+ Crear nuevo vendedor',
+      email: undefined,
+      isCreateOption: true
+    };
+
+    // Obtener el array de sellers - el backend retorna `sellers` pero el tipo dice `items`
+    let sellersArray: any[] = [];
+
+    if (availableSellers) {
+      // Manejar la respuesta actual del backend que usa 'sellers'
+      if ('sellers' in availableSellers && Array.isArray(availableSellers.sellers)) {
+        sellersArray = availableSellers.sellers;
+      }
+      // Manejar el tipo esperado que usa 'items'
+      else if ('items' in availableSellers && Array.isArray(availableSellers.items)) {
+        sellersArray = availableSellers.items;
+      }
+      // Si availableSellers es directamente un array
+      else if (Array.isArray(availableSellers)) {
+        sellersArray = availableSellers;
+      }
     }
-    return availableSellers;
-  }, [availableSellers, isLoadingSellers]);
+
+    // Si hay sellers disponibles, los agregamos y añadimos la opción de crear al final
+    if (sellersArray.length > 0) {
+      return [...sellersArray, createOption];
+    }
+
+    // Si no hay sellers o está cargando, solo mostramos la opción de crear
+    return [createOption];
+  }, [availableSellers]);
 
   return (
     <Dialog
@@ -264,6 +306,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                 value={selectedPDV}
                 onChange={(_, newValue) => setSelectedPDV(newValue)}
                 loading={isLoadingPDVs}
+                isOptionEqualToValue={(option, value) => option?.id === value?.id}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -314,6 +357,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                   }
                 }}
                 loading={isLoadingSellers}
+                isOptionEqualToValue={(option, value) => option?.id === value?.id}
                 renderInput={(params) => (
                   <TextField
                     {...params}

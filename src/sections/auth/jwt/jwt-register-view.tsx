@@ -106,15 +106,13 @@ export default function JwtRegisterView() {
           }
         });
 
-        // If no field-specific errors were set, show general error
         if (!hasFieldErrors) {
-          const firstError = error.data.detail[0];
-          enqueueSnackbar(firstError?.msg || 'Error en el registro. Verifica los datos e intenta nuevamente.', {
+          const firstError = error.data.detail;
+          enqueueSnackbar(firstError || 'Error en el registro. Verifica los datos e intenta nuevamente.', {
             variant: 'error'
           });
         }
       } else {
-        // Handle other types of errors
         const errorMessage =
           error?.data?.detail?.[0]?.msg ||
           error?.message ||
@@ -184,12 +182,7 @@ export default function JwtRegisterView() {
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2"> ¿Ya tienes cuenta? </Typography>
 
-        <Link
-          variant="subtitle2"
-          href={paths.auth.jwt.login}
-          sx={{ cursor: 'pointer' }}
-          onClick={() => router.push(paths.auth.jwt.login)}
-        >
+        <Link variant="subtitle2" sx={{ cursor: 'pointer' }} onClick={() => router.push(paths.auth.jwt.login)}>
           Iniciar sesión
         </Link>
       </Stack>

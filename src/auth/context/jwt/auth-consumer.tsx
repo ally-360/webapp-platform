@@ -20,7 +20,9 @@ export function AuthConsumer({ children }) {
   return (
     <AuthContext.Consumer>
       {(auth) => {
-        if (auth.loading) {
+        // Solo mostrar splash screen cuando realmente está cargando datos iniciales
+        // y no cuando el usuario no está autenticado
+        if (auth.loading && auth.authenticated !== false) {
           return <SplashScreen />;
         }
 

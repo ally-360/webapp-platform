@@ -198,7 +198,33 @@ export const posApi = createApi({
      * Obtener detalle de venta POS
      * GET /pos/sales/{id}
      */
-    getPOSSale: builder.query<POSInvoice, string>({
+    getPOSSale: builder.query<
+      {
+        id: string;
+        pdv_id: string;
+        customer_id: string;
+        seller_id: string;
+        number: string;
+        status: string;
+        issue_date: string;
+        notes?: string;
+        currency: string;
+        subtotal: string;
+        taxes_total: string;
+        total_amount: string;
+        paid_amount: string;
+        balance_due: string;
+        created_at: string;
+        updated_at: string;
+        customer_name: string;
+        seller_name: string;
+        pdv_name: string;
+        line_items: any[];
+        payments: any[];
+        cash_movements: any[];
+      },
+      string
+    >({
       query: (id) => `/pos/sales/${id}`,
       providesTags: (result, error, id) => [{ type: 'POSSale', id }]
     }),
@@ -253,10 +279,13 @@ export const posApi = createApi({
 
     /**
      * Obtener turno actual
-     * GET /pos/shift/current
+     * GET /pos/shift/current?pdv_id={pdv_id}
      */
-    getCurrentShift: builder.query<ShiftCurrent, void>({
-      query: () => '/pos/shift/current',
+    getCurrentShift: builder.query<ShiftCurrent, { pdv_id: string }>({
+      query: ({ pdv_id }) => ({
+        url: '/pos/shift/current',
+        params: { pdv_id }
+      }),
       providesTags: ['Shift']
     }),
 
@@ -352,6 +381,7 @@ export const {
   useOpenCashRegisterMutation,
   useCloseCashRegisterMutation,
   useGetCashRegistersQuery,
+  useLazyGetCashRegistersQuery,
   useGetCashRegisterQuery,
 
   // Cash Movements
@@ -374,6 +404,7 @@ export const {
 
   // Shifts
   useGetCurrentShiftQuery,
+  useLazyGetCurrentShiftQuery,
   useCloseCurrentShiftMutation,
   useGetShiftHistoryQuery,
   useGetShiftQuery,

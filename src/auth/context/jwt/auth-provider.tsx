@@ -98,7 +98,12 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        setState((prev) => ({ ...prev, loading: false }));
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          isAuthenticated: false,
+          user: null
+        }));
         return;
       }
 
@@ -107,7 +112,12 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
       setState((prev) => ({ ...prev, loading: userLoading || companiesLoading }));
     } catch (error) {
       console.warn('Auth initialization error:', error);
-      setState((prev) => ({ ...prev, loading: false }));
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        isAuthenticated: false,
+        user: null
+      }));
     }
   }, [userLoading, companiesLoading]);
 
@@ -408,8 +418,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const logout = useCallback(async () => {
     try {
       await logoutMutation().unwrap();
-      setSession(null);
-      navigate(paths.auth.jwt.login);
     } catch (error) {
       console.warn('Logout error:', error);
     }
@@ -421,8 +429,17 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
     setSession(null);
     dispatch(clearCredentials());
-    setState(initialState);
+
+    // Restablecer estado inicial con loading en false para evitar splash screen
+    setState({
+      ...initialState,
+      loading: false
+    });
+
     enqueueSnackbar('Sesión cerrada', { variant: 'info' });
+
+    // Navegar después de limpiar el estado
+    navigate(paths.auth.jwt.login);
   }, [logoutMutation, dispatch, enqueueSnackbar, navigate]);
 
   const status = state.loading ? 'loading' : state.user ? 'authenticated' : 'unauthenticated';

@@ -148,3 +148,35 @@ export const ChangePassWordSchema = object().shape({
     .test('no-match', t('New password must be different'), (value, { parent }) => value !== parent.oldPassword),
   confirmNewPassword: string().oneOf([ref('newPassword')], t('Passwords must match'))
 });
+
+// Company Form Schema specifically for CompanyFormData interface
+export const CompanyFormSchema = object().shape({
+  name: string().min(1, 'Ingrese un nombre valido').required('Ingrese el nombre'),
+  description: string().required('Ingrese una descripción'),
+  address: string().min(3, 'Ingrese una dirección valida').required('Ingrese la dirección'),
+  phone_number: string()
+    .required('Ingrese un número de teléfono')
+    .test(
+      'phone-format',
+      'Número de teléfono inválido. Use formato colombiano: +573XXXXXXXXX (móvil) o +571XXXXXXX (fijo)',
+      (value) => {
+        if (!value) return false;
+        // Regex para formato colombiano con o sin +57
+        const phoneRegex = /^(\+57)?[13]\d{9}$/;
+        return phoneRegex.test(value.replace(/\s+/g, ''));
+      }
+    ),
+  nit: string()
+    .required('Ingrese un número de NIT valido')
+    .test('nit-format', 'NIT inválido. Debe ser un NIT colombiano válido de 8-9 dígitos', (value) => {
+      if (!value) return false;
+      // Regex para NIT colombiano (8-9 dígitos, no puede empezar con 0)
+      const nitRegex = /^[1-9]\d{7,8}$/;
+      return nitRegex.test(value);
+    }),
+  economic_activity: string().required('Seleccione la actividad económica'),
+  quantity_employees: string().required('Seleccione la cantidad de empleados'),
+  social_reason: string().required('Ingrese la razón social'),
+  logo: string().optional(),
+  uniquePDV: yup.boolean().default(false)
+});

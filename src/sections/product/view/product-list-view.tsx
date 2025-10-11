@@ -352,12 +352,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                         />
                       ))}
 
-                    <TableEmptyRows
-                      height={denseHeight}
-                      emptyRows={Math.max(0, table.rowsPerPage - dataInPage.length)}
-                    />
-
-                    <TableNoData notFound={notFound} />
+                    <TableNoData notFound={notFound} text="No se encontraron productos" />
                   </TableBody>
                 </Table>
               </div>

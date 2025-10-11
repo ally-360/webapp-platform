@@ -13,7 +13,7 @@ import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 
 // interfaces & validation
-import { RegisterCompanySchema } from 'src/interfaces/auth/yupSchemas';
+import { CompanyFormSchema } from 'src/interfaces/auth/yupSchemas';
 import { CompanyFormData, CompanyResponse } from 'src/interfaces/stepByStep';
 
 // redux
@@ -67,20 +67,20 @@ export default function RegisterCompanyForm() {
 
   // Form setup with values from API or Redux state
   const defaultValues: CompanyFormData = {
-    name: firstCompany?.name || companyData?.name || '',
-    description: firstCompany?.description || companyData?.description || '',
-    address: firstCompany?.address || companyData?.address || '',
-    phone_number: firstCompany?.phone_number || companyData?.phone_number || '',
-    nit: firstCompany?.nit || companyData?.nit || '',
-    economic_activity: firstCompany?.economic_activity || companyData?.economic_activity || '',
+    name: String(firstCompany?.name || companyData?.name || ''),
+    description: String(firstCompany?.description || companyData?.description || ''),
+    address: String(firstCompany?.address || companyData?.address || ''),
+    phone_number: String(firstCompany?.phone_number || companyData?.phone_number || ''),
+    nit: String(firstCompany?.nit || companyData?.nit || ''),
+    economic_activity: String(firstCompany?.economic_activity || companyData?.economic_activity || ''),
     quantity_employees: String(firstCompany?.quantity_employees || companyData?.quantity_employees || ''),
-    social_reason: firstCompany?.social_reason || companyData?.social_reason || '',
-    logo: firstCompany?.logo || companyData?.logo || '',
-    uniquePDV: firstCompany?.uniquePDV ?? companyData?.uniquePDV ?? false
+    social_reason: String(firstCompany?.social_reason || companyData?.social_reason || ''),
+    logo: String(firstCompany?.logo || companyData?.logo || ''),
+    uniquePDV: Boolean(firstCompany?.uniquePDV ?? companyData?.uniquePDV ?? false)
   };
 
-  const methods = useForm({
-    resolver: yupResolver(RegisterCompanySchema),
+  const methods = useForm<CompanyFormData>({
+    resolver: yupResolver(CompanyFormSchema as any),
     defaultValues,
     shouldFocusError: false
   });
@@ -98,43 +98,44 @@ export default function RegisterCompanyForm() {
     if (firstCompany && !companyResponse) {
       console.log('🔄 Loading company from API:', firstCompany);
 
-      const companyFormData = {
-        name: firstCompany.name || '',
-        description: firstCompany.description || '',
-        address: firstCompany.address || '',
-        phone_number: firstCompany.phone_number || '',
-        nit: firstCompany.nit || '',
-        economic_activity: firstCompany.economic_activity || '',
+      // Create a deep copy to avoid immutability issues
+      const companyFormData: CompanyFormData = {
+        name: String(firstCompany.name || ''),
+        description: String(firstCompany.description || ''),
+        address: String(firstCompany.address || ''),
+        phone_number: String(firstCompany.phone_number || ''),
+        nit: String(firstCompany.nit || ''),
+        economic_activity: String(firstCompany.economic_activity || ''),
         quantity_employees: String(firstCompany.quantity_employees || ''),
-        social_reason: firstCompany.social_reason || '',
-        logo: firstCompany.logo || '',
-        uniquePDV: firstCompany.uniquePDV ?? false
+        social_reason: String(firstCompany.social_reason || ''),
+        logo: String(firstCompany.logo || ''),
+        uniquePDV: Boolean(firstCompany.uniquePDV ?? false)
       };
 
       // Set form data in Redux
       dispatch(setCompanyData(companyFormData));
 
-      // Reset form with new data
+      // Reset form with copied data to avoid read-only issues
       reset(companyFormData);
 
       // Set company response to indicate it exists
-      dispatch(
-        setCompanyResponse({
-          id: firstCompany.id,
-          name: firstCompany.name || '',
-          description: firstCompany.description || '',
-          address: firstCompany.address || '',
-          phone_number: firstCompany.phone_number || '',
-          nit: firstCompany.nit || '',
-          economic_activity: firstCompany.economic_activity || '',
-          quantity_employees: String(firstCompany.quantity_employees || ''),
-          social_reason: firstCompany.social_reason || '',
-          logo: firstCompany.logo || '',
-          uniquePDV: firstCompany.uniquePDV ?? false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-      );
+      const companyResponseData: CompanyResponse = {
+        id: String(firstCompany.id),
+        name: String(firstCompany.name || ''),
+        description: String(firstCompany.description || ''),
+        address: String(firstCompany.address || ''),
+        phone_number: String(firstCompany.phone_number || ''),
+        nit: String(firstCompany.nit || ''),
+        economic_activity: String(firstCompany.economic_activity || ''),
+        quantity_employees: String(firstCompany.quantity_employees || ''),
+        social_reason: String(firstCompany.social_reason || ''),
+        logo: String(firstCompany.logo || ''),
+        uniquePDV: Boolean(firstCompany.uniquePDV ?? false),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      dispatch(setCompanyResponse(companyResponseData));
     }
   }, [firstCompany, companyResponse, dispatch, reset]);
 
@@ -156,21 +157,35 @@ export default function RegisterCompanyForm() {
 
       console.log('🏢 Creating company with data:', data);
 
+      // Create a clean copy of form data to avoid read-only issues
+      const cleanData: CompanyFormData = {
+        name: String(data.name || ''),
+        description: String(data.description || ''),
+        address: String(data.address || ''),
+        phone_number: String(data.phone_number || ''),
+        nit: String(data.nit || ''),
+        economic_activity: String(data.economic_activity || ''),
+        quantity_employees: String(data.quantity_employees || ''),
+        social_reason: String(data.social_reason || ''),
+        logo: String(data.logo || ''),
+        uniquePDV: Boolean(data.uniquePDV)
+      };
+
       // Save form data to Redux
-      dispatch(setCompanyData(data));
+      dispatch(setCompanyData(cleanData));
 
       // Adaptar datos al formato esperado por createCompany (RegisterCompany)
       const companyPayload = {
-        name: data.name || '',
-        description: data.description || '',
-        address: data.address || '',
-        phone_number: data.phone_number || '',
-        nit: data.nit || '',
-        economic_activity: data.economic_activity || '',
-        quantity_employees: String(data.quantity_employees || ''),
-        social_reason: data.social_reason || '',
-        logo: data.logo || null,
-        uniquePDV: data.uniquePDV
+        name: cleanData.name,
+        description: cleanData.description,
+        address: cleanData.address,
+        phone_number: cleanData.phone_number,
+        nit: cleanData.nit,
+        economic_activity: cleanData.economic_activity,
+        quantity_employees: cleanData.quantity_employees,
+        social_reason: cleanData.social_reason,
+        logo: cleanData.logo || null,
+        uniquePDV: cleanData.uniquePDV
       };
 
       // Si ya existe una empresa, hacer PATCH (update), si no, POST (create)
@@ -183,7 +198,7 @@ export default function RegisterCompanyForm() {
         // Crear nueva empresa
         response = await createCompany(companyPayload).unwrap();
         enqueueSnackbar(
-          data.uniquePDV
+          cleanData.uniquePDV
             ? 'Empresa creada exitosamente. PDV principal generado automáticamente.'
             : 'Empresa creada exitosamente.',
           { variant: 'success' }
@@ -192,26 +207,36 @@ export default function RegisterCompanyForm() {
 
       // Guardar respuesta real en Redux si existe
       if (response && response.id) {
-        dispatch(
-          setCompanyResponse({
-            ...response,
-            uniquePDV: data.uniquePDV
-          })
-        );
+        const responseData: CompanyResponse = {
+          id: String(response.id),
+          name: String(response.name || cleanData.name),
+          description: String(response.description || cleanData.description),
+          address: String(response.address || cleanData.address),
+          phone_number: String(response.phone_number || cleanData.phone_number),
+          nit: String(response.nit || cleanData.nit),
+          economic_activity: String(response.economic_activity || cleanData.economic_activity),
+          quantity_employees: String(response.quantity_employees || cleanData.quantity_employees),
+          social_reason: String(response.social_reason || cleanData.social_reason),
+          logo: String(response.logo || cleanData.logo),
+          uniquePDV: Boolean(cleanData.uniquePDV),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        dispatch(setCompanyResponse(responseData));
       } else {
         // Fallback: respuesta mock
         const mockResponse: CompanyResponse = {
           id: 'temp-id',
-          name: data.name,
-          description: data.description,
-          address: data.address,
-          phone_number: data.phone_number,
-          nit: data.nit,
-          economic_activity: data.economic_activity,
-          quantity_employees: data.quantity_employees,
-          social_reason: data.social_reason,
-          logo: data.logo,
-          uniquePDV: data.uniquePDV,
+          name: cleanData.name,
+          description: cleanData.description,
+          address: cleanData.address,
+          phone_number: cleanData.phone_number,
+          nit: cleanData.nit,
+          economic_activity: cleanData.economic_activity,
+          quantity_employees: cleanData.quantity_employees,
+          social_reason: cleanData.social_reason,
+          logo: cleanData.logo,
+          uniquePDV: cleanData.uniquePDV,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
