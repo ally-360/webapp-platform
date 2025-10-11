@@ -25,6 +25,7 @@ import { paths } from 'src/routes/paths';
 import { StepType } from 'src/interfaces/stepByStep';
 import {
   setStep,
+  resetStep,
   setCompanyResponse,
   setPDVResponse,
   setPlanData,
@@ -79,6 +80,7 @@ export default function StepByStep() {
   const completedSteps = useAppSelector((state) => state.stepByStep.completedSteps);
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
   const isUniquePDV = companyResponse?.uniquePDV;
+  const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
 
   const stepsConfig = useMemo(() => getStepsConfig(isUniquePDV), [isUniquePDV]);
 
@@ -104,8 +106,10 @@ export default function StepByStep() {
     console.log('💳 Suscripción:', currentSubscription);
     console.log('� Paso actual:', currentStep);
 
-    // Establecer el paso actual detectado
-    dispatch(setStep(currentStep));
+    // Establecer el paso actual detectado, con validación y clamping
+    const maxStep = isUniquePDV ? 2 : 3;
+    const safeStep = Math.min(Math.max(currentStep, 0), maxStep);
+    dispatch(setStep(safeStep));
 
     // 📌 CARGAR EMPRESA SI EXISTE
     if (companies && companies.length > 0) {
@@ -165,7 +169,48 @@ export default function StepByStep() {
         })
       );
     }
-  }, [isReady, hasError, companies, allPDVs, currentSubscription, currentStep, dispatch]);
+  }, [isReady, hasError, companies, allPDVs, currentSubscription, currentStep, dispatch, isUniquePDV]);
+
+  // Evitar estados inválidos: si uniquePDV y no hay suscripción, no permitir saltar a summary
+  useEffect(() => {
+    if (!isReady) return;
+    const maxStep = isUniquePDV ? 2 : 3;
+    const currentActive = activeStep;
+
+    // Clamp activeStep a rango válido
+    if (currentActive > maxStep) {
+      dispatch(setStep(maxStep));
+      return;
+    }
+
+    // Si uniquePDV y no hay suscripción, asegurar que no esté en summary (2)
+    if (isUniquePDV && !currentSubscription && currentActive === 2) {
+      dispatch(setStep(1)); // Forzar al paso PLAN
+      return;
+    }
+
+    // Si no uniquePDV, sin PDV -> no permitir pasar de PDV
+    if (
+      !isUniquePDV &&
+      (!allPDVs || !allPDVs.pdvs || allPDVs.pdvs.length === 0) &&
+      !pdvResponse &&
+      currentActive > StepType.PDV
+    ) {
+      // Si aún no tenemos PDVs en servidor y tampoco en local, forzar permanecer en PDV
+      dispatch(setStep(StepType.PDV));
+    }
+  }, [activeStep, isUniquePDV, currentSubscription, allPDVs, isReady, dispatch, pdvResponse]);
+
+  // Saneamiento de progreso: si el estado almacenado indica PLAN completado pero el backend no tiene suscripción, retroceder
+  useEffect(() => {
+    if (!isReady) return;
+    if (isUniquePDV && !currentSubscription) {
+      // Forzar al paso PLAN y limpiar datos de plan si estaban marcados únicamente si estaba en SUMMARY o más
+      if (activeStep > StepType.PLAN) {
+        dispatch(resetStep(StepType.PLAN));
+      }
+    }
+  }, [isReady, isUniquePDV, currentSubscription, dispatch, activeStep]);
 
   const isStepOptional = (_step: number) => false;
   const isStepSkipped = (_step: number) => false;
@@ -191,33 +236,20 @@ export default function StepByStep() {
   };
 
   const StepComponent = useMemo(() => {
-    // Para empresas con uniquePDV, mapear el activeStep al componente correcto
+    // Para empresas con uniquePDV, mapear el activeStep al componente correcto con fallback seguro
     if (isUniquePDV) {
-      switch (activeStep) {
-        case 0: // StepType.COMPANY
-          return <RegisterCompanyForm />;
-        case 1: // StepType.PLAN (saltamos PDV)
-          return <PlanSelectionForm />;
-        case 2: // StepType.SUMMARY
-          return <RegisterSummary />;
-        default:
-          return <Typography>Paso desconocido</Typography>;
-      }
+      if (activeStep === 0) return <RegisterCompanyForm />;
+      if (activeStep === 1) return <PlanSelectionForm />;
+      if (activeStep === 2) return <RegisterSummary />;
+      return <RegisterCompanyForm />; // Fallback seguro
     }
 
-    // Para empresas normales, usar los tipos de paso estándar
-    switch (activeStep) {
-      case StepType.COMPANY:
-        return <RegisterCompanyForm />;
-      case StepType.PDV:
-        return <RegisterPDVForm />;
-      case StepType.PLAN:
-        return <PlanSelectionForm />;
-      case StepType.SUMMARY:
-        return <RegisterSummary />;
-      default:
-        return <Typography>Paso desconocido</Typography>;
-    }
+    // Para empresas normales, usar los tipos de paso estándar con fallback seguro
+    if (activeStep === StepType.COMPANY) return <RegisterCompanyForm />;
+    if (activeStep === StepType.PDV) return <RegisterPDVForm />;
+    if (activeStep === StepType.PLAN) return <PlanSelectionForm />;
+    if (activeStep === StepType.SUMMARY) return <RegisterSummary />;
+    return <RegisterCompanyForm />; // Fallback seguro
   }, [activeStep, isUniquePDV]);
 
   // 🔄 Mostrar loading mientras se cargan los datos iniciales

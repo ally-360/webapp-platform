@@ -30,9 +30,15 @@ import {
 // Redux
 import { useAppDispatch } from 'src/hooks/store';
 import { clearAllStateOnCompanySwitch } from 'src/redux/actions/companySwitch';
-import { setCredentials, clearCredentials } from 'src/redux/slices/authSlice';
+import { setCredentials, clearCredentials, setToken } from 'src/redux/slices/authSlice';
 import { useNavigate } from 'react-router';
 import { paths } from 'src/routes/paths';
+import { authApi } from 'src/redux/services/authApi';
+import { subscriptionsApi } from 'src/redux/services/subscriptionsApi';
+import { posApi } from 'src/redux/services/posApi';
+import { pdvsApi } from 'src/redux/services/pdvsApi';
+import { productsApi } from 'src/redux/services/productsApi';
+import { invoicesApi } from 'src/redux/services/invoicesApi';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 
@@ -301,6 +307,16 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
         if (result.access_token) {
           setSession(result.access_token);
+          // Actualizar token en Redux para que los baseQuery lean el nuevo Authorization inmediatamente
+          dispatch(setToken(result.access_token));
+
+          // Invalidar caches para evitar respuestas con token viejo
+          dispatch(authApi.util.invalidateTags(['User', 'Company', 'PDV', 'Subscription']));
+          dispatch(subscriptionsApi.util.invalidateTags(['Subscription', 'Plan', 'User']));
+          dispatch(posApi.util.invalidateTags(['POS'] as any));
+          dispatch(pdvsApi.util.invalidateTags(['PDV'] as any));
+          dispatch(productsApi.util.invalidateTags(['Product'] as any));
+          dispatch(invoicesApi.util.invalidateTags(['Invoice'] as any));
 
           const selectedCompany = userCompanies?.find((comp) => comp.id === companyId);
           if (selectedCompany) {

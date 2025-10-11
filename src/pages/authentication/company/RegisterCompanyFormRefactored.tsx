@@ -34,6 +34,7 @@ import { useGetMyCompaniesQuery, useCreateCompanyMutation, useUpdateCompanyMutat
 
 // options
 import { useEffect } from 'react';
+import { useAuthContext } from 'src/auth/hooks';
 import { economicActivityOptions, quantityEmployeesOptions } from './optionsCommon';
 
 // ========================================
@@ -43,6 +44,7 @@ import { economicActivityOptions, quantityEmployeesOptions } from './optionsComm
 export default function RegisterCompanyForm() {
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
+  const { selectCompany } = useAuthContext();
 
   // RTK Query hooks
   // En step-by-step, permitir la consulta para cargar datos existentes
@@ -188,14 +190,11 @@ export default function RegisterCompanyForm() {
         uniquePDV: cleanData.uniquePDV
       };
 
-      // Si ya existe una empresa, hacer PATCH (update), si no, POST (create)
-      let response;
+      let response: any;
       if (firstCompany?.id) {
-        // Editar empresa existente
         response = await updateCompany({ id: firstCompany.id, data: companyPayload }).unwrap();
         enqueueSnackbar('Empresa actualizada exitosamente.', { variant: 'success' });
       } else {
-        // Crear nueva empresa
         response = await createCompany(companyPayload).unwrap();
         enqueueSnackbar(
           cleanData.uniquePDV
@@ -203,6 +202,18 @@ export default function RegisterCompanyForm() {
             : 'Empresa creada exitosamente.',
           { variant: 'success' }
         );
+      }
+
+      // Forzar selección de empresa SIEMPRE tras crear/editar para actualizar el token (tenant)
+      try {
+        const companyIdToSelect = response?.id || firstCompany?.id;
+        if (companyIdToSelect) {
+          await selectCompany(companyIdToSelect, false);
+          console.log('✅ Empresa seleccionada y token actualizado (tenant)');
+        }
+        console.log('ℹ️ No se seleccionó ninguna empresa (no hay ID disponible)');
+      } catch (selectErr) {
+        console.error('❌ Error al seleccionar empresa tras registro/edición:', selectErr);
       }
 
       // Guardar respuesta real en Redux si existe

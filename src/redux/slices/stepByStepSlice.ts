@@ -251,9 +251,8 @@ const stepByStepSlice = createSlice({
       const isUniquePDV = state.companyResponse?.uniquePDV;
 
       if (isUniquePDV) {
-        // Para empresas uniquePDV: 0=COMPANY, 1=PLAN, 2=SUMMARY
         switch (currentStep) {
-          case 0: // COMPANY
+          case 0:
             state.activeStep = 1; // PLAN (en configuración uniquePDV)
             break;
           case 1: // PLAN (en configuración uniquePDV)

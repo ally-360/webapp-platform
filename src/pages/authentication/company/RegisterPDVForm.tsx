@@ -14,7 +14,6 @@ import parse from 'autosuggest-highlight/parse';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterPDVSchema } from 'src/interfaces/auth/yupSchemas';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import type { InferType } from 'yup';
 import { setPDVData, setPDVResponse, goToNextStep, goToPreviousStep } from 'src/redux/slices/stepByStepSlice';
 import { useCreatePDVMutation, useUpdatePDVMutation, useGetAllPDVsQuery } from 'src/redux/services/authApi';
 import { useGetDepartmentsQuery, useGetCitiesQuery } from 'src/redux/services/locationsApi';
@@ -22,7 +21,15 @@ import type { Department, City } from 'src/redux/services/locationsApi';
 
 // ----------------------------------------------------------------------
 
-type RegisterPDVFormValues = InferType<typeof RegisterPDVSchema>;
+type RegisterPDVFormValues = {
+  name: string;
+  departamento: Department | null;
+  municipio: City | null;
+  address: string;
+  phone_number: string;
+  main: boolean;
+  company_id: string;
+};
 
 export default function RegisterPDVForm() {
   const { enqueueSnackbar } = useSnackbar();
@@ -49,8 +56,8 @@ export default function RegisterPDVForm() {
 
   const defaultValues: RegisterPDVFormValues = {
     name: firstPDV?.name || pdvResponse?.name || pdvData?.name || '',
-    departamento: {} as any,
-    municipio: {} as any,
+    departamento: null as any,
+    municipio: null as any,
     address: firstPDV?.address || pdvResponse?.address || pdvData?.address || '',
     phone_number: firstPDV?.phone_number || pdvResponse?.phone_number || pdvData?.phone_number || '',
     main: true,
@@ -302,8 +309,8 @@ export default function RegisterPDVForm() {
           onChange={(event, newValue) => {
             setSelectedDepartment(newValue || null);
             setSelectedCity(null);
-            setValue('departamento', newValue || ({} as Department), { shouldValidate: true });
-            setValue('municipio', {} as City, { shouldValidate: false });
+            setValue('departamento', (newValue ?? null) as any, { shouldValidate: true });
+            setValue('municipio', null as any, { shouldValidate: false });
           }}
         />
 
@@ -344,7 +351,7 @@ export default function RegisterPDVForm() {
           }}
           onChange={(event, newValue) => {
             setSelectedCity(newValue || null);
-            setValue('municipio', newValue || ({} as City), { shouldValidate: true });
+            setValue('municipio', (newValue ?? null) as any, { shouldValidate: true });
           }}
           disabled={!selectedDepartment}
         />

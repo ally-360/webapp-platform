@@ -169,6 +169,11 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
     }
 
     try {
+      // Validación: cliente obligatorio (backend requiere UUID)
+      if (!saleWindow.customer?.id) {
+        enqueueSnackbar('Debes seleccionar un cliente antes de confirmar la venta.', { variant: 'warning' });
+        return;
+      }
       const finalDiscountAmount =
         discountType === 'percentage' ? (recalculatedTotals.subtotal * discountValue) / 100 : discountValue;
 
@@ -214,7 +219,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
       // Preparar datos para la API
       const saleData: any = {
         pdv_id: currentRegister.pdv_id,
-        customer_id: saleWindow.customer?.id || 0, // Cliente por defecto (ID: 0)
+        customer_id: saleWindow.customer.id, // UUID requerido por backend
         seller_id: seller || '', // Convertir null a string vacío
         items,
         payments,
@@ -260,7 +265,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
   };
 
   const totalPaid = saleWindow.payments.reduce((sum, payment) => sum + payment.amount, 0);
-  const canConfirm = sellerName && saleDate && taxRate >= 0 && recalculatedTotals.total > 0 && !isCreatingSale;
+  const canConfirm =
+    !!saleWindow.customer?.id &&
+    !!sellerName &&
+    !!saleDate &&
+    taxRate >= 0 &&
+    recalculatedTotals.total > 0 &&
+    !isCreatingSale;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>

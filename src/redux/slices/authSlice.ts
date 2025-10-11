@@ -74,6 +74,13 @@ const authSlice = createSlice({
       localStorage.setItem('selectedCompanyId', action.payload.company_id);
     },
 
+    // Actualizar solo el token (por ejemplo, tras select-company)
+    setToken: (state, action: PayloadAction<string>) => {
+      const token = action.payload;
+      state.token = token;
+      localStorage.setItem('accessToken', token);
+    },
+
     // Actualizar usuario
     setUser: (state, action: PayloadAction<UserOut>) => {
       state.user = action.payload;
@@ -124,8 +131,15 @@ const authSlice = createSlice({
 // 📤 EXPORTS
 // ========================================
 
-export const { setCredentials, setSelectedCompany, setUser, clearCredentials, setLoading, initializeFromStorage } =
-  authSlice.actions;
+export const {
+  setCredentials,
+  setSelectedCompany,
+  setUser,
+  clearCredentials,
+  setLoading,
+  initializeFromStorage,
+  setToken
+} = authSlice.actions;
 
 export default authSlice.reducer;
 

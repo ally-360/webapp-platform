@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../store';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 // ========================================
 // 📋 Types & Interfaces
@@ -43,18 +43,7 @@ export interface BrandResponse {
 
 export const brandsApi = createApi({
   reducerPath: 'brandsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8000',
-    prepareHeaders: (headers, { getState }) => {
-      const { auth } = getState() as RootState;
-      const { token } = auth;
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Brand'],
   endpoints: (builder) => ({
     // ========================================
