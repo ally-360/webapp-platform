@@ -9,7 +9,6 @@ import { useDispatch } from 'react-redux';
 import { switchPopupState } from 'src/redux/inventory/categoriesSlice';
 import { switchPopupState as switchPopupStateBrands } from 'src/redux/inventory/brandsSlice';
 import { switchPopup } from 'src/redux/inventory/pdvsSlice';
-import { togglePopup as toggleContactsPopup } from 'src/redux/inventory/contactsSlice';
 import { useNavigate } from 'react-router';
 
 // Cast SvgColor to any locally to avoid TS prop inference issues
@@ -178,10 +177,10 @@ export function useNavData() {
           {
             title: t('Contactos'),
             path: paths.dashboard.user.list,
-            icon: ICONS.user,
-            openPopup() {
-              dispatch(toggleContactsPopup());
-            }
+            icon: ICONS.user
+            // openPopup() {
+            //   dispatch(toggleContactsPopup());
+            // }
             // children: [
             //   // { title: t('profile'), path: paths.dashboard.user.root },
             //   // { title: t('cards'), path: paths.dashboard.user.cards },

@@ -26,11 +26,10 @@ import MenuItem from '@mui/material/MenuItem';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import parse from 'autosuggest-highlight/parse';
 import match from 'autosuggest-highlight/match';
-import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import { useTheme } from '@mui/material/styles';
 import { useCreateContactMutation, useUpdateContactMutation } from 'src/redux/services/contactsApi';
+import { useGetDepartmentsQuery, useGetCitiesQuery } from 'src/redux/services/locationsApi';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
@@ -207,7 +206,6 @@ export default function UserNewEditForm({ currentUser }) {
       sendEmail: false
     };
   }, [currentUser]);
-  const dispatch = useAppDispatch();
 
   const methods = useForm<any>({
     resolver: yupResolver(NewUserSchema),
@@ -225,6 +223,20 @@ export default function UserNewEditForm({ currentUser }) {
   } = methods;
 
   const values = watch();
+
+  // RTK Query hooks for departments and cities
+  const { data: departmentsResponse, isLoading: isDepartmentsLoading } = useGetDepartmentsQuery();
+  const departments = useMemo(() => departmentsResponse?.departments || [], [departmentsResponse]);
+
+  // Watch for department changes to fetch cities
+  const selectedDepartment = watch('departamento');
+  const departmentId = selectedDepartment?.id;
+  
+  const { data: citiesResponse, isLoading: isCitiesLoading } = useGetCitiesQuery(
+    { department_id: departmentId },
+    { skip: !departmentId }
+  );
+  const cities = useMemo(() => citiesResponse?.cities || [], [citiesResponse]);
 
   const [createContact] = useCreateContactMutation();
   const [updateContact] = useUpdateContactMutation();
@@ -263,33 +275,47 @@ export default function UserNewEditForm({ currentUser }) {
 
   // ----------------------------------------------------------------------
 
-  useEffect(() => {
-    dispatch(getAllMunicipios());
-  }, [dispatch]);
-
-  const { locations } = useAppSelector((state) => state.locations);
-  const departmentValue = watch('departamento');
   const [searchQueryMunicipio, setSearchQueryMunicipio] = useState('');
   const [searchQueryDepartamento, setSearchQueryDepartamento] = useState('');
-  const [municipios, setMunicipios] = useState([]);
 
+  // Effect to clear city when department changes
   useEffect(() => {
-    if (departmentValue) {
-      setMunicipios(departmentValue.towns);
-      const selectedMunicipio = watch('town');
-      if (selectedMunicipio) {
-        const municipioExist = departmentValue.towns.filter((town) => town.name === selectedMunicipio.name);
-        if (municipioExist.length === 0) {
-          setValue('town', '');
-          setSearchQueryMunicipio('');
-        }
+    if (selectedDepartment) {
+      // Check if current city belongs to selected department
+      const currentCity = watch('town');
+      if (currentCity && currentCity.department_id !== selectedDepartment.id) {
+        setValue('town', null);
+        setSearchQueryMunicipio('');
       }
     } else {
-      setMunicipios([]);
       setValue('town', null);
       setSearchQueryMunicipio('');
     }
-  }, [departmentValue, locations, setValue, watch]);
+  }, [selectedDepartment, setValue, watch]);
+
+  // Effect to populate department and city when editing
+  useEffect(() => {
+    if (currentUser && departments.length > 0) {
+      const stateName = currentUser.billing_address?.state;
+      const cityName = currentUser.billing_address?.city;
+      
+      if (stateName && !selectedDepartment) {
+        // Find department by name
+        const department = departments.find((dept) => dept.name === stateName);
+        if (department) {
+          setValue('departamento', department);
+          
+          // If we also have a city name, we'll set it when cities load
+          if (cityName && cities.length > 0) {
+            const city = cities.find((c) => c.name === cityName && c.department_id === department.id);
+            if (city) {
+              setValue('town', city);
+            }
+          }
+        }
+      }
+    }
+  }, [currentUser, departments, cities, selectedDepartment, setValue]);
 
   const handleInputDepartamentoChange = (event, value) => {
     setSearchQueryDepartamento(value);
@@ -297,6 +323,12 @@ export default function UserNewEditForm({ currentUser }) {
 
   const handleInputMunicipioChange = (event, value) => {
     setSearchQueryMunicipio(value);
+  };
+
+  const getCitiesNoOptionsText = () => {
+    if (!selectedDepartment) return 'Selecciona un departamento';
+    if (isCitiesLoading) return 'Cargando ciudades...';
+    return 'No hay ciudades disponibles';
   };
 
   const isOptionEqualToValue = (option: any, value: any) => {
@@ -375,7 +407,8 @@ export default function UserNewEditForm({ currentUser }) {
                 onInputChange={handleInputDepartamentoChange}
                 isOptionEqualToValue={isOptionEqualToValue}
                 getOptionLabel={(option) => (option.name ? option.name : '')}
-                options={locations}
+                options={departments}
+                loading={isDepartmentsLoading}
                 renderOption={(props, option) => {
                   const matches = match(option.name, searchQueryDepartamento);
                   const parts = parse(option.name, matches);
@@ -402,7 +435,7 @@ export default function UserNewEditForm({ currentUser }) {
                 }}
                 noOptionsText={
                   <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                    No hay resultados para {searchQueryMunicipio}
+                    {isDepartmentsLoading ? 'Cargando departamentos...' : 'No hay departamentos disponibles'}
                   </Typography>
                 }
               />
@@ -414,7 +447,8 @@ export default function UserNewEditForm({ currentUser }) {
                 onInputChange={handleInputMunicipioChange}
                 isOptionEqualToValue={isOptionEqualToValue}
                 getOptionLabel={(option) => (option.name ? option.name : '')}
-                options={municipios}
+                options={cities}
+                loading={isCitiesLoading}
                 renderOption={(props, option) => {
                   const matches = match(option.name, searchQueryMunicipio);
                   const parts = parse(option.name, matches);
@@ -441,9 +475,7 @@ export default function UserNewEditForm({ currentUser }) {
                 }}
                 noOptionsText={
                   <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                    {municipios.length === 0
-                      ? 'Seleciona un departamento'
-                      : `No hay resultados para ${searchQueryMunicipio}`}
+                    {getCitiesNoOptionsText()}
                   </Typography>
                 }
               />

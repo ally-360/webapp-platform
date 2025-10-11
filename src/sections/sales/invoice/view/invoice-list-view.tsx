@@ -42,7 +42,6 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import {
   useTable,
   TableNoData,
-  TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
   TablePaginationCustom
@@ -958,8 +957,6 @@ export default function InvoiceListView() {
                         onDeleteRow={() => handleDeleteRow(row.id)}
                       />
                     ))}
-
-                  <TableEmptyRows height={denseHeight} emptyRows={Math.max(0, table.rowsPerPage - dataInPage.length)} />
 
                   <TableNoData notFound={notFound} />
                 </TableBody>

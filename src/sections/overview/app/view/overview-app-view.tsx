@@ -5,8 +5,6 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import Skeleton from '@mui/material/Skeleton';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
 import { useSettingsContext } from 'src/components/settings';
@@ -160,7 +158,7 @@ export default function OverviewAppView() {
 
       <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Welcome Cards - Evitar parpadeo con lógica condicional */}
-        {isInitialLoad && (
+        {/* {isInitialLoad && (
           <>
             <Grid xs={12} sm={12} md={5} lg={4}>
               <AppWelcome
@@ -189,7 +187,7 @@ export default function OverviewAppView() {
               </Box>
             </Grid>
           </>
-        )}
+        )} */}
 
         {!isInitialLoad && tutorialCompleted && (
           // Tutorial completado: AppWelcome toma el ancho completo
@@ -207,7 +205,7 @@ export default function OverviewAppView() {
           </Grid>
         )}
 
-        {!isInitialLoad && !tutorialCompleted && (
+        {isInitialLoad && !tutorialCompleted && (
           // Tutorial no completado: layout normal
           <>
             <Grid xs={12} sm={12} md={5} lg={4}>

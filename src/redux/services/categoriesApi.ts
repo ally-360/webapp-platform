@@ -94,7 +94,19 @@ export const categoriesApi = createApi({
         method: 'POST',
         body: categoryData
       }),
-      invalidatesTags: ['Category']
+      invalidatesTags: ['Category'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Invalidate catalogApi categories as well
+          dispatch(categoriesApi.util.invalidateTags([{ type: 'Category' as const }]));
+          // Also invalidate catalogApi if it exists in the store
+          const { catalogApi } = await import('./catalogApi');
+          dispatch(catalogApi.util.invalidateTags([{ type: 'Category' as const }]));
+        } catch {
+          // ignore
+        }
+      }
     }),
 
     // ========================================

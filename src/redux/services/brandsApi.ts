@@ -90,7 +90,19 @@ export const brandsApi = createApi({
         method: 'POST',
         body: brandData
       }),
-      invalidatesTags: ['Brand']
+      invalidatesTags: ['Brand'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Invalidate catalogApi brands as well
+          dispatch(brandsApi.util.invalidateTags([{ type: 'Brand' as const }]));
+          // Also invalidate catalogApi if it exists in the store
+          const { catalogApi } = await import('./catalogApi');
+          dispatch(catalogApi.util.invalidateTags([{ type: 'Brand' as const }]));
+        } catch {
+          // ignore
+        }
+      }
     }),
 
     // ========================================

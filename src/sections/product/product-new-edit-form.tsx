@@ -51,7 +51,7 @@ import {
 import { useGetTaxesQuery, useGetCategoriesQuery, useGetBrandsQuery } from 'src/redux/services/catalogApi';
 import { NewProductSchema } from 'src/interfaces/inventory/productsSchemas';
 import { NewProductInterface, PDVproduct, getProductResponse } from 'src/interfaces/inventory/productsInterface';
-import { useAppDispatch } from 'src/hooks/store';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { fNumber } from 'src/utils/format-number';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
 
@@ -121,6 +121,12 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const [selectedOptionBrand, setSelectedOptionBrand] = useState('');
   const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
   const [searchQueryBrand, setSearchQueryBrand] = useState('');
+  
+  // Track when we're creating new items to auto-select them
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [isCreatingBrand, setIsCreatingBrand] = useState(false);
+  const [previousCategoryCount, setPreviousCategoryCount] = useState(0);
+  const [previousBrandCount, setPreviousBrandCount] = useState(0);
 
   // Handlers declared early to satisfy effect deps below
   const handleCategorySelect = useCallback(
@@ -156,8 +162,46 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   }, [currentProduct?.taxesOption, includeTaxes, setValueAny]);
 
   const { data: taxes = [] } = useGetTaxesQuery();
-  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategoriesQuery();
-  const { data: brands = [], isLoading: isLoadingBrands } = useGetBrandsQuery();
+  const { data: categories = [], isLoading: isLoadingCategories, refetch: refetchCategories } = useGetCategoriesQuery();
+  const { data: brands = [], isLoading: isLoadingBrands, refetch: refetchBrands } = useGetBrandsQuery();
+
+  // Get popup states for handling post-creation selection
+  const { openPopup: categoryPopupOpen } = useAppSelector((state) => state.categories);
+  const { openPopup: brandPopupOpen } = useAppSelector((state) => state.brands);
+
+  // Effect to select newly created category
+  useEffect(() => {
+    // When category popup closes, refetch categories to get latest data
+    if (!categoryPopupOpen && isCreatingCategory) {
+      refetchCategories().then((result) => {
+        if (result.data && result.data.length > previousCategoryCount) {
+          // Get the last category (most recently added)
+          const lastCategory = result.data[result.data.length - 1];
+          if (lastCategory) {
+            handleCategorySelect(null, lastCategory);
+          }
+        }
+        setIsCreatingCategory(false);
+      });
+    }
+  }, [categoryPopupOpen, isCreatingCategory, previousCategoryCount, handleCategorySelect, refetchCategories]);
+
+  // Effect to select newly created brand
+  useEffect(() => {
+    // When brand popup closes, refetch brands to get latest data
+    if (!brandPopupOpen && isCreatingBrand) {
+      refetchBrands().then((result) => {
+        if (result.data && result.data.length > previousBrandCount) {
+          // Get the last brand (most recently added)
+          const lastBrand = result.data[result.data.length - 1];
+          if (lastBrand) {
+            handleBrandSelect(null, lastBrand);
+          }
+        }
+        setIsCreatingBrand(false);
+      });
+    }
+  }, [brandPopupOpen, isCreatingBrand, previousBrandCount, handleBrandSelect, refetchBrands]);
 
   // Prefill selected taxes in edit mode when product has a single taxesOption id
   useEffect(() => {
@@ -301,7 +345,9 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   // Autocomplete category
 
   const handleClickOpenPopupCategory = () => {
-    dispatch(switchPopupState(false));
+    setIsCreatingCategory(true);
+    setPreviousCategoryCount(categories.length);
+    dispatch(switchPopupState(true));
   };
 
   const [searchQueryCategory, setSearchQueryCategory] = useState('');
@@ -331,7 +377,9 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   };
 
   const handleClickOpenPopupBrand = () => {
-    dispatch(switchPopupStateBrand(false));
+    setIsCreatingBrand(true);
+    setPreviousBrandCount(brands.length);
+    dispatch(switchPopupStateBrand(true));
   };
   const priceBase = watch('priceBase');
   // Calculate priceSale based on selected taxes
