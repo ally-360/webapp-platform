@@ -98,7 +98,7 @@ export default function RegisterCompanyForm() {
         })
       );
 
-      // Small delay to ensure Redux state is updated before navigation
+      // Longer delay to ensure company selection and token refresh are complete
       setTimeout(() => {
         // Show success message
         enqueueSnackbar(
@@ -110,7 +110,7 @@ export default function RegisterCompanyForm() {
 
         // Navigate to next step - goToNextStep handles uniquePDV logic automatically
         dispatch(goToNextStep());
-      }, 100);
+      }, 500); // Increased delay to ensure company selection is complete
     } catch (error: any) {
       console.error('❌ Error creating company:', error);
       const errorMessage = error?.data?.detail || error?.message || 'Error al crear la empresa';

@@ -250,18 +250,33 @@ const stepByStepSlice = createSlice({
       const currentStep = state.activeStep;
       const isUniquePDV = state.companyResponse?.uniquePDV;
 
-      switch (currentStep) {
-        case StepType.COMPANY:
-          state.activeStep = isUniquePDV ? StepType.PLAN : StepType.PDV;
-          break;
-        case StepType.PDV:
-          state.activeStep = StepType.PLAN;
-          break;
-        case StepType.PLAN:
-          state.activeStep = StepType.SUMMARY;
-          break;
-        default:
-          break;
+      if (isUniquePDV) {
+        // Para empresas uniquePDV: 0=COMPANY, 1=PLAN, 2=SUMMARY
+        switch (currentStep) {
+          case 0: // COMPANY
+            state.activeStep = 1; // PLAN (en configuración uniquePDV)
+            break;
+          case 1: // PLAN (en configuración uniquePDV)
+            state.activeStep = 2; // SUMMARY
+            break;
+          default:
+            break;
+        }
+      } else {
+        // Para empresas normales: 0=COMPANY, 1=PDV, 2=PLAN, 3=SUMMARY
+        switch (currentStep) {
+          case StepType.COMPANY:
+            state.activeStep = StepType.PDV;
+            break;
+          case StepType.PDV:
+            state.activeStep = StepType.PLAN;
+            break;
+          case StepType.PLAN:
+            state.activeStep = StepType.SUMMARY;
+            break;
+          default:
+            break;
+        }
       }
       saveToLocalStorage(state);
     },
@@ -271,18 +286,33 @@ const stepByStepSlice = createSlice({
       const isUniquePDV = state.companyResponse?.uniquePDV;
       console.log('🔄 goToPreviousStep called from step:', currentStep, 'isUniquePDV:', isUniquePDV);
 
-      switch (currentStep) {
-        case StepType.PDV:
-          state.activeStep = StepType.COMPANY;
-          break;
-        case StepType.PLAN:
-          state.activeStep = isUniquePDV ? StepType.COMPANY : StepType.PDV;
-          break;
-        case StepType.SUMMARY:
-          state.activeStep = StepType.PLAN;
-          break;
-        default:
-          break;
+      if (isUniquePDV) {
+        // Para empresas uniquePDV: 0=COMPANY, 1=PLAN, 2=SUMMARY
+        switch (currentStep) {
+          case 1: // PLAN (en configuración uniquePDV)
+            state.activeStep = 0; // COMPANY
+            break;
+          case 2: // SUMMARY
+            state.activeStep = 1; // PLAN (en configuración uniquePDV)
+            break;
+          default:
+            break;
+        }
+      } else {
+        // Para empresas normales: 0=COMPANY, 1=PDV, 2=PLAN, 3=SUMMARY
+        switch (currentStep) {
+          case StepType.PDV:
+            state.activeStep = StepType.COMPANY;
+            break;
+          case StepType.PLAN:
+            state.activeStep = StepType.PDV;
+            break;
+          case StepType.SUMMARY:
+            state.activeStep = StepType.PLAN;
+            break;
+          default:
+            break;
+        }
       }
       saveToLocalStorage(state);
     },

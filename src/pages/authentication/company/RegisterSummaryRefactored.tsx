@@ -15,6 +15,7 @@ import { useGetAllPDVsQuery, authApi } from 'src/redux/services/authApi';
 import {
   useUpdateFirstLoginMutation,
   useGetCurrentSubscriptionQuery,
+  useGetPlansQuery,
   subscriptionsApi
 } from 'src/redux/services/subscriptionsApi';
 
@@ -69,8 +70,38 @@ export default function RegisterSummary() {
     skip: false // Always try to load subscription in summary
   });
 
+  // Get all plans to find the plan name
+  const { data: allPlans } = useGetPlansQuery({ is_active: true, limit: 50 });
+
   // API for updating first_login
   const [updateFirstLogin] = useUpdateFirstLoginMutation();
+
+  // Helper function to get plan name
+  const getPlanName = useCallback(() => {
+    // First try from subscription response
+    if (subscriptionResponse?.plan_name) {
+      return subscriptionResponse.plan_name;
+    }
+
+    // Then try to find in plans list using plan_id from planData
+    if (planData?.plan_id && allPlans) {
+      const selectedPlan = allPlans.find((plan) => plan.id === planData.plan_id);
+      if (selectedPlan) {
+        return selectedPlan.name;
+      }
+    }
+
+    // Then try using plan_code from subscription
+    if ((subscriptionResponse?.plan_code || apiSubscription?.plan_code) && allPlans) {
+      const planCode = subscriptionResponse?.plan_code || apiSubscription?.plan_code;
+      const selectedPlan = allPlans.find((plan) => plan.code === planCode);
+      if (selectedPlan) {
+        return selectedPlan.name;
+      }
+    }
+
+    return 'Plan seleccionado';
+  }, [subscriptionResponse, planData, allPlans, apiSubscription]);
 
   // Load subscription data if available and not already in Redux
   useEffect(() => {
@@ -195,7 +226,7 @@ export default function RegisterSummary() {
           </Typography>
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
-            <InfoBlock title="Plan" value={subscriptionResponse?.plan_name || 'Plan seleccionado'} />
+            <InfoBlock title="Plan" value={getPlanName()} />
             <InfoBlock
               title="Estado"
               value={

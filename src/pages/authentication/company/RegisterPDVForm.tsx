@@ -133,7 +133,7 @@ export default function RegisterPDVForm() {
   // Effect para resetear form con datos completos cuando todo esté listo
   // Solo hacer reset inicial, no en cada cambio de municipio
   useEffect(() => {
-    if (selectedDepartment && selectedCity && !methods.formState.isDirty) {
+    if (selectedDepartment && selectedCity && !hasInitialReset) {
       const completeFormData = {
         name: firstPDV?.name || pdvResponse?.name || pdvData?.name || '',
         departamento: selectedDepartment,
@@ -146,8 +146,9 @@ export default function RegisterPDVForm() {
 
       console.log('🔄 Initial form reset with complete data:', completeFormData);
       reset(completeFormData);
+      setHasInitialReset(true);
     }
-  }, [selectedDepartment, selectedCity]); // Removido dependencies que causaban resets innecesarios
+  }, [selectedDepartment, selectedCity, hasInitialReset, firstPDV, pdvResponse, pdvData, companyResponse, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
