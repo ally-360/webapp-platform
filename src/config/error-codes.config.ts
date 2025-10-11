@@ -95,13 +95,6 @@ export const ERROR_CODE_MAP: Record<number, ErrorConfig> = {
     message: 'El servicio no está disponible temporalmente',
     severity: 'warning'
   },
-
-  // Errores de red y conexión (600-699)
-  600: {
-    action: 'toast',
-    message: 'Sin conexión a internet. Revisa tu conexión',
-    severity: 'error'
-  },
   601: {
     action: 'toast',
     message: 'Tiempo de espera agotado. Intenta de nuevo',

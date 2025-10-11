@@ -121,7 +121,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const [selectedOptionBrand, setSelectedOptionBrand] = useState('');
   const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
   const [searchQueryBrand, setSearchQueryBrand] = useState('');
-  
+
   // Track when we're creating new items to auto-select them
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [isCreatingBrand, setIsCreatingBrand] = useState(false);

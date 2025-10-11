@@ -231,7 +231,7 @@ export default function UserNewEditForm({ currentUser }) {
   // Watch for department changes to fetch cities
   const selectedDepartment = watch('departamento');
   const departmentId = selectedDepartment?.id;
-  
+
   const { data: citiesResponse, isLoading: isCitiesLoading } = useGetCitiesQuery(
     { department_id: departmentId },
     { skip: !departmentId }
@@ -298,13 +298,13 @@ export default function UserNewEditForm({ currentUser }) {
     if (currentUser && departments.length > 0) {
       const stateName = currentUser.billing_address?.state;
       const cityName = currentUser.billing_address?.city;
-      
+
       if (stateName && !selectedDepartment) {
         // Find department by name
         const department = departments.find((dept) => dept.name === stateName);
         if (department) {
           setValue('departamento', department);
-          
+
           // If we also have a city name, we'll set it when cities load
           if (cityName && cities.length > 0) {
             const city = cities.find((c) => c.name === cityName && c.department_id === department.id);
