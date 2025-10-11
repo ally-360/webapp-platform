@@ -235,27 +235,27 @@ export default function StepByStep() {
     );
   }
 
-  if (hasError) {
-    return (
-      <RootStyle>
-        <Container>
-          <ContentStyle>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '50vh' }}>
-              <Typography variant="h6" color="error" gutterBottom>
-                Error de conexión
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                No se pudo cargar la configuración. Verifica tu conexión e intenta nuevamente.
-              </Typography>
-              <Button variant="outlined" onClick={() => window.location.reload()}>
-                Reintentar
-              </Button>
-            </Box>
-          </ContentStyle>
-        </Container>
-      </RootStyle>
-    );
-  }
+  // if (hasError) {
+  //   return (
+  //     <RootStyle>
+  //       <Container>
+  //         <ContentStyle>
+  //           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '50vh' }}>
+  //             <Typography variant="h6" color="error" gutterBottom>
+  //               Error de conexión
+  //             </Typography>
+  //             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+  //               No se pudo cargar la configuración. Verifica tu conexión e intenta nuevamente.
+  //             </Typography>
+  //             <Button variant="outlined" onClick={() => window.location.reload()}>
+  //               Reintentar
+  //             </Button>
+  //           </Box>
+  //         </ContentStyle>
+  //       </Container>
+  //     </RootStyle>
+  //   );
+  // }
 
   return (
     <RootStyle>

@@ -1,5 +1,5 @@
 import { Button, Divider, IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import PropTypes from 'prop-types';
 import Iconify from 'src/components/iconify';
 import { useTranslation } from 'react-i18next';
@@ -7,70 +7,84 @@ import CustomPopover from 'src/components/custom-popover/custom-popover';
 import { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useBoolean } from 'src/hooks/use-boolean';
-// import trash2Outline from '@iconify/icons-eva/trash-2-outline';
 
-export default function MenuCategories({ handleEdit, handleDelete, handleView, view, element, edit }) {
-  const [anchorEl, setAnchorEl] = useState(null);
+// Tipos para mejor tipado
+interface MenuCategoriesProps {
+  handleEdit: (element: any) => void;
+  handleDelete: (element: any) => void;
+  handleView?: (id: string | number) => void;
+  view?: boolean;
+  element: any;
+  edit?: boolean;
+}
+
+function MenuCategories({ handleEdit, handleDelete, handleView, view, element, edit }: MenuCategoriesProps) {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const openMenu = Boolean(anchorEl);
   const { t } = useTranslation();
   const popover = usePopover();
-  const confirm = useBoolean();
+  const confirm = useBoolean(false);
+  const ref = useRef<HTMLElement>(null);
 
-  const handleClose = () => {
+  // ========================================
+  // 🎯 CALLBACKS ESTABLES
+  // ========================================
+
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const [elementState] = useState(element);
-
-  useEffect(() => {
-    console.log(elementState);
-  }, [elementState]);
-
-  const handleEditElement = () => {
-    // console.log(elementState);
-    handleEdit(elementState);
+  const handleEditElement = useCallback(() => {
+    handleEdit(element);
     handleClose();
-  };
+  }, [handleEdit, element, handleClose]);
 
-  const ref = useRef(null);
+  const handleViewElement = useCallback(() => {
+    if (handleView && element?.id) {
+      handleView(element.id);
+    }
+    popover.onClose();
+  }, [handleView, element?.id, popover]);
+
+  const handleDeleteElement = useCallback(() => {
+    handleDelete(element);
+    confirm.onFalse();
+  }, [handleDelete, element, confirm]);
+
+  const handleConfirmDelete = useCallback(() => {
+    confirm.onTrue();
+    popover.onClose();
+  }, [confirm, popover]);
+
+  // ========================================
+  // 🎨 RENDERIZADO PRINCIPAL
+  // ========================================
 
   return (
     <>
       <IconButton color={popover.open ? 'primary' : 'default'} onClick={popover.onOpen}>
         <Iconify icon="eva:more-vertical-fill" />
       </IconButton>
-      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
-        <MenuItem
-          onClick={() => {
-            handleView(element.id);
-            popover.onClose();
-          }}
-        >
-          <Iconify icon="solar:eye-bold" />
-          {t('Ver')}
-        </MenuItem>
 
-        <MenuItem
-          onClick={() => {
-            handleEditElement();
-            popover.onClose();
-          }}
-        >
+      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 140 }}>
+        {handleView && (
+          <MenuItem onClick={handleViewElement}>
+            <Iconify icon="solar:eye-bold" />
+            {t('Ver')}
+          </MenuItem>
+        )}
+
+        <MenuItem onClick={handleEditElement}>
           <Iconify icon="solar:pen-bold" />
           {t('Editar')}
         </MenuItem>
 
-        <MenuItem
-          onClick={() => {
-            confirm.onTrue();
-            popover.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
+        <MenuItem onClick={handleConfirmDelete} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-trash-bold" />
           {t('Eliminar')}
         </MenuItem>
       </CustomPopover>
+
       <Menu
         open={openMenu}
         anchorEl={ref.current}
@@ -84,36 +98,38 @@ export default function MenuCategories({ handleEdit, handleDelete, handleView, v
         {edit && (
           <MenuItem onClick={handleEditElement}>
             <Iconify icon="solar:pen-bold" />
-
             <Typography variant="body2" sx={{ ml: 2 }}>
               Editar
             </Typography>
           </MenuItem>
         )}
 
-        {view && (
-          <MenuItem onClick={() => handleView()}>
+        {view && handleView && (
+          <MenuItem onClick={handleViewElement}>
             <Iconify icon="solar:eye-bold" />
             <Typography variant="body2" sx={{ ml: 2 }}>
               Ver
             </Typography>
           </MenuItem>
         )}
-        {view || edit ? <Divider /> : null}
-        <MenuItem onClick={() => handleDelete(element)} sx={{ color: 'error.main' }}>
+
+        {(view || edit) && <Divider />}
+
+        <MenuItem onClick={handleDeleteElement} sx={{ color: 'error.main' }}>
           <Iconify icon="solar:trash-bin-trash-bold" />
           <Typography variant="body2" sx={{ ml: 2 }}>
             Delete
           </Typography>
         </MenuItem>
       </Menu>
+
       <ConfirmDialog
         open={confirm.value}
         onClose={confirm.onFalse}
-        title={t('Eliminar Punto De Venta')}
-        content={t(`¿Estás seguro de eliminar la categoria?`)}
+        title={t('Confirmar eliminación')}
+        content={t('¿Estás seguro de que quieres eliminar este elemento?')}
         action={
-          <Button variant="contained" color="error" onClick={() => handleDelete(element)}>
+          <Button variant="contained" color="error" onClick={handleDeleteElement}>
             {t('Eliminar')}
           </Button>
         }
@@ -122,15 +138,14 @@ export default function MenuCategories({ handleEdit, handleDelete, handleView, v
   );
 }
 
+// Memoización para evitar re-renderizados innecesarios
+export default memo(MenuCategories);
+
 MenuCategories.propTypes = {
-  handleEdit: PropTypes.func,
-  handleDelete: PropTypes.func,
+  handleEdit: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func.isRequired,
   handleView: PropTypes.func,
   view: PropTypes.bool,
-  element: PropTypes.object,
+  element: PropTypes.object.isRequired,
   edit: PropTypes.bool
-};
-
-MenuCategories.defaultProps = {
-  view: true
 };

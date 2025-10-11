@@ -52,10 +52,10 @@ interface Props {
 
 export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWindow }: Props) {
   const { enqueueSnackbar } = useSnackbar();
-  
+
   // Redux state
   const { currentRegister } = useAppSelector((state) => state.pos);
-  
+
   // RTK Query mutations and queries
   const [createPOSSale, { isLoading: isCreatingSale }] = useCreatePOSSaleMutation();
   const { data: sellersData } = useGetSellersQuery({
@@ -63,7 +63,11 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
     size: 100
   });
 
-  const sellers = useMemo(() => sellersData?.items || [], [sellersData?.items]);
+  const sellers = useMemo(() => {
+    const sellersList = sellersData?.sellers || [];
+    console.log('📋 Vendedores cargados:', sellersList.length, sellersList);
+    return sellersList;
+  }, [sellersData?.sellers]);
 
   // Form state
   const [seller, setSeller] = useState('');
@@ -89,13 +93,33 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
       setDiscountType(saleWindow.discount_percentage ? 'percentage' : 'amount');
       setNotes(saleWindow.notes || '');
 
-      // Set default seller if available
-      if (sellers.length > 0) {
+      // Set default seller: priorizar el que abrió la caja
+      if (currentRegister?.user_id && sellers.length > 0) {
+        // Buscar el vendedor que coincide con el user_id de la caja registradora
+        const currentCashierSeller = sellers.find((sellerItem) => sellerItem.id === currentRegister.user_id);
+
+        console.log('🎯 Cajero actual:', currentRegister.user_name, 'ID:', currentRegister.user_id);
+        console.log('🔍 Vendedor encontrado:', currentCashierSeller);
+
+        if (currentCashierSeller) {
+          // Si encontramos al cajero actual en la lista de vendedores, usarlo
+          setSeller(currentCashierSeller.id);
+          setSellerName(currentCashierSeller.name);
+          console.log('✅ Usando cajero actual como vendedor por defecto');
+        } else if (sellers.length > 0) {
+          // Si no se encuentra, usar el primer vendedor disponible
+          setSeller(sellers[0].id);
+          setSellerName(sellers[0].name);
+          console.log('⚠️ Cajero no encontrado en vendedores, usando primer vendedor disponible');
+        }
+      } else if (sellers.length > 0) {
+        // Fallback: usar el primer vendedor si no hay registro de caja
         setSeller(sellers[0].id);
         setSellerName(sellers[0].name);
+        console.log('📝 Usando primer vendedor como fallback');
       }
     }
-  }, [open, saleWindow, sellers]);
+  }, [open, saleWindow, sellers, currentRegister?.user_id, currentRegister?.user_name]);
 
   // Recalculate totals when tax or discount changes
   useEffect(() => {
@@ -178,7 +202,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
             apiMethod = 'other';
             break;
         }
-        
+
         return {
           method: apiMethod,
           amount: payment.amount,
@@ -188,9 +212,9 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
       });
 
       // Preparar datos para la API
-      const saleData = {
+      const saleData: any = {
         pdv_id: currentRegister.pdv_id,
-        customer_id: saleWindow.customer?.id || '', // Convertir null a string vacío
+        customer_id: saleWindow.customer?.id || 0, // Cliente por defecto (ID: 0)
         seller_id: seller || '', // Convertir null a string vacío
         items,
         payments,
@@ -208,7 +232,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
       await createPOSSale(saleData).unwrap();
 
       enqueueSnackbar('¡Venta creada exitosamente!', { variant: 'success' });
-      
+
       // Llamar a la función original onConfirm para compatibilidad
       onConfirm({
         seller_id: seller,
@@ -223,7 +247,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
       handleClose();
     } catch (error: any) {
       console.error('❌ Error al crear venta:', error);
-      
+
       // Manejo de errores específicos
       if (error?.data?.detail) {
         enqueueSnackbar(`Error: ${error.data.detail}`, { variant: 'error' });
@@ -288,11 +312,23 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                   <Typography
                     variant="subtitle2"
                     gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
                   >
                     <Icon icon="mdi:account-tie" />
                     Vendedor Responsable
                   </Typography>
+
+                  {/* Información del cajero actual */}
+                  {currentRegister?.user_name && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mb: 2, display: 'block', fontStyle: 'italic' }}
+                    >
+                      Por defecto: {currentRegister.user_name} (quien abrió la caja)
+                    </Typography>
+                  )}
+
                   <FormControl fullWidth>
                     <Select
                       value={seller}
@@ -301,16 +337,38 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                       sx={{ bgcolor: 'background.paper' }}
                     >
                       <MenuItem value="" disabled>
-                        Seleccionar vendedor
+                        {sellers.length === 0 ? 'Cargando vendedores...' : 'Seleccionar vendedor'}
                       </MenuItem>
+                      {sellers.length === 0 && (
+                        <MenuItem value="" disabled>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
+                            <Icon icon="mdi:information" width={20} height={20} />
+                            <Typography variant="body2" color="text.secondary">
+                              No hay vendedores disponibles
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      )}
                       {sellers.map((sellerOption) => (
                         <MenuItem key={sellerOption.id} value={sellerOption.id}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
                             <Icon icon="mdi:account-circle" width={20} height={20} />
-                            <Box>
-                              <Typography variant="body2" fontWeight="medium">
-                                {sellerOption.name}
-                              </Typography>
+                            <Box sx={{ flex: 1 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="body2" fontWeight="medium">
+                                  {sellerOption.name}
+                                </Typography>
+                                {/* Indicador si es el cajero que abrió la caja */}
+                                {currentRegister?.user_id === sellerOption.id && (
+                                  <Chip
+                                    label="Cajero Actual"
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                    sx={{ fontSize: '0.65rem', height: 18 }}
+                                  />
+                                )}
+                              </Box>
                               <Typography variant="caption" color="text.secondary">
                                 CC: {sellerOption.document || 'N/A'}
                               </Typography>

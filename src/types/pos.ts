@@ -119,6 +119,13 @@ export interface Seller {
   updated_at: string;
 }
 
+export interface SellersResponse {
+  sellers: Seller[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 // ========================================
 // 🛒 POS SALE TYPES
 // ========================================
@@ -137,7 +144,7 @@ export interface POSPaymentCreate {
 }
 
 export interface POSInvoiceCreate {
-  customer_id: string;
+  customer_id: string | number; // Puede ser string para clientes reales o number (0) para cliente por defecto
   seller_id: string;
   items: POSLineItemCreate[];
   payments: POSPaymentCreate[];

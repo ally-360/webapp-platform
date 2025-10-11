@@ -13,6 +13,7 @@ import type {
   Seller,
   SellerCreate,
   SellerUpdate,
+  SellersResponse,
   POSInvoice,
   POSInvoiceCreate,
   POSSalesParams,
@@ -132,7 +133,7 @@ export const posApi = createApi({
      * Listar vendedores
      * GET /sellers
      */
-    getSellers: builder.query<PaginatedResponse<Seller>, { page?: number; size?: number; is_active?: boolean }>({
+    getSellers: builder.query<SellersResponse, { page?: number; size?: number; is_active?: boolean }>({
       query: ({ page = 1, size = 100, is_active = true } = {}) => ({
         url: '/sellers',
         params: { page, size, is_active }
@@ -173,10 +174,11 @@ export const posApi = createApi({
      * Crear venta POS
      * POST /pos/sales
      */
-    createPOSSale: builder.mutation<POSInvoice, POSInvoiceCreate>({
-      query: (data) => ({
+    createPOSSale: builder.mutation<POSInvoice, POSInvoiceCreate & { pdv_id: string }>({
+      query: ({ pdv_id, ...data }) => ({
         url: '/pos/sales',
         method: 'POST',
+        params: { pdv_id },
         body: data
       }),
       invalidatesTags: ['POSSale', 'CashMovement', 'CashRegister']

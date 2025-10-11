@@ -1,6 +1,6 @@
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { JWTconfig } from '../config-global';
-import { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from '../interfaces/api/api-response.interface';
+import { ApiResponse, ApiSuccessResponse } from '../interfaces/api/api-response.interface';
 import { getErrorConfig } from '../config/error-codes.config';
 
 // ----------------------------------------------------------------------
@@ -55,50 +55,6 @@ apiClient.interceptors.response.use(
 
     // Si no tiene la estructura esperada, retornar la respuesta completa
     return response;
-  },
-
-  // Error en la respuesta
-  (error: AxiosError<ApiErrorResponse>) => {
-    let errorConfig;
-
-    if (error.response?.data) {
-      const errorData = error.response.data;
-
-      // Verificar si es una respuesta de error de nuestra API
-      if (errorData && typeof errorData === 'object' && 'success' in errorData && !errorData.success) {
-        const { details } = errorData;
-
-        if (details && details.acode) {
-          // Usar nuestro sistema de códigos de error
-          errorConfig = getErrorConfig(details.acode);
-        } else {
-          // Error sin código específico
-          errorConfig = {
-            action: 'toast' as const,
-            message: details?.message || 'Error desconocido',
-            severity: 'error' as const
-          };
-        }
-      } else {
-        // Error HTTP estándar
-        const { status } = error.response;
-        errorConfig = getHttpErrorConfig(status, error.response.statusText);
-      }
-    } else if (error.request) {
-      // Error de red/conexión
-      errorConfig = getErrorConfig(600); // Código para error de conexión
-    } else {
-      // Error genérico
-      errorConfig = getErrorConfig(1000); // Código para error general
-    }
-
-    // Mostrar el error usando el handler global si está disponible
-    if (globalErrorHandler && errorConfig) {
-      globalErrorHandler(errorConfig);
-    }
-
-    // Rechazar la promesa con información estructurada
-    return Promise.reject(new Error(errorConfig?.message || 'Error desconocido'));
   }
 );
 
