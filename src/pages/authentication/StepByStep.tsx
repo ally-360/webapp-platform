@@ -191,6 +191,21 @@ export default function StepByStep() {
   };
 
   const StepComponent = useMemo(() => {
+    // Para empresas con uniquePDV, mapear el activeStep al componente correcto
+    if (isUniquePDV) {
+      switch (activeStep) {
+        case 0: // StepType.COMPANY
+          return <RegisterCompanyForm />;
+        case 1: // StepType.PLAN (saltamos PDV)
+          return <PlanSelectionForm />;
+        case 2: // StepType.SUMMARY
+          return <RegisterSummary />;
+        default:
+          return <Typography>Paso desconocido</Typography>;
+      }
+    }
+
+    // Para empresas normales, usar los tipos de paso estándar
     switch (activeStep) {
       case StepType.COMPANY:
         return <RegisterCompanyForm />;
@@ -203,7 +218,7 @@ export default function StepByStep() {
       default:
         return <Typography>Paso desconocido</Typography>;
     }
-  }, [activeStep]);
+  }, [activeStep, isUniquePDV]);
 
   // 🔄 Mostrar loading mientras se cargan los datos iniciales
   if (isLoading && !isReady) {

@@ -15,7 +15,7 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterPDVSchema } from 'src/interfaces/auth/yupSchemas';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import type { InferType } from 'yup';
-import { setPDVResponse, goToNextStep, goToPreviousStep } from 'src/redux/slices/stepByStepSlice';
+import { setPDVData, setPDVResponse, goToNextStep, goToPreviousStep } from 'src/redux/slices/stepByStepSlice';
 import { useCreatePDVMutation, useUpdatePDVMutation, useGetAllPDVsQuery } from 'src/redux/services/authApi';
 import { useGetDepartmentsQuery, useGetCitiesQuery } from 'src/redux/services/locationsApi';
 import type { Department, City } from 'src/redux/services/locationsApi';
@@ -30,6 +30,7 @@ export default function RegisterPDVForm() {
   const dispatch = useAppDispatch();
 
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
+  const pdvData = useAppSelector((state) => state.stepByStep.pdvData);
   const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
 
   const { data: departments } = useGetDepartmentsQuery();
@@ -41,15 +42,17 @@ export default function RegisterPDVForm() {
   const firstPDV = allPDVs?.pdvs?.[0];
   const isEditing = !!firstPDV;
 
+  // Estados locales para manejar la selección
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+  const [selectedCity, setSelectedCity] = useState<any>(null);
+  const [hasInitialReset, setHasInitialReset] = useState(false); // Flag para evitar resets múltiples
+
   const defaultValues: RegisterPDVFormValues = {
-    name: firstPDV?.name || pdvResponse?.name || '',
-    departamento:
-      firstPDV?.department_id || pdvResponse?.department_id
-        ? departments?.departments?.find((dept) => dept.id === (firstPDV?.department_id || pdvResponse?.department_id))
-        : ({} as any),
+    name: firstPDV?.name || pdvResponse?.name || pdvData?.name || '',
+    departamento: {} as any,
     municipio: {} as any,
-    address: firstPDV?.address || pdvResponse?.address || '',
-    phone_number: firstPDV?.phone_number || pdvResponse?.phone_number || '',
+    address: firstPDV?.address || pdvResponse?.address || pdvData?.address || '',
+    phone_number: firstPDV?.phone_number || pdvResponse?.phone_number || pdvData?.phone_number || '',
     main: true,
     company_id: companyResponse?.id || ''
   };
@@ -62,21 +65,20 @@ export default function RegisterPDVForm() {
   const {
     handleSubmit,
     setValue,
-    watch,
+    reset,
     setError: setFormError,
     formState: { isSubmitting }
   } = methods;
   const [errorMsg, setErrorMsg] = useState('');
 
-  const selectedDepartment = watch('departamento');
-
-  const departmentId = selectedDepartment && 'id' in selectedDepartment ? Number(selectedDepartment.id) : null;
+  const departmentId = selectedDepartment?.id || null;
   const { data: cities } = useGetCitiesQuery(departmentId ? { department_id: departmentId } : { limit: 0 }, {
     skip: !departmentId
   });
 
   const filteredCities = cities?.cities || [];
 
+  // Effect para restaurar datos del PDV existente al estado Redux
   useEffect(() => {
     if (firstPDV && !pdvResponse) {
       dispatch(
@@ -85,8 +87,8 @@ export default function RegisterPDVForm() {
           name: firstPDV.name,
           address: firstPDV.address,
           phone_number: firstPDV.phone_number || '',
-          location: {} as any, // Will be populated by user selection
-          departamento: {} as any, // Will be populated by user selection
+          department_id: firstPDV.department_id ? Number(firstPDV.department_id) : undefined,
+          city_id: firstPDV.city_id ? Number(firstPDV.city_id) : undefined,
           main: true,
           company_id: companyResponse?.id || '',
           created_at: firstPDV.created_at,
@@ -95,6 +97,57 @@ export default function RegisterPDVForm() {
       );
     }
   }, [firstPDV, pdvResponse, dispatch, companyResponse]);
+
+  // Effect para restaurar departamento cuando los datos estén disponibles
+  useEffect(() => {
+    if (departments?.departments && (firstPDV?.department_id || pdvResponse?.department_id)) {
+      const savedDepartmentId = firstPDV?.department_id || pdvResponse?.department_id;
+
+      if (savedDepartmentId) {
+        const foundDepartment = departments.departments.find((dept) => dept.id === Number(savedDepartmentId));
+        if (foundDepartment && (!selectedDepartment || selectedDepartment.id !== foundDepartment.id)) {
+          console.log('🔄 Restoring department:', foundDepartment);
+          setSelectedDepartment(foundDepartment);
+          setValue('departamento', foundDepartment);
+        }
+      }
+    }
+  }, [departments, firstPDV, pdvResponse, selectedDepartment, setValue]);
+
+  // Effect para restaurar ciudad cuando las ciudades y departamento estén disponibles
+  useEffect(() => {
+    if (selectedDepartment && cities?.cities && (firstPDV?.city_id || pdvResponse?.city_id)) {
+      const savedCityId = firstPDV?.city_id || pdvResponse?.city_id;
+
+      if (savedCityId) {
+        const foundCity = cities.cities.find((city) => city.id === Number(savedCityId));
+        if (foundCity && (!selectedCity || selectedCity.id !== foundCity.id)) {
+          console.log('🔄 Restoring city:', foundCity);
+          setSelectedCity(foundCity);
+          setValue('municipio', foundCity);
+        }
+      }
+    }
+  }, [selectedDepartment, cities, firstPDV, pdvResponse, selectedCity, setValue]);
+
+  // Effect para resetear form con datos completos cuando todo esté listo
+  // Solo hacer reset inicial, no en cada cambio de municipio
+  useEffect(() => {
+    if (selectedDepartment && selectedCity && !methods.formState.isDirty) {
+      const completeFormData = {
+        name: firstPDV?.name || pdvResponse?.name || pdvData?.name || '',
+        departamento: selectedDepartment,
+        municipio: selectedCity,
+        address: firstPDV?.address || pdvResponse?.address || pdvData?.address || '',
+        phone_number: firstPDV?.phone_number || pdvResponse?.phone_number || pdvData?.phone_number || '',
+        main: true,
+        company_id: companyResponse?.id || ''
+      };
+
+      console.log('🔄 Initial form reset with complete data:', completeFormData);
+      reset(completeFormData);
+    }
+  }, [selectedDepartment, selectedCity]); // Removido dependencies que causaban resets innecesarios
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -129,6 +182,22 @@ export default function RegisterPDVForm() {
         result = await createPDV(pdvPayload).unwrap();
         enqueueSnackbar('Punto de venta creado exitosamente', { variant: 'success' });
       }
+
+      // Guardar datos del formulario en Redux para persistencia
+      dispatch(
+        setPDVData({
+          name: data.name,
+          description: '', // No tenemos description en este form
+          address: data.address,
+          phone_number: data.phone_number || '',
+          location: {
+            id: String(municipio.id),
+            name: municipio.name
+          },
+          main: true,
+          company_id: companyResponse?.id || ''
+        })
+      );
 
       dispatch(
         setPDVResponse({
@@ -173,36 +242,6 @@ export default function RegisterPDVForm() {
       enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   });
-
-  const departamento = watch('departamento') as Department | any;
-
-  useEffect(() => {
-    if (departamento && departamento.id) {
-      const cityId = firstPDV?.city_id || pdvResponse?.city_id;
-      if (cityId && cities?.cities) {
-        const foundCity = cities.cities.find((city) => city.id === cityId);
-        if (foundCity) {
-          setValue('municipio', foundCity);
-          return;
-        }
-      }
-
-      setValue('municipio', {} as any);
-    }
-  }, [departamento, setValue, cities, firstPDV, pdvResponse]);
-
-  const hasEmptyFields = () => {
-    const values = methods.getValues();
-    console.log(values);
-    return (
-      !values.name ||
-      !values.address ||
-      !values.departamento ||
-      Object.keys(values.departamento).length === 0 ||
-      !values.municipio ||
-      Object.keys(values.municipio).length === 0
-    );
-  };
 
   const handleBack = () => {
     dispatch(goToPreviousStep());
@@ -260,6 +299,8 @@ export default function RegisterPDVForm() {
             );
           }}
           onChange={(event, newValue) => {
+            setSelectedDepartment(newValue || null);
+            setSelectedCity(null);
             setValue('departamento', newValue || ({} as Department), { shouldValidate: true });
             setValue('municipio', {} as City, { shouldValidate: false });
           }}
@@ -301,9 +342,10 @@ export default function RegisterPDVForm() {
             );
           }}
           onChange={(event, newValue) => {
+            setSelectedCity(newValue || null);
             setValue('municipio', newValue || ({} as City), { shouldValidate: true });
           }}
-          disabled={!departamento || Object.keys(departamento).length === 0}
+          disabled={!selectedDepartment}
         />
       </Stack>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

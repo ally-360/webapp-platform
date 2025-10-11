@@ -345,7 +345,8 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
           economic_activity: databody.economic_activity || null,
           quantity_employees: databody.quantity_employees || null,
           social_reason: databody.social_reason || null,
-          logo: databody.logo || null
+          logo: databody.logo || null,
+          uniquePDV: databody.uniquePDV || false
         };
 
         const result = await createCompanyMutation(backendData).unwrap();
@@ -426,6 +427,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     localStorage.removeItem('accessToken');
     localStorage.removeItem('companyId');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('ally360-step-by-step');
 
     setSession(null);
     dispatch(clearCredentials());

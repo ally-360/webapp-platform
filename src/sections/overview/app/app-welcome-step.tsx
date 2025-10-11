@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetProductsQuery } from 'src/redux/services/productsApi';
 import { useGetContactsQuery } from 'src/redux/services/contactsApi';
 import { useGetSalesInvoicesQuery } from 'src/redux/services/salesInvoicesApi';
+import { useAuthContext } from 'src/auth/hooks';
 // routes
 import { paths } from 'src/routes/paths';
 // components
@@ -66,14 +67,15 @@ export default function AppWelcomeStep() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [activeStep, setActiveStep] = useState(0);
+  const { company } = useAuthContext();
 
   // Usar el hook personalizado para obtener el estado
   const { isCompleted: allStepsCompleted, hasProducts, hasContacts, hasInvoices, isLoading } = useWelcomeStepStatus();
 
   // También mantener las queries individuales para obtener el estado de loading
-  const { isLoading: loadingProducts } = useGetProductsQuery({ limit: 1 });
-  const { isLoading: loadingContacts } = useGetContactsQuery({ limit: 1 });
-  const { isLoading: loadingInvoices } = useGetSalesInvoicesQuery({ limit: 1 });
+  const { isLoading: loadingProducts } = useGetProductsQuery({ limit: 1 }, { skip: !company?.id });
+  const { isLoading: loadingContacts } = useGetContactsQuery({ limit: 1 }, { skip: !company?.id });
+  const { isLoading: loadingInvoices } = useGetSalesInvoicesQuery({ limit: 1 }, { skip: !company?.id });
 
   // Auto-avanzar al siguiente paso si el actual está completado
   useEffect(() => {

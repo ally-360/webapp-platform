@@ -101,6 +101,9 @@ export default function RegisterSummary() {
 
       dispatch(completeOnboarding());
 
+      // Limpiar localStorage del step-by-step ya que el onboarding está completo
+      localStorage.removeItem('ally360-step-by-step');
+
       const resp = await updateFirstLogin({ first_login: false }).unwrap();
       console.log('✅ First login updated:', resp);
 

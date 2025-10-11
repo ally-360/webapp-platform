@@ -1,8 +1,7 @@
 import { useSnackbar } from 'notistack';
 import React, { useState } from 'react';
-import { Alert, IconButton, MenuItem, Stack, Typography, FormControlLabel, Switch, Box, Divider } from '@mui/material';
+import { Alert, MenuItem, Stack, Typography, FormControlLabel, Switch, Box, Divider } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import { Icon } from '@iconify/react';
 import { useAuthContext } from 'src/auth/hooks';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,119 +10,138 @@ import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterCompanySchema } from 'src/interfaces/auth/yupSchemas';
 import { RegisterCompany } from 'src/interfaces/auth/userInterfaces';
-import { useDispatch } from 'react-redux';
-import { setPrevValuesCompany, setStep } from 'src/redux/inventory/stepByStepSlice';
-import { useAppSelector } from 'src/hooks/store';
-import RequestService from '../../../axios/services/service';
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { setCompanyData, setCompanyResponse, goToNextStep } from 'src/redux/slices/stepByStepSlice';
 import { economicActivityOptions, quantityEmployeesOptions } from './optionsCommon';
 
 export default function RegisterCompanyForm() {
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
   const { createCompany } = useAuthContext();
 
-  const dispatch = useDispatch();
-  const { prevValuesCompany } = useAppSelector((state) => state.stepByStep);
+  const dispatch = useAppDispatch();
+  const companyData = useAppSelector((state) => state.stepByStep.companyData);
+  const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
 
-  const defaultValues = {
-    name: prevValuesCompany?.name || '',
-    address: prevValuesCompany?.address || '',
-    nit: prevValuesCompany?.nit || '',
-    phoneNumber: prevValuesCompany?.phoneNumber || '',
-    website: prevValuesCompany?.website || '',
-    quantityEmployees: prevValuesCompany?.quantityEmployees || '',
-    economicActivity: prevValuesCompany?.economicActivity || '',
-    uniquePDV: prevValuesCompany?.uniquePDV || false
+  // Check if we're in edit mode (company already exists)
+  const isEditing = !!companyResponse?.id;
+
+  const defaultValues: RegisterCompany = {
+    name: companyData?.name || companyResponse?.name || '',
+    description: companyData?.description || companyResponse?.description || '',
+    address: companyData?.address || companyResponse?.address || '',
+    phone_number: companyData?.phone_number || companyResponse?.phone_number || '',
+    nit: companyData?.nit || companyResponse?.nit || '',
+    economic_activity: companyData?.economic_activity || companyResponse?.economic_activity || '',
+    quantity_employees: companyData?.quantity_employees || companyResponse?.quantity_employees || '',
+    social_reason: companyData?.social_reason || companyResponse?.social_reason || '',
+    logo: companyData?.logo || companyResponse?.logo || null,
+    uniquePDV: companyData?.uniquePDV || companyResponse?.uniquePDV || false
   };
 
-  const methods = useForm({
-    resolver: yupResolver(RegisterCompanySchema),
-    defaultValues,
-    shouldFocusError: false
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const methods = useForm<RegisterCompany>({
+    resolver: yupResolver(RegisterCompanySchema) as any,
+    defaultValues
   });
 
-  const {
-    handleSubmit,
-    watch,
-    formState: { isSubmitting }
-  } = methods;
+  const { handleSubmit, formState, watch } = methods;
+  const { isSubmitting } = formState;
 
-  // Watch uniquePDV value for UI changes
   const uniquePDV = watch('uniquePDV');
-  const [errorMsg, setErrorMsg] = useState('');
-  console.log(prevValuesCompany);
 
   const onSubmit = handleSubmit(async (data: RegisterCompany) => {
     try {
-      console.log(`Registrando empresa:`, data);
+      console.log('🏢 Submitting company form:', { isEditing, data });
 
-      if (prevValuesCompany?.id) {
-        await RequestService.updateCompany({ databody: data, id: prevValuesCompany.id });
-        enqueueSnackbar('Actualización de la empresa completado', {
-          variant: 'success',
-          action: (key) => (
-            <IconButton onClick={() => closeSnackbar(key)}>
-              <Icon icon="eva:close-fill" />
-            </IconButton>
-          )
-        });
-        // Mantener el ID y agregar los nuevos datos
-        dispatch(
-          setPrevValuesCompany({
-            id: prevValuesCompany.id,
-            name: data.name,
-            nit: data.nit,
-            address: data.address || '',
-            phoneNumber: data.phone_number,
-            quantityEmployees: data.quantity_employees || '',
-            economicActivity: data.economic_activity || '',
-            uniquePDV: data.uniquePDV
-          })
-        );
-      } else {
-        await createCompany(data);
+      // First save form data to Redux for persistence
+      dispatch(
+        setCompanyData({
+          ...data,
+          logo: data.logo || undefined // Convert null to undefined
+        })
+      );
 
+      if (isEditing) {
+        // TODO: Implement company update logic if needed
+        console.log('✏️ Company update not implemented yet');
+        enqueueSnackbar('Funcionalidad de edición pendiente', { variant: 'warning' });
+        return;
+      }
+
+      // Create new company
+      await createCompany(data);
+
+      // The company was created successfully, now update Redux with the response
+      // The createCompany function in auth-provider.tsx will:
+      // 1. Call createCompanyMutation()
+      // 2. Call selectCompany() to get new token
+      // 3. Set company in auth context
+
+      // We also need to update Redux store for step-by-step persistence
+      // We'll use the data that was sent since the auth-provider has the response
+      dispatch(
+        setCompanyResponse({
+          id: '', // Will be updated when StepByStep loads company data
+          name: data.name,
+          description: data.description || '',
+          address: data.address || '',
+          phone_number: data.phone_number || '',
+          nit: data.nit,
+          economic_activity: data.economic_activity || '',
+          quantity_employees: data.quantity_employees || '',
+          social_reason: data.social_reason || '',
+          logo: data.logo || '',
+          uniquePDV: data.uniquePDV,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+      );
+
+      // Small delay to ensure Redux state is updated before navigation
+      setTimeout(() => {
+        // Show success message
         enqueueSnackbar(
           data.uniquePDV
             ? 'Empresa creada exitosamente. PDV principal generado automáticamente.'
             : 'Empresa creada exitosamente.',
-          {
-            variant: 'success',
-            action: (key) => (
-              <IconButton onClick={() => closeSnackbar(key)}>
-                <Icon icon="eva:close-fill" />
-              </IconButton>
-            )
-          }
+          { variant: 'success' }
         );
 
-        if (data.uniquePDV) {
-          dispatch(setStep(2));
-        } else {
-          dispatch(setStep(1));
-        }
-      }
+        // Navigate to next step - goToNextStep handles uniquePDV logic automatically
+        dispatch(goToNextStep());
+      }, 100);
     } catch (error: any) {
-      console.error(error);
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+      console.error('❌ Error creating company:', error);
+      const errorMessage = error?.data?.detail || error?.message || 'Error al crear la empresa';
+      setErrorMsg(errorMessage);
     }
   });
+
+  const getButtonText = () => {
+    if (isEditing) return 'Guardar cambios';
+    if (uniquePDV) return 'Crear empresa y continuar';
+    return 'Siguiente paso';
+  };
 
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
       <Stack sx={{ marginTop: 1 }} spacing={3}>
         {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
         <Typography variant="subtitle1" textAlign="center" sx={{ mb: 3 }}>
-          Ingresa la información de la empresa
+          {isEditing ? 'Editar información de la empresa' : 'Ingresa la información de la empresa'}
         </Typography>
+
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFTextField fullWidth label="Nombre de la empresa" name="name" />
-          <RHFTextField fullWidth label="Dirección de la empresa" name="address" />
+          <RHFTextField fullWidth label="Descripción" name="description" />
         </Stack>
+
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="NIT" name="nit" />
+          <RHFTextField fullWidth label="Dirección de la empresa" name="address" />
           <RHFPhoneNumber
             label="Teléfono"
-            name="phoneNumber"
+            name="phone_number"
             type="string"
             autoComplete="tel"
             defaultCountry="co"
@@ -131,9 +149,12 @@ export default function RegisterCompanyForm() {
             countryCodeEditable={false}
           />
         </Stack>
+
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="Sitio web" name="website" />
+          <RHFTextField fullWidth label="NIT" name="nit" />
+          <RHFTextField fullWidth label="Razón social" name="social_reason" />
         </Stack>
+
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFSelect fullWidth label="Cantidad de empleados" name="quantity_employees">
             {quantityEmployeesOptions.map((option) => (
@@ -159,7 +180,7 @@ export default function RegisterCompanyForm() {
             label={
               <Box>
                 <Typography variant="body1" fontWeight="medium">
-                  Punto de venta únicoooo
+                  Punto de venta único
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {uniquePDV
@@ -172,6 +193,7 @@ export default function RegisterCompanyForm() {
           />
         </Box>
       </Stack>
+
       <LoadingButton
         color="primary"
         sx={{ marginTop: 8 }}
@@ -181,7 +203,7 @@ export default function RegisterCompanyForm() {
         variant="contained"
         loading={isSubmitting}
       >
-        {uniquePDV ? 'Crear empresa y continuar' : 'Siguiente paso'}
+        {getButtonText()}
       </LoadingButton>
     </FormProvider>
   );

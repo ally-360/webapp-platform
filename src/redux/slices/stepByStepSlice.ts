@@ -15,10 +15,47 @@ import {
 } from 'src/interfaces/stepByStep';
 
 // ========================================
-// 🔧 INITIAL STATE
+// � PERSISTENCE HELPERS
 // ========================================
 
-const initialState: StepByStepState = {
+const STEP_BY_STEP_STORAGE_KEY = 'ally360-step-by-step';
+
+const loadFromLocalStorage = (): Partial<StepByStepState> | null => {
+  try {
+    const savedState = localStorage.getItem(STEP_BY_STEP_STORAGE_KEY);
+    if (savedState) {
+      return JSON.parse(savedState);
+    }
+  } catch (error) {
+    console.warn('❌ Error loading step-by-step state from localStorage:', error);
+  }
+  return null;
+};
+
+const saveToLocalStorage = (state: StepByStepState) => {
+  try {
+    // Solo guardamos los datos importantes, no los estados de loading/error
+    const stateToSave = {
+      activeStep: state.activeStep,
+      completedSteps: state.completedSteps,
+      companyData: state.companyData,
+      companyResponse: state.companyResponse,
+      pdvData: state.pdvData,
+      pdvResponse: state.pdvResponse,
+      planData: state.planData,
+      subscriptionResponse: state.subscriptionResponse
+    };
+    localStorage.setItem(STEP_BY_STEP_STORAGE_KEY, JSON.stringify(stateToSave));
+  } catch (error) {
+    console.warn('❌ Error saving step-by-step state to localStorage:', error);
+  }
+};
+
+// ========================================
+// �🔧 INITIAL STATE
+// ========================================
+
+const defaultInitialState: StepByStepState = {
   activeStep: StepType.COMPANY,
   completedSteps: [],
 
@@ -46,6 +83,18 @@ const initialState: StepByStepState = {
   }
 };
 
+// Cargar estado desde localStorage si existe
+const savedState = loadFromLocalStorage();
+const initialState: StepByStepState = savedState
+  ? {
+      ...defaultInitialState,
+      ...savedState,
+      // Siempre resetear loading y errors al cargar
+      loading: defaultInitialState.loading,
+      errors: defaultInitialState.errors
+    }
+  : defaultInitialState;
+
 // ========================================
 // 🎯 SLICE
 // ========================================
@@ -60,12 +109,14 @@ const stepByStepSlice = createSlice({
 
     setStep: (state, action: PayloadAction<number>) => {
       state.activeStep = action.payload;
+      saveToLocalStorage(state);
     },
 
     setCompletedStep: (state, action: PayloadAction<number>) => {
       if (!state.completedSteps.includes(action.payload)) {
         state.completedSteps.push(action.payload);
       }
+      saveToLocalStorage(state);
     },
 
     // ========================================
@@ -74,6 +125,7 @@ const stepByStepSlice = createSlice({
 
     setCompanyData: (state, action: PayloadAction<CompanyFormData>) => {
       state.companyData = action.payload;
+      saveToLocalStorage(state);
     },
 
     setCompanyResponse: (state, action: PayloadAction<CompanyResponse>) => {
@@ -82,6 +134,7 @@ const stepByStepSlice = createSlice({
       if (!state.completedSteps.includes(StepType.COMPANY)) {
         state.completedSteps.push(StepType.COMPANY);
       }
+      saveToLocalStorage(state);
 
       // No cambiar automáticamente el paso activo aquí
       // Permitir navegación manual entre pasos
@@ -93,6 +146,7 @@ const stepByStepSlice = createSlice({
 
     setPDVData: (state, action: PayloadAction<PDVFormData>) => {
       state.pdvData = action.payload;
+      saveToLocalStorage(state);
     },
 
     setPDVResponse: (state, action: PayloadAction<PDVResponse>) => {
@@ -100,6 +154,7 @@ const stepByStepSlice = createSlice({
       if (!state.completedSteps.includes(StepType.PDV)) {
         state.completedSteps.push(StepType.PDV);
       }
+      saveToLocalStorage(state);
       // No cambiar automáticamente el paso activo
     },
 
@@ -109,6 +164,7 @@ const stepByStepSlice = createSlice({
 
     setPlanData: (state, action: PayloadAction<PlanFormData>) => {
       state.planData = action.payload;
+      saveToLocalStorage(state);
     },
 
     setSubscriptionResponse: (state, action: PayloadAction<SubscriptionResponse>) => {
@@ -116,6 +172,7 @@ const stepByStepSlice = createSlice({
       if (!state.completedSteps.includes(StepType.PLAN)) {
         state.completedSteps.push(StepType.PLAN);
       }
+      saveToLocalStorage(state);
       // No cambiar automáticamente el paso activo
     },
 
@@ -177,9 +234,13 @@ const stepByStepSlice = createSlice({
 
       state.activeStep = step;
       state.errors = initialState.errors;
+      saveToLocalStorage(state);
     },
 
-    resetAll: () => initialState,
+    resetAll: () => {
+      localStorage.removeItem(STEP_BY_STEP_STORAGE_KEY);
+      return initialState;
+    },
 
     // ========================================
     // 🎯 NAVIGATION HELPERS
@@ -202,6 +263,7 @@ const stepByStepSlice = createSlice({
         default:
           break;
       }
+      saveToLocalStorage(state);
     },
 
     goToPreviousStep: (state) => {
@@ -222,6 +284,7 @@ const stepByStepSlice = createSlice({
         default:
           break;
       }
+      saveToLocalStorage(state);
     },
 
     // ========================================
@@ -232,6 +295,7 @@ const stepByStepSlice = createSlice({
       // Marcar todos los pasos como completados
       state.completedSteps = [StepType.COMPANY, StepType.PDV, StepType.PLAN, StepType.SUMMARY];
       state.activeStep = StepType.SUMMARY;
+      saveToLocalStorage(state);
     }
   }
 });

@@ -124,15 +124,16 @@ export function useStepByStepData(): StepByStepData {
 
     const company = companies[0];
 
-    // Si es uniquePDV, saltar paso PDV
+    // Si es uniquePDV, usar mapeo simplificado de pasos
     if (company.uniquePDV) {
-      // Con empresa uniquePDV pero sin suscripción → Paso 2 (PLAN)
-      if (!currentSubscription) return 2;
-      // Con empresa uniquePDV y suscripción → Paso 3 (SUMMARY)
-      return 3;
+      // Con empresa uniquePDV pero sin suscripción → Paso 1 (PLAN en configuración uniquePDV)
+      if (!currentSubscription) return 1;
+      // Con empresa uniquePDV y suscripción → Paso 2 (SUMMARY en configuración uniquePDV)
+      return 2;
     }
 
-    // Empresa no uniquePDV sin PDVs → Paso 1 (PDV)
+    // Empresa no uniquePDV - usar mapeo completo de pasos
+    // Sin PDVs → Paso 1 (PDV)
     if (!allPDVs || !allPDVs.pdvs || allPDVs.pdvs.length === 0) return 1;
     // Con empresa y PDVs pero sin suscripción → Paso 2 (PLAN)
     if (!currentSubscription) return 2;

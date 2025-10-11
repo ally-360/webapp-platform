@@ -177,6 +177,6 @@ export const CompanyFormSchema = object().shape({
   economic_activity: string().required('Seleccione la actividad económica'),
   quantity_employees: string().required('Seleccione la cantidad de empleados'),
   social_reason: string().required('Ingrese la razón social'),
-  logo: string().optional(),
+  logo: string().nullable().optional(),
   uniquePDV: yup.boolean().default(false)
 });
