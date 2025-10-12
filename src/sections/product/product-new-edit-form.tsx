@@ -114,10 +114,6 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const values = watch();
   const setValueAny = setValue as any;
 
-  useEffect(() => {
-    console.log('values', values);
-    console.log('errors', errors);
-  }, [values, errors]);
   const [selectedOptionBrand, setSelectedOptionBrand] = useState('');
   const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
   const [searchQueryBrand, setSearchQueryBrand] = useState('');
@@ -435,7 +431,6 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
 
   // Popup to assign inventory
   const handleAssignInventory = (pdv: PDVproduct, quantity: number, minQuantity: number, edit: boolean) => {
-    console.log('pdv', pdv);
     if (edit) {
       handleEditInventory(pdv, quantity, minQuantity);
       dispatch(setPopupAssignInventory(false));

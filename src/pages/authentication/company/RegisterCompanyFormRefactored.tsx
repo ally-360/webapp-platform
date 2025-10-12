@@ -204,7 +204,6 @@ export default function RegisterCompanyForm() {
         );
       }
 
-      // Forzar selección de empresa SIEMPRE tras crear/editar para actualizar el token (tenant)
       try {
         const companyIdToSelect = response?.id || firstCompany?.id;
         if (companyIdToSelect) {
@@ -216,7 +215,6 @@ export default function RegisterCompanyForm() {
         console.error('❌ Error al seleccionar empresa tras registro/edición:', selectErr);
       }
 
-      // Guardar respuesta real en Redux si existe
       if (response && response.id) {
         const responseData: CompanyResponse = {
           id: String(response.id),
@@ -235,7 +233,6 @@ export default function RegisterCompanyForm() {
         };
         dispatch(setCompanyResponse(responseData));
       } else {
-        // Fallback: respuesta mock
         const mockResponse: CompanyResponse = {
           id: 'temp-id',
           name: cleanData.name,
@@ -254,7 +251,6 @@ export default function RegisterCompanyForm() {
         dispatch(setCompanyResponse(mockResponse));
       }
 
-      // Navegar al siguiente paso
       dispatch(goToNextStep());
     } catch (error: any) {
       console.error('❌ Company creation error:', error);

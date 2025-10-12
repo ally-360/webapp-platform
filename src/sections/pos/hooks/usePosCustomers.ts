@@ -43,7 +43,7 @@ export const usePosCustomers = () => {
   // Cliente por defecto (sin documento) - memoizado para evitar re-renders
   const defaultCustomer: Customer = useMemo(
     () => ({
-      id: 0,
+      id: '0', // Cambiar a string para coincidir con el tipo
       name: 'Cliente Final',
       document_type: undefined,
       document: '',
@@ -56,8 +56,21 @@ export const usePosCustomers = () => {
 
   // Transformar contactos de la API al formato esperado por el POS
   useEffect(() => {
-    if (contactsData && Array.isArray(contactsData)) {
-      const transformedCustomers: Customer[] = contactsData.map((apiContact) => ({
+    let apiContacts: any[] = [];
+
+    // Manejar diferentes formatos de respuesta
+    if (contactsData) {
+      if (Array.isArray(contactsData)) {
+        apiContacts = contactsData;
+      } else if ((contactsData as any).items && Array.isArray((contactsData as any).items)) {
+        apiContacts = (contactsData as any).items;
+      } else if ((contactsData as any).data && Array.isArray((contactsData as any).data)) {
+        apiContacts = (contactsData as any).data;
+      }
+    }
+
+    if (apiContacts.length > 0) {
+      const transformedCustomers: Customer[] = apiContacts.map((apiContact) => ({
         id: apiContact.id,
         name: apiContact.name,
         document_type: apiContact.id_type as 'CC' | 'NIT' | 'CE' | 'PP' | undefined,

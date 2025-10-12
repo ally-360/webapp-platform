@@ -12,7 +12,7 @@ import { clearCredentials } from '../slices/authSlice';
  * - Redirección automática al login
  */
 export const baseQueryWithAuth = fetchBaseQuery({
-  baseUrl: (import.meta as any).env.VITE_HOST_API || 'http://localhost:8000',
+  baseUrl: (import.meta as any).env.VITE_HOST_API || 'https://api.ally360.co',
   prepareHeaders: (headers, { getState }) => {
     // Obtener token del estado global o localStorage
     const token = (getState() as RootState).auth?.token || localStorage.getItem('accessToken');

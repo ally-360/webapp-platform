@@ -79,12 +79,10 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
 
   const onSubmit = async (formValues: any) => {
     try {
-      console.log('send values', formValues);
       const resp = handleAssignInventory(formValues.pdv, formValues.quantity, formValues.minQuantity, formValues.edit);
       if (resp) {
         reset();
       }
-      console.log(resp);
     } catch (error) {
       console.error(error);
     }
@@ -116,14 +114,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
 
   const { popupAssignInventory } = useAppSelector((state) => state.products);
 
-  useEffect(() => {
-    console.log(pdvs);
-  }, [pdvs]);
   const [scroll] = React.useState<'paper' | 'body'>('paper');
-
-  useEffect(() => {
-    console.log(values);
-  }, [values]);
 
   return (
     <Stack>

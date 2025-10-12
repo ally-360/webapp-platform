@@ -95,8 +95,10 @@ const PosCustomerSelector = memo(
           loading={isLoading}
           filterOptions={(options, { inputValue: searchValue }) => {
             if (!searchValue.trim()) {
-              // Sin búsqueda, mostrar solo la opción de crear
-              return allOptions.filter((option) => (option as CustomerOption).isCreateOption);
+              // Sin búsqueda, mostrar todos los clientes reales + opción de crear
+              const realCustomers = (allOptions as CustomerOption[]).filter((option) => !option.isCreateOption);
+              const createOption = (allOptions as CustomerOption[]).filter((option) => option.isCreateOption);
+              return [...realCustomers, ...createOption];
             }
 
             // Con búsqueda, filtrar clientes reales y agregar opción crear

@@ -169,7 +169,7 @@ export interface EmailVerificationResponse {
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: (import.meta as any).env?.VITE_HOST_API || 'http://localhost:8000',
+    baseUrl: (import.meta as any).env?.VITE_HOST_API || 'https://api.ally360.co',
     prepareHeaders: (headers, { getState }) => {
       // Obtener token del estado global
       const token = (getState() as RootState).auth?.token || localStorage.getItem('accessToken');
