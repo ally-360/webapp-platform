@@ -24,12 +24,9 @@ import { userProfileApi } from './services/userProfileApi';
 import { locationsApi } from './services/locationsApi';
 import { subscriptionsApi } from './services/subscriptionsApi';
 import { posApi } from './services/posApi';
-import authReducer from './slices/authSlice';
 
 export const store = configureStore({
   reducer: {
-    // 🔐 Auth & API
-    auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [brandsApi.reducerPath]: brandsApi.reducer,

@@ -3,7 +3,6 @@
 // ========================================
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../store';
 
 // ========================================
 // 🏷️ AUTH INTERFACES (Backend Schema)
@@ -170,9 +169,9 @@ export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
     baseUrl: (import.meta as any).env?.VITE_HOST_API || 'https://api.ally360.co',
-    prepareHeaders: (headers, { getState }) => {
-      // Obtener token del estado global
-      const token = (getState() as RootState).auth?.token || localStorage.getItem('accessToken');
+    prepareHeaders: (headers) => {
+      // Obtener token del localStorage directamente
+      const token = localStorage.getItem('accessToken');
 
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
@@ -393,34 +392,309 @@ export const authApi = createApi({
 });
 
 // ========================================
-// 📤 EXPORT HOOKS
+// 📤 EXPORT HOOKS WITH DETAILED DOCUMENTATION
 // ========================================
 
-export const {
-  // Auth mutations
-  useLoginMutation,
-  useRegisterMutation,
-  useVerifyEmailMutation,
-  useVerifyEmailWithAutoLoginMutation,
-  useLogoutMutation,
-  useSelectCompanyMutation,
-  useChangePasswordMutation,
+/**
+ * 🔐 **Auth API Hooks** - RTK Query hooks with endpoint documentation
+ *
+ * Hover over any hook to see:
+ * - HTTP method and endpoint
+ * - Request/response types
+ * - Usage examples
+ */
 
-  // Auth queries
-  useGetCurrentUserQuery,
-  useVerifyEmailViaGetQuery,
+// ========================================
+// 🔐 AUTHENTICATION HOOKS
+// ========================================
 
-  // Company mutations & queries
-  useCreateCompanyMutation,
-  useUpdateCompanyMutation,
-  useGetMyCompaniesQuery,
+/**
+ * **Login User**
+ *
+ * `POST /auth/login`
+ *
+ * Authenticates user with email/password and returns JWT token + user data
+ *
+ * @example
+ * ```ts
+ * const [login, { data, isLoading, error }] = useLoginMutation();
+ * await login({ email: 'user@example.com', password: 'password123' });
+ * ```
+ */
+export const useLoginMutation = authApi.endpoints.login.useMutation;
 
-  // PDV mutations & queries
-  useCreatePDVMutation,
-  useUpdatePDVMutation,
-  useGetCurrentPDVQuery,
-  useGetAllPDVsQuery,
+/**
+ * **Register New User**
+ *
+ * `POST /auth/register`
+ *
+ * Creates new user account with email, password and profile data
+ *
+ * @example
+ * ```ts
+ * const [register] = useRegisterMutation();
+ * await register({
+ *   email: 'user@example.com',
+ *   password: 'password123',
+ *   profile: { first_name: 'John', last_name: 'Doe' }
+ * });
+ * ```
+ */
+export const useRegisterMutation = authApi.endpoints.register.useMutation;
 
-  // Subscription queries
-  useGetCurrentSubscriptionQuery
-} = authApi;
+/**
+ * **Verify Email Address**
+ *
+ * `POST /auth/verify-email`
+ *
+ * Verifies user email using token from verification email
+ *
+ * @example
+ * ```ts
+ * const [verifyEmail] = useVerifyEmailMutation();
+ * await verifyEmail({ token: 'verification_token_here' });
+ * ```
+ */
+export const useVerifyEmailMutation = authApi.endpoints.verifyEmail.useMutation;
+
+/**
+ * **Verify Email with Auto-Login**
+ *
+ * `POST /auth/verify-email`
+ *
+ * Verifies email and automatically logs in user, returning auth tokens
+ *
+ * @example
+ * ```ts
+ * const [verifyEmailWithAutoLogin] = useVerifyEmailWithAutoLoginMutation();
+ * await verifyEmailWithAutoLogin({ token: 'token', auto_login: true });
+ * ```
+ */
+export const useVerifyEmailWithAutoLoginMutation = authApi.endpoints.verifyEmailWithAutoLogin.useMutation;
+
+/**
+ * **Verify Email via GET**
+ *
+ * `GET /auth/verify-email?token=...&auto_login=true`
+ *
+ * Alternative email verification method using GET request
+ *
+ * @example
+ * ```ts
+ * const { data } = useVerifyEmailViaGetQuery({ token: 'token', auto_login: true });
+ * ```
+ */
+export const useVerifyEmailViaGetQuery = authApi.endpoints.verifyEmailViaGet.useQuery;
+
+/**
+ * **Logout User**
+ *
+ * `POST /auth/logout`
+ *
+ * Invalidates current session and logs out user
+ *
+ * @example
+ * ```ts
+ * const [logout] = useLogoutMutation();
+ * await logout();
+ * ```
+ */
+export const useLogoutMutation = authApi.endpoints.logout.useMutation;
+
+/**
+ * **Get Current User**
+ *
+ * `GET /auth/me`
+ *
+ * Retrieves current authenticated user's profile and details
+ *
+ * @example
+ * ```ts
+ * const { data: user, isLoading } = useGetCurrentUserQuery();
+ * console.log(user?.profile.first_name);
+ * ```
+ */
+export const useGetCurrentUserQuery = authApi.endpoints.getCurrentUser.useQuery;
+
+/**
+ * **Select Company Context**
+ *
+ * `POST /auth/select-company`
+ *
+ * Switches user's active company context and updates JWT token
+ *
+ * @example
+ * ```ts
+ * const [selectCompany] = useSelectCompanyMutation();
+ * await selectCompany({ company_id: 'company-uuid-here' });
+ * ```
+ */
+export const useSelectCompanyMutation = authApi.endpoints.selectCompany.useMutation;
+
+/**
+ * **Change Password**
+ *
+ * `POST /auth/change-password`
+ *
+ * Updates user's password with current password validation
+ *
+ * @example
+ * ```ts
+ * const [changePassword] = useChangePasswordMutation();
+ * await changePassword({
+ *   current_password: 'old_pass',
+ *   new_password: 'new_pass',
+ *   confirm_password: 'new_pass'
+ * });
+ * ```
+ */
+export const useChangePasswordMutation = authApi.endpoints.changePassword.useMutation;
+
+// ========================================
+// 🏢 COMPANY MANAGEMENT HOOKS
+// ========================================
+
+/**
+ * **Create Company**
+ *
+ * `POST /company/`
+ *
+ * Creates new company with business information and NIT
+ *
+ * @example
+ * ```ts
+ * const [createCompany] = useCreateCompanyMutation();
+ * await createCompany({
+ *   name: 'My Business',
+ *   nit: '123456789-0',
+ *   phone_number: '+57123456789',
+ *   uniquePDV: true
+ * });
+ * ```
+ */
+export const useCreateCompanyMutation = authApi.endpoints.createCompany.useMutation;
+
+/**
+ * **Update Company**
+ *
+ * `PATCH /company/{id}`
+ *
+ * Updates existing company information
+ *
+ * @example
+ * ```ts
+ * const [updateCompany] = useUpdateCompanyMutation();
+ * await updateCompany({
+ *   id: 'company-id',
+ *   data: { name: 'Updated Business Name' }
+ * });
+ * ```
+ */
+export const useUpdateCompanyMutation = authApi.endpoints.updateCompany.useMutation;
+
+/**
+ * **Get My Companies**
+ *
+ * `GET /company/my_companies`
+ *
+ * Retrieves all companies where current user is a member
+ *
+ * @example
+ * ```ts
+ * const { data: companies } = useGetMyCompaniesQuery();
+ * companies?.forEach(company => console.log(company.name));
+ * ```
+ */
+export const useGetMyCompaniesQuery = authApi.endpoints.getMyCompanies.useQuery;
+
+// ========================================
+// 🏪 POINT OF SALE (PDV) HOOKS
+// ========================================
+
+/**
+ * **Create PDV**
+ *
+ * `POST /pdvs/`
+ *
+ * Creates new Point of Sale location for company
+ *
+ * @example
+ * ```ts
+ * const [createPDV] = useCreatePDVMutation();
+ * await createPDV({
+ *   name: 'Main Store',
+ *   address: 'Calle 123 #45-67',
+ *   phone_number: '+57123456789'
+ * });
+ * ```
+ */
+export const useCreatePDVMutation = authApi.endpoints.createPDV.useMutation;
+
+/**
+ * **Update PDV**
+ *
+ * `PATCH /pdvs/{id}`
+ *
+ * Updates existing PDV information
+ *
+ * @example
+ * ```ts
+ * const [updatePDV] = useUpdatePDVMutation();
+ * await updatePDV({
+ *   id: 'pdv-id',
+ *   data: { name: 'Updated Store Name' }
+ * });
+ * ```
+ */
+export const useUpdatePDVMutation = authApi.endpoints.updatePDV.useMutation;
+
+/**
+ * **Get Current PDV**
+ *
+ * `GET /pdvs/current`
+ *
+ * Retrieves current active PDV based on user context
+ *
+ * @example
+ * ```ts
+ * const { data: currentPDV } = useGetCurrentPDVQuery();
+ * console.log(`Active PDV: ${currentPDV?.name}`);
+ * ```
+ */
+export const useGetCurrentPDVQuery = authApi.endpoints.getCurrentPDV.useQuery;
+
+/**
+ * **Get All PDVs**
+ *
+ * `GET /pdvs/`
+ *
+ * Retrieves all PDVs for current company with pagination
+ *
+ * @example
+ * ```ts
+ * const { data: pdvsResponse } = useGetAllPDVsQuery();
+ * console.log(`Total PDVs: ${pdvsResponse?.total}`);
+ * pdvsResponse?.pdvs.forEach(pdv => console.log(pdv.name));
+ * ```
+ */
+export const useGetAllPDVsQuery = authApi.endpoints.getAllPDVs.useQuery;
+
+// ========================================
+// 💳 SUBSCRIPTION HOOKS
+// ========================================
+
+/**
+ * **Get Current Subscription**
+ *
+ * `GET /subscriptions/current`
+ *
+ * Retrieves current subscription plan and billing information
+ *
+ * @example
+ * ```ts
+ * const { data: subscription } = useGetCurrentSubscriptionQuery();
+ * console.log(`Plan: ${subscription?.plan_name}`);
+ * console.log(`Days remaining: ${subscription?.days_remaining}`);
+ * ```
+ */
+export const useGetCurrentSubscriptionQuery = authApi.endpoints.getCurrentSubscription.useQuery;

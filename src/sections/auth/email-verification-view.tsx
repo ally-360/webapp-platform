@@ -19,7 +19,6 @@ import { useVerifyEmailWithAutoLoginMutation } from 'src/redux/services/authApi'
 import Iconify from 'src/components/iconify';
 import Logo from 'src/components/logo';
 import { useAppDispatch } from 'src/hooks/store';
-import { setCredentials } from 'src/redux/slices/authSlice';
 import { setSession } from 'src/auth/context/jwt/utils';
 import { enqueueSnackbar } from 'notistack';
 
@@ -70,20 +69,6 @@ export default function EmailVerificationView() {
 
         if (result.access_token && result.user_id) {
           setSession(result.access_token);
-
-          dispatch(
-            setCredentials({
-              token: result.access_token,
-              user: result.user || {
-                id: result.user_id,
-                email: '',
-                is_active: result.is_active,
-                email_verified: true,
-                profile: {} as any
-              },
-              companies: result.companies || []
-            })
-          );
 
           setVerificationState({
             loading: false,

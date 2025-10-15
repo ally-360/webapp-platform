@@ -20,13 +20,10 @@ export function AuthConsumer({ children }) {
   return (
     <AuthContext.Consumer>
       {(auth) => {
-        // Solo mostrar splash screen cuando realmente está cargando datos iniciales
-        // y no cuando el usuario no está autenticado
         if (auth.loading && auth.authenticated !== false) {
           return <SplashScreen />;
         }
 
-        // Solo mostrar CompanyChangeLoading si no estamos en rutas de autenticación
         if (auth.changingCompany && !isAuthRoute) {
           return <CompanyChangeLoading open={auth.changingCompany} companyName={auth.company?.name} />;
         }

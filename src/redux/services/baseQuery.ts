@@ -3,7 +3,6 @@ import { enqueueSnackbar } from 'notistack';
 import { isTokenExpired } from 'src/auth/utils/token-validation';
 import { createBrowserHistory } from 'history';
 import type { RootState } from '../store';
-import { clearCredentials } from '../slices/authSlice';
 
 /**
  * Base query personalizado que maneja automáticamente:
@@ -43,7 +42,7 @@ export const baseQueryWithReauth = async (args: any, api: any, extraOptions: any
   if (result.error && result.error.status === 401) {
     console.warn('🔒 401 Unauthorized - Token expired or invalid');
 
-    api.dispatch(clearCredentials());
+    // api.dispatch(clearCredentials());
 
     localStorage.removeItem('accessToken');
 

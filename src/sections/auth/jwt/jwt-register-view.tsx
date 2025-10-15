@@ -23,25 +23,68 @@ import { enqueueSnackbar } from 'notistack';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterSchema } from 'src/interfaces/auth/yupSchemas';
 // ----------------------------------------------------------------------
+const getErrorMessage = (backendMessage: string, fieldName: string): string => {
+  // Phone number specific errors
+  if (fieldName.includes('phone') || fieldName.includes('Phone')) {
+    if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
+      return 'Usa un número correcto. Formato válido: +573XXXXXXXXX (móvil) o +571XXXXXXX (fijo)';
+    }
+  }
+
+  // DNI specific errors
+  if (fieldName.includes('dni')) {
+    if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
+      return 'Ingresa una cédula válida (entre 6 y 10 dígitos)';
+    }
+  }
+
+  // Email specific errors
+  if (fieldName.includes('email')) {
+    if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
+      return 'Ingresa un correo válido con formato usuario@dominio.com';
+    }
+    if (backendMessage.toLowerCase().includes('exists') || backendMessage.toLowerCase().includes('existe')) {
+      return 'Este correo ya está registrado. Usa otro correo o inicia sesión';
+    }
+  }
+
+  // Name specific errors
+  if (fieldName.includes('name')) {
+    if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
+      return 'El nombre debe tener al menos 2 caracteres';
+    }
+    if (backendMessage.toLowerCase().includes('long') || backendMessage.toLowerCase().includes('largo')) {
+      return 'El nombre debe tener menos de 50 caracteres';
+    }
+  }
+
+  // Password specific errors
+  if (fieldName.includes('password')) {
+    if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    if (backendMessage.toLowerCase().includes('weak') || backendMessage.toLowerCase().includes('débil')) {
+      return 'La contraseña debe contener al menos una letra y un número';
+    }
+  }
+
+  return backendMessage;
+};
 
 export default function JwtRegisterView() {
   const { register } = useAuthContext();
-
   const router = useRouter();
-
   const [errorMsg] = useState('');
-
-  const password = useBoolean(false); // Pass a default value of false to useBoolean
+  const password = useBoolean(false);
 
   const defaultValues = {
     password: '',
     email: '',
     profile: {
-      personalPhoneNumber: '+57',
+      phone_number: '+57',
       dni: '',
-      name: '',
-      lastname: '',
-      photo: 'https://i.pravatar.cc/300'
+      first_name: '',
+      last_name: ''
     }
   };
 
@@ -60,54 +103,33 @@ export default function JwtRegisterView() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       await register(data);
-      // Después del registro exitoso, mostrar mensaje y redirigir a página de información
       enqueueSnackbar('Registro completado. Revisa tu email para verificar tu cuenta.', {
         variant: 'success'
       });
 
-      // Redirigir a una página informativa sobre verificación de email
       router.push(paths.auth.jwt.login);
     } catch (error: any) {
       console.error('Registration error:', error);
 
-      // Handle backend validation errors
       if (error?.data?.detail && Array.isArray(error.data.detail)) {
         let hasFieldErrors = false;
 
-        // Map backend validation errors to form fields
         error.data.detail.forEach((validationError: any) => {
           const { loc, msg } = validationError;
 
           if (loc && Array.isArray(loc) && loc.length >= 2) {
-            // Extract field path from location array
             const fieldPath = loc.slice(1).join('.');
 
-            // Map backend field names to frontend form field names
-            const fieldMappings: { [key: string]: string } = {
-              'profile.phone_number': 'profile.personalPhoneNumber',
-              'profile.personal_phone_number': 'profile.personalPhoneNumber',
-              'profile.dni': 'profile.dni',
-              'profile.name': 'profile.name',
-              'profile.lastname': 'profile.lastname',
-              email: 'email',
-              password: 'password'
-            };
-
-            const frontendFieldName = fieldMappings[fieldPath] || fieldPath;
-
-            // Set error for the specific field
-            if (frontendFieldName) {
-              setError(frontendFieldName as any, {
-                type: 'manual',
-                message: getErrorMessage(msg, frontendFieldName)
-              });
-              hasFieldErrors = true;
-            }
+            setError(fieldPath as any, {
+              type: 'manual',
+              message: getErrorMessage(msg, fieldPath)
+            });
+            hasFieldErrors = true;
           }
         });
 
         if (!hasFieldErrors) {
-          const firstError = error.data.detail;
+          const firstError = error.data.detail[0];
           enqueueSnackbar(firstError || 'Error en el registro. Verifica los datos e intenta nuevamente.', {
             variant: 'error'
           });
@@ -116,6 +138,7 @@ export default function JwtRegisterView() {
         const errorMessage =
           error?.data?.detail?.[0]?.msg ||
           error?.message ||
+          error?.data?.detail ||
           'Error en el registro. Verifica los datos e intenta nuevamente.';
 
         enqueueSnackbar(errorMessage, {
@@ -124,56 +147,6 @@ export default function JwtRegisterView() {
       }
     }
   });
-
-  // Helper function to provide user-friendly error messages
-  const getErrorMessage = (backendMessage: string, fieldName: string): string => {
-    // Phone number specific errors
-    if (fieldName.includes('phone') || fieldName.includes('Phone')) {
-      if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
-        return 'Usa un número correcto. Formato válido: +573XXXXXXXXX (móvil) o +571XXXXXXX (fijo)';
-      }
-    }
-
-    // DNI specific errors
-    if (fieldName.includes('dni')) {
-      if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
-        return 'Ingresa una cédula válida (entre 6 y 10 dígitos)';
-      }
-    }
-
-    // Email specific errors
-    if (fieldName.includes('email')) {
-      if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
-        return 'Ingresa un correo válido con formato usuario@dominio.com';
-      }
-      if (backendMessage.toLowerCase().includes('exists') || backendMessage.toLowerCase().includes('existe')) {
-        return 'Este correo ya está registrado. Usa otro correo o inicia sesión';
-      }
-    }
-
-    // Name specific errors
-    if (fieldName.includes('name')) {
-      if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
-        return 'El nombre debe tener al menos 2 caracteres';
-      }
-      if (backendMessage.toLowerCase().includes('long') || backendMessage.toLowerCase().includes('largo')) {
-        return 'El nombre debe tener menos de 50 caracteres';
-      }
-    }
-
-    // Password specific errors
-    if (fieldName.includes('password')) {
-      if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
-        return 'La contraseña debe tener al menos 8 caracteres';
-      }
-      if (backendMessage.toLowerCase().includes('weak') || backendMessage.toLowerCase().includes('débil')) {
-        return 'La contraseña debe contener al menos una letra y un número';
-      }
-    }
-
-    // Return original message if no specific mapping found
-    return backendMessage;
-  };
 
   const renderHead = (
     <Stack spacing={2} sx={{ mb: 5, position: 'relative' }}>
@@ -209,9 +182,14 @@ export default function JwtRegisterView() {
         {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="profile.name" label="Nombre" autoComplete="given-name" placeholder="Ej: Juan Carlos" />
           <RHFTextField
-            name="profile.lastname"
+            name="profile.first_name"
+            label="Nombre"
+            autoComplete="given-name"
+            placeholder="Ej: Juan Carlos"
+          />
+          <RHFTextField
+            name="profile.last_name"
             label="Apellido"
             autoComplete="family-name"
             placeholder="Ej: García López"
@@ -220,7 +198,7 @@ export default function JwtRegisterView() {
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFPhoneNumber
-            name="profile.personalPhoneNumber"
+            name="profile.phone_number"
             label="Teléfono"
             type="string"
             autoComplete="tel"

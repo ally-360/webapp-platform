@@ -30,7 +30,7 @@ export const RegisterSchema = object().shape({
       return hasLetter && hasNumber;
     }),
   profile: object().shape({
-    lastname: string()
+    last_name: string()
       .min(2, 'El apellido debe tener al menos 2 caracteres')
       .max(50, 'El apellido debe tener menos de 50 caracteres')
       .required('El apellido es requerido')
@@ -39,7 +39,7 @@ export const RegisterSchema = object().shape({
         const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
         return nameRegex.test(value);
       }),
-    name: string()
+    first_name: string()
       .min(2, 'El nombre debe tener al menos 2 caracteres')
       .max(50, 'El nombre debe tener menos de 50 caracteres')
       .required('El nombre es requerido')
@@ -48,7 +48,7 @@ export const RegisterSchema = object().shape({
         const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
         return nameRegex.test(value);
       }),
-    personalPhoneNumber: string()
+    phone_number: string()
       .required('El número de teléfono es requerido')
       .test(
         'phone-format',

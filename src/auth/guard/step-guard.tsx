@@ -59,7 +59,7 @@ export default function StepGuard({ children }: StepGuardProps) {
     }
 
     // Caso 3: No está cargando + no es primer login + está en step-by-step → Permitir acceso
-    if (!loading && isFirstLogin === false && pathname === ONBOARDING_PATHS.stepByStep) {
+    if (!loading && isFirstLogin === false) {
       setChecked(true);
     }
   }, [authenticated, returnTo, router, isFirstLogin, pathname, loading]);
