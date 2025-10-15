@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React, { useCallback, useEffect } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
@@ -7,8 +6,11 @@ import { useRouter, useSearchParams, usePathname } from 'src/routes/hook';
 import { useAuthContext } from '../hooks';
 // ----------------------------------------------------------------------
 
-export default function GuestGuard({ children }) {
-  console.log('GuestGuard');
+interface GuestGuardProps {
+  children: React.ReactNode;
+}
+
+export default function GuestGuard({ children }: GuestGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -22,14 +24,15 @@ export default function GuestGuard({ children }) {
   const check = useCallback(() => {
     if (!authenticated) return;
 
+    // Si no es el primer login, redirigir a la ruta de retorno o al dashboard
     if (isFirstLogin === false) {
-      // Evitar redireccionar si ya estamos en el destino
       if (pathname !== returnTo) {
         router.replace(returnTo);
       }
       return;
     }
 
+    // Si es el primer login, redirigir al paso a paso
     if (isFirstLogin === true) {
       if (pathname !== paths.stepByStep.root) {
         router.replace(paths.stepByStep.root);
@@ -43,7 +46,3 @@ export default function GuestGuard({ children }) {
 
   return <>{children}</>;
 }
-
-GuestGuard.propTypes = {
-  children: PropTypes.node
-};

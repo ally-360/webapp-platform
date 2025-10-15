@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useCallback, useState } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
@@ -9,35 +8,51 @@ import { useTokenValidation } from '../hooks/use-token-validation';
 
 // ----------------------------------------------------------------------
 
-const loginPaths = {
+/**
+ * Configuración de paths de login por método de autenticación
+ */
+const LOGIN_PATHS = {
   jwt: paths.auth.jwt.login
-};
+} as const;
+
+/**
+ * Configuración del hook de validación de token
+ */
+const TOKEN_VALIDATION_CONFIG = {
+  warningMinutes: 5,
+  autoRefresh: false,
+  autoRedirect: true,
+  checkInterval: 60
+} as const;
 
 // ----------------------------------------------------------------------
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+interface AuthGuardProps {
+  children: React.ReactNode;
+}
+
+/**
+ * AuthGuard - Componente que protege rutas requiriendo autenticación
+ * Funcionalidades:
+ * - Protege rutas de usuarios no autenticados
+ * - Redirige al login preservando la URL destino
+ * - Monitorea la validez del token automáticamente
+ * - Maneja estados de loading elegantemente
+ */
+export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { authenticated, method, isFirstLogin, loading } = useAuthContext();
 
-  useTokenValidation({
-    warningMinutes: 5,
-    autoRefresh: false,
-    autoRedirect: true,
-    checkInterval: 60
-  });
-
-  console.log('AuthGuard', { authenticated, method, isFirstLogin });
+  useTokenValidation(TOKEN_VALIDATION_CONFIG);
 
   const [checked, setChecked] = useState(false);
 
   const check = useCallback(() => {
-    // Esperar a que cargue el estado de autenticación para evitar redirecciones prematuras
     if (loading) return;
 
     if (!authenticated) {
-      // Evitar redirigir si ya estamos en el login
-      const loginPath = loginPaths[method];
+      const loginPath = LOGIN_PATHS[method];
       const onLogin = pathname.startsWith(loginPath);
       if (onLogin) {
         return;
@@ -56,15 +71,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     check();
   }, [check]);
 
-  // Nota: la redirección al StepByStep se maneja en GuestGuard/StepGuard para evitar conflictos
-
   if (!checked) {
     return null;
   }
 
   return <>{children}</>;
 }
-
-AuthGuard.propTypes = {
-  children: PropTypes.node
-};

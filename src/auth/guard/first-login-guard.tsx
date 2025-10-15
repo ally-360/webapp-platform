@@ -13,15 +13,17 @@ export default function FirstLoginGuard({ children }: { children: React.ReactNod
     if (loading) return;
 
     if (!authenticated) {
-      // No decide aquí; AuthGuard externo llevará al login
       return;
     }
 
-    // Si NO es first_login, bloquear acceso a step-by-step
     if (isFirstLogin === false && pathname === paths.stepByStep.root) {
       router.replace(paths.dashboard.root);
     }
   }, [authenticated, isFirstLogin, loading, pathname, router]);
+
+  if (!authenticated || isFirstLogin === null || loading) {
+    return null;
+  }
 
   return <>{children}</>;
 }

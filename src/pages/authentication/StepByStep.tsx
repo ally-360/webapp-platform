@@ -32,6 +32,7 @@ import {
   setSubscriptionResponse
 } from 'src/redux/slices/stepByStepSlice';
 import { useStepByStepData } from 'src/hooks/use-step-by-step-data';
+import { SplashScreen } from 'src/components/loading-screen';
 
 const getStepsConfig = (isUniquePDV: boolean | undefined) => {
   if (isUniquePDV) {
@@ -252,19 +253,8 @@ export default function StepByStep() {
     return <RegisterCompanyForm />; // Fallback seguro
   }, [activeStep, isUniquePDV]);
 
-  // 🔄 Mostrar loading mientras se cargan los datos iniciales
   if (isLoading && !isReady) {
-    return (
-      <RootStyle>
-        <Container>
-          <ContentStyle>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-              <Typography variant="h6">Cargando configuración...</Typography>
-            </Box>
-          </ContentStyle>
-        </Container>
-      </RootStyle>
-    );
+    return <SplashScreen />;
   }
 
   // if (hasError) {

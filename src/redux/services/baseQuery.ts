@@ -47,6 +47,8 @@ export const baseQueryWithReauth = async (args: any, api: any, extraOptions: any
 
     localStorage.removeItem('accessToken');
 
+    // se está ejecutando asi no tenga token y muestra esto (revisar para algunos casos)
+
     enqueueSnackbar('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', {
       variant: 'warning',
       persist: true
