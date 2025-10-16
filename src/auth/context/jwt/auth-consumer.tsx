@@ -11,7 +11,6 @@ import { AuthContext } from './auth-context';
 export function AuthConsumer({ children }) {
   const location = useLocation();
 
-  // No mostrar CompanyChangeLoading en rutas de registro/autenticación
   const isAuthRoute =
     location.pathname.includes('/auth/') ||
     location.pathname.includes('/register') ||

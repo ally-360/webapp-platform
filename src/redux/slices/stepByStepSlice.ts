@@ -249,16 +249,20 @@ const stepByStepSlice = createSlice({
     goToNextStep: (state) => {
       const currentStep = state.activeStep;
       const isUniquePDV = state.companyResponse?.uniquePDV;
+      console.log('🔄 goToNextStep called from step:', currentStep, 'isUniquePDV:', isUniquePDV);
 
       if (isUniquePDV) {
         switch (currentStep) {
           case 0:
             state.activeStep = 1; // PLAN (en configuración uniquePDV)
+            console.log('✅ uniquePDV: COMPANY -> PLAN (step 0 -> 1)');
             break;
           case 1: // PLAN (en configuración uniquePDV)
             state.activeStep = 2; // SUMMARY
+            console.log('✅ uniquePDV: PLAN -> SUMMARY (step 1 -> 2)');
             break;
           default:
+            console.log('⚠️ uniquePDV: No navigation rule for step', currentStep);
             break;
         }
       } else {
@@ -266,14 +270,18 @@ const stepByStepSlice = createSlice({
         switch (currentStep) {
           case StepType.COMPANY:
             state.activeStep = StepType.PDV;
+            console.log('✅ normal: COMPANY -> PDV (step 0 -> 1)');
             break;
           case StepType.PDV:
             state.activeStep = StepType.PLAN;
+            console.log('✅ normal: PDV -> PLAN (step 1 -> 2)');
             break;
           case StepType.PLAN:
             state.activeStep = StepType.SUMMARY;
+            console.log('✅ normal: PLAN -> SUMMARY (step 2 -> 3)');
             break;
           default:
+            console.log('⚠️ normal: No navigation rule for step', currentStep);
             break;
         }
       }

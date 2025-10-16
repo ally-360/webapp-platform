@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Stepper,
@@ -16,16 +16,17 @@ import {
 import { useNavigate } from 'react-router';
 import { useSnackbar } from 'notistack';
 import { useAuthContext } from 'src/auth/hooks';
-import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyFormRefactored';
+import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyForm';
 import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
 import { PlanSelectionForm } from 'src/pages/authentication/company/PlanSelectionForm';
-import RegisterSummary from 'src/pages/authentication/company/RegisterSummaryRefactored';
+import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
 import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { paths } from 'src/routes/paths';
 import { StepType } from 'src/interfaces/stepByStep';
 import {
   setStep,
   resetStep,
+  goToPreviousStep,
   setCompanyResponse,
   setPDVResponse,
   setPlanData,
@@ -50,7 +51,6 @@ const getStepsConfig = (isUniquePDV: boolean | undefined) => {
   ];
 };
 
-// Estilo contenedor principal
 const RootStyle = styled(Container)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     display: 'flex'
@@ -74,48 +74,61 @@ const ContentStyle = styled('div')(({ theme }) => ({
 export default function StepByStep() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { logout, isFirstLogin } = useAuthContext();
+  const { logout } = useAuthContext();
   const dispatch = useAppDispatch();
 
-  const activeStep = useAppSelector((state) => state.stepByStep.activeStep);
-  const completedSteps = useAppSelector((state) => state.stepByStep.completedSteps);
+  // Ref para rastrear la última acción del usuario
+  const lastUserAction = useRef<'auto' | 'manual-forward' | 'manual-back' | null>(null);
+
+  const { activeStep, completedSteps } = useAppSelector((state) => state.stepByStep);
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
-  const isUniquePDV = companyResponse?.uniquePDV;
   const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
-
+  const subscriptionResponse = useAppSelector((state) => state.stepByStep.subscriptionResponse);
+  const planData = useAppSelector((state) => state.stepByStep.planData);
+  const isUniquePDV = companyResponse?.uniquePDV;
   const stepsConfig = useMemo(() => getStepsConfig(isUniquePDV), [isUniquePDV]);
-
   const { companies, allPDVs, currentSubscription, isLoading, isReady, hasError, currentStep } = useStepByStepData();
 
-  // 🚫 Redirigir si no es first_login
   useEffect(() => {
-    if (isFirstLogin === false) {
-      console.log('❌ No es first_login, redirigiendo al dashboard');
-      navigate(paths.dashboard.root);
+    if (!isReady || hasError) {
+      return;
     }
-  }, [isFirstLogin, navigate]);
+    const maxStep = isUniquePDV ? 2 : 3;
+    const safeStep = Math.min(Math.max(currentStep, 0), maxStep);
 
-  // 🔄 Inicializar datos en Redux cuando estén listos
+    dispatch(setStep(safeStep));
+  }, [isReady, hasError, currentStep, isUniquePDV, dispatch]);
+
   useEffect(() => {
     if (!isReady || hasError) {
       return;
     }
 
-    console.log('🔍 Inicializando datos del step-by-step...');
-    console.log('📦 Empresas:', companies);
-    console.log('🏪 PDVs:', allPDVs);
-    console.log('💳 Suscripción:', currentSubscription);
-    console.log('� Paso actual:', currentStep);
+    const hasCompleteSubscriptionData = !!(subscriptionResponse || (currentSubscription && currentSubscription.id));
+    const shouldGoToSummary = isUniquePDV && hasCompleteSubscriptionData && completedSteps.includes(StepType.PLAN);
 
-    // Establecer el paso actual detectado, con validación y clamping
-    const maxStep = isUniquePDV ? 2 : 3;
-    const safeStep = Math.min(Math.max(currentStep, 0), maxStep);
-    dispatch(setStep(safeStep));
+    // Resetear el flag de navegación manual cuando se complete nueva información importante
+    if (shouldGoToSummary && lastUserAction.current === 'manual-back' && activeStep === StepType.PLAN) {
+      lastUserAction.current = null;
+    }
 
-    // 📌 CARGAR EMPRESA SI EXISTE
+    // Solo hacer navegación automática si:
+    // 1. Debemos ir al summary
+    // 2. No estamos ya en el summary
+    // 3. La última acción del usuario no fue navegar hacia atrás
+    if (shouldGoToSummary && activeStep !== 2 && lastUserAction.current !== 'manual-back') {
+      lastUserAction.current = 'auto';
+      dispatch(setStep(2));
+    }
+  }, [isReady, hasError, isUniquePDV, subscriptionResponse, currentSubscription, completedSteps, activeStep, dispatch]);
+
+  useEffect(() => {
+    if (!isReady || hasError) {
+      return;
+    }
+
     if (companies && companies.length > 0) {
       const company = companies[0];
-      console.log('✅ Cargando empresa:', company);
 
       dispatch(
         setCompanyResponse({
@@ -129,17 +142,15 @@ export default function StepByStep() {
           quantity_employees: String(company.quantity_employees || ''),
           social_reason: company.social_reason || '',
           logo: company.logo || '',
-          uniquePDV: company.uniquePDV || false,
+          uniquePDV: company.unique_pdv || false,
           created_at: company.created_at || new Date().toISOString(),
           updated_at: company.updated_at || new Date().toISOString()
         })
       );
     }
 
-    // 📌 CARGAR PDV SI EXISTE
     if (allPDVs && allPDVs.pdvs && allPDVs.pdvs.length > 0) {
       const mainPDV = allPDVs.pdvs.find((pdv) => pdv.is_active) || allPDVs.pdvs[0];
-      console.log('✅ Cargando PDV:', mainPDV);
 
       dispatch(
         setPDVResponse({
@@ -156,10 +167,7 @@ export default function StepByStep() {
       );
     }
 
-    // 📌 CARGAR SUSCRIPCIÓN SI EXISTE
     if (currentSubscription && currentSubscription.id) {
-      console.log('✅ Cargando suscripción:', currentSubscription);
-
       dispatch(setSubscriptionResponse(currentSubscription));
       dispatch(
         setPlanData({
@@ -170,62 +178,94 @@ export default function StepByStep() {
         })
       );
     }
-  }, [isReady, hasError, companies, allPDVs, currentSubscription, currentStep, dispatch, isUniquePDV]);
+  }, [
+    isReady,
+    hasError,
+    companies,
+    allPDVs,
+    currentSubscription,
+    subscriptionResponse,
+    completedSteps,
+    currentStep,
+    dispatch,
+    isUniquePDV
+  ]);
 
-  // Evitar estados inválidos: si uniquePDV y no hay suscripción, no permitir saltar a summary
   useEffect(() => {
     if (!isReady) return;
     const maxStep = isUniquePDV ? 2 : 3;
     const currentActive = activeStep;
 
-    // Clamp activeStep a rango válido
     if (currentActive > maxStep) {
       dispatch(setStep(maxStep));
       return;
     }
 
-    // Si uniquePDV y no hay suscripción, asegurar que no esté en summary (2)
-    if (isUniquePDV && !currentSubscription && currentActive === 2) {
-      dispatch(setStep(1)); // Forzar al paso PLAN
+    if (isUniquePDV && currentActive === 2 && !completedSteps.includes(StepType.PLAN)) {
+      dispatch(setStep(1));
       return;
     }
 
-    // Si no uniquePDV, sin PDV -> no permitir pasar de PDV
     if (
       !isUniquePDV &&
+      currentActive === StepType.PDV && // Solo verificar cuando estamos exactamente en el paso PDV
       (!allPDVs || !allPDVs.pdvs || allPDVs.pdvs.length === 0) &&
-      !pdvResponse &&
-      currentActive > StepType.PDV
+      !pdvResponse
     ) {
-      // Si aún no tenemos PDVs en servidor y tampoco en local, forzar permanecer en PDV
-      dispatch(setStep(StepType.PDV));
+      // Mantenerse en el paso PDV si no hay data, pero no retroceder desde pasos posteriores
     }
-  }, [activeStep, isUniquePDV, currentSubscription, allPDVs, isReady, dispatch, pdvResponse]);
+  }, [
+    activeStep,
+    completedSteps,
+    isUniquePDV,
+    currentSubscription,
+    subscriptionResponse,
+    planData,
+    allPDVs,
+    isReady,
+    dispatch,
+    pdvResponse
+  ]);
 
-  // Saneamiento de progreso: si el estado almacenado indica PLAN completado pero el backend no tiene suscripción, retroceder
   useEffect(() => {
     if (!isReady) return;
-    if (isUniquePDV && !currentSubscription) {
-      // Forzar al paso PLAN y limpiar datos de plan si estaban marcados únicamente si estaba en SUMMARY o más
+
+    const hasAnySubscriptionData = !!(currentSubscription || subscriptionResponse);
+
+    if (isUniquePDV && !hasAnySubscriptionData) {
       if (activeStep > StepType.PLAN) {
         dispatch(resetStep(StepType.PLAN));
       }
     }
-  }, [isReady, isUniquePDV, currentSubscription, dispatch, activeStep]);
+  }, [isReady, isUniquePDV, currentSubscription, subscriptionResponse, dispatch, activeStep]);
 
   const isStepOptional = (_step: number) => false;
   const isStepSkipped = (_step: number) => false;
   const isStepCompleted = (step: number) => completedSteps.includes(step);
 
+  /**
+   * Maneja el clic en un paso del Stepper.
+   * Permite navegar solo a pasos completados o al siguiente paso inmediato.
+   * @param {number} step - Índice del paso clicado.
+   */
   const handleStepClick = (step: number) => {
-    // Solo permitir navegación a pasos completados o al paso siguiente inmediato
     const maxAllowedStep = Math.max(...completedSteps, 0) + 1;
 
     if (step <= maxAllowedStep || isStepCompleted(step)) {
+      // Marcar la dirección de la navegación manual
+      if (step < activeStep) {
+        lastUserAction.current = 'manual-back';
+      } else if (step > activeStep) {
+        lastUserAction.current = 'manual-forward';
+      }
+
       dispatch(setStep(step));
     }
   };
 
+  /**
+   * Maneja el cierre de sesión del usuario.
+   */
   const handleLogout = async () => {
     try {
       await logout();
@@ -236,48 +276,37 @@ export default function StepByStep() {
     }
   };
 
+  /**
+   * Maneja la navegación manual hacia atrás desde componentes hijo.
+   */
+  const handleManualBackNavigation = useCallback(() => {
+    lastUserAction.current = 'manual-back';
+    dispatch(goToPreviousStep());
+  }, [dispatch]);
+
+  /**
+   * Renderiza el componente del paso actual.
+   * @returns {JSX.Element} Componente del paso actual.
+   * Flujo 1: uniquePDV → 3 pasos (Company, Plan, Summary)
+   * Flujo 2: no uniquePDV → 4 pasos (Company, PDV, Plan, Summary)
+   */
   const StepComponent = useMemo(() => {
-    // Para empresas con uniquePDV, mapear el activeStep al componente correcto con fallback seguro
     if (isUniquePDV) {
       if (activeStep === 0) return <RegisterCompanyForm />;
       if (activeStep === 1) return <PlanSelectionForm />;
-      if (activeStep === 2) return <RegisterSummary />;
-      return <RegisterCompanyForm />; // Fallback seguro
+      if (activeStep === 2) return <RegisterSummary onManualBack={handleManualBackNavigation} />;
+      return <RegisterCompanyForm />;
     }
-
-    // Para empresas normales, usar los tipos de paso estándar con fallback seguro
     if (activeStep === StepType.COMPANY) return <RegisterCompanyForm />;
     if (activeStep === StepType.PDV) return <RegisterPDVForm />;
     if (activeStep === StepType.PLAN) return <PlanSelectionForm />;
-    if (activeStep === StepType.SUMMARY) return <RegisterSummary />;
-    return <RegisterCompanyForm />; // Fallback seguro
-  }, [activeStep, isUniquePDV]);
+    if (activeStep === StepType.SUMMARY) return <RegisterSummary onManualBack={handleManualBackNavigation} />;
+    return <RegisterCompanyForm />;
+  }, [activeStep, isUniquePDV, handleManualBackNavigation]);
 
   if (isLoading && !isReady) {
     return <SplashScreen />;
   }
-
-  // if (hasError) {
-  //   return (
-  //     <RootStyle>
-  //       <Container>
-  //         <ContentStyle>
-  //           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '50vh' }}>
-  //             <Typography variant="h6" color="error" gutterBottom>
-  //               Error de conexión
-  //             </Typography>
-  //             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-  //               No se pudo cargar la configuración. Verifica tu conexión e intenta nuevamente.
-  //             </Typography>
-  //             <Button variant="outlined" onClick={() => window.location.reload()}>
-  //               Reintentar
-  //             </Button>
-  //           </Box>
-  //         </ContentStyle>
-  //       </Container>
-  //     </RootStyle>
-  //   );
-  // }
 
   return (
     <RootStyle>

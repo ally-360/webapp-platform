@@ -1,169 +1,340 @@
-import { useSnackbar } from 'notistack';
-import React, { useState } from 'react';
-import { Alert, MenuItem, Stack, Typography, FormControlLabel, Switch, Box, Divider } from '@mui/material';
-import { LoadingButton } from '@mui/lab';
-import { useAuthContext } from 'src/auth/hooks';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useSnackbar } from 'notistack';
+import { Alert, Stack, Typography, MenuItem, FormControlLabel, Switch, Box, Divider } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
+
+// hooks
+import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+
+// components
 import FormProvider from 'src/components/hook-form/form-provider';
 import { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import { RegisterCompanySchema } from 'src/interfaces/auth/yupSchemas';
-import { RegisterCompany } from 'src/interfaces/auth/userInterfaces';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { setCompanyData, setCompanyResponse, goToNextStep } from 'src/redux/slices/stepByStepSlice';
+
+// interfaces & validation
+import { CompanyFormSchema } from 'src/interfaces/auth/yupSchemas';
+import { CompanyFormData, CompanyResponse } from 'src/interfaces/stepByStep';
+
+// redux
+import {
+  setCompanyData,
+  setCompanyResponse,
+  setLoading,
+  setError,
+  clearError,
+  selectCompanyData,
+  selectLoading,
+  selectErrors,
+  goToNextStep
+} from 'src/redux/slices/stepByStepSlice';
+
+// RTK Query
+import { useGetMyCompaniesQuery, useCreateCompanyMutation, useUpdateCompanyMutation } from 'src/redux/services/authApi';
+
+// options
+import { useEffect } from 'react';
+import { useAuthContext } from 'src/auth/hooks';
 import { economicActivityOptions, quantityEmployeesOptions } from './optionsCommon';
+
+// ========================================
+// 🏢 REGISTER COMPANY FORM - Refactored
+// ========================================
 
 export default function RegisterCompanyForm() {
   const { enqueueSnackbar } = useSnackbar();
-  const { createCompany } = useAuthContext();
-
   const dispatch = useAppDispatch();
-  const companyData = useAppSelector((state) => state.stepByStep.companyData);
+  const { selectCompany } = useAuthContext();
+
+  // RTK Query hooks
+  const { data: myCompanies } = useGetMyCompaniesQuery(undefined, {
+    skip: false,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMountOrArgChange: false
+  });
+  const [createCompany] = useCreateCompanyMutation();
+  const [updateCompany] = useUpdateCompanyMutation();
+
+  const companyData = useAppSelector(selectCompanyData);
+  const loading = useAppSelector(selectLoading);
+  const errors = useAppSelector(selectErrors);
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
+  const pdvData = useAppSelector((state) => state.stepByStep.pdvData);
 
-  // Check if we're in edit mode (company already exists)
-  const isEditing = !!companyResponse?.id;
+  const firstCompany = myCompanies?.[0];
+  const isEditing = !!firstCompany;
 
-  const defaultValues: RegisterCompany = {
-    name: companyData?.name || companyResponse?.name || '',
-    description: companyData?.description || companyResponse?.description || '',
-    address: companyData?.address || companyResponse?.address || '',
-    phone_number: companyData?.phone_number || companyResponse?.phone_number || '',
-    nit: companyData?.nit || companyResponse?.nit || '',
-    economic_activity: companyData?.economic_activity || companyResponse?.economic_activity || '',
-    quantity_employees: companyData?.quantity_employees || companyResponse?.quantity_employees || '',
-    social_reason: companyData?.social_reason || companyResponse?.social_reason || '',
-    logo: companyData?.logo || companyResponse?.logo || null,
-    uniquePDV: companyData?.uniquePDV || companyResponse?.uniquePDV || false
+  const defaultValues: CompanyFormData = {
+    name: String(firstCompany?.name || companyData?.name || ''),
+    description: String(firstCompany?.description || companyData?.description || ''),
+    address: String(firstCompany?.address || companyData?.address || ''),
+    phone_number: String(firstCompany?.phone_number || companyData?.phone_number || ''),
+    nit: String(firstCompany?.nit || companyData?.nit || ''),
+    economic_activity: String(firstCompany?.economic_activity || companyData?.economic_activity || ''),
+    quantity_employees: String(firstCompany?.quantity_employees || companyData?.quantity_employees || ''),
+    social_reason: String(firstCompany?.social_reason || companyData?.social_reason || ''),
+    logo: String(firstCompany?.logo || companyData?.logo || ''),
+    uniquePDV: Boolean(firstCompany?.unique_pdv ?? companyData?.uniquePDV ?? false)
   };
 
-  const [errorMsg, setErrorMsg] = useState('');
-
-  const methods = useForm<RegisterCompany>({
-    resolver: yupResolver(RegisterCompanySchema) as any,
-    defaultValues
+  const methods = useForm<CompanyFormData>({
+    resolver: yupResolver(CompanyFormSchema as any),
+    defaultValues,
+    shouldFocusError: false
   });
 
-  const { handleSubmit, formState, watch } = methods;
-  const { isSubmitting } = formState;
+  const {
+    handleSubmit,
+    watch,
+    reset,
+    setError: setFormError,
+    formState: { isSubmitting }
+  } = methods;
+
+  useEffect(() => {
+    if (firstCompany && !companyResponse) {
+      const companyFormData: CompanyFormData = {
+        name: String(firstCompany.name || ''),
+        description: String(firstCompany.description || ''),
+        address: String(firstCompany.address || ''),
+        phone_number: String(firstCompany.phone_number || ''),
+        nit: String(firstCompany.nit || ''),
+        economic_activity: String(firstCompany.economic_activity || ''),
+        quantity_employees: String(firstCompany.quantity_employees || ''),
+        social_reason: String(firstCompany.social_reason || ''),
+        logo: String(firstCompany.logo || ''),
+        uniquePDV: Boolean(firstCompany.unique_pdv ?? false)
+      };
+
+      dispatch(setCompanyData(companyFormData));
+      reset(companyFormData);
+
+      const companyResponseData: CompanyResponse = {
+        id: firstCompany.id,
+        name: String(firstCompany.name || ''),
+        description: String(firstCompany.description || ''),
+        address: String(firstCompany.address || ''),
+        phone_number: String(firstCompany.phone_number || ''),
+        nit: String(firstCompany.nit || ''),
+        economic_activity: String(firstCompany.economic_activity || ''),
+        quantity_employees: String(firstCompany.quantity_employees || ''),
+        social_reason: String(firstCompany.social_reason || ''),
+        logo: String(firstCompany.logo || ''),
+        uniquePDV: Boolean(firstCompany.unique_pdv ?? false),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      dispatch(setCompanyResponse(companyResponseData));
+    }
+  }, [firstCompany, companyResponse, dispatch, reset]);
 
   const uniquePDV = watch('uniquePDV');
 
-  const onSubmit = handleSubmit(async (data: RegisterCompany) => {
+  const getButtonText = () => {
+    if (isEditing) {
+      return uniquePDV ? 'Actualizar empresa y continuar' : 'Actualizar empresa';
+    }
+    return uniquePDV ? 'Crear empresa y continuar' : 'Crear empresa';
+  };
+
+  const onSubmit = handleSubmit(async (data: CompanyFormData) => {
     try {
-      console.log('🏢 Submitting company form:', { isEditing, data });
+      dispatch(clearError('company'));
+      dispatch(setLoading({ step: 'company', loading: true }));
 
-      // First save form data to Redux for persistence
-      dispatch(
-        setCompanyData({
-          ...data,
-          logo: data.logo || undefined // Convert null to undefined
-        })
-      );
+      const cleanData: CompanyFormData = {
+        name: String(data.name || ''),
+        description: String(data.description || ''),
+        address: String(data.address || ''),
+        phone_number: String(data.phone_number || ''),
+        nit: String(data.nit || ''),
+        economic_activity: String(data.economic_activity || ''),
+        quantity_employees: String(data.quantity_employees || ''),
+        social_reason: String(data.social_reason || ''),
+        logo: String(data.logo || ''),
+        uniquePDV: Boolean(data.uniquePDV)
+      };
 
-      if (isEditing) {
-        // TODO: Implement company update logic if needed
-        console.log('✏️ Company update not implemented yet');
-        enqueueSnackbar('Funcionalidad de edición pendiente', { variant: 'warning' });
-        return;
-      }
+      dispatch(setCompanyData(cleanData));
 
-      // Create new company
-      await createCompany(data);
+      const companyPayload = {
+        name: cleanData.name,
+        description: cleanData.description,
+        address: cleanData.address,
+        phone_number: cleanData.phone_number,
+        nit: cleanData.nit,
+        economic_activity: cleanData.economic_activity,
+        quantity_employees: cleanData.quantity_employees,
+        social_reason: cleanData.social_reason,
+        logo: cleanData.logo || null,
+        uniquePDV: cleanData.uniquePDV
+      };
 
-      // The company was created successfully, now update Redux with the response
-      // The createCompany function in auth-provider.tsx will:
-      // 1. Call createCompanyMutation()
-      // 2. Call selectCompany() to get new token
-      // 3. Set company in auth context
-
-      // We also need to update Redux store for step-by-step persistence
-      // We'll use the data that was sent since the auth-provider has the response
-      dispatch(
-        setCompanyResponse({
-          id: '', // Will be updated when StepByStep loads company data
-          name: data.name,
-          description: data.description || '',
-          address: data.address || '',
-          phone_number: data.phone_number || '',
-          nit: data.nit,
-          economic_activity: data.economic_activity || '',
-          quantity_employees: data.quantity_employees || '',
-          social_reason: data.social_reason || '',
-          logo: data.logo || '',
-          uniquePDV: data.uniquePDV,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-      );
-
-      // Longer delay to ensure company selection and token refresh are complete
-      setTimeout(() => {
-        // Show success message
+      let response: any;
+      if (firstCompany?.id) {
+        response = await updateCompany({ id: firstCompany.id, data: companyPayload }).unwrap();
+        enqueueSnackbar('Empresa actualizada exitosamente.', { variant: 'success' });
+      } else {
+        response = await createCompany(companyPayload).unwrap();
         enqueueSnackbar(
-          data.uniquePDV
+          cleanData.uniquePDV
             ? 'Empresa creada exitosamente. PDV principal generado automáticamente.'
             : 'Empresa creada exitosamente.',
           { variant: 'success' }
         );
+      }
 
-        // Navigate to next step - goToNextStep handles uniquePDV logic automatically
-        dispatch(goToNextStep());
-      }, 500); // Increased delay to ensure company selection is complete
+      try {
+        const companyIdToSelect = response?.id || firstCompany?.id;
+        if (companyIdToSelect) {
+          await selectCompany(companyIdToSelect, false);
+        }
+      } catch (selectErr) {
+        console.error('❌ Error al seleccionar empresa tras registro/edición:', selectErr);
+      }
+
+      if (response && response.id) {
+        const responseData: CompanyResponse = {
+          id: String(response.id),
+          name: String(response.name || cleanData.name),
+          description: String(response.description || cleanData.description),
+          address: String(response.address || cleanData.address),
+          phone_number: String(response.phone_number || cleanData.phone_number),
+          nit: String(response.nit || cleanData.nit),
+          economic_activity: String(response.economic_activity || cleanData.economic_activity),
+          quantity_employees: String(response.quantity_employees || cleanData.quantity_employees),
+          social_reason: String(response.social_reason || cleanData.social_reason),
+          logo: String(response.logo || cleanData.logo),
+          uniquePDV: cleanData.uniquePDV,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        dispatch(setCompanyResponse(responseData));
+      } else {
+        const mockResponse: CompanyResponse = {
+          id: 'temp-id',
+          name: cleanData.name,
+          description: cleanData.description,
+          address: cleanData.address,
+          phone_number: cleanData.phone_number,
+          nit: cleanData.nit,
+          economic_activity: cleanData.economic_activity,
+          quantity_employees: cleanData.quantity_employees,
+          social_reason: cleanData.social_reason,
+          logo: cleanData.logo,
+          uniquePDV: cleanData.uniquePDV,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        dispatch(setCompanyResponse(mockResponse));
+      }
+
+      dispatch(goToNextStep());
     } catch (error: any) {
-      console.error('❌ Error creating company:', error);
-      const errorMessage = error?.data?.detail || error?.message || 'Error al crear la empresa';
-      setErrorMsg(errorMessage);
+      console.error('❌ Company creation error:', error);
+
+      let errorMessage = 'Error creando la empresa';
+
+      if (error?.data?.detail && Array.isArray(error.data.detail)) {
+        error.data.detail.forEach((err: any) => {
+          if (err.loc && err.loc[1]) {
+            const fieldName = err.loc[1];
+            const errorMsg = err.msg || 'Error de validación';
+            setFormError(fieldName, { message: errorMsg });
+          }
+        });
+
+        const validationErrors = error.data.detail.map((err: any) => err.msg || 'Error de validación').join(', ');
+        errorMessage = `Errores de validación: ${validationErrors}`;
+      } else if (error?.data?.detail && typeof error.data.detail === 'string') {
+        errorMessage = error.data.detail;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      dispatch(setError({ step: 'company', error: errorMessage }));
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+    } finally {
+      dispatch(setLoading({ step: 'company', loading: false }));
     }
   });
 
-  const getButtonText = () => {
-    if (isEditing) return 'Guardar cambios';
-    if (uniquePDV) return 'Crear empresa y continuar';
-    return 'Siguiente paso';
-  };
-
   return (
     <FormProvider methods={methods} onSubmit={onSubmit}>
-      <Stack sx={{ marginTop: 1 }} spacing={3}>
-        {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+      <Stack spacing={3} sx={{ mt: 1 }}>
+        {/* Error Alert */}
+        {errors.company && <Alert severity="error">{errors.company}</Alert>}
+
+        {/* Header */}
         <Typography variant="subtitle1" textAlign="center" sx={{ mb: 3 }}>
-          {isEditing ? 'Editar información de la empresa' : 'Ingresa la información de la empresa'}
+          {isEditing ? 'Editar información de tu empresa' : 'Configura la información de tu empresa'}
         </Typography>
 
+        {/* Company Basic Info */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="Nombre de la empresa" name="name" />
-          <RHFTextField fullWidth label="Descripción" name="description" />
+          <RHFTextField fullWidth label="Nombre de la empresa" name="name" placeholder="Ej: Mi Empresa SAS" />
+          <RHFTextField
+            fullWidth
+            label="NIT"
+            name="nit"
+            placeholder="Ej: 901886184"
+            // helperText="NIT colombiano de 8-9 dígitos (sin dígito de verificación)"
+          />
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="Dirección de la empresa" name="address" />
+          <RHFTextField
+            fullWidth
+            label="Razón social *"
+            name="social_reason"
+            placeholder="Ej: Mi Empresa Sociedad por Acciones Simplificada"
+          />
+          <RHFTextField
+            fullWidth
+            label="Descripción *"
+            name="description"
+            placeholder="Ej: Comercialización de productos tecnológicos"
+          />
+        </Stack>
+
+        {/* Contact Info */}
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <RHFTextField fullWidth label="Dirección *" name="address" placeholder="Ej: Calle 123 #45-67, Bogotá" />
           <RHFPhoneNumber
-            label="Teléfono"
+            label="Teléfono *"
             name="phone_number"
             type="string"
             autoComplete="tel"
             defaultCountry="co"
             onlyCountries={['co']}
             countryCodeEditable={false}
+            placeholder="Ej: +57 300 123 4567"
           />
         </Stack>
 
+        {/* Business Details */}
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField fullWidth label="NIT" name="nit" />
-          <RHFTextField fullWidth label="Razón social" name="social_reason" />
-        </Stack>
-
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFSelect fullWidth label="Cantidad de empleados" name="quantity_employees">
+          <RHFSelect
+            fullWidth
+            label="Cantidad de empleados *"
+            name="quantity_employees"
+            placeholder="Selecciona el rango"
+          >
             {quantityEmployeesOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.value}
               </MenuItem>
             ))}
           </RHFSelect>
-          <RHFSelect fullWidth label="Actividad económica" name="economic_activity">
+
+          <RHFSelect
+            fullWidth
+            label="Actividad económica *"
+            name="economic_activity"
+            placeholder="Selecciona tu sector"
+          >
             {economicActivityOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.value}
@@ -172,39 +343,43 @@ export default function RegisterCompanyForm() {
           </RHFSelect>
         </Stack>
 
-        <Box sx={{ mt: 2 }}>
+        {/* Unique PDV Option */}
+        <Box sx={{ mt: 3 }}>
           <Divider sx={{ mb: 2 }} />
 
-          <FormControlLabel
-            control={<Switch {...methods.register('uniquePDV')} checked={uniquePDV} color="primary" />}
-            label={
-              <Box>
-                <Typography variant="body1" fontWeight="medium">
-                  Punto de venta único
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {uniquePDV
-                    ? 'Tu empresa tendrá un solo punto de venta que se creará automáticamente'
-                    : 'Podrás configurar múltiples puntos de venta después'}
-                </Typography>
-              </Box>
-            }
-            sx={{ alignItems: 'flex-start', ml: 0 }}
-          />
+          {!pdvData && (
+            <FormControlLabel
+              control={<Switch {...methods.register('uniquePDV')} checked={uniquePDV} color="primary" />}
+              label={
+                <Box>
+                  <Typography variant="body1" fontWeight="medium">
+                    Punto de venta único
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {uniquePDV
+                      ? 'Tu empresa tendrá un solo punto de venta que se creará automáticamente'
+                      : 'Podrás configurar múltiples puntos de venta después'}
+                  </Typography>
+                </Box>
+              }
+              sx={{ alignItems: 'flex-start', ml: 0 }}
+            />
+          )}
         </Box>
-      </Stack>
 
-      <LoadingButton
-        color="primary"
-        sx={{ marginTop: 8 }}
-        fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-      >
-        {getButtonText()}
-      </LoadingButton>
+        {/* Submit Button */}
+        <LoadingButton
+          color="primary"
+          sx={{ mt: 4 }}
+          fullWidth
+          size="large"
+          type="submit"
+          variant="contained"
+          loading={isSubmitting || loading.company}
+        >
+          {getButtonText()}
+        </LoadingButton>
+      </Stack>
     </FormProvider>
   );
 }

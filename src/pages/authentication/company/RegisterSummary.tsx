@@ -5,12 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { paths } from 'src/routes/paths';
 import { useAuthContext } from 'src/auth/hooks';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import {
-  goToPreviousStep,
-  completeOnboarding,
-  setSubscriptionResponse,
-  setPlanData
-} from 'src/redux/slices/stepByStepSlice';
+import { completeOnboarding, setSubscriptionResponse, setPlanData } from 'src/redux/slices/stepByStepSlice';
 import { useGetAllPDVsQuery, authApi } from 'src/redux/services/authApi';
 import {
   useUpdateFirstLoginMutation,
@@ -18,6 +13,10 @@ import {
   useGetPlansQuery,
   subscriptionsApi
 } from 'src/redux/services/subscriptionsApi';
+
+interface RegisterSummaryProps {
+  onManualBack?: () => void;
+}
 
 /**
  * Renderiza un bloque de información con título y contenido.
@@ -47,43 +46,32 @@ function getBillingCycleText(billingCycle?: string) {
 /**
  * Componente resumen del registro para empresa y PDV principal.
  */
-export default function RegisterSummary() {
+export default function RegisterSummary({ onManualBack }: RegisterSummaryProps) {
   const { company, pdvCompany } = useAuthContext();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { enqueueSnackbar } = useSnackbar();
   const [isFinishing, setIsFinishing] = useState(false);
-
   const companyData = useAppSelector((state) => state.stepByStep.companyData);
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
   const pdvData = useAppSelector((state) => state.stepByStep.pdvData);
   const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
   const planData = useAppSelector((state) => state.stepByStep.planData);
   const subscriptionResponse = useAppSelector((state) => state.stepByStep.subscriptionResponse);
-
-  // Also get PDVs from API as fallback
   const { data: apiPDVs } = useGetAllPDVsQuery();
   const firstApiPDV = apiPDVs?.pdvs?.[0];
-
-  // Get current subscription to show in summary
   const { data: apiSubscription } = useGetCurrentSubscriptionQuery(undefined, {
-    skip: false // Always try to load subscription in summary
+    skip: false
   });
 
-  // Get all plans to find the plan name
   const { data: allPlans } = useGetPlansQuery({ is_active: true, limit: 50 });
-
-  // API for updating first_login
   const [updateFirstLogin] = useUpdateFirstLoginMutation();
 
-  // Helper function to get plan name
   const getPlanName = useCallback(() => {
-    // First try from subscription response
     if (subscriptionResponse?.plan_name) {
       return subscriptionResponse.plan_name;
     }
 
-    // Then try to find in plans list using plan_id from planData
     if (planData?.plan_id && allPlans) {
       const selectedPlan = allPlans.find((plan) => plan.id === planData.plan_id);
       if (selectedPlan) {
@@ -91,7 +79,6 @@ export default function RegisterSummary() {
       }
     }
 
-    // Then try using plan_code from subscription
     if ((subscriptionResponse?.plan_code || apiSubscription?.plan_code) && allPlans) {
       const planCode = subscriptionResponse?.plan_code || apiSubscription?.plan_code;
       const selectedPlan = allPlans.find((plan) => plan.code === planCode);
@@ -103,11 +90,8 @@ export default function RegisterSummary() {
     return 'Plan seleccionado';
   }, [subscriptionResponse, planData, allPlans, apiSubscription]);
 
-  // Load subscription data if available and not already in Redux
   useEffect(() => {
     if (apiSubscription && !subscriptionResponse) {
-      console.log('🔄 Loading subscription from API in Summary:', apiSubscription);
-
       dispatch(setSubscriptionResponse(apiSubscription));
 
       if (!planData) {
@@ -128,24 +112,11 @@ export default function RegisterSummary() {
 
     setIsFinishing(true);
     try {
-      console.log('🎯 Finalizando onboarding...');
-
       dispatch(completeOnboarding());
-
-      // Limpiar localStorage del step-by-step ya que el onboarding está completo
       localStorage.removeItem('ally360-step-by-step');
-
-      const resp = await updateFirstLogin({ first_login: false }).unwrap();
-      console.log('✅ First login updated:', resp);
-
-      // Force invalidate user data to ensure immediate state update
-      console.log('🔄 Invalidating user cache...');
+      await updateFirstLogin({ first_login: false }).unwrap();
       dispatch(authApi.util.invalidateTags(['User']));
       dispatch(subscriptionsApi.util.invalidateTags(['User']));
-
-      // Small delay to ensure cache invalidation completes
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
       navigate(paths.dashboard.root);
 
       enqueueSnackbar('¡Registro completado exitosamente! Bienvenido a Ally360', {
@@ -227,12 +198,6 @@ export default function RegisterSummary() {
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
             <InfoBlock title="Plan" value={getPlanName()} />
-            <InfoBlock
-              title="Estado"
-              value={
-                subscriptionResponse?.status === 'trial' ? 'Período de prueba' : subscriptionResponse?.status || '-'
-              }
-            />
             <InfoBlock title="Ciclo de facturación" value={getBillingCycleText(planData?.billing_cycle)} />
             {subscriptionResponse?.is_trial && (
               <InfoBlock title="Días restantes" value={subscriptionResponse.days_remaining} />
@@ -247,7 +212,7 @@ export default function RegisterSummary() {
       )}
 
       <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
-        <Button variant="outlined" onClick={() => dispatch(goToPreviousStep())} disabled={isFinishing}>
+        <Button variant="outlined" onClick={onManualBack} disabled={isFinishing}>
           Volver
         </Button>
         <Button

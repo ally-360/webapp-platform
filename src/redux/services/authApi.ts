@@ -89,7 +89,7 @@ export interface CompanyOut {
   quantity_employees: string | null;
   social_reason?: string | null;
   logo?: string | null;
-  uniquePDV?: boolean;
+  unique_pdv?: boolean;
 }
 
 export interface PDVCreate {

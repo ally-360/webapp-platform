@@ -35,24 +35,22 @@ export default function RegisterPDVForm() {
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
   const dispatch = useAppDispatch();
-
   const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
   const pdvData = useAppSelector((state) => state.stepByStep.pdvData);
   const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
-
   const { data: departments } = useGetDepartmentsQuery();
-
   const { data: allPDVs } = useGetAllPDVsQuery();
+
+  // Query hooks for creating and updating PDVs
   const [createPDV] = useCreatePDVMutation();
   const [updatePDV] = useUpdatePDVMutation();
 
   const firstPDV = allPDVs?.pdvs?.[0];
   const isEditing = !!firstPDV;
 
-  // Estados locales para manejar la selección
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [selectedCity, setSelectedCity] = useState<any>(null);
-  const [hasInitialReset, setHasInitialReset] = useState(false); // Flag para evitar resets múltiples
+  const [hasInitialReset, setHasInitialReset] = useState(false);
 
   const defaultValues: RegisterPDVFormValues = {
     name: firstPDV?.name || pdvResponse?.name || pdvData?.name || '',
@@ -85,7 +83,6 @@ export default function RegisterPDVForm() {
 
   const filteredCities = cities?.cities || [];
 
-  // Effect para restaurar datos del PDV existente al estado Redux
   useEffect(() => {
     if (firstPDV && !pdvResponse) {
       dispatch(
@@ -105,7 +102,6 @@ export default function RegisterPDVForm() {
     }
   }, [firstPDV, pdvResponse, dispatch, companyResponse]);
 
-  // Effect para restaurar departamento cuando los datos estén disponibles
   useEffect(() => {
     if (departments?.departments && (firstPDV?.department_id || pdvResponse?.department_id)) {
       const savedDepartmentId = firstPDV?.department_id || pdvResponse?.department_id;
@@ -121,7 +117,6 @@ export default function RegisterPDVForm() {
     }
   }, [departments, firstPDV, pdvResponse, selectedDepartment, setValue]);
 
-  // Effect para restaurar ciudad cuando las ciudades y departamento estén disponibles
   useEffect(() => {
     if (selectedDepartment && cities?.cities && (firstPDV?.city_id || pdvResponse?.city_id)) {
       const savedCityId = firstPDV?.city_id || pdvResponse?.city_id;
@@ -137,8 +132,6 @@ export default function RegisterPDVForm() {
     }
   }, [selectedDepartment, cities, firstPDV, pdvResponse, selectedCity, setValue]);
 
-  // Effect para resetear form con datos completos cuando todo esté listo
-  // Solo hacer reset inicial, no en cada cambio de municipio
   useEffect(() => {
     if (selectedDepartment && selectedCity && !hasInitialReset) {
       const completeFormData = {
@@ -151,7 +144,6 @@ export default function RegisterPDVForm() {
         company_id: companyResponse?.id || ''
       };
 
-      console.log('🔄 Initial form reset with complete data:', completeFormData);
       reset(completeFormData);
       setHasInitialReset(true);
     }
@@ -191,11 +183,10 @@ export default function RegisterPDVForm() {
         enqueueSnackbar('Punto de venta creado exitosamente', { variant: 'success' });
       }
 
-      // Guardar datos del formulario en Redux para persistencia
       dispatch(
         setPDVData({
           name: data.name,
-          description: '', // No tenemos description en este form
+          description: '',
           address: data.address,
           phone_number: data.phone_number || '',
           location: {
@@ -222,7 +213,6 @@ export default function RegisterPDVForm() {
         })
       );
 
-      // Navegar al siguiente paso
       dispatch(goToNextStep());
     } catch (error: any) {
       console.error('❌ PDV error:', error);

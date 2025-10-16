@@ -23,22 +23,23 @@ import { enqueueSnackbar } from 'notistack';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterSchema } from 'src/interfaces/auth/yupSchemas';
 // ----------------------------------------------------------------------
+
+/**
+ * Mapea mensajes de error del backend a mensajes amigables para el usuario
+ */
 const getErrorMessage = (backendMessage: string, fieldName: string): string => {
-  // Phone number specific errors
   if (fieldName.includes('phone') || fieldName.includes('Phone')) {
     if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
       return 'Usa un número correcto. Formato válido: +573XXXXXXXXX (móvil) o +571XXXXXXX (fijo)';
     }
   }
 
-  // DNI specific errors
   if (fieldName.includes('dni')) {
     if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
       return 'Ingresa una cédula válida (entre 6 y 10 dígitos)';
     }
   }
 
-  // Email specific errors
   if (fieldName.includes('email')) {
     if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
       return 'Ingresa un correo válido con formato usuario@dominio.com';
@@ -48,7 +49,6 @@ const getErrorMessage = (backendMessage: string, fieldName: string): string => {
     }
   }
 
-  // Name specific errors
   if (fieldName.includes('name')) {
     if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
       return 'El nombre debe tener al menos 2 caracteres';
@@ -58,7 +58,6 @@ const getErrorMessage = (backendMessage: string, fieldName: string): string => {
     }
   }
 
-  // Password specific errors
   if (fieldName.includes('password')) {
     if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
       return 'La contraseña debe tener al menos 8 caracteres';

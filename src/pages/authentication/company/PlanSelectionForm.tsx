@@ -67,10 +67,8 @@ export function PlanSelectionForm() {
   const plans = useMemo(() => plansData || [], [plansData]);
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId);
 
-  // Also consider subscription response when detecting selected plan
   useEffect(() => {
     if (subscriptionResponse && plans.length > 0 && !selectedPlanId) {
-      // Find and select the plan that matches the current subscription
       const currentPlan = plans.find((plan) => plan.code === subscriptionResponse.plan_code);
       if (currentPlan) {
         setValue('plan_id', currentPlan.id);
@@ -78,23 +76,16 @@ export function PlanSelectionForm() {
     }
   }, [subscriptionResponse, selectedPlanId, setValue, plans]);
 
-  // Auto-load existing subscription data
   useEffect(() => {
     if (currentSubscription && !subscriptionResponse) {
-      console.log('🔄 Loading subscription from API:', currentSubscription);
-
-      // Update Redux state with current subscription
       dispatch(setSubscriptionResponse(currentSubscription));
-
-      // Find the plan_id from the plan_code in the subscription
       const planForSubscription = plans.find((plan) => plan.code === currentSubscription.plan_code);
 
       if (planForSubscription) {
-        // Update form with existing data - set the plan that matches the current subscription
         reset({
           plan_id: planForSubscription.id,
           billing_cycle: currentSubscription.billing_cycle,
-          auto_renew: true, // Default value since it's not in the response
+          auto_renew: true,
           currency: 'COP'
         });
       }
@@ -106,17 +97,7 @@ export function PlanSelectionForm() {
     try {
       const hasExistingSubscription = !!currentSubscription?.id;
       let result;
-
-      console.log('🔄 Submitting plan selection:', {
-        hasExistingSubscription,
-        planId: data.plan_id,
-        planCode: selectedPlan?.code,
-        currentSubscriptionId: currentSubscription?.id,
-        action: hasExistingSubscription ? 'UPDATE (PATCH)' : 'CREATE (POST)'
-      });
-
       if (hasExistingSubscription) {
-        // Use PATCH for existing subscriptions
         const updatePayload = {
           plan_id: data.plan_id,
           billing_cycle: data.billing_cycle || 'monthly',
@@ -132,7 +113,6 @@ export function PlanSelectionForm() {
         const planName = selectedPlan?.name || 'plan';
         enqueueSnackbar(`Plan actualizado a ${planName} exitosamente`, { variant: 'success' });
       } else {
-        // Use POST for new subscriptions
         const subscriptionPayload = {
           plan_id: data.plan_id,
           billing_cycle: data.billing_cycle || 'monthly',
@@ -156,10 +136,8 @@ export function PlanSelectionForm() {
         }
       }
 
-      // Update Redux state with the subscription response
       dispatch(setSubscriptionResponse(result));
 
-      // Cast data to PlanFormData since we know it has the right structure
       const planData: PlanFormData = {
         plan_id: data.plan_id,
         billing_cycle: data.billing_cycle || 'monthly',
@@ -173,7 +151,7 @@ export function PlanSelectionForm() {
       };
 
       dispatch(setPlanData(planData));
-      dispatch(goToNextStep()); // Go to summary
+      dispatch(goToNextStep());
     } catch (error: any) {
       console.error('Error creating/updating subscription:', error);
       let errorMessage = 'Error al activar el plan';
@@ -238,7 +216,6 @@ export function PlanSelectionForm() {
     return features;
   };
 
-  // Show loading state
   if (plansLoading) {
     return (
       <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
@@ -264,7 +241,6 @@ export function PlanSelectionForm() {
     );
   }
 
-  // Show error state
   if (plansError) {
     return (
       <Box sx={{ maxWidth: 900, mx: 'auto', p: 3 }}>
@@ -298,7 +274,7 @@ export function PlanSelectionForm() {
 
       {!currentSubscription && plans.some((plan) => plan.type !== 'free') && (
         <Alert severity="info" sx={{ mb: 4 }}>
-          🎉 <strong>15 días gratis</strong> para que pruebes todas las funciones de los planes pagos. Cancela cuando
+          <strong>15 días gratis</strong> para que pruebes todas las funciones de los planes pagos. Cancela cuando
           quieras, sin compromisos.
         </Alert>
       )}
@@ -320,7 +296,6 @@ export function PlanSelectionForm() {
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  // Highlight current subscription plan
                   ...(currentSubscription?.plan_code === plan.code && {
                     backgroundColor: 'action.selected',
                     '&:before': {
@@ -406,7 +381,7 @@ export function PlanSelectionForm() {
 
                   {plan.type === 'free' && (
                     <Alert severity="info" sx={{ mt: 2 }}>
-                      🎉 Plan gratuito para siempre
+                      Plan gratuito para siempre
                     </Alert>
                   )}
                 </CardContent>
