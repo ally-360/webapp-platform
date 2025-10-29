@@ -327,12 +327,13 @@ export default function ProductTableFiltersAdvanced({
               size="small"
               variant="outlined"
               onClick={handleApplyPriceRange}
+              startIcon={<Iconify icon="solar:check-circle-bold" width={16} />}
               disabled={
                 priceRange[0] === (filters.priceRange?.[0] || 0) &&
                 priceRange[1] === (filters.priceRange?.[1] || 10000000)
               }
             >
-              {t('Aplicar')}
+              {t('Aplicar Filtro')}
             </Button>
           </Stack>
 
@@ -376,11 +377,12 @@ export default function ProductTableFiltersAdvanced({
               size="small"
               variant="outlined"
               onClick={handleApplyStockRange}
+              startIcon={<Iconify icon="solar:check-circle-bold" width={16} />}
               disabled={
                 stockRange[0] === (filters.stockRange?.[0] || 0) && stockRange[1] === (filters.stockRange?.[1] || 1000)
               }
             >
-              {t('Aplicar')}
+              {t('Aplicar Filtro')}
             </Button>
           </Stack>
         </Stack>

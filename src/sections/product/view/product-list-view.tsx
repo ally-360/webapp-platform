@@ -115,23 +115,79 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
   // RTK QUERY - PRODUCTOS
   // ========================================
 
+  // Mapear columnas de la tabla a campos del backend para ordenamiento
+  const sortByMap: Record<string, 'name' | 'price' | 'stock' | 'created_at'> = {
+    name: 'name',
+    priceSale: 'price',
+    quantityStock: 'stock',
+    createdAt: 'created_at'
+  };
+
+  // Construir filtros para el backend
+  const backendFilters: any = {
+    page: table.page + 1,
+    limit: table.rowsPerPage,
+    search: debouncedSearch || undefined,
+    is_active: filters.status === 'all' ? undefined : filters.status === 'active'
+  };
+
+  // Categorías: enviar solo el primero o el de la vista
+  if (filters.categories?.length > 0) {
+    backendFilters.category_id = (filters.categories as any)[0]?.id;
+  } else if (categoryId) {
+    backendFilters.category_id = categoryId;
+  }
+
+  // Marcas: enviar solo el primero o el de la vista
+  if (filters.brands?.length > 0) {
+    backendFilters.brand_id = (filters.brands as any)[0]?.id;
+  } else if (brandId) {
+    backendFilters.brand_id = brandId;
+  }
+
+  // Rango de precios (solo si cambió del default)
+  if (filters.priceRange && (filters.priceRange[0] > 0 || filters.priceRange[1] < 10000000)) {
+    if (filters.priceRange[0] > 0) {
+      backendFilters.price_min = filters.priceRange[0];
+    }
+    if (filters.priceRange[1] < 10000000) {
+      backendFilters.price_max = filters.priceRange[1];
+    }
+  }
+
+  // Rango de stock (solo si cambió del default)
+  if (filters.stockRange && (filters.stockRange[0] > 0 || filters.stockRange[1] < 1000)) {
+    if (filters.stockRange[0] > 0) {
+      backendFilters.stock_min = filters.stockRange[0];
+    }
+    if (filters.stockRange[1] < 1000) {
+      backendFilters.stock_max = filters.stockRange[1];
+    }
+  }
+
+  // Stock bajo
+  if (filters.lowStock === true) {
+    backendFilters.has_low_stock = true;
+  }
+
+  // PDV: enviar solo el primero si hay varios seleccionados
+  // El backend solo soporta un pdv_id, el filtro múltiple se hará en el cliente
+  if (filters.pdvs?.length > 0) {
+    backendFilters.pdv_id = (filters.pdvs as any)[0]?.id;
+  }
+
+  // Ordenamiento (mapear columnas de la tabla a campos del backend)
+  const mappedSortBy = sortByMap[table.orderBy] || 'created_at';
+  backendFilters.sort_by = mappedSortBy;
+  backendFilters.sort_order = table.order || 'desc';
+
   const {
     data: productsData,
     isLoading: productsLoading,
     refetch: refetchProducts
-  } = useGetProductsQuery(
-    {
-      page: table.page + 1,
-      limit: table.rowsPerPage,
-      search: debouncedSearch || undefined,
-      categoryId: (filters.categories as any)?.[0]?.id || categoryId,
-      brandId: (filters.brands as any)?.[0]?.id || brandId,
-      is_active: filters.status === 'all' ? undefined : filters.status === 'active'
-    },
-    {
-      skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
-    }
-  );
+  } = useGetProductsQuery(backendFilters, {
+    skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
+  });
 
   const [deleteProduct] = useDeleteProductMutation();
 
@@ -142,6 +198,20 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId, brandId]);
 
+  // Reset page when filters change
+  useEffect(() => {
+    table.onResetPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filters.status,
+    filters.categories,
+    filters.brands,
+    filters.pdvs,
+    filters.priceRange,
+    filters.stockRange,
+    filters.lowStock
+  ]);
+
   // DATOS PROCESADOS
   // ========================================
 
@@ -149,31 +219,14 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
   const totalProducts = productsData?.total || 0;
   const productsEmpty = !productsLoading && tableData.length === 0;
 
-  // Filtrado local para filtros avanzados no soportados por el backend
+  // Filtrado local SOLO para múltiples PDVs (el backend solo soporta uno)
+  // El resto de filtros ya los maneja el backend
   const dataFiltered = tableData.filter((product) => {
-    // Filtro de PDVs
-    if (filters.pdvs?.length > 0) {
+    // Filtro de múltiples PDVs (solo si hay más de uno seleccionado)
+    if (filters.pdvs?.length > 1) {
       const pdvIds = (filters.pdvs as any[]).map((p) => p.id);
       const hasAnyPdv = product.productPdv?.some((p) => pdvIds.includes(p.pdv_id));
       if (!hasAnyPdv) return false;
-    }
-
-    // Filtro de precio
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange;
-      if (product.priceSale < min || product.priceSale > max) return false;
-    }
-
-    // Filtro de stock
-    if (filters.stockRange) {
-      const [min, max] = filters.stockRange;
-      if (product.quantityStock < min || product.quantityStock > max) return false;
-    }
-
-    // Filtro de stock bajo
-    if (filters.lowStock) {
-      const minQuantityAllPdvs = product.productPdv?.reduce((acc, pdv) => pdv.min_quantity + acc, 0) || 0;
-      if (product.quantityStock > minQuantityAllPdvs) return false;
     }
 
     return true;

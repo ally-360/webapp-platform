@@ -263,12 +263,30 @@ export interface ApiErrorResponse {
 // 🔍 FILTER & SEARCH TYPES
 // ========================================
 export interface ProductFilters {
+  // Búsqueda y filtros básicos
   search?: string; // buscar por nombre, SKU o descripción
   category_id?: string; // filtrar por categoría
   brand_id?: string; // filtrar por marca
   is_active?: boolean; // filtrar por estado activo
+
+  // Filtros de rango
+  price_min?: number; // precio mínimo
+  price_max?: number; // precio máximo
+  stock_min?: number; // stock mínimo total
+  stock_max?: number; // stock máximo total
+
+  // Filtros especiales
+  pdv_id?: string; // stock en PDV específico
+  has_low_stock?: boolean; // productos con stock crítico
+
+  // Ordenamiento
+  sort_by?: 'name' | 'price' | 'stock' | 'created_at'; // ordenar por campo
+  sort_order?: 'asc' | 'desc'; // dirección ordenamiento
+
+  // Paginación
   page?: number; // número de página
   limit?: number; // elementos por página
+
   // Legacy support
   companyId?: string;
   brandId?: string;
