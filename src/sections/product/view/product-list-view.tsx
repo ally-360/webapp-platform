@@ -40,6 +40,8 @@ import Scrollbar from 'src/components/scrollbar';
 import ProductTableRow from '../product-table-row';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
+import ProductTableFiltersAdvanced from '../product-table-filters-advanced';
+import ProductTableFiltersChips from '../product-table-filters-chips';
 
 // ----------------------------------------------------------------------
 
@@ -61,7 +63,15 @@ const defaultFilters = {
   name: '',
   sku: '',
   publish: [],
-  stock: []
+  stock: [],
+  // Advanced filters
+  status: 'all', // 'all' | 'active' | 'inactive'
+  categories: [],
+  brands: [],
+  pdvs: [],
+  priceRange: [0, 10000000],
+  stockRange: [0, 1000],
+  lowStock: false
 };
 
 // ----------------------------------------------------------------------
@@ -87,6 +97,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const confirm = useBoolean(false);
+  const filtersDrawer = useBoolean(false);
 
   const categoryId = typeof categoryView === 'object' && categoryView?.id ? categoryView.id : undefined;
   const brandId = brandView?.id || undefined;
@@ -113,8 +124,9 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
       page: table.page + 1,
       limit: table.rowsPerPage,
       search: debouncedSearch || undefined,
-      categoryId,
-      brandId
+      categoryId: (filters.categories as any)?.[0]?.id || categoryId,
+      brandId: (filters.brands as any)?.[0]?.id || brandId,
+      is_active: filters.status === 'all' ? undefined : filters.status === 'active'
     },
     {
       skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
@@ -137,10 +149,37 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
   const totalProducts = productsData?.total || 0;
   const productsEmpty = !productsLoading && tableData.length === 0;
 
-  const dataFiltered = tableData;
-  const dataInPage = tableData;
+  // Filtrado local para filtros avanzados no soportados por el backend
+  const dataFiltered = tableData.filter((product) => {
+    // Filtro de PDVs
+    if (filters.pdvs?.length > 0) {
+      const pdvIds = (filters.pdvs as any[]).map((p) => p.id);
+      const hasAnyPdv = product.productPdv?.some((p) => pdvIds.includes(p.pdv_id));
+      if (!hasAnyPdv) return false;
+    }
 
-  const denseHeight = table.dense ? 60 : 80;
+    // Filtro de precio
+    if (filters.priceRange) {
+      const [min, max] = filters.priceRange;
+      if (product.priceSale < min || product.priceSale > max) return false;
+    }
+
+    // Filtro de stock
+    if (filters.stockRange) {
+      const [min, max] = filters.stockRange;
+      if (product.quantityStock < min || product.quantityStock > max) return false;
+    }
+
+    // Filtro de stock bajo
+    if (filters.lowStock) {
+      const minQuantityAllPdvs = product.productPdv?.reduce((acc, pdv) => pdv.min_quantity + acc, 0) || 0;
+      if (product.quantityStock > minQuantityAllPdvs) return false;
+    }
+
+    return true;
+  });
+
+  const dataInPage = dataFiltered;
 
   // Determinar si estamos en vista de categoría o marca
   const isCategoryOrBrandView = categoryView !== false || brandView !== undefined;
@@ -199,6 +238,23 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
 
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
+  }, []);
+
+  const handleRemoveFilter = useCallback((filterKey: string, value?: any) => {
+    if (filterKey === 'status') {
+      setFilters((prev) => ({ ...prev, status: 'all' }));
+    } else if (filterKey === 'lowStock') {
+      setFilters((prev) => ({ ...prev, lowStock: false }));
+    } else if (filterKey === 'priceRange') {
+      setFilters((prev) => ({ ...prev, priceRange: [0, 10000000] }));
+    } else if (filterKey === 'stockRange') {
+      setFilters((prev) => ({ ...prev, stockRange: [0, 1000] }));
+    } else if (['categories', 'brands', 'pdvs'].includes(filterKey)) {
+      setFilters((prev) => ({
+        ...prev,
+        [filterKey]: (prev[filterKey] as any[]).filter((item) => item.id !== value.id)
+      }));
+    }
   }, []);
 
   const handleDeleteRow = useCallback(
@@ -268,9 +324,15 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
               dataFiltered={dataFiltered}
               onFilters={handleFilters}
               categoryView={isCategoryOrBrandView}
+              onOpenFilters={filtersDrawer.onTrue}
               //
               stockOptions={PRODUCT_STOCK_OPTIONS}
               publishOptions={PUBLISH_OPTIONS}
+            />
+            <ProductTableFiltersChips
+              filters={filters}
+              onRemoveFilter={handleRemoveFilter}
+              onResetFilters={handleResetFilters}
             />
             {canReset && (
               <ProductTableFiltersResult
@@ -462,6 +524,15 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
             Eliminar
           </Button>
         }
+      />
+
+      <ProductTableFiltersAdvanced
+        open={filtersDrawer.value}
+        onClose={filtersDrawer.onFalse}
+        filters={filters}
+        onFilters={handleFilters}
+        onResetFilters={handleResetFilters}
+        countsData={productsData as any}
       />
     </>
   );

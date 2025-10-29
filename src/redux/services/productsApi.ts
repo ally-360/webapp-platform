@@ -40,10 +40,9 @@ export const productsApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: HOST_API,
     prepareHeaders: (headers, { getState }) => {
-      const { auth } = getState() as RootState;
-      console.log('🔑 ProductsAPI prepareHeaders:', { token: auth.token ? 'EXISTS' : 'MISSING' });
-      if (auth.token) {
-        headers.set('Authorization', `Bearer ${auth.token}`);
+      const token = localStorage.getItem('accessToken') || (getState() as RootState).auth?.token;
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
       }
       headers.set('Content-Type', 'application/json');
       return headers;

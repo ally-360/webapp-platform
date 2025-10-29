@@ -1,6 +1,5 @@
 // routes
 // utils
-import axios from 'src/utils/axios';
 
 // ----------------------------------------------------------------------
 
@@ -79,24 +78,5 @@ export const setSession = (accessToken: string | null) => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('companyId');
     localStorage.removeItem('refreshToken');
-  }
-};
-
-/**
- * Set session for company id in localStorage and axios headers for company-id
- * @param companyId
- * @returns
- * @example
- * setSessionCompanyId('company-id');
- */
-export const setSessionCompanyId = (companyId: string) => {
-  if (companyId) {
-    localStorage.setItem('companyId', companyId);
-
-    axios.defaults.headers['company-id'] = companyId;
-  } else {
-    localStorage.removeItem('companyId');
-
-    delete axios.defaults.headers['company-id'];
   }
 };

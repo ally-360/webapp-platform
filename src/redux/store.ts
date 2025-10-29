@@ -4,7 +4,6 @@ import pdvsReducer from './inventory/pdvsSlice';
 import locationsReducer from './inventory/locationsSlice';
 import categoriesReducer from './inventory/categoriesSlice';
 import brandsReducer from './inventory/brandsSlice';
-import userReducer from './inventory/user';
 import contactsReducer from './inventory/contactsSlice';
 import stepByStepReducer from './slices/stepByStepSlice';
 import posReducer from './pos/posSlice';
@@ -48,7 +47,6 @@ export const store = configureStore({
     locations: locationsReducer,
     categories: categoriesReducer,
     brands: brandsReducer,
-    user: userReducer,
     contacts: contactsReducer,
     stepByStep: stepByStepReducer,
     pos: posReducer

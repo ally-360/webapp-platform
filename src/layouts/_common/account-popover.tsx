@@ -21,15 +21,14 @@ import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { t } from 'i18next';
-
-import React, { useEffect } from 'react';
-
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
 const OPTIONS = [
   {
     label: 'Home',
-    linkTo: '/'
+    linkTo: paths.dashboard.root
   },
   {
     label: 'Mi cuenta',
@@ -45,16 +44,10 @@ const OPTIONS = [
 
 export default function AccountPopover() {
   const router = useRouter();
-
+  const location = useLocation();
   const { user, company } = useAuthContext();
   const { logout } = useAuthContext();
   const { data: avatarData } = useGetUserAvatarQuery();
-
-  useEffect(() => {
-    console.log('Company in AccountPopover:', company);
-    console.log('User in AccountPopover:', user);
-    console.log('Avatar Data in AccountPopover:', avatarData);
-  }, [company, user, avatarData]);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -73,6 +66,8 @@ export default function AccountPopover() {
 
   const handleClickItem = (path) => {
     popover.onClose();
+    const currentPath = location.pathname;
+    if (currentPath === path) return;
     router.push(path);
   };
 

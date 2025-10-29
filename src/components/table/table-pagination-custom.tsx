@@ -36,7 +36,7 @@ export default function TablePaginationCustom({
 
       {onChangeDense && (
         <FormControlLabel
-          label="Dense"
+          label="Compacto"
           control={<Switch checked={dense} onChange={onChangeDense} />}
           sx={{
             pl: 2,
