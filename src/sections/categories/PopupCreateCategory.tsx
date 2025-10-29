@@ -61,11 +61,10 @@ function PopupCreateCategory() {
   // Validation schema (fixed)
   const createCategorySchema = Yup.object().shape({
     name: Yup.string().required('Nombre requerido'),
-    description: Yup.string().required('Descripción requerida'),
+    description: Yup.string().optional(),
     parent_id: Yup.string().nullable().optional()
   });
 
-  // Default values based on edit state
   const defaultValues = useMemo(() => {
     let parentId: string | null = null;
     if (categoryEditData) {
@@ -166,14 +165,16 @@ function PopupCreateCategory() {
         <DialogContent>
           <Stack spacing={2} mt={4} mb={3} direction="column" alignItems="center">
             <RHFTextField label="Nombre" name="name" required />
-            <RHFTextField label="Descripción" name="description" required />
-            <RHFSelect label="Categoria padre" name="parent_id">
-              {categoriesList.map((category: any) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
-                </MenuItem>
-              ))}
-            </RHFSelect>
+            <RHFTextField label="Descripción" name="description" />
+            {categoriesList.length === 0 ? null : (
+              <RHFSelect label="Categoria padre" name="parent_id">
+                {categoriesList.map((category: any) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </RHFSelect>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions

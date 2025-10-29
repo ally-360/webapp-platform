@@ -30,8 +30,6 @@ export const switchCompany = createAction<string>('global/switchCompany');
  * Thunk que ejecuta la limpieza completa del estado al cambiar empresa
  */
 export const clearAllStateOnCompanySwitch = () => async (dispatch: AppDispatch) => {
-  console.log('🧹 Clearing all application state for company switch...');
-
   try {
     // 1. Resetear todos los slices de estado local
     dispatch(resetProductsState());

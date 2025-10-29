@@ -300,8 +300,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const createCompany = useCallback(
     async (databody: RegisterCompany): Promise<void> => {
       try {
-        console.log('🏢 Create company attempt with RTK Query:', databody.name);
-
         // Transform data to backend format
         const backendData: CompanyCreate = {
           name: databody.name,
@@ -338,15 +336,8 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const createPDV = useCallback(
     async (pdvData: any) => {
       try {
-        const result = await createPDVMutation(pdvData).unwrap();
+        await createPDVMutation(pdvData).unwrap();
         enqueueSnackbar('PDV registrado exitosamente', { variant: 'success' });
-
-        // Use backend PDV directly - no adaptation needed
-        console.log('✅ PDV created:', result);
-
-        // TODO: Adaptar estas acciones al nuevo stepByStep slice
-        // dispatch(setPrevValuesPDV(result));
-        // dispatch(setStep(2));
       } catch (error: any) {
         console.error('Error registering PDV:', error);
         enqueueSnackbar(error?.data?.detail || 'Error registrando PDV', { variant: 'error' });
@@ -387,16 +378,11 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     } catch (error) {
       console.warn('Logout error:', error);
     }
-
     localStorage.removeItem('accessToken');
     localStorage.removeItem('companyId');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('ally360-step-by-step');
-
     setSession(null);
-    // dispatch(clearCredentials());
-
-    // Restablecer estado inicial con loading en false para evitar splash screen
     setState({
       ...initialState,
       loading: false
@@ -404,7 +390,6 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
     enqueueSnackbar('Sesión cerrada', { variant: 'info' });
 
-    // Navegar después de limpiar el estado
     navigate(paths.auth.jwt.login);
   }, [logoutMutation, enqueueSnackbar, navigate]);
 

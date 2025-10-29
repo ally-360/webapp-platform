@@ -15,7 +15,7 @@ import {
 } from 'src/interfaces/stepByStep';
 
 // ========================================
-// � PERSISTENCE HELPERS
+// PERSISTENCE HELPERS
 // ========================================
 
 const STEP_BY_STEP_STORAGE_KEY = 'ally360-step-by-step';
@@ -34,7 +34,6 @@ const loadFromLocalStorage = (): Partial<StepByStepState> | null => {
 
 const saveToLocalStorage = (state: StepByStepState) => {
   try {
-    // Solo guardamos los datos importantes, no los estados de loading/error
     const stateToSave = {
       activeStep: state.activeStep,
       completedSteps: state.completedSteps,
@@ -52,7 +51,7 @@ const saveToLocalStorage = (state: StepByStepState) => {
 };
 
 // ========================================
-// �🔧 INITIAL STATE
+// INITIAL STATE
 // ========================================
 
 const defaultInitialState: StepByStepState = {
@@ -83,20 +82,18 @@ const defaultInitialState: StepByStepState = {
   }
 };
 
-// Cargar estado desde localStorage si existe
 const savedState = loadFromLocalStorage();
 const initialState: StepByStepState = savedState
   ? {
       ...defaultInitialState,
       ...savedState,
-      // Siempre resetear loading y errors al cargar
       loading: defaultInitialState.loading,
       errors: defaultInitialState.errors
     }
   : defaultInitialState;
 
 // ========================================
-// 🎯 SLICE
+// SLICE
 // ========================================
 
 const stepByStepSlice = createSlice({
@@ -104,7 +101,7 @@ const stepByStepSlice = createSlice({
   initialState,
   reducers: {
     // ========================================
-    // 📍 NAVIGATION ACTIONS
+    // NAVIGATION ACTIONS
     // ========================================
 
     setStep: (state, action: PayloadAction<number>) => {
@@ -120,7 +117,7 @@ const stepByStepSlice = createSlice({
     },
 
     // ========================================
-    // 🏢 COMPANY ACTIONS
+    // COMPANY ACTIONS
     // ========================================
 
     setCompanyData: (state, action: PayloadAction<CompanyFormData>) => {
@@ -129,19 +126,15 @@ const stepByStepSlice = createSlice({
     },
 
     setCompanyResponse: (state, action: PayloadAction<CompanyResponse>) => {
-      console.log('🔄 setCompanyResponse called with:', action.payload);
       state.companyResponse = action.payload;
       if (!state.completedSteps.includes(StepType.COMPANY)) {
         state.completedSteps.push(StepType.COMPANY);
       }
       saveToLocalStorage(state);
-
-      // No cambiar automáticamente el paso activo aquí
-      // Permitir navegación manual entre pasos
     },
 
     // ========================================
-    // 📍 PDV ACTIONS
+    // PDV ACTIONS
     // ========================================
 
     setPDVData: (state, action: PayloadAction<PDVFormData>) => {
@@ -155,11 +148,10 @@ const stepByStepSlice = createSlice({
         state.completedSteps.push(StepType.PDV);
       }
       saveToLocalStorage(state);
-      // No cambiar automáticamente el paso activo
     },
 
     // ========================================
-    // 💳 PLAN ACTIONS
+    // PLAN ACTIONS
     // ========================================
 
     setPlanData: (state, action: PayloadAction<PlanFormData>) => {
@@ -173,11 +165,10 @@ const stepByStepSlice = createSlice({
         state.completedSteps.push(StepType.PLAN);
       }
       saveToLocalStorage(state);
-      // No cambiar automáticamente el paso activo
     },
 
     // ========================================
-    // 🔄 LOADING ACTIONS
+    // LOADING ACTIONS
     // ========================================
 
     setLoading: (state, action: PayloadAction<{ step: keyof StepByStepState['loading']; loading: boolean }>) => {
@@ -186,7 +177,7 @@ const stepByStepSlice = createSlice({
     },
 
     // ========================================
-    // ❌ ERROR ACTIONS
+    // ERROR ACTIONS
     // ========================================
 
     setError: (state, action: PayloadAction<{ step: keyof StepByStepState['errors']; error?: string }>) => {
@@ -208,7 +199,7 @@ const stepByStepSlice = createSlice({
     },
 
     // ========================================
-    // 🔄 RESET ACTIONS
+    // RESET ACTIONS
     // ========================================
 
     resetStep: (state, action: PayloadAction<number>) => {
@@ -243,45 +234,36 @@ const stepByStepSlice = createSlice({
     },
 
     // ========================================
-    // 🎯 NAVIGATION HELPERS
+    // NAVIGATION HELPERS
     // ========================================
 
     goToNextStep: (state) => {
       const currentStep = state.activeStep;
       const isUniquePDV = state.companyResponse?.uniquePDV;
-      console.log('🔄 goToNextStep called from step:', currentStep, 'isUniquePDV:', isUniquePDV);
 
       if (isUniquePDV) {
         switch (currentStep) {
           case 0:
-            state.activeStep = 1; // PLAN (en configuración uniquePDV)
-            console.log('✅ uniquePDV: COMPANY -> PLAN (step 0 -> 1)');
+            state.activeStep = 1;
             break;
-          case 1: // PLAN (en configuración uniquePDV)
-            state.activeStep = 2; // SUMMARY
-            console.log('✅ uniquePDV: PLAN -> SUMMARY (step 1 -> 2)');
+          case 1:
+            state.activeStep = 2;
             break;
           default:
-            console.log('⚠️ uniquePDV: No navigation rule for step', currentStep);
             break;
         }
       } else {
-        // Para empresas normales: 0=COMPANY, 1=PDV, 2=PLAN, 3=SUMMARY
         switch (currentStep) {
           case StepType.COMPANY:
             state.activeStep = StepType.PDV;
-            console.log('✅ normal: COMPANY -> PDV (step 0 -> 1)');
             break;
           case StepType.PDV:
             state.activeStep = StepType.PLAN;
-            console.log('✅ normal: PDV -> PLAN (step 1 -> 2)');
             break;
           case StepType.PLAN:
             state.activeStep = StepType.SUMMARY;
-            console.log('✅ normal: PLAN -> SUMMARY (step 2 -> 3)');
             break;
           default:
-            console.log('⚠️ normal: No navigation rule for step', currentStep);
             break;
         }
       }
@@ -294,19 +276,17 @@ const stepByStepSlice = createSlice({
       console.log('🔄 goToPreviousStep called from step:', currentStep, 'isUniquePDV:', isUniquePDV);
 
       if (isUniquePDV) {
-        // Para empresas uniquePDV: 0=COMPANY, 1=PLAN, 2=SUMMARY
         switch (currentStep) {
-          case 1: // PLAN (en configuración uniquePDV)
-            state.activeStep = 0; // COMPANY
+          case 1:
+            state.activeStep = 0;
             break;
-          case 2: // SUMMARY
-            state.activeStep = 1; // PLAN (en configuración uniquePDV)
+          case 2:
+            state.activeStep = 1;
             break;
           default:
             break;
         }
       } else {
-        // Para empresas normales: 0=COMPANY, 1=PDV, 2=PLAN, 3=SUMMARY
         switch (currentStep) {
           case StepType.PDV:
             state.activeStep = StepType.COMPANY;
@@ -325,11 +305,10 @@ const stepByStepSlice = createSlice({
     },
 
     // ========================================
-    // 🎯 ONBOARDING COMPLETION
+    // ONBOARDING COMPLETION
     // ========================================
 
     completeOnboarding: (state) => {
-      // Marcar todos los pasos como completados
       state.completedSteps = [StepType.COMPANY, StepType.PDV, StepType.PLAN, StepType.SUMMARY];
       state.activeStep = StepType.SUMMARY;
       saveToLocalStorage(state);
@@ -338,7 +317,7 @@ const stepByStepSlice = createSlice({
 });
 
 // ========================================
-// 📤 EXPORTS
+// EXPORTS
 // ========================================
 
 export const {
@@ -377,7 +356,7 @@ export const {
 export default stepByStepSlice.reducer;
 
 // ========================================
-// 🔍 SELECTORS
+// SELECTORS
 // ========================================
 
 export const selectActiveStep = (state: { stepByStep: StepByStepState }) => state.stepByStep.activeStep;
@@ -396,41 +375,3 @@ export const selectErrors = (state: { stepByStep: StepByStepState }) => state.st
 
 export const selectIsUniquePDV = (state: { stepByStep: StepByStepState }) =>
   state.stepByStep.companyResponse?.uniquePDV;
-
-// ========================================
-// 🧮 COMPUTED SELECTORS
-// ========================================
-
-export const selectCanGoNext = (state: { stepByStep: StepByStepState }) => {
-  const { activeStep, companyResponse, pdvResponse, subscriptionResponse } = state.stepByStep;
-
-  switch (activeStep) {
-    case StepType.COMPANY:
-      return !!companyResponse;
-    case StepType.PDV:
-      return !!pdvResponse || companyResponse?.uniquePDV;
-    case StepType.PLAN:
-      return !!subscriptionResponse;
-    case StepType.SUMMARY:
-      return false;
-    default:
-      return false;
-  }
-};
-
-export const selectCanGoPrevious = (state: { stepByStep: StepByStepState }) => {
-  const { activeStep } = state.stepByStep;
-  return activeStep > StepType.COMPANY;
-};
-
-export const selectStepProgress = (state: { stepByStep: StepByStepState }) => {
-  const { completedSteps, companyResponse } = state.stepByStep;
-  const totalSteps = companyResponse?.uniquePDV ? 3 : 4; // Skip PDV if uniquePDV
-  const completed = completedSteps.length;
-
-  return {
-    completed,
-    total: totalSteps,
-    percentage: Math.round((completed / totalSteps) * 100)
-  };
-};

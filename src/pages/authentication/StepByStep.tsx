@@ -16,10 +16,10 @@ import {
 import { useNavigate } from 'react-router';
 import { useSnackbar } from 'notistack';
 import { useAuthContext } from 'src/auth/hooks';
-import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyForm';
-import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
-import { PlanSelectionForm } from 'src/pages/authentication/company/PlanSelectionForm';
-import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
+import RegisterCompanyForm from 'src/pages/authentication/steps/RegisterCompanyForm';
+import RegisterPDVForm from 'src/pages/authentication/steps/RegisterPDVForm';
+import { PlanSelectionForm } from 'src/pages/authentication/steps/PlanSelectionForm';
+import RegisterSummary from 'src/pages/authentication/steps/RegisterSummary';
 import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { paths } from 'src/routes/paths';
 import { StepType } from 'src/interfaces/stepByStep';
@@ -107,15 +107,10 @@ export default function StepByStep() {
     const hasCompleteSubscriptionData = !!(subscriptionResponse || (currentSubscription && currentSubscription.id));
     const shouldGoToSummary = isUniquePDV && hasCompleteSubscriptionData && completedSteps.includes(StepType.PLAN);
 
-    // Resetear el flag de navegación manual cuando se complete nueva información importante
     if (shouldGoToSummary && lastUserAction.current === 'manual-back' && activeStep === StepType.PLAN) {
       lastUserAction.current = null;
     }
 
-    // Solo hacer navegación automática si:
-    // 1. Debemos ir al summary
-    // 2. No estamos ya en el summary
-    // 3. La última acción del usuario no fue navegar hacia atrás
     if (shouldGoToSummary && activeStep !== 2 && lastUserAction.current !== 'manual-back') {
       lastUserAction.current = 'auto';
       dispatch(setStep(2));

@@ -57,6 +57,7 @@ import {
 } from 'src/redux/services/salesInvoicesApi';
 //
 import { useAuthContext } from 'src/auth/hooks';
+import Scrollbar from 'src/components/scrollbar';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -914,7 +915,7 @@ export default function InvoiceListView() {
               }
             />
 
-            <Box sx={{ overflow: 'auto' }}>
+            <Scrollbar>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
                 <TableHeadCustom
                   order={table.order}
@@ -961,7 +962,7 @@ export default function InvoiceListView() {
                   <TableNoData notFound={notFound} />
                 </TableBody>
               </Table>
-            </Box>
+            </Scrollbar>
           </TableContainer>
 
           <TablePaginationCustom

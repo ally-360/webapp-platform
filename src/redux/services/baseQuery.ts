@@ -42,8 +42,6 @@ export const baseQueryWithReauth = async (args: any, api: any, extraOptions: any
   if (result.error && result.error.status === 401) {
     console.warn('🔒 401 Unauthorized - Token expired or invalid');
 
-    // api.dispatch(clearCredentials());
-
     localStorage.removeItem('accessToken');
 
     // se está ejecutando asi no tenga token y muestra esto (revisar para algunos casos)

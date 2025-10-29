@@ -215,8 +215,6 @@ export default function RegisterPDVForm() {
 
       dispatch(goToNextStep());
     } catch (error: any) {
-      console.error('❌ PDV error:', error);
-
       let errorMessage = isEditing ? 'Error actualizando el punto de venta' : 'Error creando el punto de venta';
 
       if (error?.data?.detail && Array.isArray(error.data.detail)) {

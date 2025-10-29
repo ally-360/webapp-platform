@@ -29,7 +29,6 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   TableNoData,
-  TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
   TablePaginationCustom
@@ -37,6 +36,7 @@ import {
 //
 import { useGetProductsQuery, useDeleteProductMutation } from 'src/redux/services/productsApi';
 import { useAuthContext } from 'src/auth/hooks';
+import Scrollbar from 'src/components/scrollbar';
 import ProductTableRow from '../product-table-row';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
@@ -137,22 +137,8 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
   const totalProducts = productsData?.total || 0;
   const productsEmpty = !productsLoading && tableData.length === 0;
 
-  // Los datos ya vienen filtrados y paginados del servidor
   const dataFiltered = tableData;
   const dataInPage = tableData;
-
-  // Debug para verificar paginación
-  console.log('🔍 ProductListView Pagination:', {
-    tablePage: table.page,
-    apiPage: table.page + 1,
-    rowsPerPage: table.rowsPerPage,
-    totalProducts,
-    productsCount: tableData.length,
-    searchTerm: debouncedSearch,
-    categoryId,
-    brandId,
-    timestamp: new Date().toLocaleTimeString()
-  });
 
   const denseHeight = table.dense ? 60 : 80;
 
@@ -251,7 +237,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
               <>
                 <Button
                   component={RouterLink}
-                  href={paths.dashboard.product.new}
+                  href={paths.dashboard.bill.newBill}
                   variant="contained"
                   color="primary"
                   style={{ marginRight: 10 }}
@@ -316,7 +302,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                   </Tooltip>
                 }
               />
-              <div style={{ overflow: 'auto' }}>
+              <Scrollbar>
                 <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                   <TableHeadCustom
                     order={table.order}
@@ -355,7 +341,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                     <TableNoData notFound={notFound} text="No se encontraron productos" />
                   </TableBody>
                 </Table>
-              </div>
+              </Scrollbar>
             </TableContainer>{' '}
             <TablePaginationCustom
               count={totalProducts}
@@ -401,7 +387,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                 </Tooltip>
               }
             />
-            <div style={{ overflow: 'auto' }}>
+            <Scrollbar>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
                   order={table.order}
@@ -436,13 +422,10 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                         onViewRow={() => handleViewRow(row.id)}
                       />
                     ))}
-
-                  <TableEmptyRows height={denseHeight} emptyRows={Math.max(0, table.rowsPerPage - dataInPage.length)} />
-
-                  <TableNoData notFound={notFound} />
+                  <TableNoData notFound={notFound} text="No hay productos en esta categoría" />
                 </TableBody>
               </Table>
-            </div>
+            </Scrollbar>
           </TableContainer>
 
           <TablePaginationCustom
