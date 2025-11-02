@@ -1,4 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 // Interfaces
 export interface SalesInvoice {
@@ -115,22 +116,7 @@ export interface InvoiceEmailRequest {
 // API
 export const salesInvoicesApi = createApi({
   reducerPath: 'salesInvoicesApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${(import.meta as any).env.VITE_HOST_API}/invoices`,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('accessToken');
-      const companyId = localStorage.getItem('companyId');
-
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      if (companyId) {
-        headers.set('X-Company-ID', companyId);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['SalesInvoice', 'InvoicePayment'],
   endpoints: (builder) => ({
     // Get all sales invoices

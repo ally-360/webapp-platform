@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { HOST_API } from 'src/config-global';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 // Minimal types for Contacts aligned with backend docs
 export type ContactType = 'client' | 'provider';
@@ -72,17 +72,7 @@ export interface ContactFilters {
 
 export const contactsApi = createApi({
   reducerPath: 'contactsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: HOST_API,
-    prepareHeaders: (headers, { getState }) => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Contacts', 'Contact'],
   endpoints: (builder) => ({
     getContacts: builder.query<Contact[], ContactFilters>({
