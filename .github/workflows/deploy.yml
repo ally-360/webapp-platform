@@ -49,12 +49,12 @@ jobs:
       # 7️⃣ Build Docker image
       - name: 🐳 Build Docker image
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+          docker build -t ghcr.io/ally-360/webpage-platform:${{ github.sha }} -t ghcr.io/ally-360/webpage-platform:latest .
 
       # 8️⃣ Push image to GHCR
       - name: 📤 Push Docker image
         run: |
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} --all-tags
+          docker push ghcr.io/ally-360/webpage-platform --all-tags
 
       # 9️⃣ Deploy to VPS
       - name: 🚀 Deploy via SSH
