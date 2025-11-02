@@ -26,7 +26,13 @@ export interface CreateProductRequest {
   brand_id: string;
   category_id: string;
   tax_ids: string[];
-  images: string[];
+  
+  // 🆕 STAGED UPLOADS - Nuevo sistema
+  upload_ids?: string[]; // IDs de StagedUpload confirmados
+  
+  // 🗑️ DEPRECATED - Base64 images (mantener compatibilidad)
+  images?: string[];
+  
   stocks: ProductStock[];
 }
 

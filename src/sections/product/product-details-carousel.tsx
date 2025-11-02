@@ -65,9 +65,7 @@ const StyledThumbnailsContainer = styled('div')(({ length, theme }) => ({
 export default function ProductDetailsCarousel({ product }) {
   const theme = useTheme();
 
-  const slides = product.images.map((img) => ({
-    src: img
-  }));
+  const slides = product.images;
 
   const lightbox = useLightBox(slides);
 
@@ -110,9 +108,9 @@ export default function ProductDetailsCarousel({ product }) {
       <Carousel {...carouselLarge.carouselSettings} asNavFor={carouselThumb.nav} ref={carouselLarge.carouselRef}>
         {slides.map((slide) => (
           <Image
-            key={slide.src}
-            alt={slide.src}
-            src={slide.src}
+            key={slide.filename}
+            alt={slide.filename}
+            src={slide.url}
             ratio="1/1"
             onClick={() => lightbox.onOpen(slide.src)}
             sx={{ cursor: 'zoom-in' }}

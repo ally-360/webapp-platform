@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -18,7 +18,7 @@ import { paths } from 'src/routes/paths';
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import { useRouter } from 'src/routes/hook';
-import FormProvider, { RHFUpload, RHFSwitch, RHFTextField, RHFAutocomplete, RHFSelect } from 'src/components/hook-form';
+import FormProvider, { RHFSwitch, RHFTextField, RHFAutocomplete, RHFSelect } from 'src/components/hook-form';
 import {
   Avatar,
   IconButton,
@@ -54,6 +54,7 @@ import { NewProductInterface, PDVproduct, getProductResponse } from 'src/interfa
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { fNumber } from 'src/utils/format-number';
 import ButtonAutocomplete from './common/ButtonAutocomplete';
+import StagedImageUpload from './staged-image-upload';
 
 // ----------------------------------------------------------------------
 
@@ -66,6 +67,9 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const { enqueueSnackbar } = useSnackbar();
 
   const [includeTaxes] = useState(false);
+  
+  // 🆕 Estado para Staged Uploads
+  const [uploadIds, setUploadIds] = useState<string[]>([]);
 
   const defaultValues = useMemo(
     () => ({
@@ -89,11 +93,11 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
         })) || [],
       quantityStock: currentProduct?.quantityStock || 0,
 
-      brand: currentProduct?.brand.id || '',
-      state: currentProduct?.state || true,
-      sellInNegative: currentProduct?.sellInNegative || false,
+      brand: currentProduct?.brand || null,
+      state: currentProduct?.state ?? true,
+      sellInNegative: currentProduct?.sellInNegative ?? false,
 
-      category: (currentProduct as any)?.category?.id || ''
+      category: (currentProduct as any)?.category || null
     }),
     [currentProduct]
   );
@@ -114,9 +118,15 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const values = watch();
   const setValueAny = setValue as any;
 
-  const [selectedOptionBrand, setSelectedOptionBrand] = useState('');
-  const [selectedOptionCategory, setSelectedOptionCategory] = useState(''); // Nuevo estado para almacenar la opción seleccionada}
+  // 🐛 DEBUG: Ver errores de validación
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log('🚨 Errores de validación del formulario:', errors);
+    }
+  }, [errors]);
+
   const [searchQueryBrand, setSearchQueryBrand] = useState('');
+  const [searchQueryCategory, setSearchQueryCategory] = useState('');
 
   // Track when we're creating new items to auto-select them
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
@@ -124,30 +134,11 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const [previousCategoryCount, setPreviousCategoryCount] = useState(0);
   const [previousBrandCount, setPreviousBrandCount] = useState(0);
 
-  // Handlers declared early to satisfy effect deps below
-  const handleCategorySelect = useCallback(
-    (_event: unknown, option: any) => {
-      setSelectedOptionCategory(option);
-      setValueAny('category', option?.id);
-    },
-    [setValueAny]
-  );
-
-  const handleBrandSelect = useCallback(
-    (_event: unknown, option: any) => {
-      setSelectedOptionBrand(option);
-      setValueAny('brand', option?.id);
-    },
-    [setValueAny]
-  );
-
   useEffect(() => {
     if (currentProduct) {
       reset(defaultValues);
-      handleBrandSelect(null, currentProduct.brand);
-      handleCategorySelect(null, currentProduct.category);
     }
-  }, [currentProduct, defaultValues, reset, handleBrandSelect, handleCategorySelect]);
+  }, [currentProduct, defaultValues, reset]);
 
   useEffect(() => {
     if (includeTaxes) {
@@ -174,13 +165,13 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
           // Get the last category (most recently added)
           const lastCategory = result.data[result.data.length - 1];
           if (lastCategory) {
-            handleCategorySelect(null, lastCategory);
+            setValueAny('category', lastCategory);
           }
         }
         setIsCreatingCategory(false);
       });
     }
-  }, [categoryPopupOpen, isCreatingCategory, previousCategoryCount, handleCategorySelect, refetchCategories]);
+  }, [categoryPopupOpen, isCreatingCategory, previousCategoryCount, setValueAny, refetchCategories]);
 
   // Effect to select newly created brand
   useEffect(() => {
@@ -191,13 +182,13 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
           // Get the last brand (most recently added)
           const lastBrand = result.data[result.data.length - 1];
           if (lastBrand) {
-            handleBrandSelect(null, lastBrand);
+            setValueAny('brand', lastBrand);
           }
         }
         setIsCreatingBrand(false);
       });
     }
-  }, [brandPopupOpen, isCreatingBrand, previousBrandCount, handleBrandSelect, refetchBrands]);
+  }, [brandPopupOpen, isCreatingBrand, previousBrandCount, setValueAny, refetchBrands]);
 
   // Prefill selected taxes in edit mode when product has a single taxesOption id
   useEffect(() => {
@@ -218,15 +209,13 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const [assignProductTaxes] = useAssignProductTaxesMutation();
   const [updateProductMinStock] = useUpdateProductMinStockMutation();
 
-  const toBase64 = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-
   const onSubmit = handleSubmit(async (data: NewProductInterface & { tax_ids?: string[] }) => {
+    // ✅ Validación de staged uploads
+    if (!uploadIds || uploadIds.length === 0) {
+      enqueueSnackbar('Debes subir al menos una imagen del producto', { variant: 'error' });
+      return;
+    }
+
     const lastProductsPdvs = data.productsPdvs;
     const priceBaseNum = Number(String(data.priceBase).replace(/[^0-9.-]+/g, '')) || 0;
     const priceSaleNum = Number(String(data.priceSale).replace(/[^0-9.-]+/g, '')) || 0;
@@ -237,20 +226,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
         data.productsPdvs.reduce((acc: number, pdv: PDVproduct) => acc + Number(pdv.quantity || 0), 0) || 0
       );
 
-      // Normalize images to base64 strings
-      const imageValues = (data.images || []) as any[];
-      const imagesBase64: string[] = (
-        await Promise.all(
-          imageValues.map(async (img) => {
-            if (typeof img === 'string') return img;
-            if (img?.preview && img instanceof File) return toBase64(img);
-            if (img?.preview && img?.file instanceof File) return toBase64(img.file);
-            if (img instanceof File) return toBase64(img);
-            return null;
-          })
-        )
-      ).filter(Boolean) as string[];
-
+      // 🆕 NUEVO SISTEMA: Usar upload_ids en lugar de base64 images
       const payload: CreateProductRequest = {
         name: data.name,
         sku: data.sku || undefined,
@@ -261,10 +237,13 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
         priceBase: priceBaseNum,
         state: Boolean(data.state),
         sellInNegative: Boolean(data.sellInNegative),
-        brand_id: String(data.brand),
-        category_id: String(data.category),
+        brand_id: String((data.brand as any)?.id || ''),
+        category_id: String((data.category as any)?.id || ''),
         tax_ids: Array.isArray((data as any).tax_ids) ? ((data as any).tax_ids as string[]) : [],
-        images: imagesBase64,
+        
+        // ✅ STAGED UPLOADS - Enviar IDs de uploads confirmados
+        upload_ids: uploadIds,
+        
         stocks: data.productsPdvs.map((pdv: PDVproduct) => ({
           pdv_id: pdv.id,
           quantity: Number(pdv.quantity),
@@ -306,38 +285,6 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     }
   });
 
-  const handleDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      const current = (values.images || []) as any[];
-      const base64Files = await Promise.all(
-        acceptedFiles.map(
-          (file) =>
-            new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(file);
-            })
-        )
-      );
-      setValueAny('images', [...current, ...base64Files], { shouldValidate: true });
-    },
-    [setValueAny, values.images]
-  );
-
-  const handleRemoveFile = useCallback(
-    (inputFile) => {
-      const filtered = values.images && values.images?.filter((file) => file !== inputFile);
-      setValueAny('images', filtered);
-    },
-    [setValueAny, values.images]
-  );
-
-  const handleRemoveAllFiles = useCallback(() => {
-    setValueAny('images', []);
-  }, [setValueAny]);
-
-  // Removed unused handleChangeIncludeTaxes
-
   // Autocomplete category
 
   const handleClickOpenPopupCategory = () => {
@@ -346,19 +293,19 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     dispatch(switchPopupState(true));
   };
 
-  const [searchQueryCategory, setSearchQueryCategory] = useState('');
-
   const handleInputCategoryChange = (event, value) => {
     setSearchQueryCategory(value);
   };
 
   // Categories & Brands are loaded via RTK Query
 
-  const isOptionEqualToValue = (option, value) => {
-    if (option && value) {
-      return option.id === value.id && option.name === value.name;
-    }
-    return false;
+  const isOptionEqualToValue = (option: any, value: any) => {
+    // Si ambos son null/undefined, son iguales
+    if (!option && !value) return true;
+    // Si solo uno es null/undefined, no son iguales
+    if (!option || !value) return false;
+    // Comparar por ID y nombre
+    return option.id === value.id && option.name === value.name;
   };
 
   const theme = useTheme();
@@ -438,7 +385,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
       return true;
     }
     if (values.productsPdvs.some((item: PDVproduct) => item.id === pdv.id)) {
-      enqueueSnackbar(`El punto de venta ${pdv.name} ya esta seleccionada, asignale una cantidad editandola.`, {
+      enqueueSnackbar(`El punto de venta ${pdv.pdv} ya esta seleccionada, asignale una cantidad editandola.`, {
         variant: 'warning'
       });
       return false;
@@ -446,13 +393,13 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     setValueAny('productsPdvs', [
       ...values.productsPdvs,
       {
-        pdv: pdv.name,
+        pdv: pdv.pdv,
         id: pdv.id,
         quantity,
         minQuantity
       }
     ]);
-    enqueueSnackbar(`El punto de venta ${pdv.name} fue asignado correctamente.`, {
+    enqueueSnackbar(`El punto de venta ${pdv.pdv} fue asignado correctamente.`, {
       variant: 'success'
     });
     dispatch(setPopupAssignInventory(false));
@@ -522,12 +469,10 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
               fullWidth
               name="category"
               label="Categoria"
-              value={selectedOptionCategory}
-              getOptionLabel={(option) => (option.name ? option.name : '')}
+              getOptionLabel={(option) => (option?.name ? option.name : '')}
               options={Array.isArray(categories) ? categories : []}
               inputValue={searchQueryCategory}
               onInputChange={handleInputCategoryChange}
-              onChange={handleCategorySelect}
               isOptionEqualToValue={isOptionEqualToValue}
               loading={isLoadingCategories}
               renderInput={(params) => (
@@ -604,9 +549,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
               label="Marca"
               inputValue={searchQueryBrand}
               onInputChange={handleInputBrandChange}
-              onChange={handleBrandSelect}
               isOptionEqualToValue={isOptionEqualToValue}
-              value={selectedOptionBrand}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -825,16 +768,14 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
                   </Typography>
                 )}
                 <Stack spacing={1.5}>
-                  <RHFUpload
-                    multiple
-                    thumbnail
-                    name="images"
-                    maxSize={3145728}
-                    onDrop={handleDrop}
-                    onRemove={handleRemoveFile}
-                    onRemoveAll={handleRemoveAllFiles}
-                    onUpload={() => console.info('ON UPLOAD')}
-                    helperText="Formatos: JPG, PNG. Max 3MB por imagen."
+                  {/* 🆕 STAGED UPLOADS - Nuevo componente de upload */}
+                  <StagedImageUpload
+                    onUploadComplete={(ids) => setUploadIds(ids)}
+                    initialUploadIds={uploadIds}
+                    maxFiles={5}
+                    maxSizeMB={3}
+                    purpose="product_image"
+                    helperText="Arrastra imágenes aquí o haz clic para seleccionar"
                   />
                 </Stack>
                 <Stack>

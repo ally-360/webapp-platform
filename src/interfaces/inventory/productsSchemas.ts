@@ -2,7 +2,8 @@ import * as Yup from 'yup';
 
 export const NewProductSchema = Yup.object().shape({
   name: Yup.string().required('Nombre del producto es requerido'),
-  images: Yup.array().min(1, 'Las imagenes son requeridas').required('Las imagenes son requeridas'),
+  // 🆕 STAGED UPLOADS: images ahora es opcional, se valida upload_ids en el componente
+  images: Yup.array().optional(),
   description: Yup.string().optional(),
   productsPdvs: Yup.array().min(1, 'El punto de venta es requerido').required('El punto de venta es requerido'),
 
@@ -12,8 +13,12 @@ export const NewProductSchema = Yup.object().shape({
   priceSale: Yup.string().required('El precio debe ser mayor a $0.00'),
   quantityStock: Yup.number(),
 
-  category: Yup.string().required('La categoria es requerida'),
-  brand: Yup.string().required('La marca es requerida'),
+  category: Yup.mixed()
+    .required('La categoria es requerida')
+    .test('is-object', 'La categoria es requerida', (value) => value && typeof value === 'object' && 'id' in value),
+  brand: Yup.mixed()
+    .required('La marca es requerida')
+    .test('is-object', 'La marca es requerida', (value) => value && typeof value === 'object' && 'id' in value),
 
   typeProduct: Yup.number(),
   state: Yup.boolean().required(),

@@ -23,6 +23,7 @@ import { userProfileApi } from './services/userProfileApi';
 import { locationsApi } from './services/locationsApi';
 import { subscriptionsApi } from './services/subscriptionsApi';
 import { posApi } from './services/posApi';
+import { uploadsApi } from './services/uploadsApi';
 
 export const store = configureStore({
   reducer: {
@@ -41,6 +42,7 @@ export const store = configureStore({
     [locationsApi.reducerPath]: locationsApi.reducer,
     [subscriptionsApi.reducerPath]: subscriptionsApi.reducer,
     [posApi.reducerPath]: posApi.reducer,
+    [uploadsApi.reducerPath]: uploadsApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -67,7 +69,8 @@ export const store = configureStore({
       userProfileApi.middleware,
       locationsApi.middleware,
       subscriptionsApi.middleware,
-      posApi.middleware
+      posApi.middleware,
+      uploadsApi.middleware
     )
 });
 

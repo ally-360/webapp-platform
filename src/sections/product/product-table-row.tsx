@@ -91,10 +91,12 @@ export default function ProductTableRow({ row, selected, onSelectRow, onDeleteRo
         <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
           <Avatar
             alt={name}
-            src={Array.isArray(images) && images.length > 0 ? images[0] : undefined}
+            src={Array.isArray(images) && images.length > 0 ? images[0].url : undefined}
             variant="rounded"
             sx={{ width: 64, height: 64, mr: 2 }}
-          />
+          >
+            {name.charAt(0)}
+          </Avatar>
           <ListItemText
             disableTypography
             primary={

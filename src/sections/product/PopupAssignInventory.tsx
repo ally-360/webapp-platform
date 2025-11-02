@@ -32,21 +32,22 @@ export default function PopupAssingInventory({
   const assignInventorySchema = Yup.object().shape({
     pdv: Yup.object({
       pdv: Yup.string().required('Punto de venta requerido'),
-      id: Yup.string().required('Punto de venta requerido'),
-    }).required('Punto de venta requerido'),
+      id: Yup.string().required('Punto de venta requerido')
+    })
+      .required('Punto de venta requerido')
+      .typeError('Punto de venta requerido'),
     quantity: Yup.number().typeError('Cantidad requerida').required('Cantidad requerida'),
     minQuantity: Yup.number().optional(),
-    edit: Yup.boolean(),
+    edit: Yup.boolean()
   });
 
   // Form hooks
 
   const defaultValues = useMemo(
     () => ({
-      pdv: pdvEdit ? { pdv: pdvEdit.pdv, id: pdvEdit.id } : { pdv: '', id: '' },
+      pdv: pdvEdit ? { pdv: pdvEdit.pdv, id: pdvEdit.id } : null,
       quantity: pdvEdit ? pdvEdit.quantity : '',
       minQuantity: pdvEdit ? pdvEdit.minQuantity : '',
-      // eslint-disable-next-line no-unneeded-ternary
       edit: pdvEdit ? true : false,
     }),
     [pdvEdit]
@@ -74,7 +75,7 @@ export default function PopupAssingInventory({
       setValue('minQuantity', pdvEdit.minQuantity);
       setValue('edit', true);
     } else {
-      setValue('pdv', { pdv: '', id: '' });
+      setValue('pdv', null);
       setValue('quantity', '');
       setValue('minQuantity', '');
       setValue('edit', false);
@@ -103,17 +104,19 @@ export default function PopupAssingInventory({
   };
 
   const isOptionEqualToValue = (option: any, value: any) => {
-    if (option && value) {
-      return option.id === value.id || option.name === value.pdv;
-    }
-    return false;
+    // Si ambos son null/undefined, son iguales
+    if (!option && !value) return true;
+    // Si solo uno es null/undefined, no son iguales
+    if (!option || !value) return false;
+    // Comparar por ID
+    return option.id === value.id;
   };
 
   const handleOptionSelect = (_event: unknown, option: any) => {
     if (option) {
       setValue('pdv', { pdv: option.name, id: option.id }, { shouldValidate: true });
     } else {
-      setValue('pdv', { pdv: '', id: '' }, { shouldValidate: true });
+      setValue('pdv', null, { shouldValidate: true });
     }
   };
 
