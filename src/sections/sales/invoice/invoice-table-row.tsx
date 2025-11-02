@@ -74,7 +74,6 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
   const handleSendEmail = useCallback(async () => {
     setIsSending(true);
     try {
-      // Generar el PDF como blob
       const pdfBlob = await pdf(<InvoicePDF invoice={row} currentStatus={status} />).toBlob();
 
       const formData = new FormData();
@@ -83,7 +82,6 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
       formData.append('message', 'Estimado cliente, adjunto encontrará su factura. Gracias por su compra.');
       formData.append('pdf_file', pdfBlob, `factura-${number}.pdf`);
 
-      // Usar fetch directamente para enviar FormData
       const token = localStorage.getItem('accessToken');
       const companyId = localStorage.getItem('companyId');
 

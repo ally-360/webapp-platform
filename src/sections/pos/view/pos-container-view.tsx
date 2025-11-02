@@ -6,7 +6,7 @@ import { Alert } from '@mui/material';
 
 // redux
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { addSaleWindow, openRegister } from 'src/redux/pos/posSlice';
+import { addSaleWindow } from 'src/redux/pos/posSlice';
 
 // hooks
 import {
@@ -14,7 +14,8 @@ import {
   usePosStatePersistence,
   useTabManagement,
   useDrawerPersistence,
-  useDrawerWidth
+  useDrawerWidth,
+  useCashRegister
 } from '../hooks';
 
 // components
@@ -28,18 +29,17 @@ import { RegisterOpenScreen, EmptyWindowsMessage, PosBottomBar } from '../compon
 // ----------------------------------------------------------------------
 
 interface RegisterOpenData {
+  pdv_id: string;
   pdv_name: string;
   opening_amount: number;
-  opening_date: Date;
-  operator_name: string;
+  seller_id?: string;
+  seller_name?: string;
   notes?: string;
 }
 
 const DEFAULT_REGISTER_VALUES = {
-  operator_name: 'Usuario Demo',
   pdv_name: 'PDV Principal - Palmira',
-  opening_amount: 50000,
-  opening_date: new Date()
+  opening_amount: 50000
 } as const;
 
 // ----------------------------------------------------------------------
@@ -74,6 +74,9 @@ export default function PosContainerView() {
   useTabManagement(salesWindows, addingNewSale, setOpenTab, setAddingNewSale);
   useDrawerPersistence(openDrawer);
 
+  // Hook para gestión de caja registradora con backend
+  const { handleOpenRegister } = useCashRegister();
+
   // Valores derivados (memoized para performance)
   const isRegisterOpen = useMemo(() => Boolean(currentRegister?.status === 'open'), [currentRegister?.status]);
 
@@ -107,21 +110,18 @@ export default function PosContainerView() {
   }, [isRegisterOpen, dispatch]);
 
   const handleRegisterOpen = useCallback(
-    (registerData: RegisterOpenData) => {
-      dispatch(
-        openRegister({
-          user_id: 'mock_user_id', // TODO: Obtener del contexto de auth
-          user_name: registerData.operator_name,
-          pdv_id: 'mock_pdv_id', // TODO: Obtener del contexto
-          pdv_name: registerData.pdv_name,
-          opening_amount: registerData.opening_amount,
-          notes: registerData.notes
-        })
-      );
-      setShowRegisterDialog(false);
-      setOpenRegisterDialog(false);
+    async (registerData: RegisterOpenData) => {
+      try {
+        const result = await handleOpenRegister(registerData);
+        if (result.success) {
+          setShowRegisterDialog(false);
+          setOpenRegisterDialog(false);
+        }
+      } catch (err) {
+        console.error('Error al abrir la caja:', err);
+      }
     },
-    [dispatch]
+    [handleOpenRegister]
   );
 
   const handleOpenRegisterDialog = useCallback(() => {

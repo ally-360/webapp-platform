@@ -73,8 +73,12 @@ function UserNewEditFormPopup({ currentUser }) {
       dv: Yup.number().nullable().optional(),
       typePerson: Yup.number().optional()
     }),
-    departamento: Yup.mixed().nullable(),
-    town: Yup.mixed().nullable()
+    departamento: Yup.object()
+      .shape({ id: Yup.string().required(), name: Yup.string().required() })
+      .required('El departamento es requerido'),
+    town: Yup.object()
+      .shape({ id: Yup.string().required(), name: Yup.string().required() })
+      .required('El municipio es requerido')
   });
 
   const defaultValues = useMemo(
@@ -120,6 +124,11 @@ function UserNewEditFormPopup({ currentUser }) {
     try {
       const { departamento: _departamento, town, identity, ...rest } = data;
 
+      if (!_departamento || !town?.id) {
+        enqueueSnackbar('Selecciona un departamento y municipio antes de guardar.', { variant: 'warning' });
+        return;
+      }
+
       const mappedIdentity = {
         ...identity
       };
@@ -132,7 +141,7 @@ function UserNewEditFormPopup({ currentUser }) {
 
       const created = await dispatch<any>(createContact(payload));
 
-      if (!created) {
+      if (!created || (created as any)?.error) {
         const err = store.getState().contacts.contactError as unknown as string;
         const message = typeof err === 'string' ? err : 'No se pudo crear el contacto';
         enqueueSnackbar(message, { variant: 'error' });

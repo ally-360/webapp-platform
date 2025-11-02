@@ -1,0 +1,74 @@
+name: 🚀 Deploy Ally360 Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ally-360/webpage-platform
+      CONTAINER_NAME: allyapp
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: 🧩 Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node environment
+      - name: 🧠 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+
+      # 3️⃣ Install dependencies
+      - name: 📦 Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+
+      # 4️⃣ Lint and Tests
+      - name: ✅ Run ESLint
+        run: yarn lint
+
+      - name: 🧪 Run Tests
+        run: yarn test --run --passWithNoTests
+
+      # 5️⃣ Build frontend
+      - name: 🏗️ Build project
+        run: yarn build
+
+      # 6️⃣ Log in to GitHub Container Registry
+      - name: 🔑 Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      # 7️⃣ Build Docker image
+      - name: 🐳 Build Docker image
+        run: |
+          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+
+      # 8️⃣ Push image to GHCR
+      - name: 📤 Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} --all-tags
+
+      # 9️⃣ Deploy to VPS
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/${{ secrets.VPS_USER }}/ally360/webapp-platform
+            echo "Pulling latest image..."
+            docker pull ghcr.io/ally-360/webpage-platform:${{ github.sha }}
+            echo "Restarting frontend container..."
+            docker compose down
+            docker compose up -d
+            echo "✅ Frontend deployed successfully!"

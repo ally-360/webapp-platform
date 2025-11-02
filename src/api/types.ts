@@ -69,14 +69,30 @@ export interface Product {
   typeProduct: '1' | '2'; // '1' = simple, '2' = configurable
   taxesOption: number;
   sku?: string;
-  priceSale: number; // en centavos
-  priceBase: number; // en centavos
-  companyId: string;
-  categoryId: string;
-  brandId: string;
-  state?: boolean;
-  sellInNegative?: boolean;
-  quantityStock?: number;
+  priceSale: number; // precio de venta
+  priceBase: number; // precio base
+  quantityStock: number; // stock global
+  globalStock: number; // stock total
+  state: boolean; // activo/inactivo
+  sellInNegative: boolean; // permitir venta en negativo
+  category: {
+    id: string;
+    name: string;
+  };
+  brand: {
+    id: string;
+    name: string;
+  };
+  productPdv: Array<{
+    pdv_id: string;
+    pdv_name: string;
+    quantity: number;
+    min_quantity: number;
+  }>;
+  inventoryType?: string | null;
+  companyId?: string;
+  categoryId?: string;
+  brandId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -247,12 +263,34 @@ export interface ApiErrorResponse {
 // 🔍 FILTER & SEARCH TYPES
 // ========================================
 export interface ProductFilters {
+  // Búsqueda y filtros básicos
+  search?: string; // buscar por nombre, SKU o descripción
+  category_id?: string; // filtrar por categoría
+  brand_id?: string; // filtrar por marca
+  is_active?: boolean; // filtrar por estado activo
+
+  // Filtros de rango
+  price_min?: number; // precio mínimo
+  price_max?: number; // precio máximo
+  stock_min?: number; // stock mínimo total
+  stock_max?: number; // stock máximo total
+
+  // Filtros especiales
+  pdv_id?: string; // stock en PDV específico
+  has_low_stock?: boolean; // productos con stock crítico
+
+  // Ordenamiento
+  sort_by?: 'name' | 'price' | 'stock' | 'created_at'; // ordenar por campo
+  sort_order?: 'asc' | 'desc'; // dirección ordenamiento
+
+  // Paginación
+  page?: number; // número de página
+  limit?: number; // elementos por página
+
+  // Legacy support
   companyId?: string;
   brandId?: string;
   categoryId?: string;
-  search?: string;
-  page?: number;
-  limit?: number;
 }
 
 export interface ContactFilters {
@@ -326,10 +364,15 @@ export interface PosSaleHistoryItem {
 }
 
 export interface GetPosSalesHistoryFilters {
+  start_date?: string; // Fecha inicial del filtro (yyyy-MM-dd)
+  end_date?: string; // Fecha final del filtro (yyyy-MM-dd)
+  seller_id?: string; // Filtrar por vendedor específico (UUID)
+  limit?: number; // Número máximo de resultados (default: 100, max: 1000)
+  offset?: number; // Número de registros a saltar (default: 0)
+  // Legacy filters for compatibility
   query?: string;
   pos_type?: 'all' | 'simple' | 'electronic';
   dateFrom?: string; // yyyy-MM-dd
   dateTo?: string; // yyyy-MM-dd
   page?: number;
-  limit?: number;
 }

@@ -29,7 +29,9 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
     pdv: Yup.object({
       pdv: Yup.string().required('Punto de venta requerido'),
       id: Yup.string().required('Punto de venta requerido')
-    }).required('Punto de venta requerido'),
+    })
+      .required('Punto de venta requerido')
+      .typeError('Punto de venta requerido'),
     quantity: Yup.number().typeError('Cantidad requerida').required('Cantidad requerida'),
     minQuantity: Yup.number().optional(),
     edit: Yup.boolean()
@@ -39,11 +41,10 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
 
   const defaultValues = useMemo(
     () => ({
-      pdv: pdvEdit ? { pdv: pdvEdit.pdv, id: pdvEdit.id } : { pdv: '', id: '' },
+      pdv: pdvEdit ? { pdv: pdvEdit.pdv, id: pdvEdit.id } : null,
       quantity: pdvEdit ? pdvEdit.quantity : '',
       minQuantity: pdvEdit ? pdvEdit.minQuantity : '',
-      // eslint-disable-next-line no-unneeded-ternary
-      edit: pdvEdit ? true : false
+      edit: !!pdvEdit
     }),
     [pdvEdit]
   );
@@ -70,7 +71,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
       setValue('minQuantity', pdvEdit.minQuantity);
       setValue('edit', true);
     } else {
-      setValue('pdv', { pdv: '', id: '' });
+      setValue('pdv', null);
       setValue('quantity', '');
       setValue('minQuantity', '');
       setValue('edit', false);
@@ -79,12 +80,10 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
 
   const onSubmit = async (formValues: any) => {
     try {
-      console.log('send values', formValues);
       const resp = handleAssignInventory(formValues.pdv, formValues.quantity, formValues.minQuantity, formValues.edit);
       if (resp) {
         reset();
       }
-      console.log(resp);
     } catch (error) {
       console.error(error);
     }
@@ -96,17 +95,19 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
   };
 
   const isOptionEqualToValue = (option: any, value: any) => {
-    if (option && value) {
-      return option.id === value.id || option.name === value.pdv;
-    }
-    return false;
+    // Si ambos son null/undefined, son iguales
+    if (!option && !value) return true;
+    // Si solo uno es null/undefined, no son iguales
+    if (!option || !value) return false;
+    // Comparar por ID
+    return option.id === value.id;
   };
 
   const handleOptionSelect = (_event: unknown, option: any) => {
     if (option) {
       setValue('pdv', { pdv: option.name, id: option.id }, { shouldValidate: true });
     } else {
-      setValue('pdv', { pdv: '', id: '' }, { shouldValidate: true });
+      setValue('pdv', null, { shouldValidate: true });
     }
   };
 
@@ -116,14 +117,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
 
   const { popupAssignInventory } = useAppSelector((state) => state.products);
 
-  useEffect(() => {
-    console.log(pdvs);
-  }, [pdvs]);
   const [scroll] = React.useState<'paper' | 'body'>('paper');
-
-  useEffect(() => {
-    console.log(values);
-  }, [values]);
 
   return (
     <Stack>
@@ -145,7 +139,15 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
           </DialogTitle>
           <Button
             color="primary"
-            sx={{ position: 'absolute', right: 8, height: 50, top: 8, borderRadius: '100%', width: 50, minWidth: 50 }}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              height: 50,
+              top: 8,
+              borderRadius: '100%',
+              width: 50,
+              minWidth: 50
+            }}
             onClick={() => dispatch(setPopupAssignInventory(false))}
           >
             <Icon width={24} height={24} icon="ion:close" />

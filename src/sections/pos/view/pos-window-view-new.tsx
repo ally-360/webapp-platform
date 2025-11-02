@@ -5,9 +5,9 @@ import { Box, Card, Divider, Grid } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 // redux & utils
-import { useAppSelector } from 'src/hooks/store';
+import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { type SaleWindow } from 'src/redux/pos/posSlice';
-import { mockProducts, mockCustomers, defaultCustomer } from 'src/redux/pos/mockData';
+import { openPopup } from 'src/redux/inventory/contactsSlice';
 
 // hooks
 import {
@@ -15,7 +15,9 @@ import {
   useCustomerSelection,
   useProductHandlers,
   usePaymentHandlers,
-  useSaleCompletion
+  useSaleCompletion,
+  usePosProducts,
+  usePosCustomers
 } from '../hooks';
 
 // components
@@ -39,9 +41,44 @@ interface Props {
 
 export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props) {
   const theme = useTheme();
-  const { availablePaymentMethods } = useAppSelector((state) => state.pos);
+  const dispatch = useAppDispatch();
+  const { availablePaymentMethods, currentRegister } = useAppSelector((state) => state.pos);
   const { computeContentWidth, isDrawerPersistent, drawerWidth } = useDrawerWidth();
   const [productsLoading, setProductsLoading] = useState(true);
+
+  // Hook para productos reales desde la API, filtrados por PDV actual
+  // Usar filtros iniciales para optimizar la carga
+  const {
+    products,
+    isLoading: isLoadingProducts,
+    searchProducts,
+    filterByCategory,
+    filterByBrand,
+    updateFilters,
+    totalProducts,
+    currentPage,
+    totalPages,
+    hasMore,
+    searchTerm,
+    isSearchValid,
+    minSearchLength
+  } = usePosProducts(
+    {
+      limit: 50, // Cargar 50 productos inicialmente
+      is_active: true // Solo productos activos
+    },
+    currentRegister?.pdv_id
+  );
+
+  // Hook para clientes reales desde la API con búsqueda inteligente
+  const {
+    customers,
+    searchCustomers,
+    isLoading: isLoadingCustomers,
+    searchTerm: customerSearchTerm,
+    minSearchLength: customerMinSearchLength,
+    isWritingButNotReady: isCustomerWritingButNotReady
+  } = usePosCustomers();
 
   // Hooks personalizados
   const { selectedCustomer, handleCustomerChange } = useCustomerSelection(sale);
@@ -75,6 +112,46 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
     return () => clearTimeout(timer);
   }, []);
 
+  // Enhanced product handlers with API integration
+  const handleProductSearch = (newSearchTerm: string) => {
+    searchProducts(newSearchTerm);
+  };
+
+  const handleCategoryFilter = (categoryId: string) => {
+    filterByCategory(categoryId);
+  };
+
+  const handleBrandFilter = (brandId: string) => {
+    filterByBrand(brandId);
+  };
+
+  const handleBarcodeDetected = (barcode: string) => {
+    // Find product by barcode/sku
+    const foundProduct = products.find(
+      (product) => product.sku === barcode || product.barCode === barcode || product.id?.toString() === barcode
+    );
+
+    if (foundProduct) {
+      handleAddProduct(foundProduct);
+      console.log('Producto encontrado y agregado:', foundProduct.name);
+    } else {
+      // If not found in current results, search by barcode
+      searchProducts(barcode);
+      console.log('Buscando producto con código:', barcode);
+    }
+  };
+
+  const handleLoadMoreProducts = () => {
+    if (hasMore && !isLoadingProducts) {
+      updateFilters({ page: currentPage + 1 });
+    }
+  };
+
+  const handleCreateCustomer = () => {
+    // Abrir modal global para crear cliente
+    dispatch(openPopup());
+  };
+
   return (
     <>
       <Grid
@@ -88,8 +165,24 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
           })
         }}
       >
-        {/* Product Grid */}
-        <PosProductGrid products={mockProducts} onAddProduct={handleAddProduct} loading={productsLoading} />
+        {/* Enhanced Product Grid with API integration */}
+        <PosProductGrid
+          products={products}
+          onAddProduct={handleAddProduct}
+          loading={isLoadingProducts || productsLoading}
+          onSearch={handleProductSearch}
+          onCategoryFilter={handleCategoryFilter}
+          onBrandFilter={handleBrandFilter}
+          onBarcodeDetected={handleBarcodeDetected}
+          onLoadMore={handleLoadMoreProducts}
+          hasMore={hasMore}
+          totalProducts={totalProducts}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          searchTerm={searchTerm}
+          isSearchValid={isSearchValid}
+          minSearchLength={minSearchLength}
+        />
       </Grid>
 
       {/* Cart Icon positioned relative to drawer width */}
@@ -104,18 +197,21 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
         <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <PosWindowHeader sale={sale} onClose={hiddenDrawer} />
 
-          {/* Scrollable Content Area */}
           <Box sx={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-            {/* Customer Selection */}
             <PosCustomerSelector
               selectedCustomer={selectedCustomer}
-              customers={[defaultCustomer, ...mockCustomers]}
+              customers={customers}
               onCustomerChange={handleCustomerChange}
+              onSearchCustomers={searchCustomers}
+              onCreateCustomer={handleCreateCustomer}
+              isLoading={isLoadingCustomers}
+              searchTerm={customerSearchTerm}
+              minSearchLength={customerMinSearchLength}
+              isWritingButNotReady={isCustomerWritingButNotReady}
             />
 
             <Divider />
 
-            {/* Products List - This area can scroll */}
             <Box sx={{ flex: 1, overflow: 'auto' }}>
               <PosProductList
                 products={sale.products}
@@ -126,7 +222,6 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
 
             <Divider />
 
-            {/* Payments - Fixed height section */}
             <PosPaymentsList
               payments={sale.payments}
               remainingAmount={remainingAmount}
@@ -136,7 +231,6 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
             />
           </Box>
 
-          {/* Fixed Bottom Section - Totals and Actions */}
           <Box
             sx={{
               mt: 'auto',
@@ -144,12 +238,10 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
               bgcolor: 'background.paper'
             }}
           >
-            {/* Totals */}
             <PosSaleTotals sale={sale} />
 
             <Divider />
 
-            {/* Actions */}
             <PosSaleActions canComplete={canComplete} onCompleteSale={handleInitiateCompleteSale} />
           </Box>
         </Card>

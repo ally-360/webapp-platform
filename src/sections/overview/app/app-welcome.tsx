@@ -69,9 +69,9 @@ export default function AppWelcome({ title, description, action, img, ...other }
         {description && (
           <Typography
             variant="body2"
+            color="primary.contrastText"
             sx={{
               opacity: 0.8,
-              maxWidth: { xs: '100%', sm: 300, md: 360 },
               mb: { xs: 1.5, sm: 2, md: 3, xl: 5 },
               fontSize: {
                 xs: '0.7rem',

@@ -9,8 +9,13 @@ import { useSnackbar } from 'src/components/snackbar';
 
 export default function BusinessSwitcher() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { company, selectCompany, changingCompany } = useAuthContext();
-  const { data: userCompanies } = useGetMyCompaniesQuery();
+  const { company, selectCompany, changingCompany, isFirstLogin } = useAuthContext();
+  const { data: userCompanies } = useGetMyCompaniesQuery(undefined, {
+    skip: isFirstLogin === true,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMountOrArgChange: false
+  });
   const { enqueueSnackbar } = useSnackbar();
 
   const open = Boolean(anchorEl);

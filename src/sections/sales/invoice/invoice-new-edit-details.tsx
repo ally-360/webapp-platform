@@ -23,7 +23,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getAllProducts } from 'src/redux/inventory/productsSlice';
 import { enqueueSnackbar } from 'notistack';
 import { IconButton, Tooltip } from '@mui/material';
-import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
+import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
 
 // ----------------------------------------------------------------------
 
@@ -45,9 +45,11 @@ export default function InvoiceNewEditDetails() {
 
   const dispatch = useDispatch();
 
+  // Fetch PDVs using RTK Query
+  useGetPDVsQuery();
+
   useEffect(() => {
     dispatch(getAllProducts());
-    dispatch(getAllPDVS());
   }, [dispatch]);
 
   const { products } = useSelector((state) => state.products);
@@ -238,7 +240,8 @@ export default function InvoiceNewEditDetails() {
     console.log(values);
   }, [values]);
 
-  const { pdvs } = useSelector((state) => state.pdvs);
+  // Usar RTK Query para obtener PDVs
+  const { data: pdvs = [] } = useGetPDVsQuery();
   const PDVSoptions = [
     { id: 0, name: 'Punto bill De Venta para cada producto' },
     ...pdvs.map((pdv) => ({ id: pdv.id, name: pdv.name }))

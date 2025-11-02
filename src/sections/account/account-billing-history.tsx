@@ -19,18 +19,18 @@ import Iconify from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 export default function AccountBillingHistory({ invoices }) {
-  const showMore = useBoolean();
+  const showMore = useBoolean(false);
 
   return (
     <Card>
-      <CardHeader title="Invoice History" />
+      <CardHeader title="Historial de Facturas" />
 
       <Stack spacing={1.5} sx={{ px: 3, pt: 3 }}>
         {(showMore.value ? invoices : invoices.slice(0, 8)).map((invoice) => (
           <Stack key={invoice.id} direction="row" alignItems="center">
             <ListItemText
               primary={invoice.invoiceNumber}
-              secondary={fDate(invoice.createdAt)}
+              secondary={fDate(invoice.createdAt, 'dd/MM/yyyy')}
               primaryTypographyProps={{
                 typography: 'body2'
               }}
@@ -62,7 +62,7 @@ export default function AccountBillingHistory({ invoices }) {
           startIcon={<Iconify icon={showMore.value ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'} />}
           onClick={showMore.onToggle}
         >
-          {showMore.value ? `Show Less` : `Show More`}
+          {showMore.value ? 'Mostrar Menos' : 'Mostrar Más'}
         </Button>
       </Stack>
     </Card>

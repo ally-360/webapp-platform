@@ -24,25 +24,66 @@ import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
 import { RegisterSchema } from 'src/interfaces/auth/yupSchemas';
 // ----------------------------------------------------------------------
 
+/**
+ * Mapea mensajes de error del backend a mensajes amigables para el usuario
+ */
+const getErrorMessage = (backendMessage: string, fieldName: string): string => {
+  if (fieldName.includes('phone') || fieldName.includes('Phone')) {
+    if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
+      return 'Usa un número correcto. Formato válido: +573XXXXXXXXX (móvil) o +571XXXXXXX (fijo)';
+    }
+  }
+
+  if (fieldName.includes('dni')) {
+    if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
+      return 'Ingresa una cédula válida (entre 6 y 10 dígitos)';
+    }
+  }
+
+  if (fieldName.includes('email')) {
+    if (backendMessage.toLowerCase().includes('inválido') || backendMessage.toLowerCase().includes('invalid')) {
+      return 'Ingresa un correo válido con formato usuario@dominio.com';
+    }
+    if (backendMessage.toLowerCase().includes('exists') || backendMessage.toLowerCase().includes('existe')) {
+      return 'Este correo ya está registrado. Usa otro correo o inicia sesión';
+    }
+  }
+
+  if (fieldName.includes('name')) {
+    if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
+      return 'El nombre debe tener al menos 2 caracteres';
+    }
+    if (backendMessage.toLowerCase().includes('long') || backendMessage.toLowerCase().includes('largo')) {
+      return 'El nombre debe tener menos de 50 caracteres';
+    }
+  }
+
+  if (fieldName.includes('password')) {
+    if (backendMessage.toLowerCase().includes('short') || backendMessage.toLowerCase().includes('corto')) {
+      return 'La contraseña debe tener al menos 8 caracteres';
+    }
+    if (backendMessage.toLowerCase().includes('weak') || backendMessage.toLowerCase().includes('débil')) {
+      return 'La contraseña debe contener al menos una letra y un número';
+    }
+  }
+
+  return backendMessage;
+};
+
 export default function JwtRegisterView() {
   const { register } = useAuthContext();
-
   const router = useRouter();
-
-  const [errorMsg, setErrorMsg] = useState('');
-
-  const password = useBoolean(false); // Pass a default value of false to useBoolean
+  const [errorMsg] = useState('');
+  const password = useBoolean(false);
 
   const defaultValues = {
     password: '',
     email: '',
     profile: {
-      personalPhoneNumber: '',
+      phone_number: '+57',
       dni: '',
-      name: '',
-      lastname: '',
-      // agregar un avatar generico de internet
-      photo: 'https://i.pravatar.cc/300'
+      first_name: '',
+      last_name: ''
     }
   };
 
@@ -54,24 +95,55 @@ export default function JwtRegisterView() {
 
   const {
     handleSubmit,
+    setError,
     formState: { isSubmitting }
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       await register(data);
-      // Después del registro exitoso, redirigir al step-by-step para crear empresa y PDV
-      router.push(paths.stepByStep.root);
-      enqueueSnackbar('Registro del usuario completado. Ahora crea tu empresa', {
+      enqueueSnackbar('Registro completado. Revisa tu email para verificar tu cuenta.', {
         variant: 'success'
       });
+
+      router.push(paths.auth.jwt.login);
     } catch (error: any) {
-      console.error(error);
-      enqueueSnackbar(`Error al registrar el usuario ${error.message}`, {
-        variant: 'error'
-      });
-      // reset();
-      setErrorMsg(typeof error === 'string' ? error : error.message);
+      console.error('Registration error:', error);
+
+      if (error?.data?.detail && Array.isArray(error.data.detail)) {
+        let hasFieldErrors = false;
+
+        error.data.detail.forEach((validationError: any) => {
+          const { loc, msg } = validationError;
+
+          if (loc && Array.isArray(loc) && loc.length >= 2) {
+            const fieldPath = loc.slice(1).join('.');
+
+            setError(fieldPath as any, {
+              type: 'manual',
+              message: getErrorMessage(msg, fieldPath)
+            });
+            hasFieldErrors = true;
+          }
+        });
+
+        if (!hasFieldErrors) {
+          const firstError = error.data.detail[0];
+          enqueueSnackbar(firstError || 'Error en el registro. Verifica los datos e intenta nuevamente.', {
+            variant: 'error'
+          });
+        }
+      } else {
+        const errorMessage =
+          error?.data?.detail?.[0]?.msg ||
+          error?.message ||
+          error?.data?.detail ||
+          'Error en el registro. Verifica los datos e intenta nuevamente.';
+
+        enqueueSnackbar(errorMessage, {
+          variant: 'error'
+        });
+      }
     }
   });
 
@@ -82,12 +154,7 @@ export default function JwtRegisterView() {
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2"> ¿Ya tienes cuenta? </Typography>
 
-        <Link
-          variant="subtitle2"
-          href={paths.auth.jwt.login}
-          sx={{ cursor: 'pointer' }}
-          onClick={() => router.push(paths.auth.jwt.login)}
-        >
+        <Link variant="subtitle2" sx={{ cursor: 'pointer' }} onClick={() => router.push(paths.auth.jwt.login)}>
           Iniciar sesión
         </Link>
       </Stack>
@@ -114,30 +181,57 @@ export default function JwtRegisterView() {
         {!!errorMsg && <Alert severity="error">{errorMsg}</Alert>}
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <RHFTextField name="profile.name" label="Nombre" autoComplete="given-name" />
-          <RHFTextField name="profile.lastname" label="Apellido" autoComplete="family-name" />
+          <RHFTextField
+            name="profile.first_name"
+            label="Nombre"
+            autoComplete="given-name"
+            placeholder="Ej: Juan Carlos"
+          />
+          <RHFTextField
+            name="profile.last_name"
+            label="Apellido"
+            autoComplete="family-name"
+            placeholder="Ej: García López"
+          />
         </Stack>
 
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <RHFPhoneNumber
-            name="profile.personalPhoneNumber"
+            name="profile.phone_number"
             label="Teléfono"
             type="string"
             autoComplete="tel"
             defaultCountry="co"
             onlyCountries={['co']}
             countryCodeEditable={false}
+            placeholder="Ej: +573001234567"
+            fullWidth
           />
-          <RHFTextField name="profile.dni" label="Cédula de ciudadania" autoComplete="cc" />
+          <RHFTextField
+            name="profile.dni"
+            label="Cédula de ciudadanía"
+            autoComplete="cc"
+            placeholder="Ej: 1234567890"
+            inputProps={{
+              maxLength: 10,
+              pattern: '[0-9]*'
+            }}
+          />
         </Stack>
 
-        <RHFTextField name="email" label="Correo electrónico" autoComplete="email" />
+        <RHFTextField
+          name="email"
+          label="Correo electrónico"
+          autoComplete="email"
+          placeholder="Ej: juan.garcia@email.com"
+        />
 
         <RHFTextField
           name="password"
           label="Contraseña"
           type={password.value ? 'text' : 'password'}
           autoComplete="new-password"
+          placeholder="Mínimo 8 caracteres con letras y números"
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

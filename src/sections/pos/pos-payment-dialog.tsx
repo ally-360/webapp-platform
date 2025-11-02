@@ -20,7 +20,6 @@ import {
 import { Stack } from '@mui/system';
 import { Icon } from '@iconify/react';
 
-// utils
 import { formatCurrency, getPaymentMethodName, getPaymentMethodIcon } from 'src/redux/pos/posUtils';
 import type { PaymentMethod } from 'src/redux/pos/posSlice';
 
@@ -39,41 +38,121 @@ interface Props {
 
 export default function PosPaymentDialog({ open, onClose, onAddPayment, remainingAmount, paymentMethods }: Props) {
   const [selectedMethod, setSelectedMethod] = useState('');
-  const [amount, setAmount] = useState(remainingAmount.toString());
+  const [amount, setAmount] = useState('');
   const [reference, setReference] = useState('');
   const [error, setError] = useState('');
 
-  // Update amount when remaining amount changes and dialog opens
+  // Función para formatear números al estilo colombiano (30.639,01)
+  const formatCurrencyInput = (num: number): string => {
+    if (Number.isNaN(num) || num === 0) return '';
+    return new Intl.NumberFormat('es-CO', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+      useGrouping: true
+    }).format(num);
+  };
+
+  // Función para parsear el input formateado a número
+  const parseCurrencyInput = (inputValue: string): number => {
+    if (!inputValue || inputValue.trim() === '') return 0;
+
+    // Remover puntos de miles y reemplazar coma decimal por punto
+    const cleaned = inputValue
+      .replace(/\./g, '') // Remover puntos de miles
+      .replace(',', '.'); // Reemplazar coma decimal por punto
+
+    const parsed = parseFloat(cleaned);
+    return Number.isNaN(parsed) ? 0 : Math.round(parsed * 100) / 100;
+  };
+
+  // Función para formatear mientras el usuario escribe
+  const handleAmountChange = (inputValue: string) => {
+    // Si está vacío, limpiar
+    if (inputValue === '') {
+      setAmount('');
+      return;
+    }
+
+    // Permitir solo números, puntos y comas
+    let sanitized = inputValue.replace(/[^\d.,]/g, '');
+
+    if (sanitized === '') {
+      setAmount('');
+      return;
+    }
+
+    // Si está escribiendo coma para decimales, manejar caso especial
+    if (sanitized.endsWith(',')) {
+      // Obtener la parte antes de la coma
+      const beforeComma = sanitized.slice(0, -1);
+      if (beforeComma === '' || beforeComma === '0') {
+        setAmount('0,');
+        return;
+      }
+      // Formatear la parte entera y agregar la coma
+      const numericValue = parseCurrencyInput(beforeComma);
+      if (numericValue > 0) {
+        setAmount(`${formatCurrencyInput(numericValue)},`);
+      } else {
+        setAmount('0,');
+      }
+      return;
+    }
+
+    // Si hay coma y dígitos después, manejar decimales
+    const commaIndex = sanitized.lastIndexOf(',');
+    if (commaIndex !== -1) {
+      const beforeComma = sanitized.substring(0, commaIndex);
+      const afterComma = sanitized.substring(commaIndex + 1);
+
+      // Limitar a 2 decimales
+      if (afterComma.length > 2) {
+        sanitized = `${beforeComma},${afterComma.substring(0, 2)}`;
+      }
+
+      // Formatear la parte entera
+      const integerPart = parseCurrencyInput(beforeComma);
+      const formattedInteger = integerPart > 0 ? formatCurrencyInput(integerPart) : '0';
+      setAmount(`${formattedInteger},${afterComma.substring(0, 2)}`);
+      return;
+    }
+
+    // Caso normal: solo números enteros
+    const numericValue = parseCurrencyInput(sanitized);
+    if (numericValue >= 0) {
+      setAmount(formatCurrencyInput(numericValue));
+    }
+  };
+
   useEffect(() => {
+    console.log('Remaining Amount changed:', remainingAmount);
     if (open) {
-      setAmount(remainingAmount.toString());
+      setAmount(formatCurrencyInput(remainingAmount));
     }
   }, [open, remainingAmount]);
 
   const handleClose = () => {
     setSelectedMethod('');
-    setAmount(remainingAmount.toString());
+    setAmount('');
     setReference('');
     setError('');
     onClose();
   };
 
   const handleAddPayment = () => {
-    const paymentAmount = parseFloat(amount);
+    const paymentAmount = parseCurrencyInput(amount);
 
-    // Validations
     if (!selectedMethod) {
       setError('Debe seleccionar un método de pago');
       return;
     }
 
-    if (Number.isNaN(paymentAmount) || paymentAmount <= 0) {
+    if (paymentAmount <= 0) {
       setError('El monto debe ser mayor a cero');
       return;
     }
 
-    // For non-cash payments, don't allow overpayment
-    if (selectedMethod !== 'cash' && paymentAmount > remainingAmount + 1) {
+    if (selectedMethod !== 'cash' && paymentAmount > remainingAmount + 0.01) {
       setError('El monto no puede ser mayor al pendiente');
       return;
     }
@@ -85,7 +164,6 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
       reference: reference || undefined
     };
 
-    // Check if we need to open cash drawer (cash payment with change)
     const shouldOpenCashDrawer = selectedMethod === 'cash' && paymentAmount > remainingAmount;
 
     onAddPayment(payment, shouldOpenCashDrawer);
@@ -93,12 +171,14 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
   };
 
   const handleSetFullAmount = () => {
-    setAmount(remainingAmount.toString());
+    setAmount(formatCurrencyInput(remainingAmount));
   };
 
-  const paymentAmount = parseFloat(amount) || 0;
+  const paymentAmount = parseCurrencyInput(amount);
   const changeAmount =
-    selectedMethod === 'cash' && paymentAmount > remainingAmount ? paymentAmount - remainingAmount : 0;
+    selectedMethod === 'cash' && paymentAmount > remainingAmount
+      ? Math.round((paymentAmount - remainingAmount) * 100) / 100
+      : 0;
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -126,7 +206,6 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
             </Typography>
           </Box>
 
-          {/* Payment Method Selection */}
           <FormControl fullWidth>
             <InputLabel>Método de Pago</InputLabel>
             <Select value={selectedMethod} label="Método de Pago" onChange={(e) => setSelectedMethod(e.target.value)}>
@@ -143,13 +222,15 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
             </Select>
           </FormControl>
 
-          {/* Amount Input */}
           <TextField
             fullWidth
             label="Monto"
-            type="number"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const { value } = e.target;
+              handleAmountChange(value);
+            }}
+            placeholder="0"
             InputProps={{
               startAdornment: <InputAdornment position="start">$</InputAdornment>,
               endAdornment: (
@@ -161,8 +242,8 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
               )
             }}
             inputProps={{
-              min: 0,
-              step: 100
+              inputMode: 'decimal',
+              pattern: '[0-9]*[.,]?[0-9]*'
             }}
           />
 
@@ -192,7 +273,7 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
           )}
 
           {/* Payment Preview */}
-          {selectedMethod && amount && !Number.isNaN(parseFloat(amount)) && parseFloat(amount) > 0 && (
+          {selectedMethod && amount && paymentAmount > 0 && (
             <Box
               sx={{
                 p: 2,
@@ -203,7 +284,7 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
               }}
             >
               <Typography variant="subtitle2" color="success.dark">
-                Pago: {getPaymentMethodName(selectedMethod)} - {formatCurrency(parseFloat(amount))}
+                Pago: {getPaymentMethodName(selectedMethod)} - {formatCurrency(paymentAmount)}
               </Typography>
               {changeAmount > 0 && (
                 <>
@@ -248,7 +329,7 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
         <Button
           variant="contained"
           onClick={handleAddPayment}
-          disabled={!selectedMethod || !amount || parseFloat(amount) <= 0}
+          disabled={!selectedMethod || !amount || paymentAmount <= 0}
           startIcon={
             selectedMethod === 'cash' && changeAmount > 0 ? (
               <Icon icon="mdi:cash-register" />

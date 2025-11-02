@@ -7,9 +7,9 @@ import { useResponsive } from 'src/hooks/use-responsive';
 // components
 import { useSettingsContext } from 'src/components/settings';
 //
-import React, { useEffect } from 'react';
-import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
-import { useAppDispatch } from 'src/hooks/store';
+import React from 'react';
+import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
+import { useAuthContext } from 'src/auth/hooks';
 import Main from './main';
 import Header from './header';
 import NavMini from './nav-mini';
@@ -21,11 +21,13 @@ import GlobalModals from './global-modals';
 export default function DashboardLayout({ children }) {
   const settings = useSettingsContext();
 
-  const dispatch = useAppDispatch();
+  const { isFirstLogin, authenticated, selectedCompany } = useAuthContext();
 
-  useEffect(() => {
-    dispatch(getAllPDVS());
-  }, [dispatch]);
+  // Fetch PDVs using RTK Query - solo si está autenticado, no es first login y hay company
+  const shouldFetch = authenticated && isFirstLogin === false && selectedCompany;
+  useGetPDVsQuery(undefined, {
+    skip: !shouldFetch
+  });
 
   const lgUp = useResponsive('up', 'lg');
 

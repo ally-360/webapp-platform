@@ -3,7 +3,6 @@ import { alpha } from '@mui/material/styles';
 // ----------------------------------------------------------------------
 
 export default function Paper(theme) {
-  console.log('theme', theme);
   return {
     MuiPaper: {
       defaultProps: {

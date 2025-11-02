@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 // @mui
 import {
   Dialog,
@@ -26,6 +26,11 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { es } from 'date-fns/locale';
 import { Icon } from '@iconify/react';
 
+// redux
+import { useAppSelector } from 'src/hooks/store';
+import { useCreatePOSSaleMutation, useGetSellersQuery } from 'src/redux/services/posApi';
+import { useSnackbar } from 'src/components/snackbar';
+
 // utils
 import { formatCurrency } from 'src/redux/pos/posUtils';
 import type { SaleWindow } from 'src/redux/pos/posSlice';
@@ -45,14 +50,26 @@ interface Props {
   saleWindow: SaleWindow;
 }
 
-const mockSellers = [
-  { id: '1', name: 'Juan Pérez', document: '12345678' },
-  { id: '2', name: 'María García', document: '87654321' },
-  { id: '3', name: 'Carlos Rodríguez', document: '11223344' },
-  { id: '4', name: 'Ana López', document: '44332211' }
-];
-
 export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWindow }: Props) {
+  const { enqueueSnackbar } = useSnackbar();
+
+  // Redux state
+  const { currentRegister } = useAppSelector((state) => state.pos);
+
+  // RTK Query mutations and queries
+  const [createPOSSale, { isLoading: isCreatingSale }] = useCreatePOSSaleMutation();
+  const { data: sellersData } = useGetSellersQuery({
+    is_active: true,
+    size: 100
+  });
+
+  const sellers = useMemo(() => {
+    const sellersList = sellersData?.sellers || [];
+    console.log('📋 Vendedores cargados:', sellersList.length, sellersList);
+    return sellersList;
+  }, [sellersData?.sellers]);
+
+  // Form state
   const [seller, setSeller] = useState('');
   const [sellerName, setSellerName] = useState('');
   const [saleDate, setSaleDate] = useState<Date>(new Date());
@@ -76,13 +93,33 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
       setDiscountType(saleWindow.discount_percentage ? 'percentage' : 'amount');
       setNotes(saleWindow.notes || '');
 
-      // Set default seller if available
-      if (mockSellers.length > 0) {
-        setSeller(mockSellers[0].id);
-        setSellerName(mockSellers[0].name);
+      // Set default seller: priorizar el que abrió la caja
+      if (currentRegister?.user_id && sellers.length > 0) {
+        // Buscar el vendedor que coincide con el user_id de la caja registradora
+        const currentCashierSeller = sellers.find((sellerItem) => sellerItem.id === currentRegister.user_id);
+
+        console.log('🎯 Cajero actual:', currentRegister.user_name, 'ID:', currentRegister.user_id);
+        console.log('🔍 Vendedor encontrado:', currentCashierSeller);
+
+        if (currentCashierSeller) {
+          // Si encontramos al cajero actual en la lista de vendedores, usarlo
+          setSeller(currentCashierSeller.id);
+          setSellerName(currentCashierSeller.name);
+          console.log('✅ Usando cajero actual como vendedor por defecto');
+        } else if (sellers.length > 0) {
+          // Si no se encuentra, usar el primer vendedor disponible
+          setSeller(sellers[0].id);
+          setSellerName(sellers[0].name);
+          console.log('⚠️ Cajero no encontrado en vendedores, usando primer vendedor disponible');
+        }
+      } else if (sellers.length > 0) {
+        // Fallback: usar el primer vendedor si no hay registro de caja
+        setSeller(sellers[0].id);
+        setSellerName(sellers[0].name);
+        console.log('📝 Usando primer vendedor como fallback');
       }
     }
-  }, [open, saleWindow]);
+  }, [open, saleWindow, sellers, currentRegister?.user_id, currentRegister?.user_name]);
 
   // Recalculate totals when tax or discount changes
   useEffect(() => {
@@ -119,30 +156,122 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
   const handleSellerChange = (sellerId: string) => {
     setSeller(sellerId);
-    const selectedSeller = mockSellers.find((s) => s.id === sellerId);
+    const selectedSeller = sellers.find((s) => s.id === sellerId);
     if (selectedSeller) {
       setSellerName(selectedSeller.name);
     }
   };
 
-  const handleConfirm = () => {
-    const finalDiscountAmount =
-      discountType === 'percentage' ? (recalculatedTotals.subtotal * discountValue) / 100 : discountValue;
+  const handleConfirm = async () => {
+    if (!currentRegister?.pdv_id) {
+      enqueueSnackbar('Error: No hay un PDV activo seleccionado', { variant: 'error' });
+      return;
+    }
 
-    onConfirm({
-      seller_id: seller,
-      seller_name: sellerName,
-      sale_date: saleDate,
-      tax_rate: taxRate,
-      discount_percentage: discountType === 'percentage' ? discountValue : undefined,
-      discount_amount: discountType === 'amount' ? discountValue : finalDiscountAmount,
-      notes: notes || undefined
-    });
-    handleClose();
+    try {
+      // Validación: cliente obligatorio (backend requiere UUID)
+      if (!saleWindow.customer?.id) {
+        enqueueSnackbar('Debes seleccionar un cliente antes de confirmar la venta.', { variant: 'warning' });
+        return;
+      }
+      const finalDiscountAmount =
+        discountType === 'percentage' ? (recalculatedTotals.subtotal * discountValue) / 100 : discountValue;
+
+      // Mapear productos al formato requerido por la API
+      const items = saleWindow.products.map((product) => ({
+        product_id: product.id,
+        quantity: product.quantity,
+        unit_price: product.price,
+        tax_rate: product.tax_rate || taxRate,
+        line_discount: 0, // Sin descuento por línea por ahora
+        line_total: product.price * product.quantity
+      }));
+
+      // Mapear pagos al formato requerido por la API
+      const payments = saleWindow.payments.map((payment) => {
+        // Mapear métodos de pago al formato de la API
+        let apiMethod: 'cash' | 'card' | 'transfer' | 'other';
+        switch (payment.method) {
+          case 'cash':
+            apiMethod = 'cash';
+            break;
+          case 'card':
+            apiMethod = 'card';
+            break;
+          case 'transfer':
+            apiMethod = 'transfer';
+            break;
+          case 'nequi':
+          case 'credit':
+          default:
+            apiMethod = 'other';
+            break;
+        }
+
+        return {
+          method: apiMethod,
+          amount: payment.amount,
+          reference: payment.reference,
+          notes: undefined
+        };
+      });
+
+      // Preparar datos para la API
+      const saleData: any = {
+        pdv_id: currentRegister.pdv_id,
+        customer_id: saleWindow.customer.id, // UUID requerido por backend
+        seller_id: seller || '', // Convertir null a string vacío
+        items,
+        payments,
+        notes: notes || undefined,
+        subtotal: recalculatedTotals.subtotal,
+        tax_total: recalculatedTotals.tax_amount,
+        discount_total: finalDiscountAmount,
+        total_amount: recalculatedTotals.total,
+        sale_date: saleDate.toISOString()
+      };
+
+      console.log('🎯 Enviando datos de venta:', saleData);
+
+      // Crear la venta usando RTK Query
+      await createPOSSale(saleData).unwrap();
+
+      enqueueSnackbar('¡Venta creada exitosamente!', { variant: 'success' });
+
+      // Llamar a la función original onConfirm para compatibilidad
+      onConfirm({
+        seller_id: seller,
+        seller_name: sellerName,
+        sale_date: saleDate,
+        tax_rate: taxRate,
+        discount_percentage: discountType === 'percentage' ? discountValue : undefined,
+        discount_amount: finalDiscountAmount,
+        notes: notes || undefined
+      });
+
+      handleClose();
+    } catch (error: any) {
+      console.error('❌ Error al crear venta:', error);
+
+      // Manejo de errores específicos
+      if (error?.data?.detail) {
+        enqueueSnackbar(`Error: ${error.data.detail}`, { variant: 'error' });
+      } else if (error?.data?.message) {
+        enqueueSnackbar(`Error: ${error.data.message}`, { variant: 'error' });
+      } else {
+        enqueueSnackbar('Error al crear la venta. Inténtalo de nuevo.', { variant: 'error' });
+      }
+    }
   };
 
   const totalPaid = saleWindow.payments.reduce((sum, payment) => sum + payment.amount, 0);
-  const canConfirm = sellerName && saleDate && taxRate >= 0 && recalculatedTotals.total > 0;
+  const canConfirm =
+    !!saleWindow.customer?.id &&
+    !!sellerName &&
+    !!saleDate &&
+    taxRate >= 0 &&
+    recalculatedTotals.total > 0 &&
+    !isCreatingSale;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
@@ -178,7 +307,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                 Confirmar Venta
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Ventana #{saleWindow.window_number} • {formatCurrency(recalculatedTotals.total)}
+                Ventana #{saleWindow.id} • {formatCurrency(recalculatedTotals.total)}
               </Typography>
             </Box>
           </Stack>
@@ -194,11 +323,23 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                   <Typography
                     variant="subtitle2"
                     gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
                   >
                     <Icon icon="mdi:account-tie" />
                     Vendedor Responsable
                   </Typography>
+
+                  {/* Información del cajero actual */}
+                  {currentRegister?.user_name && (
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ mb: 2, display: 'block', fontStyle: 'italic' }}
+                    >
+                      Por defecto: {currentRegister.user_name} (quien abrió la caja)
+                    </Typography>
+                  )}
+
                   <FormControl fullWidth>
                     <Select
                       value={seller}
@@ -207,18 +348,40 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                       sx={{ bgcolor: 'background.paper' }}
                     >
                       <MenuItem value="" disabled>
-                        Seleccionar vendedor
+                        {sellers.length === 0 ? 'Cargando vendedores...' : 'Seleccionar vendedor'}
                       </MenuItem>
-                      {mockSellers.map((sellerOption) => (
+                      {sellers.length === 0 && (
+                        <MenuItem value="" disabled>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
+                            <Icon icon="mdi:information" width={20} height={20} />
+                            <Typography variant="body2" color="text.secondary">
+                              No hay vendedores disponibles
+                            </Typography>
+                          </Box>
+                        </MenuItem>
+                      )}
+                      {sellers.map((sellerOption) => (
                         <MenuItem key={sellerOption.id} value={sellerOption.id}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Icon icon="mdi:account-circle" size={20} />
-                            <Box>
-                              <Typography variant="body2" fontWeight="medium">
-                                {sellerOption.name}
-                              </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
+                            <Icon icon="mdi:account-circle" width={20} height={20} />
+                            <Box sx={{ flex: 1 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="body2" fontWeight="medium">
+                                  {sellerOption.name}
+                                </Typography>
+                                {/* Indicador si es el cajero que abrió la caja */}
+                                {currentRegister?.user_id === sellerOption.id && (
+                                  <Chip
+                                    label="Cajero Actual"
+                                    size="small"
+                                    color="primary"
+                                    variant="outlined"
+                                    sx={{ fontSize: '0.65rem', height: 18 }}
+                                  />
+                                )}
+                              </Box>
                               <Typography variant="caption" color="text.secondary">
-                                CC: {sellerOption.document}
+                                CC: {sellerOption.document || 'N/A'}
                               </Typography>
                             </Box>
                           </Box>
@@ -387,7 +550,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                   border: '2px solid',
                   borderColor: 'primary.main',
                   background: (theme) =>
-                    `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.neutral} 100%)`,
+                    `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
                   boxShadow: (theme) => theme.shadows[8]
                 }}
               >
@@ -406,7 +569,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                     gutterBottom
                     sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                   >
-                    <Icon icon="mdi:package-variant" size={16} />
+                    <Icon icon="mdi:package-variant" width={16} height={16} />
                     PRODUCTOS ({saleWindow.products.length})
                   </Typography>
                   <Paper sx={{ maxHeight: 200, overflow: 'auto', p: 1, bgcolor: 'background.paper' }}>
@@ -472,7 +635,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                         color="error.main"
                         sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                       >
-                        <Icon icon="mdi:tag-minus" size={16} />
+                        <Icon icon="mdi:tag-minus" width={16} height={16} />
                         Descuento ({discountType === 'percentage' ? `${discountValue}%` : 'Fijo'}):
                       </Typography>
                       <Typography variant="body2" color="error.main" fontWeight="bold">
@@ -526,7 +689,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                       color="success.main"
                       sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                     >
-                      <Icon icon="mdi:check-circle" size={16} />
+                      <Icon icon="mdi:check-circle" width={16} height={16} />
                       Pagado:
                     </Typography>
                     <Typography variant="body2" color="success.main" fontWeight="bold">
@@ -552,7 +715,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                         color="warning.main"
                         sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                       >
-                        <Icon icon="mdi:clock-outline" size={16} />
+                        <Icon icon="mdi:clock-outline" width={16} height={16} />
                         Pendiente:
                       </Typography>
                       <Typography variant="body2" color="warning.main" fontWeight="bold">
@@ -607,7 +770,9 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
             onClick={handleConfirm}
             disabled={!canConfirm}
             size="large"
-            startIcon={<Icon icon="mdi:check" />}
+            startIcon={
+              isCreatingSale ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:check" />
+            }
             sx={{
               minWidth: 160,
               background: (theme) =>
@@ -618,7 +783,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
               }
             }}
           >
-            Confirmar Venta
+            {isCreatingSale ? 'Procesando...' : 'Confirmar Venta'}
           </Button>
         </DialogActions>
       </Dialog>

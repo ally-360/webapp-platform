@@ -2,7 +2,6 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { HOST_API } from 'src/config-global';
 import type { Product, PaginatedResponse, ProductFilters } from 'src/api/types';
 import type { getProductResponse } from 'src/interfaces/inventory/productsInterface';
-import type { RootState } from '../store';
 
 // ========================================
 // 📦 PRODUCTS API - RTK QUERY
@@ -27,7 +26,13 @@ export interface CreateProductRequest {
   brand_id: string;
   category_id: string;
   tax_ids: string[];
-  images: string[];
+
+  // 🆕 STAGED UPLOADS - Nuevo sistema
+  upload_ids?: string[]; // IDs de StagedUpload confirmados
+
+  // 🗑️ DEPRECATED - Base64 images (mantener compatibilidad)
+  images?: string[];
+
   stocks: ProductStock[];
 }
 
@@ -39,11 +44,10 @@ export const productsApi = createApi({
   reducerPath: 'productsApi',
   baseQuery: fetchBaseQuery({
     baseUrl: HOST_API,
-    prepareHeaders: (headers, { getState }) => {
-      const { auth } = getState() as RootState;
-      console.log('🔑 ProductsAPI prepareHeaders:', { token: auth.token ? 'EXISTS' : 'MISSING' });
-      if (auth.token) {
-        headers.set('Authorization', `Bearer ${auth.token}`);
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
       }
       headers.set('Content-Type', 'application/json');
       return headers;
@@ -62,9 +66,45 @@ export const productsApi = createApi({
       query: (filters = {}) => {
         const searchParams = new URLSearchParams();
 
+        // Búsqueda y filtros básicos
         if (filters.search) searchParams.set('search', filters.search);
-        if (filters.categoryId) searchParams.set('category_id', filters.categoryId);
-        if (filters.brandId) searchParams.set('brand_id', filters.brandId);
+        if (filters.category_id || filters.categoryId) {
+          searchParams.set('category_id', filters.category_id || filters.categoryId || '');
+        }
+        if (filters.brand_id || filters.brandId) {
+          searchParams.set('brand_id', filters.brand_id || filters.brandId || '');
+        }
+        if (typeof filters.is_active === 'boolean') {
+          searchParams.set('is_active', filters.is_active.toString());
+        }
+
+        // Filtros de rango de precios
+        if (filters.price_min !== undefined && filters.price_min > 0) {
+          searchParams.set('price_min', filters.price_min.toString());
+        }
+        if (filters.price_max !== undefined && filters.price_max > 0) {
+          searchParams.set('price_max', filters.price_max.toString());
+        }
+
+        // Filtros de rango de stock
+        if (filters.stock_min !== undefined && filters.stock_min > 0) {
+          searchParams.set('stock_min', filters.stock_min.toString());
+        }
+        if (filters.stock_max !== undefined && filters.stock_max < 1000) {
+          searchParams.set('stock_max', filters.stock_max.toString());
+        }
+
+        // Filtros especiales
+        if (filters.pdv_id) searchParams.set('pdv_id', filters.pdv_id);
+        if (filters.has_low_stock === true) {
+          searchParams.set('has_low_stock', 'true');
+        }
+
+        // Ordenamiento
+        if (filters.sort_by) searchParams.set('sort_by', filters.sort_by);
+        if (filters.sort_order) searchParams.set('sort_order', filters.sort_order);
+
+        // Paginación
         if (filters.page) searchParams.set('page', filters.page.toString());
         if (filters.limit) searchParams.set('limit', filters.limit.toString());
 

@@ -157,7 +157,7 @@ export const _userPlans = [
     name: 'Ally Supreme',
     description: 'Para empresas medianas o en expansión con operaciones complejas',
     features: [
-      'Facturación electrónica ilimitada',
+      'Hasta 1000 facturas electrónicas al mes',
       'Hasta 10 usuarios incluidos (todos los roles)',
       'Hasta 10 bodegas, traslados entre ellas',
       'Terminal POS completo',

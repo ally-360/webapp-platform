@@ -8,6 +8,7 @@ import { posRoutes } from './pos';
 
 // Email verification page
 const EmailVerificationPage = lazy(() => import('src/pages/auth/email-verification'));
+const AcceptInvitationPage = lazy(() => import('src/pages/accept-invitation'));
 
 // ----------------------------------------------------------------------
 
@@ -25,6 +26,12 @@ export default function Router() {
     {
       path: 'verify-email',
       element: <EmailVerificationPage />
+    },
+
+    // Accept invitation route (outside auth guard)
+    {
+      path: 'accept-invitation',
+      element: <AcceptInvitationPage />
     },
 
     // Auth routes

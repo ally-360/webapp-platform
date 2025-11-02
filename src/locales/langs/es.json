@@ -98,6 +98,14 @@
   "demo": {
     "title": "Inglés"
   },
+  "invoice": {
+    "status": {
+      "OPEN": "Abierta",
+      "PAID": "Pagada",
+      "VOID": "Anulada",
+      "DRAFT": "Borrador"
+    }
+  },
   "errorsCode": {
     "1": "Correo o contraseña incorrectos",
     "2": "Tu sesión ha expirado, por favor inicia sesión de nuevo",

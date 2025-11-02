@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../store';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 // ========================================
 // 📋 Types & Interfaces
@@ -47,18 +47,7 @@ export interface CategoryResponse {
 
 export const categoriesApi = createApi({
   reducerPath: 'categoriesApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8000',
-    prepareHeaders: (headers, { getState }) => {
-      const { auth } = getState() as RootState;
-      const { token } = auth;
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Category'],
   endpoints: (builder) => ({
     // ========================================
@@ -94,7 +83,19 @@ export const categoriesApi = createApi({
         method: 'POST',
         body: categoryData
       }),
-      invalidatesTags: ['Category']
+      invalidatesTags: ['Category'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Invalidate catalogApi categories as well
+          dispatch(categoriesApi.util.invalidateTags([{ type: 'Category' as const }]));
+          // Also invalidate catalogApi if it exists in the store
+          const { catalogApi } = await import('./catalogApi');
+          dispatch(catalogApi.util.invalidateTags([{ type: 'Category' as const }]));
+        } catch {
+          // ignore
+        }
+      }
     }),
 
     // ========================================
@@ -103,7 +104,7 @@ export const categoriesApi = createApi({
     updateCategory: builder.mutation<CategoryOutput, { id: string; data: CategoryUpdate }>({
       query: ({ id, data }) => ({
         url: `/categories/${id}`,
-        method: 'PUT',
+        method: 'PATCH',
         body: data
       }),
       invalidatesTags: (result, error, { id }) => [{ type: 'Category', id }, 'Category']

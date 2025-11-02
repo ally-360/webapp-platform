@@ -33,38 +33,48 @@ export default function RHFAutocomplete({
     <Controller
       name={name}
       control={control}
-      render={({ field, fieldState: { error } }) => (
-        <Autocomplete
-          {...field}
-          options={options}
-          onFocus={() => setIsFocused(true)} // Establece isFocused a true cuando se hace focus
-          onBlur={() => setIsFocused(false)} // Establece isFocused a false cuando se pierde el focus
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              '& fieldset': {
-                borderColor: isFocused ? theme.palette.primary.main : '#ced4da' // Usa el color primario del tema cuando se hace focus
+      render={({ field, fieldState: { error } }) => {
+        const { value, onChange, ...restField } = field;
+        // MUI Autocomplete expects `null` when there's no selection (not `{}` or `undefined`)
+        const safeValue = value && Object.keys(value || {}).length > 0 ? value : null;
+
+        return (
+          <Autocomplete
+            {...restField}
+            value={safeValue}
+            onChange={(event, newValue) => {
+              setValue(name, newValue ?? null, { shouldValidate: true });
+              onChange(newValue ?? null);
+            }}
+            options={options}
+            onFocus={() => setIsFocused(true)} // Establece isFocused a true cuando se hace focus
+            onBlur={() => setIsFocused(false)} // Establece isFocused a false cuando se pierde el focus
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: isFocused ? theme.palette.primary.main : '#ced4da' // Usa el color primario del tema cuando se hace focus
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: theme.palette.primary.main
+                }
               },
-              '&.Mui-focused fieldset': {
-                borderColor: theme.palette.primary.main
+              '& label.Mui-focused': {
+                color: `${theme.palette.primary.main}!important` // Cambia el color del label cuando se hace focus
               }
-            },
-            '& label.Mui-focused': {
-              color: `${theme.palette.primary.main}!important` // Cambia el color del label cuando se hace focus
-            }
-          }}
-          onChange={(event, newValue) => setValue(name, newValue, { shouldValidate: true })}
-          renderInput={(params) => (
-            <TextField
-              label={label}
-              placeholder={placeholder}
-              error={!!error}
-              helperText={error ? error?.message : helperText}
-              {...params}
-            />
-          )}
-          {...other}
-        />
-      )}
+            }}
+            renderInput={(params) => (
+              <TextField
+                label={label}
+                placeholder={placeholder}
+                error={!!error}
+                helperText={error ? error?.message : helperText}
+                {...params}
+              />
+            )}
+            {...other}
+          />
+        );
+      }}
     />
   );
 }

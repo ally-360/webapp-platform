@@ -34,7 +34,7 @@ interface Company {
   id: string;
   name: string;
   nit: string;
-  phone_number: string;
+  phone_number: string | null;
   address?: string | null;
   logo?: string | null;
 }
@@ -257,8 +257,13 @@ const CompanyCard = memo(
 export default function SelectBusinessPage() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { selectCompany, changingCompany } = useAuthContext();
-  const { data: userCompanies = [] } = useGetMyCompaniesQuery();
+  const { selectCompany, changingCompany, isFirstLogin } = useAuthContext();
+  const { data: userCompanies = [] } = useGetMyCompaniesQuery(undefined, {
+    skip: isFirstLogin === true,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMountOrArgChange: false
+  });
   const theme = useTheme();
 
   const handleSelect = useCallback(

@@ -233,7 +233,7 @@ export default function InvoiceNewEditDetails() {
   }, [values]);
 
   const PDVSoptions = [
-    { id: 0, name: 'Puntosss De Venta para cada producto' },
+    { id: 0, name: 'Puntos De Venta para cada producto' },
     ...(Array.isArray(pdvs) ? pdvs.map((pdv) => ({ id: pdv.id, name: pdv.name })) : [])
   ];
   useEffect(() => {

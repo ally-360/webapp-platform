@@ -4,8 +4,7 @@ import Box from '@mui/material/Box';
 // components
 //
 import React, { useEffect, useMemo, useState } from 'react';
-import { getAllPDVS } from 'src/redux/inventory/pdvsSlice';
-import { useAppDispatch } from 'src/hooks/store';
+import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
 import GlobalModals from 'src/layouts/dashboard/global-modals';
 import PosTopbar from 'src/sections/pos/components/pos-topbar';
 import { useLocation } from 'react-router-dom';
@@ -18,12 +17,10 @@ interface PosLayoutProps {
 }
 
 export default function PosLayout({ children }: PosLayoutProps) {
-  const dispatch = useAppDispatch();
   const location = useLocation();
 
-  useEffect(() => {
-    dispatch(getAllPDVS());
-  }, [dispatch]);
+  // Fetch PDVs using RTK Query
+  useGetPDVsQuery();
 
   // Drawer settings for main POS view
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);

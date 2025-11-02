@@ -42,11 +42,11 @@ export default function JwtLoginView() {
 
   const returnTo = searchParams.get('returnTo');
 
-  const viewPassword = useBoolean(false); // Pass a default value of false to useBoolean
+  const viewPassword = useBoolean(false);
 
   const defaultValues: AuthCredentials = {
-    email: 'example@gmail.com',
-    password: 'Example123.'
+    email: '',
+    password: ''
   };
 
   const methods = useForm({
@@ -68,7 +68,7 @@ export default function JwtLoginView() {
     } catch (error: unknown) {
       console.error(error);
       reset();
-      setErrorMsg(typeof error === 'string' ? error : (error as Error).message);
+      setErrorMsg(typeof error === 'string' ? error : (error as Error).data.detail);
     }
   });
 

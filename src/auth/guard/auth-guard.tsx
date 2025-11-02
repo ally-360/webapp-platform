@@ -1,60 +1,75 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useCallback, useState } from 'react';
 // routes
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hook';
+import { useRouter, usePathname } from 'src/routes/hook';
 // hooks
 import { useAuthContext } from '../hooks';
 import { useTokenValidation } from '../hooks/use-token-validation';
 
 // ----------------------------------------------------------------------
 
-const loginPaths = {
+/**
+ * Configuración de paths de login por método de autenticación
+ */
+const LOGIN_PATHS = {
   jwt: paths.auth.jwt.login
-};
+} as const;
+
+/**
+ * Configuración del hook de validación de token
+ */
+const TOKEN_VALIDATION_CONFIG = {
+  warningMinutes: 5,
+  autoRefresh: false,
+  autoRedirect: true,
+  checkInterval: 60
+} as const;
 
 // ----------------------------------------------------------------------
 
-export default function AuthGuard({ children }: { children: React.ReactNode }) {
+interface AuthGuardProps {
+  children: React.ReactNode;
+}
+
+/**
+ * AuthGuard - Componente que protege rutas requiriendo autenticación
+ * Funcionalidades:
+ * - Protege rutas de usuarios no autenticados
+ * - Redirige al login preservando la URL destino
+ * - Monitorea la validez del token automáticamente
+ * - Maneja estados de loading elegantemente
+ */
+export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
-  const { authenticated, method, isFirstLogin } = useAuthContext();
+  const pathname = usePathname();
+  const { authenticated, method, isFirstLogin, loading } = useAuthContext();
 
-  // 🔒 Configurar validación automática de token
-  useTokenValidation({
-    warningMinutes: 5,
-    autoRefresh: false,
-    autoRedirect: true,
-    checkInterval: 60
-  });
-
-  console.log('AuthGuard', { authenticated, method, isFirstLogin });
+  useTokenValidation(TOKEN_VALIDATION_CONFIG);
 
   const [checked, setChecked] = useState(false);
 
   const check = useCallback(() => {
+    if (loading) return;
+
     if (!authenticated) {
-      const searchParams = new URLSearchParams({ returnTo: window.location.pathname }).toString();
+      const loginPath = LOGIN_PATHS[method];
+      const onLogin = pathname.startsWith(loginPath);
+      if (onLogin) {
+        return;
+      }
 
-      const loginPath = loginPaths[method];
-
+      const searchParams = new URLSearchParams({ returnTo: pathname }).toString();
       const href = `${loginPath}?${searchParams}`;
-
       router.replace(href);
-    } else {
-      setChecked(true);
+      return;
     }
-  }, [authenticated, method, router]);
+
+    setChecked(true);
+  }, [authenticated, method, router, pathname, loading]);
 
   useEffect(() => {
     check();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (isFirstLogin === true) {
-      router.push(paths.stepByStep.root);
-    }
-  }, [isFirstLogin, router]);
+  }, [check]);
 
   if (!checked) {
     return null;
@@ -62,7 +77,3 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-
-AuthGuard.propTypes = {
-  children: PropTypes.node
-};

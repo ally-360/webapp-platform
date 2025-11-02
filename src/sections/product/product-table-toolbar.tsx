@@ -32,6 +32,7 @@ interface ProductTableToolbarProps {
   stockOptions: any;
   publishOptions: any;
   componentRef: any;
+  onOpenFilters?: VoidFunction;
 }
 
 // PDF Styles and Component outside render to satisfy lint
@@ -82,7 +83,8 @@ export default function ProductTableToolbar({
   //
   stockOptions,
   publishOptions: _publishOptions,
-  componentRef
+  componentRef,
+  onOpenFilters
 }: ProductTableToolbarProps) {
   const popover = usePopover();
   const handleFilterName = useCallback(
@@ -139,7 +141,10 @@ export default function ProductTableToolbar({
           pdvQuantity: pdv.quantity,
           category: product.category?.name
         };
-        XLSX.utils.sheet_add_json(worksheet, [rowData], { skipHeader: true, origin: `A${rowIndex}` });
+        XLSX.utils.sheet_add_json(worksheet, [rowData], {
+          skipHeader: true,
+          origin: `A${rowIndex}`
+        });
         // eslint-disable-next-line no-plusplus
         rowIndex++;
       });
@@ -259,6 +264,18 @@ export default function ProductTableToolbar({
               }}
             />
           </Stack>
+        )}
+
+        {onOpenFilters && !categoryView && (
+          <IconButton
+            color="primary"
+            onClick={onOpenFilters}
+            sx={{
+              bgcolor: 'action.selected'
+            }}
+          >
+            <Iconify icon="solar:filter-bold" />
+          </IconButton>
         )}
 
         <IconButton color="primary" onClick={popover.onOpen}>

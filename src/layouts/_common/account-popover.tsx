@@ -14,20 +14,21 @@ import { useRouter } from 'src/routes/hook';
 // hooks
 // auth
 import { useAuthContext } from 'src/auth/hooks';
+// api
+import { useGetUserAvatarQuery } from 'src/redux/services/userProfileApi';
 // components
 import { varHover } from 'src/components/animate';
 import { useSnackbar } from 'src/components/snackbar';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { t } from 'i18next';
-
 import React from 'react';
-
+import { useLocation } from 'react-router-dom';
 // ----------------------------------------------------------------------
 
 const OPTIONS = [
   {
     label: 'Home',
-    linkTo: '/'
+    linkTo: paths.dashboard.root
   },
   {
     label: 'Mi cuenta',
@@ -43,9 +44,10 @@ const OPTIONS = [
 
 export default function AccountPopover() {
   const router = useRouter();
-
-  const { user } = useAuthContext();
+  const location = useLocation();
+  const { user, company } = useAuthContext();
   const { logout } = useAuthContext();
+  const { data: avatarData } = useGetUserAvatarQuery();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -64,6 +66,8 @@ export default function AccountPopover() {
 
   const handleClickItem = (path) => {
     popover.onClose();
+    const currentPath = location.pathname;
+    if (currentPath === path) return;
     router.push(path);
   };
 
@@ -88,8 +92,8 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={user?.profile?.photo}
-          alt={user?.profile?.name}
+          src={avatarData?.avatar_url}
+          alt={user?.profile?.first_name}
           sx={{
             width: 36,
             height: 36,
@@ -101,11 +105,11 @@ export default function AccountPopover() {
       <CustomPopover open={popover.open} onClose={popover.onClose} sx={{ width: 200, p: 0 }}>
         <Box sx={{ p: 2, pb: 1.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {`${user?.profile?.name} ${user?.profile?.lastname}`}
+            {`${user?.profile?.first_name} ${user?.profile?.last_name}`}
           </Typography>
 
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {user?.company?.name}
+            {company?.name}
           </Typography>
         </Box>
 

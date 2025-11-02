@@ -44,15 +44,11 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
     const token = localStorage.getItem('accessToken');
 
     if (!token) {
-      console.log('🔍 No token found, user should login');
       return;
     }
 
     try {
-      // Verificar si el token está expirado
       if (isTokenExpired(token)) {
-        console.log('🔒 Token expired, logging out');
-
         if (autoRedirect) {
           enqueueSnackbar('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', {
             variant: 'warning',
@@ -65,7 +61,6 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
         return;
       }
 
-      // Verificar si el token expirará pronto
       if (willTokenExpireSoon(token, warningMinutes) && !warningShownRef.current) {
         const timeToExpiry = getTokenTimeToExpiry(token);
         const minutesLeft = timeToExpiry ? Math.ceil(timeToExpiry / 60) : 0;
@@ -91,7 +86,6 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
       // TODO: Implementar auto-refresh si está habilitado
       if (autoRefresh && willTokenExpireSoon(token, 2)) {
         console.log('🔄 Auto-refresh token (not implemented yet)');
-        // Aquí se implementaría la lógica de refresh token
       }
     } catch (error) {
       console.error('❌ Error checking token validity:', error);
@@ -99,17 +93,13 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
   }, [warningMinutes, autoRefresh, autoRedirect, logout, enqueueSnackbar, router]);
 
   const startTokenValidation = useCallback(() => {
-    // Verificar inmediatamente
     checkTokenValidity();
 
-    // Configurar intervalo de verificación
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
 
     intervalRef.current = setInterval(checkTokenValidity, checkInterval * 1000);
-
-    console.log(`🕒 Token validation started (checking every ${checkInterval}s)`);
   }, [checkTokenValidity, checkInterval]);
 
   const stopTokenValidation = useCallback(() => {

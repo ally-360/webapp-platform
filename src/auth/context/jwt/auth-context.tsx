@@ -8,8 +8,9 @@ export const defaultAuthContext: AuthContextType = {
   unauthenticated: true,
   isFirstLogin: false,
   changingCompany: false,
+  selectedCompany: false,
   company: null,
-  pdvCompany: null as any,
+  pdvCompany: null,
 
   method: 'jwt',
 
@@ -25,7 +26,7 @@ export const defaultAuthContext: AuthContextType = {
   selectCompany: async () => {
     throw new Error('selectCompany method not implemented');
   },
-  updateCompany: async () => {
+  updateCompany: async (_id: string, _data: any) => {
     throw new Error('updateCompany method not implemented');
   },
   updatePDV: async () => {

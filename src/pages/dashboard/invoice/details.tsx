@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async';
 // routes
 import { useParams } from 'src/routes/hook';
 // sections
-import { InvoiceDetailsView } from 'src/sections/invoice/view';
+import { InvoiceDetailsView } from 'src/sections/sales/invoice/view';
 
 // ----------------------------------------------------------------------
 

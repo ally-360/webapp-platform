@@ -22,7 +22,9 @@ import {
   StockFilters,
   CreateInvoicePayload,
   ApiSuccessResponse,
-  PaginatedResponse
+  PaginatedResponse,
+  PosSaleHistoryItem,
+  GetPosSalesHistoryFilters
 } from './types';
 
 import { JWTconfig } from '../config-global';
@@ -302,3 +304,61 @@ export const createInvoice = async (
     method: 'POST',
     body: JSON.stringify(payload)
   });
+
+// ========================================
+// 🏪 POS SALES HISTORY FUNCTIONS
+// ========================================
+
+/**
+ * Obtiene el historial de ventas POS con filtros
+ * GET /api/v1/pos/sales/
+ */
+export const getPosSalesHistory = async (
+  filters: GetPosSalesHistoryFilters = {}
+): Promise<ApiSuccessResponse<PosSaleHistoryItem[]>> => {
+  const searchParams = new URLSearchParams();
+
+  if (filters.start_date) searchParams.set('start_date', filters.start_date);
+  if (filters.end_date) searchParams.set('end_date', filters.end_date);
+  if (filters.seller_id) searchParams.set('seller_id', filters.seller_id);
+  if (filters.limit) searchParams.set('limit', filters.limit.toString());
+  if (filters.offset) searchParams.set('offset', filters.offset.toString());
+
+  const response = await apiRequest<PosSaleHistoryItem[]>(`/api/v1/pos/sales/?${searchParams.toString()}`);
+
+  // Transform API response to match expected format
+  if (Array.isArray(response.data)) {
+    // API returns array directly, map to expected format
+    const transformedData: PosSaleHistoryItem[] = response.data.map((sale: any) => {
+      // Determine status based on API response
+      let status: 'paid' | 'cancelled' | 'refunded' = 'paid';
+      if (sale.status === 'cancelled') {
+        status = 'cancelled';
+      } else if (sale.status === 'refunded') {
+        status = 'refunded';
+      }
+
+      return {
+        id: sale.id,
+        invoice_number: sale.number,
+        created_at: sale.issue_date || sale.created_at,
+        customer: sale.customer_name ? { name: sale.customer_name } : null,
+        seller_name: sale.seller_name,
+        products: [], // Will need to be populated from line items if available
+        payments: [], // Will need to be populated from payment records if available
+        subtotal: parseFloat(sale.subtotal || '0'),
+        tax_amount: parseFloat(sale.taxes_total || '0'),
+        total: parseFloat(sale.total_amount || '0'),
+        pos_type: 'simple', // Assume simple POS type for now
+        status
+      };
+    });
+
+    return {
+      success: true,
+      data: transformedData
+    };
+  }
+
+  return response as ApiSuccessResponse<PosSaleHistoryItem[]>;
+};

@@ -1,10 +1,10 @@
-import { AuthCredentials, RegisterUser, GetCompanyResponse, GetPDVResponse, GetUserResponse } from './userInterfaces';
+import { AuthCredentials, RegisterUser, BackendUser, BackendCompany, BackendPDV } from './userInterfaces';
 
 export interface AuthContextType {
   /**
    * Datos del usuario autenticado.
    */
-  user: GetUserResponse | null;
+  user: BackendUser | null;
 
   /**
    * Retorna true si la aplicación está cargando el estado de autenticación.
@@ -32,13 +32,20 @@ export interface AuthContextType {
   changingCompany: boolean;
 
   /**
+   * Retorna true si ya se seleccionó una empresa.
+   */
+  selectedCompany: boolean;
+
+  /**
    * Datos de la empresa a la que pertenece el usuario.
    */
-  company: GetCompanyResponse | null;
+  company: BackendCompany | null;
+
   /**
    * Datos de los puntos de venta de la empresa a la que pertenece el usuario.
    */
-  pdvCompany: GetPDVResponse; // TODO: agregar interfaz de pdvCompany
+  pdvCompany: BackendPDV | null;
+
   method: string;
 
   /**
@@ -61,15 +68,16 @@ export interface AuthContextType {
   /**
    * Selecciona una empresa y actualiza el token JWT.
    * @param companyId ID de la empresa a seleccionar.
+   * @param showLoading Indica si se debe mostrar la pantalla de loading. Por defecto true.
    */
-  selectCompany: (companyId: string) => Promise<any>;
+  selectCompany: (companyId: string, showLoading?: boolean) => Promise<any>;
 
   // TODO: agregar interfaz de todos los de aqui abajo
 
   /**
    * Actualiza los datos de la empresa a la que pertenece el usuario.
    */
-  updateCompany: (data: object) => Promise<void>;
+  updateCompany: (id: string, data: object) => Promise<any>;
 
   // /**
   //  * Actualiza los datos de los puntos de venta de la empresa a la que pertenece el usuario.

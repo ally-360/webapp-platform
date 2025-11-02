@@ -259,21 +259,28 @@ export default function InvetoryCategoriesList() {
                         {viewCategoryById.name}
                       </Typography>
                       <Typography variant="body2" sx={{ mb: 1 }}>
-                        {viewCategoryById.parent && (
+                        {/* TODO: implementar logica en backend y frontend para categorias padre */}
+                        {/* {viewCategoryById.parent && (
                           <>
                             <strong>Categoria Padre: </strong>
                             {viewCategoryById.parent.name}
                           </>
-                        )}
+                        )} */}
                       </Typography>
                       <Typography variant="body2" sx={{ mb: 3 }}>
-                        <strong>Descripción: </strong>
-                        {viewCategoryById.description || 'Sin descripción'}
+                        {viewCategoryById.description ? (
+                          <>
+                            <strong>Descripción: </strong>
+                            {viewCategoryById.description}
+                          </>
+                        ) : (
+                          ''
+                        )}
                       </Typography>
                     </Grid>
                   </Grid>
                   <Divider sx={{ mb: 3 }} />
-                  <Typography variant="h6" sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 0 }}>
                     Productos asociados
                   </Typography>
                   <ProductListView categoryView={viewCategoryById} />

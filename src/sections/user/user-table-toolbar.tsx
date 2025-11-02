@@ -9,9 +9,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
-import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
+import { useGetCitiesQuery } from 'src/redux/services/locationsApi';
 import { Autocomplete, FormControl } from '@mui/material';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 
 // ----------------------------------------------------------------------
 
@@ -22,7 +21,10 @@ export default function UserTableToolbar({
   roleOptions: _roleOptions
 }) {
   const popover = usePopover();
-  const dispatch = useAppDispatch();
+
+  // Get all cities using RTK Query (no department filter to get all cities)
+  const { data: citiesResponse, isLoading: isCitiesLoading } = useGetCitiesQuery({ limit: 1000 });
+  const cities = citiesResponse?.cities || [];
 
   const handleFilterName = useCallback(
     (event) => {
@@ -37,13 +39,6 @@ export default function UserTableToolbar({
     },
     [onFilters]
   );
-
-  React.useEffect(() => {
-    dispatch(getAllMunicipios());
-  }, [dispatch]);
-
-  // Use precomputed municipios from the store to avoid flattening undefined towns
-  const municipios = useAppSelector((state) => state.locations.municipios || []);
 
   const isOptionEqualToValue = (option, value) => {
     if (!option || !value) return false;
@@ -95,7 +90,8 @@ export default function UserTableToolbar({
             value={filters.municipio || null}
             isOptionEqualToValue={isOptionEqualToValue}
             getOptionLabel={(option) => (option && option.name ? option.name : '')}
-            options={municipios}
+            options={cities}
+            loading={isCitiesLoading}
             renderInput={(params) => <TextField {...params} label="Municipio" margin="none" />}
           />
         </FormControl>

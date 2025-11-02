@@ -1,0 +1,15 @@
+services:
+  allyapp:
+    container_name: allyapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - ally360-api_default
+    expose:
+      - "80"
+
+networks:
+  ally360-api_default:
+    external: true

@@ -1,6 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { HOST_API } from 'src/config-global';
-import type { RootState } from '../store';
 
 // Minimal types for Contacts aligned with backend docs
 export type ContactType = 'client' | 'provider';
@@ -76,8 +75,10 @@ export const contactsApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: HOST_API,
     prepareHeaders: (headers, { getState }) => {
-      const { auth } = getState() as RootState;
-      if (auth.token) headers.set('Authorization', `Bearer ${auth.token}`);
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
       headers.set('Content-Type', 'application/json');
       return headers;
     }

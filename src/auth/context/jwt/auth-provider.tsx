@@ -1,19 +1,19 @@
 /* eslint-disable no-nested-ternary */
-import PropTypes from 'prop-types';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useSnackbar } from 'notistack';
+
+// ------------------------ interfaces ------------------------
 
 import {
   AuthCredentials,
   RegisterCompany,
-  RegisterUser,
-  GetCompanyResponse,
-  GetUserResponse,
-  GetPDVResponse,
-  UpdateProfile
+  BackendUser,
+  BackendCompany,
+  BackendPDV
 } from 'src/interfaces/auth/userInterfaces';
 
-// 🎯 RTK Query Integration
+// ------------------------- RTK Query Integration ------------------------
+
 import {
   useLoginMutation,
   useRegisterMutation,
@@ -21,6 +21,7 @@ import {
   useGetCurrentUserQuery,
   useGetMyCompaniesQuery,
   useCreateCompanyMutation,
+  useUpdateCompanyMutation,
   useCreatePDVMutation,
   useSelectCompanyMutation,
   type RegisterUserData,
@@ -30,20 +31,29 @@ import {
 // Redux
 import { useAppDispatch } from 'src/hooks/store';
 import { clearAllStateOnCompanySwitch } from 'src/redux/actions/companySwitch';
-import { setCredentials, clearCredentials } from 'src/redux/slices/authSlice';
-import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
+// import { setCredentials, setToken } from 'src/redux/slices/authSlice';
+import { useNavigate } from 'react-router';
+import { paths } from 'src/routes/paths';
+import { authApi } from 'src/redux/services/authApi';
+import { subscriptionsApi } from 'src/redux/services/subscriptionsApi';
+import { posApi } from 'src/redux/services/posApi';
+import { pdvsApi } from 'src/redux/services/pdvsApi';
+import { productsApi } from 'src/redux/services/productsApi';
+import { invoicesApi } from 'src/redux/services/invoicesApi';
+import { decodeToken } from 'src/auth/utils/token-validation';
 import { AuthContext } from './auth-context';
 import { setSession } from './utils';
 
 interface InitialState {
-  user: GetUserResponse | null;
+  user: BackendUser | null;
   loading: boolean;
   isAuthenticated: boolean;
   isFirstLogin: boolean;
-  company: GetCompanyResponse | null;
-  pdvCompany: any;
+  company: BackendCompany | null;
+  pdvCompany: BackendPDV | null;
   changingCompany: boolean;
   selectedCompany: boolean;
+  allCompanies: BackendCompany[];
 }
 
 const initialState: InitialState = {
@@ -54,7 +64,8 @@ const initialState: InitialState = {
   company: null,
   pdvCompany: null,
   changingCompany: false,
-  selectedCompany: false
+  selectedCompany: false,
+  allCompanies: []
 };
 
 /**
@@ -65,20 +76,25 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const [state, setState] = React.useState<InitialState>(initialState);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
+  // ------------- Redux Api hooks -------------
   const [loginMutation] = useLoginMutation();
   const [registerMutation] = useRegisterMutation();
   const [logoutMutation] = useLogoutMutation();
   const [createCompanyMutation] = useCreateCompanyMutation();
+  const [updateCompanyMutation] = useUpdateCompanyMutation();
   const [createPDVMutation] = useCreatePDVMutation();
   const [selectCompanyMutation] = useSelectCompanyMutation();
+  const token = localStorage.getItem('accessToken') || null;
 
+  // ------------- RTK Query data fetching -------------
   const {
     data: currentUser,
     isLoading: userLoading,
     error: userError
   } = useGetCurrentUserQuery(undefined, {
-    skip: !localStorage.getItem('accessToken')
+    skip: !token
   });
 
   const {
@@ -86,240 +102,142 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     isLoading: companiesLoading,
     error: companiesError
   } = useGetMyCompaniesQuery(undefined, {
-    skip: !localStorage.getItem('accessToken')
+    skip: !token || userLoading || !currentUser || currentUser?.first_login === true
   });
 
+  // ------------- Auth logic -------------
+
+  /**
+   * Inicializa el estado de autenticación al cargar el componente.
+   * 1. Verifica si hay un token en localStorage.
+   * 2. Si hay token, lo establece en la sesión.
+   * 3. Si el usuario ya está cargado, actualiza el estado con los datos del usuario (compañías, PDVs, etc.)
+   * 4. Decodifica el token para verificar si hay una empresa seleccionada.
+   * 5. Si las empresas del usuario ya están cargadas, establece la primera empresa como la empresa actual.
+   * 6. Maneja errores y actualiza el estado de carga.
+   */
   const initialize = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken');
       if (!token) {
-        setState((prev) => ({ ...prev, loading: false }));
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          isAuthenticated: false,
+          user: null
+        }));
         return;
       }
 
       setSession(token);
-
+      if (currentUser) {
+        setState((prev) => ({
+          ...prev,
+          user: currentUser,
+          isAuthenticated: true,
+          isFirstLogin: currentUser.first_login,
+          loading: false
+        }));
+      }
       setState((prev) => ({ ...prev, loading: userLoading || companiesLoading }));
+
+      const decodedToken = decodeToken(token);
+
+      if (decodedToken) {
+        setState((prev) => ({ ...prev, selectedCompany: !!decodedToken?.tenant_id }));
+      }
+
+      if (userCompanies && userCompanies.length > 0) {
+        setState((prev) => ({
+          ...prev,
+          company: userCompanies[0] || null,
+          allCompanies: userCompanies,
+          isFirstLogin: currentUser ? currentUser.first_login : false,
+          loading: false
+        }));
+      } else if (userCompanies && userCompanies.length === 0) {
+        setState((prev) => ({
+          ...prev,
+          allCompanies: [],
+          company: null,
+          isFirstLogin: currentUser ? currentUser.first_login : false,
+          loading: false
+        }));
+      }
     } catch (error) {
       console.warn('Auth initialization error:', error);
-      setState((prev) => ({ ...prev, loading: false }));
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        isAuthenticated: false,
+        user: null
+      }));
     }
-  }, [userLoading, companiesLoading]);
+  }, [userLoading, companiesLoading, token, currentUser, userCompanies]);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  const decodeToken = (token: string) => {
-    try {
-      const payload = token.split('.')[1];
-      const decodedPayload = atob(payload);
-      return JSON.parse(decodedPayload);
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      const adaptedUser = {
-        id: currentUser.id,
-        email: currentUser.email,
-        verified: currentUser.email_verified,
-        authId: currentUser.id,
-        firstLogin: false, // El backend no maneja firstLogin aún
-        profile: {
-          name: currentUser.profile.first_name,
-          lastname: currentUser.profile.last_name,
-          personalPhoneNumber: currentUser.profile.phone_number,
-          dni: currentUser.profile.dni,
-          photo: currentUser.profile.avatar_url
-        }
-      } as GetUserResponse;
-
-      setState((prev) => ({
-        ...prev,
-        user: adaptedUser,
-        isAuthenticated: true,
-        loading: false
-      }));
-    }
-  }, [currentUser]);
-
-  // Actualizar estado cuando se obtienen las empresas
-  useEffect(() => {
-    const decodedToken = decodeToken(localStorage.getItem('accessToken') || '');
-
-    if (decodedToken) {
-      setState((prev) => ({
-        ...prev,
-        selectedCompany: !!decodedToken?.tenant_id
-      }));
-    }
-    if (userCompanies && userCompanies.length > 0) {
-      const adaptedCompanies = userCompanies.map((company) => ({
-        id: company.id,
-        name: company.name,
-        nit: company.nit,
-        phoneNumber: company.phone_number,
-        address: company.address || '',
-        website: '',
-        economicActivity: company.economic_activity || '',
-        quantityEmployees: company.quantity_employees?.toString() || ''
-      })) as GetCompanyResponse[];
-
-      setState((prev) => ({
-        ...prev,
-        company: adaptedCompanies[0] || null,
-        isFirstLogin: adaptedCompanies.length === 0,
-        loading: false
-      }));
-
-      // Guardar empresas en Redux para el step-by-step
-      if (adaptedCompanies.length > 0 && currentUser) {
-        dispatch(
-          setCredentials({
-            token: localStorage.getItem('accessToken') || '',
-            user: currentUser,
-            companies: adaptedCompanies as any // Temporal casting para evitar problemas de tipos
-          })
-        );
-      }
-    } else if (userCompanies && userCompanies.length === 0) {
-      // Usuario no tiene empresas - es su primer login
-      setState((prev) => ({
-        ...prev,
-        isFirstLogin: true,
-        loading: false
-      }));
-    }
-  }, [userCompanies, currentUser, dispatch]);
-
-  // Manejar errores de carga del usuario
-  useEffect(() => {
-    if (userError) {
-      console.warn('User loading error:', userError);
-      setState((prev) => ({ ...prev, loading: false }));
-    }
-  }, [userError]);
-
-  // Manejar errores de carga de empresas
-  useEffect(() => {
-    if (companiesError) {
-      console.warn('Companies loading error:', companiesError);
-      setState((prev) => ({ ...prev, loading: false }));
-    }
-  }, [companiesError]);
-
+  /**
+   * Inicia sesión en la aplicación.
+   * 1. Llama a la mutación de inicio de sesión con las credenciales proporcionadas.
+   * 2. Si la autenticación es exitosa, guarda el token y los datos del usuario en el estado.
+   * 3. Si hay una sola empresa, la selecciona automáticamente.
+   * 4. Si hay múltiples empresas, redirige al usuario a la selección de empresa.
+   */
   const login = useCallback(
     async ({ email, password }: AuthCredentials) => {
       try {
-        console.log('🔑 Login attempt with RTK Query:', { email });
-
         const result = await loginMutation({ email, password }).unwrap();
         const { access_token, user, companies } = result;
 
-        console.log('✅ Login successful:', { user: user?.email, companies: companies?.length });
-
-        // Guardar token y configurar sesión
         setSession(access_token);
-        dispatch(setCredentials({ token: access_token, user, companies }));
 
-        // Adaptar datos del backend al formato frontend
-        const adaptedUser = {
-          id: user.id,
-          email: user.email,
-          verified: user.email_verified,
-          authId: user.id,
-          firstLogin: companies.length === 0,
-          profile: {
-            name: user.profile.first_name,
-            lastname: user.profile.last_name,
-            personalPhoneNumber: user.profile.phone_number,
-            dni: user.profile.dni,
-            photo: user.profile.avatar_url
-          }
-        } as GetUserResponse;
-
-        // Adaptar companies si existen
-        const adaptedCompanies = companies.map((uc) => ({
-          id: uc.company_id,
-          name: uc.company_name,
-          // Otros campos se cargarán después
-          website: '',
-          phoneNumber: '',
-          address: '',
-          nit: ''
-        })) as GetCompanyResponse[];
-
-        setState({
-          user: adaptedUser,
-          company: adaptedCompanies[0] || null,
-          pdvCompany: null,
+        setState((prev) => ({
+          ...prev,
+          user,
           isAuthenticated: true,
-          isFirstLogin: companies.length === 0,
-          loading: false,
-          changingCompany: false,
-          selectedCompany: !!(companies.length === 1)
-        });
+          isFirstLogin: user.first_login,
+          loading: false
+        }));
 
-        // Si solo hay una empresa, seleccionarla automáticamente
         if (companies.length === 1) {
-          try {
-            const companyResult = await selectCompanyMutation({ company_id: companies[0].company_id }).unwrap();
+          const companyResult = await selectCompanyMutation({
+            company_id: companies[0].company_id
+          }).unwrap();
 
-            // Actualizar token con el nuevo token de empresa
-            if (companyResult.access_token) {
-              setSession(companyResult.access_token);
-              dispatch(
-                setCredentials({
-                  token: companyResult.access_token,
-                  user,
-                  companies
-                })
-              );
-              console.log('✅ Auto-selected company and updated token');
-            }
-          } catch (selectError) {
-            console.error('❌ Error auto-selecting company:', selectError);
-            // No lanzar error, el login fue exitoso
+          if (companyResult.access_token) {
+            setSession(companyResult.access_token);
           }
+        } else {
+          navigate(paths.select_business);
         }
 
         enqueueSnackbar('Bienvenido', { variant: 'success' });
       } catch (error: any) {
-        console.error('❌ Login error:', error);
+        console.error('Login error:', error);
         const errorMessage = error?.data?.detail || error?.message || 'Error en el login';
         enqueueSnackbar(errorMessage, { variant: 'error' });
         throw error;
       }
     },
-    [loginMutation, dispatch, selectCompanyMutation, enqueueSnackbar]
+    [loginMutation, selectCompanyMutation, enqueueSnackbar, navigate]
   );
 
+  /** Registra un nuevo usuario en la aplicación.
+   * 1. Llama a la mutación de registro con los datos del usuario.
+   * 2. Si el registro es exitoso, muestra una notificación al usuario.
+   * 3. Maneja errores y muestra mensajes apropiados.
+   */
   const register = useCallback(
-    async (data: RegisterUser) => {
+    async (data: RegisterUserData) => {
       try {
-        console.log('📝 Register attempt with RTK Query:', data.email);
-
-        // Transformar datos al formato esperado por el backend
-        const backendData: RegisterUserData = {
-          email: data.email,
-          password: data.password,
-          profile: {
-            first_name: data.profile.name,
-            last_name: data.profile.lastname,
-            phone_number: data.profile.personalPhoneNumber || null,
-            dni: data.profile.dni || null
-          }
-        };
-
-        await registerMutation(backendData).unwrap();
-        console.log('✅ Register successful');
-        enqueueSnackbar('Registro exitoso. Continúa con la configuración de tu empresa.', { variant: 'success' });
+        await registerMutation(data).unwrap();
+        enqueueSnackbar('Registro exitoso. Te hemos enviado un email de verificación al correo electrónico.', {
+          variant: 'success'
+        });
       } catch (error: any) {
-        console.error('❌ Register error:', error);
+        console.error('Register error:', error);
         const errorMessage = error?.data?.detail || error?.message || 'Error en el registro';
         enqueueSnackbar(errorMessage, { variant: 'error' });
         throw error;
@@ -329,9 +247,11 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   );
 
   const selectCompany = useCallback(
-    async (companyId: string) => {
+    async (companyId: string, showLoading = true) => {
       try {
-        setState((prev) => ({ ...prev, changingCompany: true }));
+        if (showLoading) {
+          setState((prev) => ({ ...prev, changingCompany: true }));
+        }
 
         await dispatch(clearAllStateOnCompanySwitch());
 
@@ -340,27 +260,28 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         if (result.access_token) {
           setSession(result.access_token);
 
+          dispatch(authApi.util.invalidateTags(['User', 'Company', 'PDV', 'Subscription']));
+          dispatch(subscriptionsApi.util.invalidateTags(['Subscription', 'Plan', 'User']));
+          dispatch(posApi.util.invalidateTags(['POS'] as any));
+          dispatch(pdvsApi.util.invalidateTags(['PDV'] as any));
+          dispatch(productsApi.util.invalidateTags(['Product'] as any));
+          dispatch(invoicesApi.util.invalidateTags(['Invoice'] as any));
+
           const selectedCompany = userCompanies?.find((comp) => comp.id === companyId);
           if (selectedCompany) {
-            const adaptedCompany = {
-              id: selectedCompany.id,
-              name: selectedCompany.name,
-              nit: selectedCompany.nit,
-              phoneNumber: selectedCompany.phone_number,
-              address: selectedCompany.address || '',
-              website: '',
-              economicActivity: selectedCompany.economic_activity || '',
-              quantityEmployees: selectedCompany.quantity_employees?.toString() || ''
-            };
-
+            // Use backend company directly without adaptation
             setState((prev) => ({
               ...prev,
-              company: adaptedCompany,
+              company: selectedCompany,
               changingCompany: false,
               selectedCompany: true
             }));
 
-            enqueueSnackbar(`Empresa seleccionada: ${selectedCompany.name}`, { variant: 'success' });
+            if (showLoading) {
+              enqueueSnackbar(`Empresa seleccionada: ${selectedCompany.name}`, {
+                variant: 'success'
+              });
+            }
           }
         }
 
@@ -379,41 +300,27 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const createCompany = useCallback(
     async (databody: RegisterCompany): Promise<void> => {
       try {
-        console.log('🏢 Create company attempt with RTK Query:', databody.name);
-
-        // Transformar datos al formato esperado por el backend
+        // Transform data to backend format
         const backendData: CompanyCreate = {
           name: databody.name,
           nit: databody.nit,
-          phone_number: databody.phoneNumber,
+          phone_number: databody.phone_number || '',
           address: databody.address || null,
-          description: null,
-          economic_activity: databody.economicActivity || null,
-          quantity_employees: databody.quantityEmployees ? parseInt(databody.quantityEmployees, 10) : undefined,
-          social_reason: null,
-          logo: null
+          description: databody.description || null,
+          economic_activity: databody.economic_activity || null,
+          quantity_employees: databody.quantity_employees || null,
+          social_reason: databody.social_reason || null,
+          logo: databody.logo || null,
+          uniquePDV: databody.uniquePDV || false
         };
 
         const result = await createCompanyMutation(backendData).unwrap();
 
-        // Adaptar respuesta del backend al formato frontend
-        const adaptedCompany = {
-          id: result.id,
-          name: result.name,
-          nit: result.nit,
-          phoneNumber: result.phone_number,
-          address: result.address || '',
-          website: '',
-          economicActivity: result.economic_activity || '',
-          quantityEmployees: result.quantity_employees?.toString() || ''
-        } as GetCompanyResponse;
+        // Use backend company directly without adaptation
+        setState((prev) => ({ ...prev, company: result }));
 
-        setState((prev) => ({ ...prev, company: adaptedCompany }));
-
-        dispatch(setPrevValuesCompany(adaptedCompany));
-        dispatch(setStep(1));
-
-        await selectCompany(adaptedCompany.id);
+        // Seleccionar la empresa creada para establecer el tenant en el token
+        await selectCompany(result.id, false); // No mostrar loading durante registro
 
         enqueueSnackbar('Empresa creada exitosamente', { variant: 'success' });
       } catch (error: any) {
@@ -423,39 +330,35 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
         throw error;
       }
     },
-    [createCompanyMutation, dispatch, enqueueSnackbar, selectCompany]
+    [createCompanyMutation, enqueueSnackbar, selectCompany]
   );
 
   const createPDV = useCallback(
     async (pdvData: any) => {
       try {
-        const result = await createPDVMutation(pdvData).unwrap();
+        await createPDVMutation(pdvData).unwrap();
         enqueueSnackbar('PDV registrado exitosamente', { variant: 'success' });
-
-        // Mapear PDVOutput a GetPDVResponse para el step-by-step
-        const mappedPDV: GetPDVResponse = {
-          id: result.id,
-          name: result.name,
-          description: '', // PDVOutput no tiene description
-          address: result.address,
-          phoneNumber: result.phone_number || '',
-          main: false // Se puede configurar más tarde
-        };
-
-        dispatch(setPrevValuesPDV(mappedPDV));
-        dispatch(setStep(2));
       } catch (error: any) {
         console.error('Error registering PDV:', error);
         enqueueSnackbar(error?.data?.detail || 'Error registrando PDV', { variant: 'error' });
         throw error;
       }
     },
-    [createPDVMutation, enqueueSnackbar, dispatch]
+    [createPDVMutation, enqueueSnackbar]
   );
 
-  const updateCompany = useCallback(async (_databody: UpdateProfile) => {
-    console.warn('updateCompany not implemented yet');
-  }, []);
+  const updateCompany = useCallback(
+    async (id: string, data: Partial<CompanyCreate>) => {
+      try {
+        const result = await updateCompanyMutation({ id, data }).unwrap();
+        return result;
+      } catch (error) {
+        console.error('Error updating company:', error);
+        throw error;
+      }
+    },
+    [updateCompanyMutation]
+  );
 
   const updatePDV = useCallback(async (_id: string, _databody: any) => {
     console.warn('updatePDV not implemented yet');
@@ -475,12 +378,20 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
     } catch (error) {
       console.warn('Logout error:', error);
     }
-
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('companyId');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('ally360-step-by-step');
     setSession(null);
-    dispatch(clearCredentials());
-    setState(initialState);
+    setState({
+      ...initialState,
+      loading: false
+    });
+
     enqueueSnackbar('Sesión cerrada', { variant: 'info' });
-  }, [logoutMutation, dispatch, enqueueSnackbar]);
+
+    navigate(paths.auth.jwt.login);
+  }, [logoutMutation, enqueueSnackbar, navigate]);
 
   const status = state.loading ? 'loading' : state.user ? 'authenticated' : 'unauthenticated';
 
@@ -532,7 +443,3 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired
-};

@@ -31,13 +31,13 @@ import { Icon } from '@iconify/react';
 import { getAllMunicipios } from 'src/redux/inventory/locationsSlice';
 import match from 'autosuggest-highlight/match';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { getAllPDVS, getPDVById, setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { setSeePDV, switchPopup } from 'src/redux/inventory/pdvsSlice';
+import { useGetPDVByIdQuery, useCreatePDVMutation, useUpdatePDVMutation } from 'src/redux/services/pdvsApi';
 
 import Iconify from 'src/components/iconify';
 import { useAuthContext } from 'src/auth/hooks';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
-import RequestService from '../../axios/services/service';
 
 // ----------------------------------------------------------------------
 const Transition = React.forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
@@ -53,32 +53,36 @@ export default function FormPDVS() {
 
   const [editDisabled, setEditDisabled] = useState(false);
 
-  const [pdvEdit, setPdvEdit] = useState(null);
+  // RTK Query hooks
+  const { data: pdvData } = useGetPDVByIdQuery(editId as string, {
+    skip: !editId // Solo hacer fetch si editId existe
+  });
 
-  // const { open, handleClose } = useSelector((state) => state.pdvs);
+  const [createPDV] = useCreatePDVMutation();
+  const [updatePDV] = useUpdatePDVMutation();
+
+  const [pdvEdit, setPdvEdit] = useState<any>(null);
+
   const open = useAppSelector((state) => state.pdvs.openPopup);
   const handleClose = () => {
     dispatch(switchPopup(false));
   };
-  const getPdvInfo = React.useCallback(async () => {
-    const resp = await dispatch(getPDVById(editId));
-    const municipio = resp.location;
-    const departamento = locations.find((dep) => dep.towns.find((m) => m.id === municipio.id));
-    const pdv = {
-      ...resp,
-      municipio,
-      departamento
-    };
-    setPdvEdit(pdv);
-  }, [editId, dispatch, setPdvEdit, locations]);
 
+  // Procesar datos del PDV cuando se obtienen de la API
   useEffect(() => {
-    if (editId) {
-      getPdvInfo();
-    } else {
-      setPdvEdit(false);
+    if (pdvData && editId) {
+      const municipio = pdvData.location;
+      const departamento = locations.find((dep) => dep.towns.find((m: any) => m.id === municipio?.id));
+      const pdv = {
+        ...pdvData,
+        municipio,
+        departamento
+      };
+      setPdvEdit(pdv);
+    } else if (!editId) {
+      setPdvEdit(null);
     }
-  }, [editId, dispatch, setPdvEdit, getPdvInfo]);
+  }, [pdvData, editId, locations]);
 
   const { t } = useTranslation();
 
@@ -159,16 +163,23 @@ export default function FormPDVS() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      data.location = { id: data.municipio.id };
-      delete data.municipio;
-      delete data.departamento;
+      const pdvPayload: any = {
+        name: data.name,
+        description: data.description,
+        address: data.address,
+        phoneNumber: data.phoneNumber,
+        location: { id: data.municipio.id },
+        main: data.main
+      };
+
       if (pdvEdit) {
-        delete data.company;
-        await RequestService.editPDV({ id: pdvEdit.id, databody: data });
+        // Update existing PDV
+        await updatePDV({ id: pdvEdit.id, pdv: pdvPayload }).unwrap();
       } else {
-        await RequestService.createPDV(data);
+        // Create new PDV
+        await createPDV(pdvPayload).unwrap();
       }
-      dispatch(getAllPDVS());
+
       reset();
       enqueueSnackbar(
         pdvEdit ? t(`Punto De Venta ${data.name} editado correctamente`) : t(`Punto De Venta ${data.name} Creado`),
@@ -176,7 +187,7 @@ export default function FormPDVS() {
           variant: 'success'
         }
       );
-      dispatch(handleClose());
+      handleClose();
     } catch (error) {
       enqueueSnackbar(t('No se ha podido crear el punto de venta, verifica los datos nuevamente'), {
         variant: 'error'
@@ -242,14 +253,7 @@ export default function FormPDVS() {
   };
 
   return (
-    <Dialog
-      open={open}
-      TransitionComponent={Transition}
-      keepMounted
-      maxWidth="sm"
-      fullWidth
-      onClose={() => dispatch(handleClose())}
-    >
+    <Dialog open={open} TransitionComponent={Transition} keepMounted maxWidth="sm" fullWidth onClose={handleClose}>
       <FormProvider methods={methods} onSubmit={onSubmit}>
         <DialogTitle id="scroll-dialog-title" sx={{ padding: '23px  40px 18px 40px!important', boxShadow: 2 }}>
           <Box gap={1} p={0} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -258,7 +262,7 @@ export default function FormPDVS() {
           </Box>
           <IconButton
             aria-label="close"
-            onClick={() => dispatch(handleClose())}
+            onClick={handleClose}
             sx={{
               position: 'absolute',
               right: 10,
@@ -434,7 +438,7 @@ export default function FormPDVS() {
               >
                 Editar
               </LoadingButton>
-              <Button color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
+              <Button color="primary" variant="outlined" onClick={handleClose}>
                 Cerrar
               </Button>
             </>
@@ -443,7 +447,7 @@ export default function FormPDVS() {
               <LoadingButton color="primary" variant="contained" type="submit" loading={isSubmitting}>
                 {pdvEdit ? 'Confirmar edición' : 'Crear Punto De Venta'}
               </LoadingButton>
-              <Button color="primary" variant="outlined" onClick={() => dispatch(handleClose())}>
+              <Button color="primary" variant="outlined" onClick={handleClose}>
                 Cancelar
               </Button>
             </>

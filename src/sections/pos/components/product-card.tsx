@@ -29,7 +29,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct }) => {
 
   // URL de imagen placeholder si no existe
   const imageUrl =
-    product.image || `https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=200&h=200&fit=crop&crop=center`;
+    product.image || `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShgQohP7LbySUaHF37ObdMPlqm-rIsjQ4fOQ&s`;
 
   return (
     <Card
@@ -59,19 +59,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct }) => {
         sx={{
           height: 140,
           position: 'relative',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+          overflow: 'hidden'
         }}
       >
         <Box
           component="img"
           className="product-image"
-          src={imageUrl}
+          src={product?.images?.length > 0 ? product.images[0] : imageUrl}
           alt={product.name}
           sx={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
             transition: 'transform 0.3s ease'
           }}
           onError={(e) => {
@@ -132,7 +131,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct }) => {
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
             color: 'text.primary'
           }}
         >
@@ -164,7 +162,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct }) => {
           >
             {formatCurrency(product.price)}
           </Typography>
-
+          {/* 
           <Box
             sx={{
               px: 1,
@@ -188,7 +186,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct }) => {
             >
               {stockStatus.text}
             </Typography>
-          </Box>
+          </Box> */}
         </Stack>
 
         {/* Main Add Button */}

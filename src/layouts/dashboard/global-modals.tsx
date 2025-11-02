@@ -15,7 +15,6 @@ export default function GlobalModals() {
   const PopupCreateBrand = lazy(() => import('src/sections/brands/PopupCreateBrand'));
   const FormPDVS = lazy(() => import('src/sections/PDVS/pdv-new-edit-form-simple'));
 
-  // No mostrar chatbot en rutas específicas como POS
   const shouldShowChatbot = !location.pathname.startsWith('/pos');
 
   return (
@@ -27,7 +26,6 @@ export default function GlobalModals() {
         {pdvOpen && <FormPDVS />}
       </Suspense>
 
-      {/* AI Chatbot - Disponible en todas las páginas del dashboard excepto POS */}
       {shouldShowChatbot && <AIChatbotEnhanced />}
     </>
   );

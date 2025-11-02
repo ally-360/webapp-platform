@@ -53,7 +53,6 @@ const TABLE_HEAD = [
   { id: 'name', label: 'Nombre o razón social' },
   { id: 'phoneNumber', label: 'Teléfono', width: 180 },
   { id: 'company', label: 'Dirección', width: 220 },
-  { id: 'municipio', label: 'Municipio', width: 180 },
   { id: 'status', label: 'Tipo', width: 100 },
   { id: '', width: 88 }
 ];

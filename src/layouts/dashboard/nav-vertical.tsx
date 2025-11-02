@@ -20,6 +20,7 @@ import { Link, Avatar, Typography, useTheme } from '@mui/material';
 import { paths } from 'src/routes/paths';
 import { useAuthContext } from 'src/auth/hooks';
 import { useSettingsContext } from 'src/components/settings';
+import { useGetUserAvatarQuery } from 'src/redux/services/userProfileApi';
 import { NAV } from '../config-layout';
 import { useNavData } from './config-navigation';
 import { NavToggleButton, NavUpgrade } from '../_common';
@@ -35,7 +36,8 @@ const AccountStyle = styled('div')(({ theme }) => ({
 }));
 
 export default function NavVertical({ openNav, onCloseNav }) {
-  const { user } = useAuthContext();
+  const { user, company } = useAuthContext();
+  const { data: avatarData } = useGetUserAvatarQuery();
 
   const theme = useTheme();
 
@@ -78,18 +80,18 @@ export default function NavVertical({ openNav, onCloseNav }) {
         >
           {/* <Paper theme={theme}> */}
           <Avatar
-            src={user?.profile?.photo}
-            alt={user?.profile?.name}
-            color={user?.profile?.photo ? 'default' : 'inherit'}
+            src={avatarData?.avatar_url}
+            alt={user?.profile?.first_name || ''}
+            color={avatarData?.avatar_url || user?.profile?.avatar_url ? 'default' : 'inherit'}
           >
-            {user?.profile?.name?.charAt(0)}
+            {user?.profile?.first_name?.charAt(0)}
           </Avatar>
           <Box sx={{ ml: 2 }}>
             <Typography variant="subtitle2" sx={{ color: 'text.primary', textDecoration: 'none !important' }}>
-              {user?.profile?.name}
+              {user?.profile?.first_name}
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: 12 }}>
-              {user?.company?.name}
+              {company?.name}
             </Typography>
           </Box>
           {/* </Paper> */}

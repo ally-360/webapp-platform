@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../store';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 // ========================================
 // 📋 Types & Interfaces
@@ -43,18 +43,7 @@ export interface BrandResponse {
 
 export const brandsApi = createApi({
   reducerPath: 'brandsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:8000',
-    prepareHeaders: (headers, { getState }) => {
-      const { auth } = getState() as RootState;
-      const { token } = auth;
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Brand'],
   endpoints: (builder) => ({
     // ========================================
@@ -90,7 +79,19 @@ export const brandsApi = createApi({
         method: 'POST',
         body: brandData
       }),
-      invalidatesTags: ['Brand']
+      invalidatesTags: ['Brand'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Invalidate catalogApi brands as well
+          dispatch(brandsApi.util.invalidateTags([{ type: 'Brand' as const }]));
+          // Also invalidate catalogApi if it exists in the store
+          const { catalogApi } = await import('./catalogApi');
+          dispatch(catalogApi.util.invalidateTags([{ type: 'Brand' as const }]));
+        } catch {
+          // ignore
+        }
+      }
     }),
 
     // ========================================

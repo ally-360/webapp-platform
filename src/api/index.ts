@@ -126,21 +126,6 @@ export const getEnvironmentConfig = () => {
 };
 
 // ========================================
-// 🔍 DEBUG INFO
-// ========================================
-if (typeof window !== 'undefined' && window.console) {
-  console.log(`%c[ALLY360 API] Modo activo: 🎭 MOCK`, 'color: #00bcd4; font-weight: bold');
-  console.log(
-    '%c[ALLY360 API] 🎭 Sistema Mock activo:\n' +
-      '• Datos quemados en memoria\n' +
-      '• Usuario de prueba: example@gmail.com / 123456\n' +
-      '• Sin conexión a backend\n' +
-      '• Para desactivar: VITE_USE_MOCK=false',
-    'color: #ff9800; font-size: 12px'
-  );
-}
-
-// ========================================
 // 📤 EXPORTS
 // ========================================
 export {

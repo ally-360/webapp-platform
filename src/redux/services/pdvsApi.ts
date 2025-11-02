@@ -5,23 +5,39 @@ import { baseQueryWithAuth } from './baseQuery';
 export interface PDV {
   id: string;
   name: string;
+  description?: string;
   address: string;
   phone_number: string;
+  phoneNumber?: string;
   is_active: boolean;
+  main?: boolean;
+  location?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface CreatePDVRequest {
   name: string;
+  description?: string;
   address: string;
-  phone_number: string;
-  is_active?: boolean;
+  phoneNumber: string;
+  location: {
+    id: string;
+  };
+  company?: string;
+  main?: boolean;
 }
 
 export interface UpdatePDVRequest {
   name?: string;
+  description?: string;
   address?: string;
-  phone_number?: string;
-  is_active?: boolean;
+  phoneNumber?: string;
+  location?: {
+    id: string;
+  };
+  main?: boolean;
 }
 
 export interface PDVsResponse {

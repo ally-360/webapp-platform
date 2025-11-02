@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Stepper,
@@ -16,23 +16,47 @@ import {
 import { useNavigate } from 'react-router';
 import { useSnackbar } from 'notistack';
 import { useAuthContext } from 'src/auth/hooks';
-import RegisterCompanyForm from 'src/pages/authentication/company/RegisterCompanyForm';
-import RegisterPDVForm from 'src/pages/authentication/company/RegisterPDVForm';
-import RegisterSummary from 'src/pages/authentication/company/RegisterSummary';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { setPrevValuesCompany, setPrevValuesPDV, setStep } from 'src/redux/inventory/stepByStepSlice';
+import RegisterCompanyForm from 'src/pages/authentication/steps/RegisterCompanyForm';
+import RegisterPDVForm from 'src/pages/authentication/steps/RegisterPDVForm';
+import { PlanSelectionForm } from 'src/pages/authentication/steps/PlanSelectionForm';
+import RegisterSummary from 'src/pages/authentication/steps/RegisterSummary';
+import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { paths } from 'src/routes/paths';
+import { StepType } from 'src/interfaces/stepByStep';
+import {
+  setStep,
+  resetStep,
+  goToPreviousStep,
+  setCompanyResponse,
+  setPDVResponse,
+  setPlanData,
+  setSubscriptionResponse
+} from 'src/redux/slices/stepByStepSlice';
+import { useStepByStepData } from 'src/hooks/use-step-by-step-data';
+import { SplashScreen } from 'src/components/loading-screen';
 
-const steps = ['Crear empresa', 'Puntos de venta', 'Resumen'];
+const getStepsConfig = (isUniquePDV: boolean | undefined) => {
+  if (isUniquePDV) {
+    return [
+      { key: StepType.COMPANY, label: 'Crear empresa' },
+      { key: StepType.PLAN, label: 'Seleccionar plan' },
+      { key: StepType.SUMMARY, label: 'Resumen' }
+    ];
+  }
+  return [
+    { key: StepType.COMPANY, label: 'Crear empresa' },
+    { key: StepType.PDV, label: 'Puntos de venta' },
+    { key: StepType.PLAN, label: 'Seleccionar plan' },
+    { key: StepType.SUMMARY, label: 'Resumen' }
+  ];
+};
 
-// Estilo contenedor principal
 const RootStyle = styled(Container)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
     display: 'flex'
   }
 }));
 
-// Estilo del contenido interno
 const ContentStyle = styled('div')(({ theme }) => ({
   maxWidth: 900,
   margin: 'auto',
@@ -41,7 +65,6 @@ const ContentStyle = styled('div')(({ theme }) => ({
   flexDirection: 'column',
   justifyContent: 'flex-start',
   padding: theme.spacing(6, 0),
-  paddingTop: '10vh !important',
   gap: '2rem'
 }));
 
@@ -49,35 +72,195 @@ const ContentStyle = styled('div')(({ theme }) => ({
  * Componente de registro paso a paso para crear una empresa, agregar PDV y ver resumen.
  */
 export default function StepByStep() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const { logout, company, pdvCompany } = useAuthContext();
+  const { logout } = useAuthContext();
+  const dispatch = useAppDispatch();
 
-  const { activeStep } = useAppSelector((state) => state.stepByStep);
+  // Ref para rastrear la última acción del usuario
+  const lastUserAction = useRef<'auto' | 'manual-forward' | 'manual-back' | null>(null);
 
-  const [skippedSteps, setSkippedSteps] = useState<Set<number>>(new Set());
-
-  const isStepOptional = (step: number) => step === 3;
-  const isStepSkipped = (step: number) => skippedSteps.has(step);
+  const { activeStep, completedSteps } = useAppSelector((state) => state.stepByStep);
+  const companyResponse = useAppSelector((state) => state.stepByStep.companyResponse);
+  const pdvResponse = useAppSelector((state) => state.stepByStep.pdvResponse);
+  const subscriptionResponse = useAppSelector((state) => state.stepByStep.subscriptionResponse);
+  const planData = useAppSelector((state) => state.stepByStep.planData);
+  const isUniquePDV = companyResponse?.uniquePDV;
+  const stepsConfig = useMemo(() => getStepsConfig(isUniquePDV), [isUniquePDV]);
+  const { companies, allPDVs, currentSubscription, isLoading, isReady, hasError, currentStep } = useStepByStepData();
 
   useEffect(() => {
-    console.log('Company information:', company);
-    if (company?.id) {
-      console.log('Company already registered:', company);
-      dispatch(setPrevValuesCompany(company));
-      dispatch(setStep(1));
+    if (!isReady || hasError) {
+      return;
     }
-  }, [company, dispatch]);
+    const maxStep = isUniquePDV ? 2 : 3;
+    const safeStep = Math.min(Math.max(currentStep, 0), maxStep);
 
-  // Sincroniza el paso activo si ya existe un PDV registrado
+    dispatch(setStep(safeStep));
+  }, [isReady, hasError, currentStep, isUniquePDV, dispatch]);
+
   useEffect(() => {
-    if (pdvCompany) {
-      dispatch(setPrevValuesPDV(pdvCompany[0]));
+    if (!isReady || hasError) {
+      return;
+    }
+
+    const hasCompleteSubscriptionData = !!(subscriptionResponse || (currentSubscription && currentSubscription.id));
+    const shouldGoToSummary = isUniquePDV && hasCompleteSubscriptionData && completedSteps.includes(StepType.PLAN);
+
+    if (shouldGoToSummary && lastUserAction.current === 'manual-back' && activeStep === StepType.PLAN) {
+      lastUserAction.current = null;
+    }
+
+    if (shouldGoToSummary && activeStep !== 2 && lastUserAction.current !== 'manual-back') {
+      lastUserAction.current = 'auto';
       dispatch(setStep(2));
     }
-  }, [pdvCompany, dispatch]);
+  }, [isReady, hasError, isUniquePDV, subscriptionResponse, currentSubscription, completedSteps, activeStep, dispatch]);
 
+  useEffect(() => {
+    if (!isReady || hasError) {
+      return;
+    }
+
+    if (companies && companies.length > 0) {
+      const company = companies[0];
+
+      dispatch(
+        setCompanyResponse({
+          id: company.id,
+          name: company.name,
+          description: company.description || '',
+          address: company.address || '',
+          phone_number: company.phone_number || '',
+          nit: company.nit,
+          economic_activity: company.economic_activity || '',
+          quantity_employees: String(company.quantity_employees || ''),
+          social_reason: company.social_reason || '',
+          logo: company.logo || '',
+          uniquePDV: company.unique_pdv || false,
+          created_at: company.created_at || new Date().toISOString(),
+          updated_at: company.updated_at || new Date().toISOString()
+        })
+      );
+    }
+
+    if (allPDVs && allPDVs.pdvs && allPDVs.pdvs.length > 0) {
+      const mainPDV = allPDVs.pdvs.find((pdv) => pdv.is_active) || allPDVs.pdvs[0];
+
+      dispatch(
+        setPDVResponse({
+          id: mainPDV.id,
+          name: mainPDV.name,
+          address: mainPDV.address,
+          phone_number: mainPDV.phone_number || '',
+          location: { id: '', name: '' },
+          main: true,
+          company_id: companies?.[0]?.id || '',
+          created_at: mainPDV.created_at,
+          updated_at: mainPDV.updated_at
+        })
+      );
+    }
+
+    if (currentSubscription && currentSubscription.id) {
+      dispatch(setSubscriptionResponse(currentSubscription));
+      dispatch(
+        setPlanData({
+          plan_id: currentSubscription.plan_code,
+          billing_cycle: currentSubscription.billing_cycle,
+          auto_renew: true,
+          currency: 'COP'
+        })
+      );
+    }
+  }, [
+    isReady,
+    hasError,
+    companies,
+    allPDVs,
+    currentSubscription,
+    subscriptionResponse,
+    completedSteps,
+    currentStep,
+    dispatch,
+    isUniquePDV
+  ]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    const maxStep = isUniquePDV ? 2 : 3;
+    const currentActive = activeStep;
+
+    if (currentActive > maxStep) {
+      dispatch(setStep(maxStep));
+      return;
+    }
+
+    if (isUniquePDV && currentActive === 2 && !completedSteps.includes(StepType.PLAN)) {
+      dispatch(setStep(1));
+      return;
+    }
+
+    if (
+      !isUniquePDV &&
+      currentActive === StepType.PDV && // Solo verificar cuando estamos exactamente en el paso PDV
+      (!allPDVs || !allPDVs.pdvs || allPDVs.pdvs.length === 0) &&
+      !pdvResponse
+    ) {
+      // Mantenerse en el paso PDV si no hay data, pero no retroceder desde pasos posteriores
+    }
+  }, [
+    activeStep,
+    completedSteps,
+    isUniquePDV,
+    currentSubscription,
+    subscriptionResponse,
+    planData,
+    allPDVs,
+    isReady,
+    dispatch,
+    pdvResponse
+  ]);
+
+  useEffect(() => {
+    if (!isReady) return;
+
+    const hasAnySubscriptionData = !!(currentSubscription || subscriptionResponse);
+
+    if (isUniquePDV && !hasAnySubscriptionData) {
+      if (activeStep > StepType.PLAN) {
+        dispatch(resetStep(StepType.PLAN));
+      }
+    }
+  }, [isReady, isUniquePDV, currentSubscription, subscriptionResponse, dispatch, activeStep]);
+
+  const isStepOptional = (_step: number) => false;
+  const isStepSkipped = (_step: number) => false;
+  const isStepCompleted = (step: number) => completedSteps.includes(step);
+
+  /**
+   * Maneja el clic en un paso del Stepper.
+   * Permite navegar solo a pasos completados o al siguiente paso inmediato.
+   * @param {number} step - Índice del paso clicado.
+   */
+  const handleStepClick = (step: number) => {
+    const maxAllowedStep = Math.max(...completedSteps, 0) + 1;
+
+    if (step <= maxAllowedStep || isStepCompleted(step)) {
+      // Marcar la dirección de la navegación manual
+      if (step < activeStep) {
+        lastUserAction.current = 'manual-back';
+      } else if (step > activeStep) {
+        lastUserAction.current = 'manual-forward';
+      }
+
+      dispatch(setStep(step));
+    }
+  };
+
+  /**
+   * Maneja el cierre de sesión del usuario.
+   */
   const handleLogout = async () => {
     try {
       await logout();
@@ -88,19 +271,37 @@ export default function StepByStep() {
     }
   };
 
-  // Mapeo de componentes por paso
+  /**
+   * Maneja la navegación manual hacia atrás desde componentes hijo.
+   */
+  const handleManualBackNavigation = useCallback(() => {
+    lastUserAction.current = 'manual-back';
+    dispatch(goToPreviousStep());
+  }, [dispatch]);
+
+  /**
+   * Renderiza el componente del paso actual.
+   * @returns {JSX.Element} Componente del paso actual.
+   * Flujo 1: uniquePDV → 3 pasos (Company, Plan, Summary)
+   * Flujo 2: no uniquePDV → 4 pasos (Company, PDV, Plan, Summary)
+   */
   const StepComponent = useMemo(() => {
-    switch (activeStep) {
-      case 0:
-        return <RegisterCompanyForm />;
-      case 1:
-        return <RegisterPDVForm />;
-      case 2:
-        return <RegisterSummary />;
-      default:
-        return <Typography>Paso desconocido</Typography>;
+    if (isUniquePDV) {
+      if (activeStep === 0) return <RegisterCompanyForm />;
+      if (activeStep === 1) return <PlanSelectionForm />;
+      if (activeStep === 2) return <RegisterSummary onManualBack={handleManualBackNavigation} />;
+      return <RegisterCompanyForm />;
     }
-  }, [activeStep]);
+    if (activeStep === StepType.COMPANY) return <RegisterCompanyForm />;
+    if (activeStep === StepType.PDV) return <RegisterPDVForm />;
+    if (activeStep === StepType.PLAN) return <PlanSelectionForm />;
+    if (activeStep === StepType.SUMMARY) return <RegisterSummary onManualBack={handleManualBackNavigation} />;
+    return <RegisterCompanyForm />;
+  }, [activeStep, isUniquePDV, handleManualBackNavigation]);
+
+  if (isLoading && !isReady) {
+    return <SplashScreen />;
+  }
 
   return (
     <RootStyle>
@@ -108,7 +309,7 @@ export default function StepByStep() {
         <ContentStyle>
           <Box sx={{ width: '100%' }}>
             <Stepper activeStep={activeStep} alternativeLabel>
-              {steps.map((label, index) => {
+              {stepsConfig.map((stepConfig, index) => {
                 const stepProps: Partial<StepProps> = {};
                 const labelProps: Partial<StepLabelProps> = {};
 
@@ -118,11 +319,25 @@ export default function StepByStep() {
 
                 if (isStepSkipped(index)) {
                   stepProps.completed = false;
+                } else if (isStepCompleted(index)) {
+                  stepProps.completed = true;
                 }
 
                 return (
-                  <Step key={label} {...stepProps}>
-                    <StepLabel {...labelProps}>{label}</StepLabel>
+                  <Step key={stepConfig.key} {...stepProps}>
+                    <StepLabel
+                      {...labelProps}
+                      sx={{
+                        cursor:
+                          isStepCompleted(index) || index <= Math.max(...completedSteps, 0) + 1 ? 'pointer' : 'default',
+                        '& .MuiStepLabel-label': {
+                          color: isStepCompleted(index) || index === activeStep ? 'primary.main' : 'text.secondary'
+                        }
+                      }}
+                      onClick={() => handleStepClick(index)}
+                    >
+                      {stepConfig.label}
+                    </StepLabel>
                   </Step>
                 );
               })}

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 // @mui
 import { alpha } from '@mui/material/styles';
 import Tab from '@mui/material/Tab';
@@ -31,9 +31,38 @@ import ProductDetailsDescription from '../product-details-description';
 
 // ----------------------------------------------------------------------
 
-//
+// ----------------------------------------------------------------------
+
+// Tipos de las pestañas disponibles
+type TabValue = 'description' | 'invoices' | 'accounting' | 'history';
+
+interface TabItem {
+  value: TabValue;
+  label: string;
+}
+
+// Configuración de pestañas estática para evitar recreaciones
+const TAB_ITEMS: TabItem[] = [
+  {
+    value: 'description',
+    label: 'Inventario'
+  },
+  {
+    value: 'invoices',
+    label: 'Facturas'
+  },
+  {
+    value: 'accounting',
+    label: 'Contabilidad'
+  },
+  {
+    value: 'history',
+    label: 'Historial'
+  }
+] as const;
 
 // ----------------------------------------------------------------------
+
 export default function ProductDetailsView({ id }: { id: string }) {
   // ========================================
   // 🔥 RTK QUERY - PRODUCTO DETALLE
@@ -49,111 +78,117 @@ export default function ProductDetailsView({ id }: { id: string }) {
 
   const settings: defaultSettingsInterface = useSettingsContext() as defaultSettingsInterface;
 
-  const [currentTab, setCurrentTab] = useState<string>('description');
+  const [currentTab, setCurrentTab] = useState<TabValue>('description');
 
-  const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: string) => {
+  // ========================================
+  // 🎯 CALLBACKS ESTABLES
+  // ========================================
+
+  const handleChangeTab = useCallback((event: React.SyntheticEvent, newValue: TabValue) => {
     setCurrentTab(newValue);
   }, []);
 
-  const renderSkeleton = <ProductDetailsSkeleton />;
+  // ========================================
+  // 🚀 COMPONENTES MEMOIZADOS
+  // ========================================
 
-  const renderError = (
-    <EmptyContent
-      filled
-      title="Error al cargar el producto"
-      action={
-        <Button
-          component={RouterLink}
-          href={paths.dashboard.product.root}
-          startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
-          sx={{ mt: 3 }}
-        >
-          Volver
-        </Button>
-      }
-      sx={{ py: 10 }}
-    />
+  const renderSkeleton = useMemo(() => <ProductDetailsSkeleton />, []);
+
+  const renderError = useMemo(
+    () => (
+      <EmptyContent
+        filled
+        title="Error al cargar el producto"
+        action={
+          <Button
+            component={RouterLink}
+            href={paths.dashboard.product.root}
+            startIcon={<Iconify icon="eva:arrow-ios-back-fill" width={16} />}
+            sx={{ mt: 3 }}
+          >
+            Volver
+          </Button>
+        }
+        sx={{ py: 10 }}
+      />
+    ),
+    []
   );
 
-  const renderProduct = product && (
-    <>
-      <ProductDetailsToolbar
-        id={product.id}
-        backLink={paths.dashboard.product.root}
-        editLink={paths.dashboard.product.edit(`${product?.id}`)}
-        liveLink={paths.dashboard.product.details(`${product?.id}`)}
-        publishOptions={PRODUCT_PUBLISH_OPTIONS}
-        stateProduct={!!product.state}
-      />
-      <Card sx={{ p: 3 }}>
-        <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
-          <Grid xs={12} md={4} lg={4}>
-            <ProductDetailsCarousel product={product} />
-          </Grid>
+  // ========================================
+  // 🏗️ RENDERIZADO DEL PRODUCTO
+  // ========================================
 
-          <Grid xs={12} md={8} lg={8}>
-            <ProductDetailsSummary product={product} />
-          </Grid>
-        </Grid>
-      </Card>
+  const renderProduct = useMemo(() => {
+    if (!product) return null;
 
-      <Card sx={{ p: 3, mt: 2 }}>
-        <Typography mb={1} variant="h5">
-          Inventario
-        </Typography>
-        <ProductDetailsInventory product={product} />
-      </Card>
-      {product.description && (
+    return (
+      <>
+        <ProductDetailsToolbar
+          id={product.id}
+          backLink={paths.dashboard.product.root}
+          editLink={paths.dashboard.product.edit(`${product.id}`)}
+          liveLink={paths.dashboard.product.details(`${product.id}`)}
+          publishOptions={PRODUCT_PUBLISH_OPTIONS}
+          stateProduct={!!product.state}
+        />
+
+        <Card sx={{ p: 3 }}>
+          <Grid container spacing={{ xs: 3, md: 5, lg: 8 }}>
+            <Grid xs={12} md={4} lg={4}>
+              <ProductDetailsCarousel product={product} />
+            </Grid>
+
+            <Grid xs={12} md={8} lg={8}>
+              <ProductDetailsSummary product={product} />
+            </Grid>
+          </Grid>
+        </Card>
+
         <Card sx={{ p: 3, mt: 2 }}>
           <Typography mb={1} variant="h5">
-            Descripción
+            Inventario
           </Typography>
-          <ProductDetailsDescription description={product?.description} />
+          <ProductDetailsInventory product={product} />
         </Card>
-      )}
 
-      <Card sx={{ mt: 3 }}>
-        <Tabs
-          value={currentTab}
-          onChange={handleChangeTab}
-          sx={{
-            px: 3,
-            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
-          }}
-        >
-          {[
-            {
-              value: 'description',
-              label: 'Inventario'
-            },
-            {
-              value: 'reviews',
-              label: `Facturas`
-            },
-            {
-              value: 'reviews',
-              label: `Contabilidad`
-            },
-            {
-              value: 'reviews',
-              label: `Historial`
-            }
-          ].map((tab) => (
-            <Tab key={tab.value} value={tab.value} label={tab.label} />
-          ))}
-        </Tabs>
+        {product.description && (
+          <Card sx={{ p: 3, mt: 2 }}>
+            <Typography mb={1} variant="h5">
+              Descripción
+            </Typography>
+            <ProductDetailsDescription description={product.description} />
+          </Card>
+        )}
 
-        {currentTab === 'description' && null}
-      </Card>
-    </>
-  );
+        <Card sx={{ mt: 3 }}>
+          <Tabs
+            value={currentTab}
+            onChange={handleChangeTab}
+            sx={{
+              px: 3,
+              boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
+            }}
+          >
+            {TAB_ITEMS.map((tab) => (
+              <Tab key={tab.value} value={tab.value} label={tab.label} />
+            ))}
+          </Tabs>
+
+          {currentTab === 'description' && null}
+        </Card>
+      </>
+    );
+  }, [product, currentTab, handleChangeTab]);
+
+  // ========================================
+  // 🎨 RENDERIZADO PRINCIPAL
+  // ========================================
 
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       {productsLoading && renderSkeleton}
-
       {error && renderError}
-
       {product && !productsLoading && renderProduct}
     </Container>
   );

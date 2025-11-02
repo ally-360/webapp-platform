@@ -1,5 +1,5 @@
 /* eslint-disable no-nested-ternary */
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import isEqual from 'lodash/isEqual';
 // @mui
 import Card from '@mui/material/Card';
@@ -13,8 +13,6 @@ import TableContainer from '@mui/material/TableContainer';
 import { useTheme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 // redux
-import { useSelector } from 'react-redux';
-import { selectCurrentUser } from 'src/redux/slices/authSlice';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -31,17 +29,19 @@ import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   TableNoData,
-  TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
   TablePaginationCustom
 } from 'src/components/table';
 //
 import { useGetProductsQuery, useDeleteProductMutation } from 'src/redux/services/productsApi';
+import { useAuthContext } from 'src/auth/hooks';
+import Scrollbar from 'src/components/scrollbar';
 import ProductTableRow from '../product-table-row';
 import ProductTableToolbar from '../product-table-toolbar';
 import ProductTableFiltersResult from '../product-table-filters-result';
-// RTK Query
+import ProductTableFiltersAdvanced from '../product-table-filters-advanced';
+import ProductTableFiltersChips from '../product-table-filters-chips';
 
 // ----------------------------------------------------------------------
 
@@ -63,24 +63,30 @@ const defaultFilters = {
   name: '',
   sku: '',
   publish: [],
-  stock: []
+  stock: [],
+  // Advanced filters
+  status: 'all', // 'all' | 'active' | 'inactive'
+  categories: [],
+  brands: [],
+  pdvs: [],
+  priceRange: [0, 10000000],
+  stockRange: [0, 1000],
+  lowStock: false
 };
 
 // ----------------------------------------------------------------------
 
 interface ProductListViewProps {
-  categoryView?: boolean | any; // Puede ser boolean o un objeto categoría/marca
-  brandView?: any; // Objeto marca para filtrar
+  categoryView?: boolean | any;
+  brandView?: any;
 }
 
 export default function ProductListView({ categoryView = false, brandView }: ProductListViewProps) {
   const theme = useTheme();
   const router = useRouter();
 
-  // Redux selectors
-  const user = useSelector(selectCurrentUser);
+  const { user } = useAuthContext();
 
-  // Ref component to print
   const componentRef = useRef<HTMLDivElement>(null);
   const table = useTable(true);
   const settings = useSettingsContext();
@@ -91,81 +97,142 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const confirm = useBoolean(false);
+  const filtersDrawer = useBoolean(false);
 
-  // Determinar filtros de categoría y marca
   const categoryId = typeof categoryView === 'object' && categoryView?.id ? categoryView.id : undefined;
   const brandId = brandView?.id || undefined;
 
-  // Debounce para búsqueda - solo buscar si tiene al menos 2 caracteres
   useEffect(() => {
     const timer = setTimeout(() => {
       if (filters.name.length >= 2 || filters.name.length === 0) {
         setDebouncedSearch(filters.name);
       }
-    }, 500); // 500ms de debounce
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [filters.name]);
 
+  // RTK QUERY - PRODUCTOS
   // ========================================
-  // 🔥 RTK QUERY - PRODUCTOS
-  // ========================================
+
+  // Mapear columnas de la tabla a campos del backend para ordenamiento
+  const sortByMap: Record<string, 'name' | 'price' | 'stock' | 'created_at'> = {
+    name: 'name',
+    priceSale: 'price',
+    quantityStock: 'stock',
+    createdAt: 'created_at'
+  };
+
+  // Construir filtros para el backend
+  const backendFilters: any = {
+    page: table.page + 1,
+    limit: table.rowsPerPage,
+    search: debouncedSearch || undefined,
+    is_active: filters.status === 'all' ? undefined : filters.status === 'active'
+  };
+
+  // Categorías: enviar solo el primero o el de la vista
+  if (filters.categories?.length > 0) {
+    backendFilters.category_id = (filters.categories as any)[0]?.id;
+  } else if (categoryId) {
+    backendFilters.category_id = categoryId;
+  }
+
+  // Marcas: enviar solo el primero o el de la vista
+  if (filters.brands?.length > 0) {
+    backendFilters.brand_id = (filters.brands as any)[0]?.id;
+  } else if (brandId) {
+    backendFilters.brand_id = brandId;
+  }
+
+  // Rango de precios (solo si cambió del default)
+  if (filters.priceRange && (filters.priceRange[0] > 0 || filters.priceRange[1] < 10000000)) {
+    if (filters.priceRange[0] > 0) {
+      backendFilters.price_min = filters.priceRange[0];
+    }
+    if (filters.priceRange[1] < 10000000) {
+      backendFilters.price_max = filters.priceRange[1];
+    }
+  }
+
+  // Rango de stock (solo si cambió del default)
+  if (filters.stockRange && (filters.stockRange[0] > 0 || filters.stockRange[1] < 1000)) {
+    if (filters.stockRange[0] > 0) {
+      backendFilters.stock_min = filters.stockRange[0];
+    }
+    if (filters.stockRange[1] < 1000) {
+      backendFilters.stock_max = filters.stockRange[1];
+    }
+  }
+
+  // Stock bajo
+  if (filters.lowStock === true) {
+    backendFilters.has_low_stock = true;
+  }
+
+  // PDV: enviar solo el primero si hay varios seleccionados
+  // El backend solo soporta un pdv_id, el filtro múltiple se hará en el cliente
+  if (filters.pdvs?.length > 0) {
+    backendFilters.pdv_id = (filters.pdvs as any)[0]?.id;
+  }
+
+  // Ordenamiento (mapear columnas de la tabla a campos del backend)
+  const mappedSortBy = sortByMap[table.orderBy] || 'created_at';
+  backendFilters.sort_by = mappedSortBy;
+  backendFilters.sort_order = table.order || 'desc';
 
   const {
     data: productsData,
     isLoading: productsLoading,
     refetch: refetchProducts
-  } = useGetProductsQuery(
-    {
-      page: table.page + 1, // RTK Query usa paginación desde 1
-      limit: table.rowsPerPage,
-      search: debouncedSearch || undefined, // Usar búsqueda con debounce
-      categoryId, // Filtrar por categoría si está presente
-      brandId // Filtrar por marca si está presente
-    },
-    {
-      skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
-    }
-  );
+  } = useGetProductsQuery(backendFilters, {
+    skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
+  });
 
   const [deleteProduct] = useDeleteProductMutation();
 
-  // Solo resetear página cuando cambian props externas (categoría/marca)
-  // No incluimos debouncedSearch porque se maneja en handleFilters
-  React.useEffect(() => {
+  useEffect(() => {
     if (categoryId !== undefined || brandId !== undefined) {
       table.onResetPage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId, brandId]); // No incluir table para evitar bucles infinitos
+  }, [categoryId, brandId]);
 
-  // ========================================
-  // 📊 DATOS PROCESADOS
+  // Reset page when filters change
+  useEffect(() => {
+    table.onResetPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    filters.status,
+    filters.categories,
+    filters.brands,
+    filters.pdvs,
+    filters.priceRange,
+    filters.stockRange,
+    filters.lowStock
+  ]);
+
+  // DATOS PROCESADOS
   // ========================================
 
-  // Extraer datos de la respuesta paginada del servidor
   const tableData = productsData?.data || [];
   const totalProducts = productsData?.total || 0;
   const productsEmpty = !productsLoading && tableData.length === 0;
 
-  // Los datos ya vienen filtrados y paginados del servidor
-  const dataFiltered = tableData;
-  const dataInPage = tableData;
+  // Filtrado local SOLO para múltiples PDVs (el backend solo soporta uno)
+  // El resto de filtros ya los maneja el backend
+  const dataFiltered = tableData.filter((product) => {
+    // Filtro de múltiples PDVs (solo si hay más de uno seleccionado)
+    if (filters.pdvs?.length > 1) {
+      const pdvIds = (filters.pdvs as any[]).map((p) => p.id);
+      const hasAnyPdv = product.productPdv?.some((p) => pdvIds.includes(p.pdv_id));
+      if (!hasAnyPdv) return false;
+    }
 
-  // Debug para verificar paginación
-  console.log('🔍 ProductListView Pagination:', {
-    tablePage: table.page,
-    apiPage: table.page + 1,
-    rowsPerPage: table.rowsPerPage,
-    totalProducts,
-    productsCount: tableData.length,
-    searchTerm: debouncedSearch,
-    categoryId,
-    brandId,
-    timestamp: new Date().toLocaleTimeString()
+    return true;
   });
 
-  const denseHeight = table.dense ? 60 : 80;
+  const dataInPage = dataFiltered;
 
   // Determinar si estamos en vista de categoría o marca
   const isCategoryOrBrandView = categoryView !== false || brandView !== undefined;
@@ -226,11 +293,27 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
     setFilters(defaultFilters);
   }, []);
 
+  const handleRemoveFilter = useCallback((filterKey: string, value?: any) => {
+    if (filterKey === 'status') {
+      setFilters((prev) => ({ ...prev, status: 'all' }));
+    } else if (filterKey === 'lowStock') {
+      setFilters((prev) => ({ ...prev, lowStock: false }));
+    } else if (filterKey === 'priceRange') {
+      setFilters((prev) => ({ ...prev, priceRange: [0, 10000000] }));
+    } else if (filterKey === 'stockRange') {
+      setFilters((prev) => ({ ...prev, stockRange: [0, 1000] }));
+    } else if (['categories', 'brands', 'pdvs'].includes(filterKey)) {
+      setFilters((prev) => ({
+        ...prev,
+        [filterKey]: (prev[filterKey] as any[]).filter((item) => item.id !== value.id)
+      }));
+    }
+  }, []);
+
   const handleDeleteRow = useCallback(
     async (id: string) => {
       try {
         await deleteProduct(id).unwrap();
-        // El refetch manejará la actualización de la paginación automáticamente
         refetchProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -263,7 +346,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
               <>
                 <Button
                   component={RouterLink}
-                  href={paths.dashboard.product.new}
+                  href={paths.dashboard.bill.newBill}
                   variant="contained"
                   color="primary"
                   style={{ marginRight: 10 }}
@@ -294,9 +377,15 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
               dataFiltered={dataFiltered}
               onFilters={handleFilters}
               categoryView={isCategoryOrBrandView}
+              onOpenFilters={filtersDrawer.onTrue}
               //
               stockOptions={PRODUCT_STOCK_OPTIONS}
               publishOptions={PUBLISH_OPTIONS}
+            />
+            <ProductTableFiltersChips
+              filters={filters}
+              onRemoveFilter={handleRemoveFilter}
+              onResetFilters={handleResetFilters}
             />
             {canReset && (
               <ProductTableFiltersResult
@@ -328,7 +417,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                   </Tooltip>
                 }
               />
-              <div style={{ overflow: 'auto' }}>
+              <Scrollbar>
                 <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                   <TableHeadCustom
                     order={table.order}
@@ -364,15 +453,10 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                         />
                       ))}
 
-                    <TableEmptyRows
-                      height={denseHeight}
-                      emptyRows={Math.max(0, table.rowsPerPage - dataInPage.length)}
-                    />
-
-                    <TableNoData notFound={notFound} />
+                    <TableNoData notFound={notFound} text="No se encontraron productos" />
                   </TableBody>
                 </Table>
-              </div>
+              </Scrollbar>
             </TableContainer>{' '}
             <TablePaginationCustom
               count={totalProducts}
@@ -418,7 +502,7 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                 </Tooltip>
               }
             />
-            <div style={{ overflow: 'auto' }}>
+            <Scrollbar>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
                   order={table.order}
@@ -453,13 +537,10 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                         onViewRow={() => handleViewRow(row.id)}
                       />
                     ))}
-
-                  <TableEmptyRows height={denseHeight} emptyRows={Math.max(0, table.rowsPerPage - dataInPage.length)} />
-
-                  <TableNoData notFound={notFound} />
+                  <TableNoData notFound={notFound} text="No hay productos en esta categoría" />
                 </TableBody>
               </Table>
-            </div>
+            </Scrollbar>
           </TableContainer>
 
           <TablePaginationCustom
@@ -496,6 +577,15 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
             Eliminar
           </Button>
         }
+      />
+
+      <ProductTableFiltersAdvanced
+        open={filtersDrawer.value}
+        onClose={filtersDrawer.onFalse}
+        filters={filters}
+        onFilters={handleFilters}
+        onResetFilters={handleResetFilters}
+        countsData={productsData as any}
       />
     </>
   );

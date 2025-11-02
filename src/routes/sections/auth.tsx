@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 // auth
 import { AuthGuard, GuestGuard } from 'src/auth/guard';
+import FirstLoginGuard from 'src/auth/guard/first-login-guard';
 // layouts
 import AuthClassicLayout from 'src/layouts/auth/classic';
 // components
@@ -62,9 +63,11 @@ const stepByStep = {
   path: 'step-by-step',
   element: (
     <AuthGuard>
-      <Suspense fallback={<SplashScreen />}>
-        <SetpBySetp />
-      </Suspense>
+      <FirstLoginGuard>
+        <Suspense fallback={<SplashScreen />}>
+          <SetpBySetp />
+        </Suspense>
+      </FirstLoginGuard>
     </AuthGuard>
   )
 };

@@ -119,7 +119,6 @@ export const dashboardRoutes = [
   },
 
   {
-    // DASHBOARD ROOT
     path: '/dashboard',
     element: (
       <AuthGuard>

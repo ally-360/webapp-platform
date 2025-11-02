@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
@@ -12,77 +12,153 @@ import Typography from '@mui/material/Typography';
 // hooks
 // utils
 import { fData } from 'src/utils/format-number';
-// assets
 // components
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFUploadAvatar } from 'src/components/hook-form';
-import { useAuthContext } from 'src/auth/hooks';
 import RHFPhoneNumber from 'src/components/hook-form/rhf-phone-number';
+// api
+import {
+  useUpdateCompanyMutation,
+  useUploadCompanyLogoMutation,
+  useGetCompanyLogoQuery,
+  useGetCompanyProfileQuery
+} from 'src/redux/services/userProfileApi';
+
+// ----------------------------------------------------------------------
+
+interface CompanyFormData {
+  name: string;
+  nit?: string;
+  address: string;
+  phone_number: string;
+  description?: string;
+  social_reason?: string;
+  quantity_employees: string;
+  economic_activity: string;
+  logo?: any;
+}
 
 // ----------------------------------------------------------------------
 
 export default function AccountCompany() {
   const { enqueueSnackbar } = useSnackbar();
 
-  const { company, updateCompany } = useAuthContext();
+  const { data: companyData, refetch: refetchCompany, isLoading: _isLoadingCompany } = useGetCompanyProfileQuery();
+  const { data: logoData, refetch: refetchLogo } = useGetCompanyLogoQuery();
+  const [updateCompany, { isLoading: _isUpdatingCompany }] = useUpdateCompanyMutation();
+  const [uploadLogo, { isLoading: _isUploadingLogo }] = useUploadCompanyLogoMutation();
 
-  const UpdateUserSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    address: Yup.string().required('Address is required'),
-    phoneNumber: Yup.string().required('Phone number is required'),
-    website: Yup.string().required('Website is required'),
-    quantityEmployees: Yup.string().required('Quantity of employees is required'),
-    economicActivity: Yup.string().required('Economic activity is required')
+  const currentCompany = companyData;
+  console.log('Current Company:', currentCompany);
+  console.log('Logo Data:', logoData);
+
+  const UpdateCompanySchema = Yup.object().shape({
+    name: Yup.string().required('Nombre es requerido'),
+    nit: Yup.string(),
+    address: Yup.string().required('Dirección es requerida'),
+    phone_number: Yup.string().required('Teléfono es requerido'),
+    description: Yup.string(),
+    social_reason: Yup.string(),
+    quantity_employees: Yup.string().required('Cantidad de empleados es requerida'),
+    economic_activity: Yup.string().required('Actividad económica es requerida'),
+    logo: Yup.mixed()
   });
 
-  const defaultValues = {
-    name: company?.name || '',
-    nit: company?.nit || '',
-    address: company?.address || '',
-    phoneNumber: company?.phoneNumber || '',
-    website: company?.website || '',
-    quantityEmployees: company?.quantityEmployees || '',
-    economicActivity: company?.economicActivity || ''
-
-    // lastname: company?.profile?.lastname || '',
-    // email: company?.profile?.email || '',
-    // photoURL: company?.profile?.photo || null,
-    // phoneNumber: company?.profile?.personalPhoneNumber || '',
-    // dni: company?.profile?.dni || ''
-  };
-
-  const methods = useForm({
-    resolver: yupResolver(UpdateUserSchema),
-    defaultValues
+  const methods = useForm<CompanyFormData>({
+    resolver: yupResolver(UpdateCompanySchema),
+    defaultValues: {
+      name: '',
+      nit: '',
+      address: '',
+      phone_number: '',
+      description: '',
+      social_reason: '',
+      quantity_employees: '',
+      economic_activity: '',
+      logo: null
+    }
   });
 
   const {
+    reset,
     setValue,
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
 
+  useEffect(() => {
+    if (currentCompany) {
+      const defaultValues = {
+        name: currentCompany.name || '',
+        nit: currentCompany.nit || '',
+        address: currentCompany.address || '',
+        phone_number: currentCompany.phone_number || '',
+        description: currentCompany.description || '',
+        social_reason: currentCompany.social_reason || '',
+        quantity_employees: currentCompany.quantity_employees?.toString() || '',
+        economic_activity: currentCompany.economic_activity || '',
+        logo: logoData?.logo_url || currentCompany.logo_url || null
+      };
+
+      console.log('Resetting form with values:', defaultValues);
+      reset(defaultValues);
+    }
+  }, [currentCompany, logoData, reset]);
+
+  // Update logo specifically when logoData changes
+  useEffect(() => {
+    if (logoData?.logo_url) {
+      console.log('Setting logo from logoData:', logoData.logo_url);
+      setValue('logo', logoData.logo_url);
+    }
+  }, [logoData, setValue]);
+
   const onSubmit = handleSubmit(async (data) => {
     try {
-      delete data.nit;
-      await updateCompany(data);
-      enqueueSnackbar('Update success!');
-      console.info('DATA', data);
-    } catch (error) {
-      console.error(error);
+      if (data.logo && typeof data.logo === 'object' && 'preview' in data.logo) {
+        const formData = new FormData();
+        formData.append('file', data.logo as unknown as File);
+
+        await uploadLogo(formData).unwrap();
+        enqueueSnackbar('Logo actualizado correctamente', { variant: 'success' });
+
+        // Refetch logo data to get the new URL
+        await refetchLogo();
+      }
+
+      const updateData = {
+        name: data.name,
+        address: data.address,
+        phone_number: data.phone_number,
+        description: data.description,
+        social_reason: data.social_reason,
+        economic_activity: data.economic_activity,
+        // Only include quantity_employees if it's a valid number
+        ...(Number.isInteger(Number(data.quantity_employees)) && {
+          quantity_employees: Number(data.quantity_employees)
+        })
+      };
+
+      await updateCompany(updateData).unwrap();
+      enqueueSnackbar('Información de la empresa actualizada correctamente', { variant: 'success' });
+
+      refetchCompany();
+    } catch (error: any) {
+      console.error('Error updating company:', error);
+      const errorMessage = error?.data?.message || 'No se pudo actualizar la información de la empresa';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   });
 
   const handleDrop = useCallback(
-    (acceptedFiles) => {
+    (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
 
-      const newFile = Object.assign(file, {
-        preview: URL.createObjectURL(file)
-      });
-
       if (file) {
-        setValue('photoURL', newFile, { shouldValidate: true });
+        const newFile = Object.assign(file, {
+          preview: URL.createObjectURL(file)
+        });
+        setValue('logo', newFile, { shouldValidate: true });
       }
     },
     [setValue]
@@ -94,7 +170,7 @@ export default function AccountCompany() {
         <Grid xs={12} md={4}>
           <Card sx={{ pt: 10, pb: 5, px: 3, textAlign: 'center' }}>
             <RHFUploadAvatar
-              name="photoURL"
+              name="logo"
               maxSize={3145728}
               onDrop={handleDrop}
               helperText={
@@ -108,8 +184,8 @@ export default function AccountCompany() {
                     color: 'text.disabled'
                   }}
                 >
-                  Allowed *.jpeg, *.jpg, *.png, *.gif
-                  <br /> max size of {fData(3145728)}
+                  Formatos permitidos: *.jpeg, *.jpg, *.png, *.gif
+                  <br /> Tamaño máximo: {fData(3145728)}
                 </Typography>
               }
             />
@@ -126,30 +202,35 @@ export default function AccountCompany() {
                 sm: 'repeat(2, 1fr)'
               }}
             >
-              <RHFTextField name="name" label="Nombre" />
-              <RHFTextField disabled name="nit" label="Nit" />
+              <RHFTextField name="name" label="Nombre de la Empresa" />
+              <RHFTextField disabled name="nit" label="NIT" />
               <RHFTextField name="address" label="Dirección" />
               <RHFPhoneNumber
                 type="string"
-                variant="outlined"
-                placeholder="Ej: 300 123 4567"
+                placeholder="Ej: 601 123 4567"
                 defaultCountry="co"
                 countryCodeEditable={false}
                 onlyCountries={['co']}
-                name="phoneNumber"
-                label="Télefono"
+                name="phone_number"
+                label="Teléfono"
               />
-              <RHFTextField name="website" label="Sitio web" />
-              <RHFTextField name="quantityEmployees" label="Cantidad de empleados" />
-
-              {/* <RHFTextField name="lastname" label="Apellido" />
-              <RHFTextField name="email" label="Email Address" />
-              <RHFPhoneNumber name="phoneNumber" label="Télefono" />
-              <RHFTextField name="dni" label="Cédula de ciudadania" /> */}
+              <RHFTextField name="description" label="Descripción" multiline />
+              <RHFTextField name="social_reason" label="Razón Social" />
+              <RHFTextField
+                name="quantity_employees"
+                label="Cantidad de Empleados"
+                placeholder="Ej: 1-10, 11-50, 51-100"
+              />
+              <RHFTextField name="economic_activity" label="Actividad Económica" />
             </Box>
 
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              <LoadingButton color="primary" type="submit" variant="contained" loading={isSubmitting}>
+              <LoadingButton
+                color="primary"
+                type="submit"
+                variant="contained"
+                loading={isSubmitting || _isUpdatingCompany || _isUploadingLogo || _isLoadingCompany}
+              >
                 Guardar Cambios
               </LoadingButton>
             </Stack>

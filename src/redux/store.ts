@@ -4,9 +4,8 @@ import pdvsReducer from './inventory/pdvsSlice';
 import locationsReducer from './inventory/locationsSlice';
 import categoriesReducer from './inventory/categoriesSlice';
 import brandsReducer from './inventory/brandsSlice';
-import userReducer from './inventory/user';
 import contactsReducer from './inventory/contactsSlice';
-import stepByStepReducer from './inventory/stepByStepSlice';
+import stepByStepReducer from './slices/stepByStepSlice';
 import posReducer from './pos/posSlice';
 // RTK Query & Auth
 import { authApi } from './services/authApi';
@@ -20,12 +19,14 @@ import { salesInvoicesApi } from './services/salesInvoicesApi';
 import { billsApi } from './services/billsApi';
 import { pdvsApi } from './services/pdvsApi';
 import { dashboardApi } from './services/dashboardApi';
-import authReducer from './slices/authSlice';
+import { userProfileApi } from './services/userProfileApi';
+import { locationsApi } from './services/locationsApi';
+import { subscriptionsApi } from './services/subscriptionsApi';
+import { posApi } from './services/posApi';
+import { uploadsApi } from './services/uploadsApi';
 
 export const store = configureStore({
   reducer: {
-    // 🔐 Auth & API
-    auth: authReducer,
     [authApi.reducerPath]: authApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [brandsApi.reducerPath]: brandsApi.reducer,
@@ -37,13 +38,17 @@ export const store = configureStore({
     [billsApi.reducerPath]: billsApi.reducer,
     [pdvsApi.reducerPath]: pdvsApi.reducer,
     [dashboardApi.reducerPath]: dashboardApi.reducer,
+    [userProfileApi.reducerPath]: userProfileApi.reducer,
+    [locationsApi.reducerPath]: locationsApi.reducer,
+    [subscriptionsApi.reducerPath]: subscriptionsApi.reducer,
+    [posApi.reducerPath]: posApi.reducer,
+    [uploadsApi.reducerPath]: uploadsApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
     locations: locationsReducer,
     categories: categoriesReducer,
     brands: brandsReducer,
-    user: userReducer,
     contacts: contactsReducer,
     stepByStep: stepByStepReducer,
     pos: posReducer
@@ -60,7 +65,12 @@ export const store = configureStore({
       salesInvoicesApi.middleware,
       billsApi.middleware,
       pdvsApi.middleware,
-      dashboardApi.middleware
+      dashboardApi.middleware,
+      userProfileApi.middleware,
+      locationsApi.middleware,
+      subscriptionsApi.middleware,
+      posApi.middleware,
+      uploadsApi.middleware
     )
 });
 

@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { Page, View, Text, Image, Document, Font, StyleSheet } from '@react-pdf/renderer';
 // hooks
 import { useAuthContext } from 'src/auth/hooks';
+// api
+import { useGetCompanyLogoQuery } from 'src/redux/services/userProfileApi';
 // utils
 import { fDate } from 'src/utils/format-time';
 import { fCurrency } from 'src/utils/format-number';
@@ -356,6 +358,10 @@ const useStyles = () =>
 export default function InvoicePDF({ invoice, currentStatus }) {
   const styles = useStyles();
   const { company } = useAuthContext();
+  const { data: logoData } = useGetCompanyLogoQuery();
+
+  // Determinar la URL del logo a usar
+  const logoUrl = logoData?.logo_url || (company as any)?.logo_url || '/logo/logoFondoTransparentesvg.svg';
 
   // Normalize data from API structure
   const line_items = invoice?.line_items || [];
@@ -373,11 +379,11 @@ export default function InvoicePDF({ invoice, currentStatus }) {
       <Page size="A4" style={styles.page}>
         {/* Header con logo y empresa */}
         <View style={styles.header}>
-          <Image source="/logo/logoFondoTransparentesvg.svg" style={{ width: 48, height: 48 }} />
+          <Image source={logoUrl} style={{ width: 48, height: 48 }} />
           <View style={{ alignItems: 'flex-start', marginLeft: 16 }}>
             <Text style={styles.companyName}>{company?.name || 'Nombre Empresa'}</Text>
-            <Text style={styles.companyInfo}>{company?.website || 'www.empresa.com'}</Text>
-            <Text style={styles.companyInfo}>{company?.phoneNumber || '+57 300 000 0000'}</Text>
+            <Text style={styles.companyInfo}>www.empresa.com</Text>
+            <Text style={styles.companyInfo}>{company?.phone_number || '+57 300 000 0000'}</Text>
           </View>
         </View>
 

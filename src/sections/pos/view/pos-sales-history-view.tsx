@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, memo, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, memo } from 'react';
 import { alpha } from '@mui/material/styles';
 import {
   Box,
@@ -24,7 +24,6 @@ import {
   DialogActions,
   Divider
 } from '@mui/material';
-import { useAppSelector } from 'src/hooks/store';
 import { format } from 'date-fns';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -46,12 +45,28 @@ import { PAYMENT_LABEL, escapeCsv, printSale } from 'src/sections/pos/components
 import {
   cancelSale as apiCancelSale,
   createCreditNote as apiCreateCreditNote,
-  downloadSalePDF as apiDownloadSalePDF,
-  getPosSalesHistory
+  downloadSalePDF as apiDownloadSalePDF
 } from 'src/api';
-import type { PosSaleHistoryItem } from 'src/api/types';
 import CustomDateRangePicker from 'src/components/custom-date-range-picker';
 import { fDate, fDateTime } from 'src/utils/format-time';
+import { useGetPOSSalesQuery } from 'src/redux/services/posApi';
+import type { POSInvoice } from 'src/types/pos';
+
+// Local interface for transformed sales data
+interface TransformedSale {
+  id: string;
+  invoice_number: string;
+  created_at: string;
+  customer: { name: string } | null;
+  seller_name: string;
+  products: any[];
+  payments: any[];
+  subtotal: number;
+  tax_amount: number;
+  total: number;
+  pos_type: 'simple' | 'electronic';
+  status: 'paid' | 'cancelled' | 'refunded';
+}
 
 const TABLE_HEAD = [
   { id: 'created_at', label: 'Fecha', width: 160 },
@@ -76,13 +91,15 @@ interface Filters {
   pos_type: 'all' | 'simple' | 'electronic';
   startDate: string | null; // yyyy-MM-dd
   endDate: string | null; // yyyy-MM-dd
+  seller_id?: string; // Nuevo filtro para vendedor
 }
 
 const defaultFilters: Filters = {
   query: '',
   pos_type: 'all',
   startDate: null,
-  endDate: null
+  endDate: null,
+  seller_id: undefined
 };
 
 // Memoized row component
@@ -290,53 +307,59 @@ const DetailsDialog = memo(({ open, onClose, sale, onPrint }: any) => (
 ));
 
 export default function PosSalesHistoryView() {
-  const { completedSales } = useAppSelector((s) => s.pos);
-
   const table = useTable({ defaultOrderBy: 'created_at' });
   const [filters, setFilters] = useState<Filters>(defaultFilters);
 
   // actions state
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedSale, setSelectedSale] = useState<PosSaleHistoryItem | null>(null);
+  const [selectedSale, setSelectedSale] = useState<TransformedSale | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // data state
-  const [rowsAll, setRowsAll] = useState<PosSaleHistoryItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Prepare API parameters from filters
+  const apiParams = useMemo(() => {
+    const params: any = {
+      limit: 1000, // Get more records for client-side filtering
+      offset: 0
+    };
 
-  useEffect(() => {
-    let ignore = false;
-    const load = async () => {
-      setLoading(true);
-      try {
-        const res = await getPosSalesHistory({
-          query: filters.query || undefined,
-          pos_type: filters.pos_type,
-          dateFrom: filters.startDate || undefined,
-          dateTo: filters.endDate || undefined,
-          page: 0,
-          limit: 1000
-        } as any);
-        if (!ignore) {
-          const list = res.data.data || res.data?.data || [];
-          setRowsAll(list as PosSaleHistoryItem[]);
-        }
-      } catch (e) {
-        if (!ignore) {
-          // Fallback a datos locales si existen
-          setRowsAll((completedSales as unknown as PosSaleHistoryItem[]) || []);
-        }
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    };
-    load();
-    return () => {
-      ignore = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.query, filters.pos_type, filters.startDate, filters.endDate]);
+    if (filters.startDate) {
+      params.start_date = filters.startDate;
+    }
+
+    if (filters.endDate) {
+      params.end_date = filters.endDate;
+    }
+
+    if (filters.seller_id) {
+      params.seller_id = filters.seller_id;
+    }
+
+    return params;
+  }, [filters.startDate, filters.endDate, filters.seller_id]);
+
+  // Use RTK Query to fetch POS sales
+  const { data: salesResponse, isLoading: loading } = useGetPOSSalesQuery(apiParams);
+
+  // Transform API response to match expected format
+  const rowsAll = useMemo((): TransformedSale[] => {
+    if (!salesResponse?.items) return [];
+
+    return salesResponse.items.map((sale: POSInvoice) => ({
+      id: sale.id,
+      invoice_number: sale.number,
+      created_at: sale.created_at,
+      customer: sale.customer_name ? { name: sale.customer_name } : null,
+      seller_name: sale.seller_name,
+      products: [], // Will need to be populated from line items if available
+      payments: [], // Will need to be populated from payment records if available
+      subtotal: parseFloat(sale.subtotal || '0'),
+      tax_amount: parseFloat(sale.taxes_total || '0'),
+      total: parseFloat(sale.total_amount || '0'),
+      pos_type: 'simple', // Assume simple POS type for now
+      status: sale.status as 'paid' | 'cancelled' | 'refunded'
+    }));
+  }, [salesResponse]);
 
   const dateError = useMemo(() => {
     if (filters.startDate && filters.endDate) {
@@ -384,7 +407,7 @@ export default function PosSalesHistoryView() {
   // Local any-cast to satisfy Scrollbar typing in this file
   const ScrollbarAny: any = Scrollbar;
 
-  const openActions = (event: React.MouseEvent<HTMLElement>, sale: PosSaleHistoryItem) => {
+  const openActions = (event: React.MouseEvent<HTMLElement>, sale: TransformedSale) => {
     setAnchorEl(event.currentTarget);
     setSelectedSale(sale);
   };
@@ -419,8 +442,9 @@ export default function PosSalesHistoryView() {
     }
   };
 
-  const updateRowOptimistic = (id: string, patch: Partial<PosSaleHistoryItem>) => {
-    setRowsAll((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  const updateRowOptimistic = (id: string, patch: Partial<TransformedSale>) => {
+    // Since we're using RTK Query, we should ideally use optimistic updates
+    // For now, we'll just update the selectedSale if it matches
     if (selectedSale && selectedSale.id === id) {
       setSelectedSale({ ...selectedSale, ...patch });
     }

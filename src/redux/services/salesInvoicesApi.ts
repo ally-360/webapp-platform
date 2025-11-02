@@ -147,16 +147,31 @@ export const salesInvoicesApi = createApi({
         search?: string;
       }
     >({
-      query: (params = {}) => ({
-        url: '',
-        params: {
+      query: (params = {}) => {
+        console.log('🔍 getSalesInvoices called with params:', params);
+
+        const queryParams = {
           type: 'sale',
           offset: params.page ? (params.page - 1) * (params.limit || 25) : 0,
           limit: params.limit || 25,
           ...params
-        }
-      }),
-      transformResponse: (response: SalesInvoicesResponse) => response,
+        };
+
+        console.log('🔍 Final query params:', queryParams);
+
+        return {
+          url: '',
+          params: queryParams
+        };
+      },
+      transformResponse: (response: SalesInvoicesResponse) => {
+        console.log('✅ getSalesInvoices response:', response);
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, arg) => {
+        console.warn('❌ getSalesInvoices error:', { response, meta, arg });
+        return response;
+      },
       providesTags: ['SalesInvoice']
     }),
 
