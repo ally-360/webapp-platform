@@ -67,7 +67,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const { enqueueSnackbar } = useSnackbar();
 
   const [includeTaxes] = useState(false);
-  
+
   // 🆕 Estado para Staged Uploads
   const [uploadIds, setUploadIds] = useState<string[]>([]);
 
@@ -240,10 +240,10 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
         brand_id: String((data.brand as any)?.id || ''),
         category_id: String((data.category as any)?.id || ''),
         tax_ids: Array.isArray((data as any).tax_ids) ? ((data as any).tax_ids as string[]) : [],
-        
+
         // ✅ STAGED UPLOADS - Enviar IDs de uploads confirmados
         upload_ids: uploadIds,
-        
+
         stocks: data.productsPdvs.map((pdv: PDVproduct) => ({
           pdv_id: pdv.id,
           quantity: Number(pdv.quantity),

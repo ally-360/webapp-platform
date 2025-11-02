@@ -24,11 +24,7 @@ const StyledDropZone = styled(Paper, {
   textAlign: 'center',
   cursor: 'pointer',
   border: `2px dashed ${
-    hasError
-      ? theme.palette.error.main
-      : isDragActive
-      ? theme.palette.primary.main
-      : theme.palette.grey[300]
+    hasError ? theme.palette.error.main : isDragActive ? theme.palette.primary.main : theme.palette.grey[300]
   }`,
   backgroundColor: isDragActive
     ? alpha(theme.palette.primary.main, 0.08)
@@ -48,29 +44,29 @@ const StyledDropZone = styled(Paper, {
 export interface StagedImageUploadProps {
   /** Callback cuando se suben imágenes exitosamente - retorna upload_ids */
   onUploadComplete?: (uploadIds: string[]) => void;
-  
+
   /** IDs de uploads ya subidos (para mostrar previews) */
   initialUploadIds?: string[];
-  
+
   /** Máximo número de archivos */
   maxFiles?: number;
-  
+
   /** Tamaño máximo en MB */
   maxSizeMB?: number;
-  
+
   /** Propósito del upload */
   purpose?: UploadPurpose;
-  
+
   /** Texto de ayuda personalizado */
   helperText?: string;
-  
+
   /** Deshabilitar upload */
   disabled?: boolean;
 }
 
 /**
  * 📤 Componente de Upload con Drag & Drop + Preview + Progreso
- * 
+ *
  * CARACTERÍSTICAS:
  * ✅ Drag & Drop de múltiples archivos
  * ✅ Preview de imágenes en grid responsivo
@@ -88,34 +84,24 @@ export default function StagedImageUpload({
   helperText = 'Arrastra imágenes aquí o haz clic para seleccionar',
   disabled = false
 }: StagedImageUploadProps) {
-  const {
-    uploadMultipleImages,
-    removeImage,
-    uploadProgress,
-    isUploading,
-    completedUploads,
-    clearProgress
-  } = useStagedImageUpload({
-    purpose,
-    maxSizeMB,
-    onSuccess: () => {
-      // Notificar al padre sobre uploads completados
-      const uploadIds = completedUploads
-        .filter((u) => u.uploadId)
-        .map((u) => u.uploadId as string);
-      
-      if (uploadIds.length > 0 && onUploadComplete) {
-        onUploadComplete(uploadIds);
+  const { uploadMultipleImages, removeImage, uploadProgress, isUploading, completedUploads, clearProgress } =
+    useStagedImageUpload({
+      purpose,
+      maxSizeMB,
+      onSuccess: () => {
+        // Notificar al padre sobre uploads completados
+        const uploadIds = completedUploads.filter((u) => u.uploadId).map((u) => u.uploadId as string);
+
+        if (uploadIds.length > 0 && onUploadComplete) {
+          onUploadComplete(uploadIds);
+        }
       }
-    }
-  });
+    });
 
   // Notificar cambios en uploads completados
   useEffect(() => {
-    const uploadIds = completedUploads
-      .filter((u) => u.uploadId)
-      .map((u) => u.uploadId as string);
-    
+    const uploadIds = completedUploads.filter((u) => u.uploadId).map((u) => u.uploadId as string);
+
     if (uploadIds.length > 0 && onUploadComplete) {
       onUploadComplete(uploadIds);
     }
@@ -155,12 +141,10 @@ export default function StagedImageUpload({
   const handleRemove = useCallback(
     async (uploadId: string) => {
       await removeImage(uploadId);
-      
+
       // Actualizar lista de uploads completados
-      const remainingIds = completedUploads
-        .filter((u) => u.uploadId !== uploadId)
-        .map((u) => u.uploadId as string);
-      
+      const remainingIds = completedUploads.filter((u) => u.uploadId !== uploadId).map((u) => u.uploadId as string);
+
       onUploadComplete?.(remainingIds);
     },
     [removeImage, completedUploads, onUploadComplete]
@@ -178,17 +162,17 @@ export default function StagedImageUpload({
       {canUploadMore && (
         <StyledDropZone {...getRootProps()} isDragActive={isDragActive} elevation={0}>
           <input {...getInputProps()} />
-          
+
           <Box component={Icon} icon="eva:cloud-upload-fill" width={64} height={64} color="text.disabled" />
-          
+
           <Typography variant="h6" sx={{ mt: 2 }}>
             {isDragActive ? '¡Suelta aquí!' : helperText}
           </Typography>
-          
+
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Formatos: JPG, PNG, WEBP • Máximo {maxSizeMB}MB por imagen
           </Typography>
-          
+
           <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>
             {totalUploads}/{maxFiles} imágenes subidas
           </Typography>
@@ -209,10 +193,8 @@ export default function StagedImageUpload({
       {/* PROGRESO DE UPLOADS EN CURSO */}
       {Object.entries(uploadProgress).map(([key, progress]) => {
         if (progress.status === 'success') return null;
-        
-        return (
-          <UploadProgressBar key={key} progress={progress} />
-        );
+
+        return <UploadProgressBar key={key} progress={progress} />;
       })}
     </Stack>
   );
@@ -343,14 +325,14 @@ function UploadProgressBar({ progress }: UploadProgressBarProps) {
           {getStatusText()}
         </Typography>
       </Stack>
-      
+
       <LinearProgress
         variant={progress.progress > 0 ? 'determinate' : 'indeterminate'}
         value={progress.progress}
         color={getStatusColor()}
         sx={{ height: 6, borderRadius: 1 }}
       />
-      
+
       {progress.status === 'error' && progress.error && (
         <Typography variant="caption" color="error.main" sx={{ mt: 0.5 }}>
           {progress.error}

@@ -5,17 +5,17 @@ import {
   useConfirmUploadMutation,
   useDeleteUploadMutation
 } from 'src/redux/services/uploadsApi';
-import type { UploadPurpose, StagedUpload } from 'src/interfaces/api/uploads';
+import type { UploadPurpose } from 'src/interfaces/api/uploads';
 
 /**
  * 🎯 Hook para manejar Staged Uploads con progreso en tiempo real
- * 
+ *
  * FLUJO COMPLETO:
  * 1. validateFile() - Valida tipo y tamaño
  * 2. presignUpload() - Obtiene URL presignada (15min)
  * 3. uploadToMinIO() - PUT directo a MinIO con progreso
  * 4. confirmUpload() - Marca como disponible
- * 
+ *
  * RETORNA:
  * - upload_id para asociar con producto/entidad
  * - download_url para preview de imagen
@@ -34,16 +34,16 @@ export interface UploadProgress {
 export interface UseStagedImageUploadOptions {
   /** Propósito del upload para validación backend */
   purpose?: UploadPurpose;
-  
+
   /** Tamaño máximo en MB (default: 3) */
   maxSizeMB?: number;
-  
+
   /** Tipos MIME permitidos */
   allowedTypes?: string[];
-  
+
   /** Callback al completar upload exitoso */
   onSuccess?: (uploadId: string, downloadUrl: string) => void;
-  
+
   /** Callback en error */
   onError?: (error: string) => void;
 }
@@ -58,7 +58,7 @@ export function useStagedImageUpload(options: UseStagedImageUploadOptions = {}) 
   } = options;
 
   const { enqueueSnackbar } = useSnackbar();
-  
+
   // RTK Query mutations
   const [presignUpload] = usePresignUploadMutation();
   const [confirmUpload] = useConfirmUploadMutation();
@@ -243,15 +243,7 @@ export function useStagedImageUpload(options: UseStagedImageUploadOptions = {}) 
         return null;
       }
     },
-    [
-      validateFile,
-      presignUpload,
-      confirmUpload,
-      purpose,
-      enqueueSnackbar,
-      onSuccess,
-      onError
-    ]
+    [validateFile, presignUpload, confirmUpload, purpose, enqueueSnackbar, onSuccess, onError]
   );
 
   // ========================================

@@ -22,11 +22,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useGetPDVsQuery } from 'src/redux/services/catalogApi';
 import { useAppSelector } from 'src/hooks/store';
 
-export default function PopupAssingInventory({
-  handleAssignInventory,
-  pdvEdit,
-  setAssignWarehouse,
-}) {
+export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, setAssignWarehouse }) {
   useSnackbar();
 
   const assignInventorySchema = Yup.object().shape({
@@ -48,14 +44,14 @@ export default function PopupAssingInventory({
       pdv: pdvEdit ? { pdv: pdvEdit.pdv, id: pdvEdit.id } : null,
       quantity: pdvEdit ? pdvEdit.quantity : '',
       minQuantity: pdvEdit ? pdvEdit.minQuantity : '',
-      edit: pdvEdit ? true : false,
+      edit: !!pdvEdit
     }),
     [pdvEdit]
   );
 
   const methods = useForm<any>({
     resolver: yupResolver(assignInventorySchema),
-    defaultValues,
+    defaultValues
   });
 
   const {
@@ -63,7 +59,7 @@ export default function PopupAssingInventory({
     watch,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting }
   } = methods;
 
   const values = watch();
@@ -84,12 +80,7 @@ export default function PopupAssingInventory({
 
   const onSubmit = async (formValues: any) => {
     try {
-      const resp = handleAssignInventory(
-        formValues.pdv,
-        formValues.quantity,
-        formValues.minQuantity,
-        formValues.edit
-      );
+      const resp = handleAssignInventory(formValues.pdv, formValues.quantity, formValues.minQuantity, formValues.edit);
       if (resp) {
         reset();
       }
@@ -155,7 +146,7 @@ export default function PopupAssingInventory({
               top: 8,
               borderRadius: '100%',
               width: 50,
-              minWidth: 50,
+              minWidth: 50
             }}
             onClick={() => dispatch(setPopupAssignInventory(false))}
           >
@@ -189,11 +180,11 @@ export default function PopupAssingInventory({
                             ml: 1,
                             width: 20,
                             height: 20,
-                            color: 'text.disabled',
+                            color: 'text.disabled'
                           }}
                         />
                       </InputAdornment>
-                    ),
+                    )
                   }}
                 />
               )}
@@ -209,7 +200,7 @@ export default function PopupAssingInventory({
                           <span
                             key={index}
                             style={{
-                              fontWeight: part.highlight ? 700 : 400,
+                              fontWeight: part.highlight ? 700 : 400
                             }}
                           >
                             {part.text}
@@ -222,27 +213,13 @@ export default function PopupAssingInventory({
               }}
               noOptionsText={
                 <Typography variant="body2" color="text.secondary" sx={{ py: 2, px: 1 }}>
-                  {isLoadingPdvs
-                    ? 'Cargando...'
-                    : `No se encontraron resultados a la búsqueda ${searchQuery}`}
+                  {isLoadingPdvs ? 'Cargando...' : `No se encontraron resultados a la búsqueda ${searchQuery}`}
                 </Typography>
               }
             />
             <Stack direction="row" sx={{ marginTop: 3 }} spacing={2}>
-              <RHFTextField
-                fullWidth
-                label="Cantidad"
-                name="quantity"
-                type="number"
-                variant="outlined"
-              />
-              <RHFTextField
-                fullWidth
-                label="Cantidad mínima"
-                name="minQuantity"
-                type="number"
-                variant="outlined"
-              />
+              <RHFTextField fullWidth label="Cantidad" name="quantity" type="number" variant="outlined" />
+              <RHFTextField fullWidth label="Cantidad mínima" name="minQuantity" type="number" variant="outlined" />
             </Stack>
           </DialogContent>
           <DialogActions>
@@ -272,5 +249,5 @@ PopupAssingInventory.propTypes = {
   open: PropTypes.bool,
   handleClose: PropTypes.func,
   handleClickOpen: PropTypes.func,
-  pdvEdit: PropTypes.object,
+  pdvEdit: PropTypes.object
 };
