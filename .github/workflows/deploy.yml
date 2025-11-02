@@ -44,7 +44,7 @@ jobs:
 
       # 6️⃣ Log in to GitHub Container Registry
       - name: 🔑 Log in to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
       # 7️⃣ Build Docker image
       - name: 🐳 Build Docker image
