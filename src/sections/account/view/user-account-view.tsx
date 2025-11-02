@@ -62,7 +62,7 @@ export default function AccountView() {
   return (
     <Container maxWidth={settings.themeStretch ? false : 'lg'}>
       <CustomBreadcrumbs
-        heading="Mi cuentaaaaaaaaa"
+        heading="Mi cuenta"
         icon="ic:round-account-circle"
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
