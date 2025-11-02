@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { HOST_API } from 'src/config-global';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 // ========================================
 // 👤 USER PROFILE API - RTK QUERY
@@ -94,28 +94,8 @@ export interface UserResponse {
 
 export const userProfileApi = createApi({
   reducerPath: 'userProfileApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${HOST_API}`,
-    prepareHeaders: (headers, { endpoint }) => {
-      const token = localStorage.getItem('accessToken');
-      const companyId = localStorage.getItem('companyId');
-
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      if (companyId) {
-        headers.set('X-Company-ID', companyId);
-      }
-
-      // Solo agregar Content-Type para endpoints que no son FormData
-      if (endpoint !== 'uploadUserAvatar' && endpoint !== 'uploadCompanyLogo') {
-        headers.set('Content-Type', 'application/json');
-      }
-
-      return headers;
-    }
-  }),
-  tagTypes: ['UserProfile', 'UserInvitations', 'CompanyUsers', 'CompanyProfile'],
+  baseQuery: baseQueryWithReauth,
+  tagTypes: ['Profile', 'Company', 'UserProfile', 'UserInvitations', 'CompanyUsers', 'CompanyProfile'],
   endpoints: (builder) => ({
     // ========================================
     // 👤 PROFILE ENDPOINTS

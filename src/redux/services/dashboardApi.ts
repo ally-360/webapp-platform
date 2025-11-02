@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { HOST_API } from 'src/config-global';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQueryWithReauth } from './baseQuery';
 
 // ========================================
 // 📊 DASHBOARD API - RTK QUERY
@@ -74,22 +74,7 @@ export interface DashboardSummary {
 
 export const dashboardApi = createApi({
   reducerPath: 'dashboardApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: HOST_API,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('accessToken');
-      const companyId = localStorage.getItem('companyId');
-
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      if (companyId) {
-        headers.set('X-Company-ID', companyId);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['DashboardData'],
   endpoints: (builder) => ({
     // ========================================
