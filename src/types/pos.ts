@@ -144,11 +144,12 @@ export interface POSPaymentCreate {
 }
 
 export interface POSInvoiceCreate {
-  customer_id: string | number; // Puede ser string para clientes reales o number (0) para cliente por defecto
+  customer_id: string | null; // UUID del cliente o null para cliente genérico
   seller_id: string;
   items: POSLineItemCreate[];
   payments: POSPaymentCreate[];
   notes?: string;
+  invoice_type?: 'pos' | 'electronic' | 'simple'; // ✅ Tipo de factura explícito
 }
 
 export interface POSInvoice {

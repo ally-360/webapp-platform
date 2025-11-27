@@ -42,6 +42,13 @@ export interface getProductResponse {
     id: string;
     name: string;
   };
+  // ✅ Stock por PDV para mostrar disponibilidad en otros puntos de venta
+  productPdv?: Array<{
+    pdv_id: string;
+    pdv_name: string;
+    quantity: number;
+    min_quantity: number;
+  }>;
   // Campos calculados frontend
   globalStock?: number;
   inventoryType?: 'Existencias' | 'Sin existencias' | 'Pocas existencias';

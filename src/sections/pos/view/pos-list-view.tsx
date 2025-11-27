@@ -283,7 +283,19 @@ export default function PosListView() {
                     emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
                   />
 
-                  <TableNoData notFound={notFound} />
+                  <TableNoData
+                    notFound={notFound}
+                    hasFilters={canReset}
+                    emptyStateConfig={{
+                      title: 'No tienes puntos de venta configurados',
+                      description: 'Configura tu primer punto de venta para comenzar a operar',
+                      action: {
+                        label: 'Configurar PDV',
+                        href: paths.dashboard.inventory.pdvs,
+                        icon: 'solar:shop-bold'
+                      }
+                    }}
+                  />
                 </TableBody>
               </Table>
             </Scrollbar>

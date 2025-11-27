@@ -1,4 +1,5 @@
 export * from './utils';
+export * from './use-empty-state-config';
 
 export { default as useTable } from './use-table';
 

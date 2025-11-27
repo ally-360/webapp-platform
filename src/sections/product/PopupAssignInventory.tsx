@@ -32,8 +32,8 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
     })
       .required('Punto de venta requerido')
       .typeError('Punto de venta requerido'),
-    quantity: Yup.number().typeError('Cantidad requerida').required('Cantidad requerida'),
-    minQuantity: Yup.number().optional(),
+    quantity: Yup.number().typeError('La cantidad es requerida').required('La cantidad es requerida'),
+    minQuantity: Yup.number().optional().nullable(),
     edit: Yup.boolean()
   });
 
@@ -43,7 +43,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
     () => ({
       pdv: pdvEdit ? { pdv: pdvEdit.pdv, id: pdvEdit.id } : null,
       quantity: pdvEdit ? pdvEdit.quantity : '',
-      minQuantity: pdvEdit ? pdvEdit.minQuantity : '',
+      minQuantity: pdvEdit ? pdvEdit.minQuantity : 10,
       edit: !!pdvEdit
     }),
     [pdvEdit]
@@ -73,7 +73,7 @@ export default function PopupAssingInventory({ handleAssignInventory, pdvEdit, s
     } else {
       setValue('pdv', null);
       setValue('quantity', '');
-      setValue('minQuantity', '');
+      setValue('minQuantity', 10);
       setValue('edit', false);
     }
   }, [pdvEdit, setValue]);

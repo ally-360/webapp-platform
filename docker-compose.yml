@@ -1,14 +1,12 @@
 services:
   allyapp:
     container_name: allyapp
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: always
-    networks:
-      - ally360-api_default
+    image: ghcr.io/ally-360/webpage-platform:latest
+    restart: unless-stopped
     expose:
       - "80"
+    networks:
+      - ally360-api_default
 
 networks:
   ally360-api_default:

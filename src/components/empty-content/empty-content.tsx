@@ -35,6 +35,10 @@ export default function EmptyContent({ title, imgUrl, action, filled, descriptio
         component="img"
         alt="empty content"
         src={imgUrl || '/assets/icons/empty/ic_content.svg'}
+        onError={(e: any) => {
+          // Si la imagen no existe, usar la imagen por defecto
+          e.target.src = '/assets/icons/empty/ic_content.svg';
+        }}
         sx={{ width: 1, maxWidth: 160 }}
       />
 

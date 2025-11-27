@@ -959,7 +959,19 @@ export default function InvoiceListView() {
                       />
                     ))}
 
-                  <TableNoData notFound={notFound} />
+                  <TableNoData
+                    notFound={notFound}
+                    hasFilters={canReset}
+                    emptyStateConfig={{
+                      title: 'No tienes facturas de venta registradas',
+                      description: 'Comienza a facturar tus ventas para llevar el control de tu negocio',
+                      action: {
+                        label: 'Nueva Factura',
+                        href: paths.dashboard.sales.newSale,
+                        icon: 'mingcute:add-line'
+                      }
+                    }}
+                  />
                 </TableBody>
               </Table>
             </Scrollbar>

@@ -1,5 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { HOST_API } from 'src/config-global';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import type {
   PresignUploadRequest,
   PresignUploadResponse,
@@ -10,6 +9,7 @@ import type {
   ListUploadsResponse,
   UpdateUploadRequest
 } from 'src/interfaces/api/uploads';
+import { baseQueryWithReauth } from './baseQuery';
 
 // ========================================
 // 📤 UPLOADS API - RTK QUERY
@@ -26,17 +26,7 @@ import type {
  */
 export const uploadsApi = createApi({
   reducerPath: 'uploadsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${HOST_API}/uploads`,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Upload', 'UploadList'],
   endpoints: (builder) => ({
     // ========================================
@@ -44,7 +34,7 @@ export const uploadsApi = createApi({
     // ========================================
     presignUpload: builder.mutation<PresignUploadResponse, PresignUploadRequest>({
       query: (body) => ({
-        url: '/presign',
+        url: '/uploads/presign',
         method: 'POST',
         body
       }),
@@ -56,7 +46,7 @@ export const uploadsApi = createApi({
     // ========================================
     confirmUpload: builder.mutation<ConfirmUploadResponse, ConfirmUploadRequest>({
       query: (body) => ({
-        url: '/confirm',
+        url: '/uploads/confirm',
         method: 'POST',
         body
       }),
@@ -67,7 +57,7 @@ export const uploadsApi = createApi({
     // 📋 GET - Obtener un upload por ID
     // ========================================
     getUpload: builder.query<StagedUpload, string>({
-      query: (uploadId) => `/${uploadId}`,
+      query: (uploadId) => `/uploads/${uploadId}`,
       providesTags: (result, error, id) => [{ type: 'Upload', id }]
     }),
 
@@ -86,7 +76,7 @@ export const uploadsApi = createApi({
         if (filters?.page) params.append('page', String(filters.page));
         if (filters?.page_size) params.append('page_size', String(filters.page_size));
 
-        return `?${params.toString()}`;
+        return `/uploads?${params.toString()}`;
       },
       providesTags: (result) =>
         result
@@ -99,7 +89,7 @@ export const uploadsApi = createApi({
     // ========================================
     updateUpload: builder.mutation<StagedUpload, { id: string } & UpdateUploadRequest>({
       query: ({ id, ...body }) => ({
-        url: `/${id}`,
+        url: `/uploads/${id}`,
         method: 'PATCH',
         body
       }),
@@ -111,7 +101,7 @@ export const uploadsApi = createApi({
     // ========================================
     deleteUpload: builder.mutation<void, string>({
       query: (uploadId) => ({
-        url: `/${uploadId}`,
+        url: `/uploads/${uploadId}`,
         method: 'DELETE'
       }),
       invalidatesTags: (result, error, id) => [{ type: 'Upload', id }, 'UploadList']

@@ -83,6 +83,19 @@ export const posApi = createApi({
       providesTags: (result, error, id) => [{ type: 'CashRegister', id }]
     }),
 
+    /**
+     * ✅ Obtener caja abierta actual para un PDV
+     * GET /cash-registers/current?pdv_id={pdv_id}
+     * Devuelve 404 si no hay caja abierta
+     */
+    getCurrentCashRegister: builder.query<CashRegister, string>({
+      query: (pdv_id) => ({
+        url: '/cash-registers/current',
+        params: { pdv_id }
+      }),
+      providesTags: ['CashRegister']
+    }),
+
     // ========================================
     // 💰 CASH MOVEMENTS ENDPOINTS
     // ========================================
@@ -385,6 +398,8 @@ export const {
   useGetCashRegistersQuery,
   useLazyGetCashRegistersQuery,
   useGetCashRegisterQuery,
+  useGetCurrentCashRegisterQuery,
+  useLazyGetCurrentCashRegisterQuery,
 
   // Cash Movements
   useCreateCashMovementMutation,

@@ -802,7 +802,19 @@ export default function BillListView() {
                     emptyRows={emptyRows(table.page, table.rowsPerPage, enrichedBills.length)}
                   />
 
-                  <TableNoData notFound={notFound} />
+                  <TableNoData
+                    notFound={notFound}
+                    hasFilters={canReset}
+                    emptyStateConfig={{
+                      title: 'No tienes facturas de compra registradas',
+                      description: 'Registra tus compras a proveedores para llevar el control de inventario',
+                      action: {
+                        label: 'Nueva Compra',
+                        href: paths.dashboard.bill.newBill,
+                        icon: 'mingcute:add-line'
+                      }
+                    }}
+                  />
                 </TableBody>
               </Table>
             </Scrollbar>

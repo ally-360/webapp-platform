@@ -1,7 +1,7 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { HOST_API } from 'src/config-global';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import type { Product, PaginatedResponse, ProductFilters } from 'src/api/types';
 import type { getProductResponse } from 'src/interfaces/inventory/productsInterface';
+import { baseQueryWithReauth } from './baseQuery';
 
 // ========================================
 // 📦 PRODUCTS API - RTK QUERY
@@ -42,17 +42,7 @@ export interface UpdateProductRequest extends Partial<CreateProductRequest> {
 
 export const productsApi = createApi({
   reducerPath: 'productsApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: HOST_API,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      headers.set('Content-Type', 'application/json');
-      return headers;
-    }
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ['Product', 'ProductList'],
   endpoints: (builder) => ({
     // ========================================
