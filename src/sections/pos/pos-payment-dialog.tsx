@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 // @mui
 import {
   Dialog,
@@ -123,13 +123,6 @@ export default function PosPaymentDialog({ open, onClose, onAddPayment, remainin
       setAmount(formatCurrencyInput(numericValue));
     }
   };
-
-  useEffect(() => {
-    console.log('Remaining Amount changed:', remainingAmount);
-    if (open) {
-      setAmount(formatCurrencyInput(remainingAmount));
-    }
-  }, [open, remainingAmount]);
 
   const handleClose = () => {
     setSelectedMethod('');

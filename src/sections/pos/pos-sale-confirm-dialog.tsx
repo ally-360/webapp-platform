@@ -65,7 +65,6 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
   const sellers = useMemo(() => {
     const sellersList = sellersData?.sellers || [];
-    console.log('📋 Vendedores cargados:', sellersList.length, sellersList);
     return sellersList;
   }, [sellersData?.sellers]);
 

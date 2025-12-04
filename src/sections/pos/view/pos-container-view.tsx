@@ -71,7 +71,7 @@ export default function PosContainerView() {
   // Hooks personalizados
   usePosInitialization();
   usePosStatePersistence(currentRegister, salesWindows);
-  useTabManagement(salesWindows, addingNewSale, setOpenTab, setAddingNewSale);
+  useTabManagement(salesWindows, addingNewSale, openTab, setOpenTab, setAddingNewSale);
   useDrawerPersistence(openDrawer);
 
   // Hook para gestión de caja registradora con backend

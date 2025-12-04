@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 export const useTabManagement = (
   salesWindows: any[],
   addingNewSale: boolean,
+  openTab: number,
   setOpenTab: (id: number) => void,
   setAddingNewSale: (value: boolean) => void
 ) => {
@@ -25,10 +26,10 @@ export const useTabManagement = (
   // Handle post-sale window selection
   useEffect(() => {
     if (salesWindows.length > 0) {
-      const currentWindowExists = salesWindows.some((window) => window.id === setOpenTab);
+      const currentWindowExists = salesWindows.some((window) => window.id === openTab);
       if (!currentWindowExists) {
         setOpenTab(salesWindows[0].id);
       }
     }
-  }, [salesWindows, setOpenTab]);
+  }, [salesWindows, openTab, setOpenTab]);
 };
