@@ -33,8 +33,23 @@ export const useSaleCompletion = (sale: SaleWindow, selectedCustomer: Customer |
   };
 
   const handleInitiateCompleteSale = () => {
+    // ✅ Validar cliente ANTES de abrir el modal
+    if (!selectedCustomer?.id) {
+      enqueueSnackbar('Debes seleccionar un cliente antes de completar la venta', {
+        variant: 'warning',
+        autoHideDuration: 4000
+      });
+      return;
+    }
+
+    // ✅ Validar que la venta se pueda completar (pagos, productos, etc)
     if (canComplete) {
       setOpenSaleConfirmDialog(true);
+    } else {
+      enqueueSnackbar('La venta no puede ser completada. Verifica productos y pagos', {
+        variant: 'error',
+        autoHideDuration: 4000
+      });
     }
   };
 
@@ -48,12 +63,30 @@ export const useSaleCompletion = (sale: SaleWindow, selectedCustomer: Customer |
     notes?: string;
   }) => {
     try {
+      // ✅ Validación adicional: verificar que customer_id sea un UUID válido
+      if (!selectedCustomer?.id || selectedCustomer.id === '0' || selectedCustomer.id === 0) {
+        enqueueSnackbar('Cliente inválido. Por favor selecciona un cliente válido.', {
+          variant: 'error',
+          autoHideDuration: 4000
+        });
+        return;
+      }
+
       // Convertir sale_date a string para Redux serialization
       const posType: 'electronic' | 'simple' = selectedCustomer && selectedCustomer.document ? 'electronic' : 'simple';
 
+      // ✅ Asegurar que customer_id sea string y no vacío
+      const customerId =
+        typeof selectedCustomer.id === 'string' ? selectedCustomer.id : selectedCustomer.id?.toString();
+
+      if (!customerId || customerId === '0') {
+        enqueueSnackbar('Error: ID de cliente inválido', { variant: 'error' });
+        return;
+      }
+
       // Preparar datos para la API del backend
       const backendSaleData = {
-        customer_id: selectedCustomer?.id?.toString() || '',
+        customer_id: customerId,
         seller_id: saleData.seller_id || '',
         notes: saleData.notes,
         items: sale.products.map((product) => ({
@@ -67,6 +100,12 @@ export const useSaleCompletion = (sale: SaleWindow, selectedCustomer: Customer |
           reference: payment.reference
         }))
       };
+
+      console.log('🎯 Datos de venta preparados:', {
+        customer_id: customerId,
+        customer: selectedCustomer,
+        backendSaleData
+      });
 
       // Crear venta en el backend
       const backendResponse = await createPOSSale(backendSaleData).unwrap();

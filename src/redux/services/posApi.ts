@@ -146,10 +146,14 @@ export const posApi = createApi({
      * Listar vendedores
      * GET /sellers
      */
-    getSellers: builder.query<SellersResponse, { page?: number; size?: number; is_active?: boolean }>({
-      query: ({ page = 1, size = 100, is_active = true } = {}) => ({
+    getSellers: builder.query<SellersResponse, { page?: number; size?: number; active_only?: boolean }>({
+      query: ({ page = 1, size = 100, active_only = true } = {}) => ({
         url: '/sellers',
-        params: { page, size, is_active }
+        params: {
+          limit: size,
+          offset: (page - 1) * size,
+          active_only
+        }
       }),
       providesTags: ['Seller']
     }),

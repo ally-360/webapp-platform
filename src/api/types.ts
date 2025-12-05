@@ -65,7 +65,13 @@ export interface Product {
   name: string;
   description?: string;
   barCode?: string;
-  images: string[];
+  images: Array<{
+    id: string;
+    filename: string;
+    url: string;
+    is_primary: boolean;
+    sort_order: number;
+  }>;
   typeProduct: '1' | '2'; // '1' = simple, '2' = configurable
   taxesOption: number;
   sku?: string;

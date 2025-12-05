@@ -55,7 +55,10 @@ export const usePosProducts = (filters: ProductFilters = {}, currentPDVId?: stri
       const transformedProducts: PosProduct[] = productsData.data.map((apiProduct: ApiProduct) => {
         // Buscar stock específico del PDV actual
         const pdvStock = apiProduct.productPdv?.find((pdv) => pdv.pdv_id === currentPDVId);
-        const stockQuantity = pdvStock?.quantity || apiProduct.quantityStock || 0;
+        const stockQuantity = pdvStock?.quantity || 0; // Si no existe en productPdv, stock = 0
+
+        // Extraer primera imagen si existe el array
+        const firstImage = apiProduct.images?.[0]?.url || apiProduct.images?.[0] || '';
 
         return {
           id: apiProduct.id,
@@ -65,8 +68,12 @@ export const usePosProducts = (filters: ProductFilters = {}, currentPDVId?: stri
           sku: apiProduct.sku || '',
           tax_rate: apiProduct.taxesOption === 1 ? 0.19 : 0, // Asumir 19% si taxesOption es 1
           category: apiProduct.category?.name || 'Sin categoría',
-          stock: stockQuantity,
-          image: apiProduct.images?.[0] || '',
+          stock: stockQuantity, // Stock en el PDV actual
+          globalStock: apiProduct.globalStock || apiProduct.quantityStock || 0, // Stock global
+          quantityStock: apiProduct.quantityStock || 0, // Stock total del producto
+          productPdv: apiProduct.productPdv || [], // ✅ ARRAY COMPLETO de stock por PDV
+          image: firstImage,
+          images: apiProduct.images?.map((img: any) => img?.url || img) || [], // ✅ Todas las imágenes
           // Información adicional del producto API
           barCode: apiProduct.barCode,
           description: apiProduct.description,

@@ -193,6 +193,122 @@ export interface POSPayment {
 }
 
 // ========================================
+// 🪟 SALE WINDOW TYPES (Frontend State Management)
+// ========================================
+
+/**
+ * Producto en ventana de venta (estado local frontend)
+ * Se mapea a POSLineItemCreate al crear la venta
+ */
+export interface SaleWindowProduct {
+  id: string; // product_id del backend
+  name: string;
+  price: number; // unit_price
+  quantity: number;
+  sku: string;
+  barCode?: string;
+  description?: string;
+  brand?: string;
+  sellInNegative?: boolean;
+  tax_rate?: number;
+  category?: string;
+  stock?: number;
+  image?: string;
+}
+
+/**
+ * Cliente en ventana de venta (estado local frontend)
+ */
+export interface SaleWindowCustomer {
+  id: string;
+  name: string;
+  document?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  document_type?: 'CC' | 'NIT' | 'CE' | 'PP';
+}
+
+/**
+ * Método de pago en ventana de venta (estado local frontend)
+ * Se mapea a POSPaymentCreate al crear la venta
+ */
+export interface SaleWindowPayment {
+  id: string; // ID temporal local (no del backend)
+  method: PaymentMethodTypeType;
+  amount: number;
+  reference?: string;
+  notes?: string;
+}
+
+/**
+ * Estado de una ventana de venta (Tab)
+ * Estructura optimizada para sincronización con backend
+ */
+export interface SaleWindow {
+  // Identificadores
+  id: number; // ID temporal local (timestamp)
+  draft_id?: string; // UUID del draft en backend (cuando se implemente)
+  name: string; // "Venta 1", "Venta 2", etc.
+
+  // Datos de la venta
+  products: SaleWindowProduct[];
+  customer: SaleWindowCustomer | null;
+  payments: SaleWindowPayment[];
+  seller_id?: string; // UUID del vendedor asignado
+  seller_name?: string;
+
+  // Cálculos (calculados en frontend, validados en backend)
+  subtotal: number;
+  tax_amount: number;
+  discount_percentage?: number;
+  discount_amount?: number;
+  total: number;
+
+  // Estado
+  status: 'draft' | 'pending_payment' | 'paid' | 'cancelled';
+  created_at: string; // ISO string
+  notes?: string;
+
+  // Metadata para sincronización
+  last_modified_at?: string; // ISO string
+  synced_at?: string; // ISO string - última sincronización con backend
+  has_changes?: boolean; // Flag para auto-save
+}
+
+/**
+ * Request para crear venta completa desde SaleWindow
+ * Mapea SaleWindow → POSInvoiceCreate
+ */
+export interface CreateSaleFromWindowRequest {
+  window: SaleWindow;
+  pdv_id: string;
+}
+
+/**
+ * Mapeo de SaleWindow a POSInvoiceCreate
+ */
+export function mapSaleWindowToPOSInvoiceCreate(window: SaleWindow, seller_id: string): POSInvoiceCreate {
+  return {
+    customer_id: window.customer?.id || null,
+    seller_id: window.seller_id || seller_id,
+    items: window.products.map((product) => ({
+      product_id: product.id,
+      quantity: product.quantity,
+      unit_price: product.price
+    })),
+    payments: window.payments.map((payment) => ({
+      method: payment.method,
+      amount: payment.amount,
+      reference: payment.reference,
+      notes: payment.notes
+    })),
+    notes: window.notes,
+    invoice_type: window.customer?.document ? 'electronic' : 'simple'
+  };
+}
+
+// ========================================
 // 📊 SHIFT TYPES
 // ========================================
 

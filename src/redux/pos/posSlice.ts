@@ -1,6 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Types para el POS
+interface ProductPdv {
+  pdv_id: string;
+  pdv_name: string;
+  quantity: number;
+  min_quantity: number;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -13,8 +20,12 @@ interface Product {
   sellInNegative?: boolean;
   tax_rate?: number;
   category?: string;
-  stock?: number;
+  stock?: number; // Stock total (quantityStock del backend)
+  globalStock?: number; // Stock global
+  quantityStock?: number; // Stock total del producto
+  productPdv?: ProductPdv[]; // Stock por cada PDV (campo del backend)
   image?: string;
+  images?: string[];
 }
 
 interface Customer {

@@ -182,6 +182,7 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
           searchTerm={searchTerm}
           isSearchValid={isSearchValid}
           minSearchLength={minSearchLength}
+          currentPdvId={currentRegister?.pdv_id}
         />
       </Grid>
 
