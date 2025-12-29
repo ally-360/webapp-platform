@@ -98,7 +98,12 @@ export default function BillListView() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   // RTK Query hooks
-  const { data: bills = [], isLoading } = useGetBillsQuery();
+  const { data: bills = [], isLoading } = useGetBillsQuery({
+    status: filters.status !== 'all' ? (filters.status as any) : undefined,
+    date_from: filters.startDate ? fDate(filters.startDate, 'yyyy-MM-dd') : undefined,
+    date_to: filters.endDate ? fDate(filters.endDate, 'yyyy-MM-dd') : undefined,
+    limit: 1000 // Adjust as needed
+  });
   const { data: contacts = [] } = useGetContactsQuery({});
   const [voidBill] = useVoidBillMutation();
 

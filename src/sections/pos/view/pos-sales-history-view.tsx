@@ -49,8 +49,9 @@ import {
 } from 'src/api';
 import CustomDateRangePicker from 'src/components/custom-date-range-picker';
 import { fDate, fDateTime } from 'src/utils/format-time';
-import { useGetPOSSalesQuery } from 'src/redux/services/posApi';
+import { useGetPOSSalesQuery, useGetPOSSaleQuery } from 'src/redux/services/posApi';
 import type { POSInvoice } from 'src/types/pos';
+import { LoadingScreen } from 'src/components/loading-screen';
 
 // Local interface for transformed sales data
 interface TransformedSale {
@@ -104,11 +105,16 @@ const defaultFilters: Filters = {
 
 // Memoized row component
 const SaleRow = memo(({ row, onOpenActions, active }: any) => {
-  const items = useMemo(() => row.products.reduce((sum: number, p: any) => sum + p.quantity, 0), [row.products]);
-  const payments = useMemo(
-    () => row.payments.map((p: any) => `${PAYMENT_LABEL[p.method] || p.method}: ${fCurrency(p.amount)}`).join(' | '),
-    [row.payments]
+  const items = useMemo(
+    () => (row.products?.length > 0 ? row.products.reduce((sum: number, p: any) => sum + p.quantity, 0) : '-'),
+    [row.products]
   );
+  const payments = useMemo(() => {
+    if (!row.payments || row.payments.length === 0) {
+      return fCurrency(row.total); // Show total if payments not available
+    }
+    return row.payments.map((p: any) => `${PAYMENT_LABEL[p.method] || p.method}: ${fCurrency(p.amount)}`).join(' | ');
+  }, [row.payments, row.total]);
   const dateStr = useMemo(() => fDateTime(row.created_at, 'dd MMM yyyy HH:mm'), [row.created_at]);
 
   return (
@@ -238,73 +244,126 @@ const FiltersBar = memo(({ filters, onFilters, canReset, dateError }: FiltersBar
   );
 });
 
-const DetailsDialog = memo(({ open, onClose, sale, onPrint }: any) => (
-  <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-    <DialogTitle>Detalle de venta</DialogTitle>
-    <DialogContent dividers>
-      {sale && (
-        <Stack spacing={2}>
-          <Stack direction="row" spacing={2} flexWrap="wrap">
-            <Info label="Factura" value={sale.invoice_number || '-'} />
-            <Info label="Fecha" value={fDateTime(sale.created_at, 'dd MMM yyyy HH:mm')} />
-            <Info label="Cliente" value={sale.customer?.name || 'Sin cliente'} />
-            <Info label="Vendedor" value={sale.seller_name || '-'} />
-            <Info label="Tipo" value={sale.pos_type === 'electronic' ? 'Electrónico' : 'Simple'} />
+const DetailsDialog = memo(({ open, onClose, saleId, onPrint }: any) => {
+  // Fetch full sale detail when dialog opens
+  const { data: saleDetail, isLoading } = useGetPOSSaleQuery(saleId, {
+    skip: !open || !saleId
+  });
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>Detalle de venta</DialogTitle>
+      <DialogContent dividers>
+        {isLoading && (
+          <Stack alignItems="center" justifyContent="center" sx={{ py: 5 }}>
+            <LoadingScreen />
           </Stack>
+        )}
 
-          <Divider />
-
-          <Typography variant="subtitle2">Productos</Typography>
-          <Stack spacing={0.5}>
-            {sale.products.map((p: any) => (
-              <Typography key={p.id} variant="body2">
-                {p.name} — x{p.quantity} · {fCurrency(p.price)}
-              </Typography>
-            ))}
-          </Stack>
-
-          <Divider />
-
-          <Typography variant="subtitle2">Pagos</Typography>
-          <Stack spacing={0.5}>
-            {sale.payments.map((p: any, idx: number) => (
-              <Typography key={idx} variant="body2">
-                {PAYMENT_LABEL[p.method] || p.method}: {fCurrency(p.amount)}
-              </Typography>
-            ))}
-          </Stack>
-
-          <Divider />
-
-          <Stack direction="row" justifyContent="space-between">
-            <Typography variant="subtitle2">Subtotal</Typography>
-            <Typography variant="subtitle2">{fCurrency(sale.subtotal)}</Typography>
-          </Stack>
-          <Stack direction="row" justifyContent="space-between">
-            <Typography variant="subtitle2">Impuesto</Typography>
-            <Typography variant="subtitle2">{fCurrency(sale.tax_amount)}</Typography>
-          </Stack>
-          {sale.discount_amount ? (
-            <Stack direction="row" justifyContent="space-between">
-              <Typography variant="subtitle2">Descuento</Typography>
-              <Typography variant="subtitle2">- {fCurrency(sale.discount_amount)}</Typography>
+        {!isLoading && saleDetail && (
+          <Stack spacing={2}>
+            {/* Información básica */}
+            <Stack direction="row" spacing={2} flexWrap="wrap">
+              <Info label="Factura" value={saleDetail.number || '-'} />
+              <Info label="Fecha" value={fDateTime(saleDetail.issue_date, 'dd MMM yyyy')} />
+              <Info label="Cliente" value={saleDetail.customer_name || 'Sin cliente'} />
+              <Info label="Vendedor" value={saleDetail.seller_name || '-'} />
+              <Info label="PDV" value={saleDetail.pdv_name || '-'} />
+              <Info label="Estado" value={saleDetail.status} />
             </Stack>
-          ) : null}
-          <Stack direction="row" justifyContent="space-between">
-            <Typography variant="h6">Total</Typography>
-            <Typography variant="h6">{fCurrency(sale.total)}</Typography>
+
+            <Divider />
+
+            {/* Productos */}
+            <Typography variant="subtitle2">Productos</Typography>
+            <Stack spacing={0.5}>
+              {saleDetail.line_items?.map((item: any, index: number) => (
+                <Stack key={`${item.sku}-${index}`} direction="row" justifyContent="space-between">
+                  <Typography variant="body2">
+                    {item.product_name} {item.sku ? `(${item.sku})` : ''} — x{item.quantity}
+                  </Typography>
+                  <Typography variant="body2">
+                    {fCurrency(item.unit_price)} x {item.quantity} = {fCurrency(item.subtotal)}
+                  </Typography>
+                </Stack>
+              ))}
+            </Stack>
+
+            <Divider />
+
+            {/* Pagos */}
+            <Typography variant="subtitle2">Pagos</Typography>
+            <Stack spacing={0.5}>
+              {saleDetail.payments?.map((payment: any, index: number) => (
+                <Stack key={`${payment.method}-${index}`} direction="row" justifyContent="space-between">
+                  <Typography variant="body2">
+                    {PAYMENT_LABEL[payment.method] || payment.method}
+                    {payment.reference && ` (Ref: ${payment.reference})`}
+                  </Typography>
+                  <Typography variant="body2">{fCurrency(payment.amount)}</Typography>
+                </Stack>
+              ))}
+            </Stack>
+
+            <Divider />
+
+            {/* Totales */}
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="subtitle2">Subtotal</Typography>
+              <Typography variant="subtitle2">{fCurrency(saleDetail.subtotal)}</Typography>
+            </Stack>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="subtitle2">Impuestos</Typography>
+              <Typography variant="subtitle2">{fCurrency(saleDetail.tax)}</Typography>
+            </Stack>
+            {saleDetail.discount > 0 && (
+              <Stack direction="row" justifyContent="space-between">
+                <Typography variant="subtitle2">Descuento</Typography>
+                <Typography variant="subtitle2">-{fCurrency(saleDetail.discount)}</Typography>
+              </Stack>
+            )}
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="h6">Total</Typography>
+              <Typography variant="h6">{fCurrency(saleDetail.total)}</Typography>
+            </Stack>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography variant="subtitle2" color="success.main">
+                Pagado
+              </Typography>
+              <Typography variant="subtitle2" color="success.main">
+                {fCurrency(saleDetail.total_paid)}
+              </Typography>
+            </Stack>
+
+            {/* Notas */}
+            {saleDetail.notes && (
+              <>
+                <Divider />
+                <Stack>
+                  <Typography variant="subtitle2">Notas</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {saleDetail.notes}
+                  </Typography>
+                </Stack>
+              </>
+            )}
           </Stack>
-        </Stack>
-      )}
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose}>Cerrar</Button>
-      <Button onClick={onPrint} startIcon={<Iconify icon="solar:printer-minimalistic-bold" />} variant="contained">
-        Imprimir
-      </Button>
-    </DialogActions>
-  </Dialog>
-));
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cerrar</Button>
+        <Button
+          onClick={onPrint}
+          startIcon={<Iconify icon="solar:printer-minimalistic-bold" />}
+          variant="contained"
+          disabled={!saleDetail}
+        >
+          Imprimir
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+});
 
 export default function PosSalesHistoryView() {
   const table = useTable({ defaultOrderBy: 'created_at' });
@@ -345,20 +404,37 @@ export default function PosSalesHistoryView() {
   const rowsAll = useMemo((): TransformedSale[] => {
     if (!salesResponse?.items) return [];
 
-    return salesResponse.items.map((sale: POSInvoice) => ({
-      id: sale.id,
-      invoice_number: sale.number,
-      created_at: sale.created_at,
-      customer: sale.customer_name ? { name: sale.customer_name } : null,
-      seller_name: sale.seller_name,
-      products: [], // Will need to be populated from line items if available
-      payments: [], // Will need to be populated from payment records if available
-      subtotal: parseFloat(sale.subtotal || '0'),
-      tax_amount: parseFloat(sale.taxes_total || '0'),
-      total: parseFloat(sale.total_amount || '0'),
-      pos_type: 'simple', // Assume simple POS type for now
-      status: sale.status as 'paid' | 'cancelled' | 'refunded'
-    }));
+    return salesResponse.items.map((sale: POSInvoice) => {
+      // Map status to expected values
+      let status: 'paid' | 'cancelled' | 'refunded' = 'paid';
+      const saleStatus = sale.status?.toUpperCase();
+      if (saleStatus === 'CANCELLED') {
+        status = 'cancelled';
+      } else if (saleStatus === 'REFUNDED') {
+        status = 'refunded';
+      }
+
+      // Determine pos_type from sale data
+      let pos_type: 'simple' | 'electronic' = 'simple';
+      if (sale.pos_type?.toLowerCase().includes('electronic') || sale.pos_type?.toLowerCase().includes('electrónico')) {
+        pos_type = 'electronic';
+      }
+
+      return {
+        id: sale.id,
+        invoice_number: sale.invoice_number || sale.number,
+        created_at: sale.created_at,
+        customer: sale.customer_name ? { name: sale.customer_name } : null,
+        seller_name: sale.seller_name || 'Sin vendedor',
+        products: sale.line_items || [],
+        payments: sale.payments || [],
+        subtotal: typeof sale.subtotal === 'number' ? sale.subtotal : parseFloat(String(sale.subtotal || '0')),
+        tax_amount: typeof sale.tax === 'number' ? sale.tax : parseFloat(String(sale.tax || '0')),
+        total: typeof sale.total === 'number' ? sale.total : parseFloat(String(sale.total || '0')),
+        pos_type,
+        status
+      };
+    });
   }, [salesResponse]);
 
   const dateError = useMemo(() => {
@@ -651,7 +727,12 @@ export default function PosSalesHistoryView() {
         </MenuItem>
       </CustomPopover>
 
-      <DetailsDialog open={detailsOpen} onClose={handleCloseDetails} sale={selectedSale} onPrint={handleReprint} />
+      <DetailsDialog
+        open={detailsOpen}
+        onClose={handleCloseDetails}
+        saleId={selectedSale?.id}
+        onPrint={handleReprint}
+      />
     </Container>
   );
 }

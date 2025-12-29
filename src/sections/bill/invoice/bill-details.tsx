@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 // @mui
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -14,6 +14,7 @@ import TableBody from '@mui/material/TableBody';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
+import Alert from '@mui/material/Alert';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // utils
@@ -42,6 +43,13 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 export default function BillDetails({ bill }) {
   const [currentStatus, setCurrentStatus] = useState(bill?.status?.toLowerCase() || 'draft');
   const paymentDialog = useBoolean(false);
+
+  // Actualizar estado cuando cambie la prop bill
+  useEffect(() => {
+    if (bill?.status) {
+      setCurrentStatus(bill.status.toLowerCase());
+    }
+  }, [bill?.status]);
 
   const handleChangeStatus = useCallback((event) => {
     setCurrentStatus(event.target.value);
@@ -165,6 +173,8 @@ export default function BillDetails({ bill }) {
     { value: 'void', label: 'Anulada' }
   ];
 
+  const canAddPayment = currentStatus === 'open' || currentStatus === 'partial';
+
   return (
     <>
       <BillToolbar
@@ -176,6 +186,34 @@ export default function BillDetails({ bill }) {
       />
 
       <Card sx={{ pt: 5, px: 5 }}>
+        {/* Alert informativo según el estado */}
+        {currentStatus === 'draft' && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2">Factura en Borrador</Typography>
+            <Typography variant="body2">
+              Cambie el estado a <strong>ABIERTO</strong> cuando reciba la mercancía. Esto incrementará automáticamente
+              el inventario.
+            </Typography>
+          </Alert>
+        )}
+
+        {currentStatus === 'open' && parseFloat(bill?.balance_due || '0') > 0 && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2">Factura Pendiente de Pago</Typography>
+            <Typography variant="body2">
+              Saldo pendiente: <strong>{fCurrency(parseFloat(bill?.balance_due || '0'))}</strong>. Registre pagos para
+              actualizar el estado automáticamente.
+            </Typography>
+          </Alert>
+        )}
+
+        {currentStatus === 'paid' && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2">Factura Pagada</Typography>
+            <Typography variant="body2">Esta factura ha sido pagada completamente.</Typography>
+          </Alert>
+        )}
+
         <Box
           rowGap={5}
           display="grid"
@@ -261,7 +299,9 @@ export default function BillDetails({ bill }) {
       </Card>
 
       {/* Payment History */}
-      {bill?.id && <BillPaymentHistory billId={bill.id} />}
+      {bill?.id && (
+        <BillPaymentHistory billId={bill.id} canAddPayment={canAddPayment} onAddPayment={paymentDialog.onTrue} />
+      )}
 
       {/* Payment Dialog */}
       <BillPaymentDialog open={paymentDialog.value} onClose={paymentDialog.onFalse} bill={bill} />

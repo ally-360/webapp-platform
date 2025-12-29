@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Button,
   Card,
@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -16,81 +15,79 @@ import {
   TableContainer,
   TableRow,
   TextField,
-  Typography
+  Typography,
+  CircularProgress,
+  TablePagination,
+  Box,
+  Chip
 } from '@mui/material';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import Iconify from 'src/components/iconify';
 import { paths } from 'src/routes/paths';
 import { fCurrency } from 'src/utils/format-number';
 import { fDate, fDateTime } from 'src/utils/format-time';
-import { getShiftHistory, getShiftById, downloadShiftReport } from 'src/api';
 import CustomDateRangePicker from 'src/components/custom-date-range-picker';
 import Scrollbar from 'src/components/scrollbar';
+import { useGetShiftHistoryQuery, useGetShiftDetailQuery } from 'src/redux/services/posApi';
+import type { ShiftHistoryParams } from 'src/types/pos';
 
 export default function ShiftHistoryView() {
-  const [filters, setFilters] = useState<{
-    start?: string | null;
-    end?: string | null;
-    userId?: string;
-    posId?: string;
-  }>({ start: null, end: null });
+  const [filters, setFilters] = useState<ShiftHistoryParams>({
+    page: 1,
+    page_size: 20,
+    sort_by: 'opened_at',
+    sort_order: 'desc'
+  });
   const [openPicker, setOpenPicker] = useState(false);
 
-  const [rows, setRows] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
   const [detailOpen, setDetailOpen] = useState(false);
-  const [detail, setDetail] = useState<any | null>(null);
+  const [selectedRegisterId, setSelectedRegisterId] = useState<string | null>(null);
+
+  // Fetch shift history with filters
+  const { data: historyData, isLoading } = useGetShiftHistoryQuery(filters);
+
+  // Fetch shift detail when modal is open
+  const { data: shiftDetail, isLoading: loadingDetail } = useGetShiftDetailQuery(selectedRegisterId || '', {
+    skip: !selectedRegisterId || !detailOpen
+  });
 
   const label = useMemo(() => {
-    if (filters.start && filters.end) {
-      return `${fDate(filters.start, 'dd MMM yy')} - ${fDate(filters.end, 'dd MMM yy')}`;
+    if (filters.date_from && filters.date_to) {
+      return `${fDate(filters.date_from, 'dd MMM yy')} - ${fDate(filters.date_to, 'dd MMM yy')}`;
     }
     return 'Rango de fechas';
-  }, [filters.start, filters.end]);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const res = await getShiftHistory({
-        dateFrom: filters.start || undefined,
-        dateTo: filters.end || undefined,
-        userId: filters.userId || undefined,
-        posId: filters.posId || undefined,
-        page: 0,
-        limit: 100
-      } as any);
-      setRows((res as any).data.data || (res as any).data?.data || []);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.start, filters.end, filters.userId, filters.posId]);
+  }, [filters.date_from, filters.date_to]);
 
   const dateError = useMemo(() => {
-    if (filters.start && filters.end) return new Date(filters.start).getTime() > new Date(filters.end).getTime();
+    if (filters.date_from && filters.date_to)
+      return new Date(filters.date_from).getTime() > new Date(filters.date_to).getTime();
     return false;
-  }, [filters.start, filters.end]);
+  }, [filters.date_from, filters.date_to]);
 
-  const handleOpenDetail = async (id: string) => {
-    const res = await getShiftById(id);
-    setDetail((res as any).data);
+  const handleOpenDetail = (register_id: string) => {
+    setSelectedRegisterId(register_id);
     setDetailOpen(true);
   };
 
-  const handleExport = async (fmt: 'pdf' | 'excel', row?: any) => {
-    const params = row ? { id: row.id } : { dateFrom: filters.start || undefined, dateTo: filters.end || undefined };
-    const res = await downloadShiftReport(fmt, params as any);
-    const url = (res as any)?.data?.url;
-    if (url) window.open(url, '_blank');
+  const handleCloseDetail = () => {
+    setDetailOpen(false);
+    setSelectedRegisterId(null);
+  };
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setFilters((prev) => ({ ...prev, page: newPage + 1 }));
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters((prev) => ({ ...prev, page_size: parseInt(event.target.value, 10), page: 1 }));
   };
 
   // Local any-cast for Scrollbar typing
   const ScrollbarAny: any = Scrollbar;
+
+  const rows = historyData?.items || [];
+  const totalRows = historyData?.total || 0;
+  const currentPage = (filters.page || 1) - 1;
+  const pageSize = filters.page_size || 20;
 
   return (
     <Container maxWidth={false}>
@@ -98,20 +95,6 @@ export default function ShiftHistoryView() {
         heading="Historial de turnos"
         icon="mdi:clock-outline"
         links={[{ name: 'POS', href: paths.dashboard.pos }, { name: 'Turnos' }]}
-        action={
-          <Stack direction="row" spacing={1}>
-            <Button variant="outlined" onClick={() => handleExport('excel')} startIcon={<Iconify icon="mdi:table" />}>
-              Exportar Excel
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => handleExport('pdf')}
-              startIcon={<Iconify icon="mdi:file-pdf-box" />}
-            >
-              Exportar PDF
-            </Button>
-          </Stack>
-        }
         sx={{ mb: { xs: 3, md: 5 } }}
       />
 
@@ -124,80 +107,69 @@ export default function ShiftHistoryView() {
             InputProps={{ readOnly: true }}
             sx={{ width: { xs: 1, md: 260 } }}
           />
-
-          <TextField
-            label="Usuario"
-            select
-            value={filters.userId || ''}
-            onChange={(e) => setFilters((p) => ({ ...p, userId: e.target.value || undefined }))}
-            sx={{ width: { xs: 1, md: 220 } }}
-          >
-            <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="u-1">Cajero Demo</MenuItem>
-          </TextField>
-
-          <TextField
-            label="PDV"
-            select
-            value={filters.posId || ''}
-            onChange={(e) => setFilters((p) => ({ ...p, posId: e.target.value || undefined }))}
-            sx={{ width: { xs: 1, md: 220 } }}
-          >
-            <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="pos-1">Caja 1</MenuItem>
-          </TextField>
         </Stack>
 
         <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
           <ScrollbarAny>
             <Table sx={{ minWidth: 960 }}>
               <TableBody>
-                {loading && (
+                {isLoading && (
                   <TableRow>
-                    <TableCell colSpan={8}>Cargando...</TableCell>
+                    <TableCell colSpan={10} align="center" sx={{ py: 5 }}>
+                      <CircularProgress />
+                    </TableCell>
                   </TableRow>
                 )}
-                {!loading &&
+                {!isLoading && rows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center" sx={{ py: 5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        No hay turnos registrados
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!isLoading &&
                   rows.map((row) => {
-                    const expected = row.summary.cashInDrawer;
-                    const counted = row.countedCash ?? null;
-                    const diff = row.difference ?? (counted != null ? counted - expected : null);
-                    const diffColor =
-                      diff == null
-                        ? 'text.secondary'
-                        : diff === 0
-                        ? 'text.primary'
-                        : diff > 0
-                        ? 'success.main'
-                        : 'error.main';
-                    const statusLabel =
-                      row.status === 'open' ? 'Abierto' : row.status === 'closed' ? 'Cerrado' : 'Error';
+                    const difference = parseFloat(row.difference || '0');
+                    let diffColor = 'text.primary';
+                    if (difference > 0) {
+                      diffColor = 'success.main';
+                    } else if (difference < 0) {
+                      diffColor = 'error.main';
+                    }
+                    const statusLabel = row.status === 'open' ? 'Abierto' : 'Cerrado';
+                    const statusColor = row.status === 'open' ? 'warning' : 'success';
+
                     return (
-                      <TableRow key={row.id} hover>
-                        <TableCell sx={{ width: 200 }}>{fDateTime(row.openedAt, 'dd MMM yyyy HH:mm')}</TableCell>
-                        <TableCell sx={{ width: 200 }}>{row.user?.name}</TableCell>
-                        <TableCell sx={{ width: 160 }}>{row.pos?.name}</TableCell>
-                        <TableCell sx={{ width: 160 }}>{fCurrency(row.summary.salesTotal)}</TableCell>
-                        <TableCell sx={{ width: 200 }}>{fCurrency(expected)}</TableCell>
-                        <TableCell sx={{ width: 200 }}>{counted != null ? fCurrency(counted) : '-'}</TableCell>
-                        <TableCell sx={{ width: 160 }}>
+                      <TableRow key={row.register_id} hover>
+                        <TableCell sx={{ width: 200 }}>{fDateTime(row.opened_at, 'dd MMM yyyy HH:mm')}</TableCell>
+                        <TableCell sx={{ width: 200 }}>
+                          {row.closed_at ? fDateTime(row.closed_at, 'dd MMM yyyy HH:mm') : '-'}
+                        </TableCell>
+                        <TableCell sx={{ width: 180 }}>{row.opened_by_name}</TableCell>
+                        <TableCell sx={{ width: 160 }}>{row.pdv_name}</TableCell>
+                        <TableCell sx={{ width: 160 }} align="right">
+                          {fCurrency(parseFloat(row.total_sales))}
+                        </TableCell>
+                        <TableCell sx={{ width: 160 }} align="right">
+                          {fCurrency(parseFloat(row.expected_balance))}
+                        </TableCell>
+                        <TableCell sx={{ width: 160 }} align="right">
+                          {row.declared_balance ? fCurrency(parseFloat(row.declared_balance)) : '-'}
+                        </TableCell>
+                        <TableCell sx={{ width: 140 }} align="right">
                           <Typography variant="body2" color={diffColor as any}>
-                            {diff != null ? fCurrency(diff) : '-'}
+                            {row.difference ? fCurrency(difference) : '-'}
                           </Typography>
                         </TableCell>
-                        <TableCell sx={{ width: 120 }}>{statusLabel}</TableCell>
-                        <TableCell align="right" sx={{ width: 220 }}>
-                          <Stack direction="row" spacing={1} justifyContent="flex-end">
-                            <Button size="small" onClick={() => handleOpenDetail(row.id)}>
-                              Ver detalle
-                            </Button>
-                            <Button size="small" onClick={() => handleExport('pdf', row)}>
-                              PDF
-                            </Button>
-                            <Button size="small" onClick={() => handleExport('excel', row)}>
-                              Excel
-                            </Button>
-                          </Stack>
+                        <TableCell sx={{ width: 100 }}>
+                          <Chip label={statusLabel} color={statusColor} size="small" />
+                        </TableCell>
+                        <TableCell align="right" sx={{ width: 120 }}>
+                          <Button size="small" onClick={() => handleOpenDetail(row.register_id)}>
+                            Ver detalle
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
@@ -206,52 +178,148 @@ export default function ShiftHistoryView() {
             </Table>
           </ScrollbarAny>
         </TableContainer>
+
+        {!isLoading && rows.length > 0 && (
+          <TablePagination
+            component="div"
+            count={totalRows}
+            page={currentPage}
+            onPageChange={handleChangePage}
+            rowsPerPage={pageSize}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[10, 20, 50, 100]}
+          />
+        )}
       </Card>
 
-      <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={detailOpen} onClose={handleCloseDetail} maxWidth="md" fullWidth>
         <DialogTitle>Detalle del turno</DialogTitle>
         <DialogContent dividers>
-          {detail && (
+          {loadingDetail && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+              <CircularProgress />
+            </Box>
+          )}
+          {!loadingDetail && shiftDetail && (
             <Stack spacing={2}>
+              <Typography variant="subtitle2" color="text.secondary">
+                Información del turno
+              </Typography>
               <Stack spacing={0.5}>
-                <Row label="Fecha apertura" value={fDateTime(detail.openedAt, 'dd MMM yyyy HH:mm')} />
-                {detail.closedAt && (
-                  <Row label="Fecha cierre" value={fDateTime(detail.closedAt, 'dd MMM yyyy HH:mm')} />
+                <Row label="PDV" value={shiftDetail.pdv_name} />
+                <Row label="Fecha apertura" value={fDateTime(shiftDetail.opened_at, 'dd MMM yyyy HH:mm')} />
+                {shiftDetail.closed_at && (
+                  <Row label="Fecha cierre" value={fDateTime(shiftDetail.closed_at, 'dd MMM yyyy HH:mm')} />
                 )}
-                <Row label="Usuario" value={detail.user?.name} />
-                <Row label="PDV" value={detail.pos?.name} />
+                <Row label="Duración" value={`${shiftDetail.duration_minutes || 0} minutos`} />
+                <Row label="Abierto por" value={shiftDetail.opened_by_name} />
+                {shiftDetail.closed_by_name && <Row label="Cerrado por" value={shiftDetail.closed_by_name} />}
+                <Row
+                  label="Estado"
+                  value={
+                    <Chip
+                      label={shiftDetail.status === 'open' ? 'Abierto' : 'Cerrado'}
+                      color={shiftDetail.status === 'open' ? 'warning' : 'success'}
+                      size="small"
+                    />
+                  }
+                />
               </Stack>
 
               <Divider />
-              <Row label="Fondo inicial" value={fCurrency(detail.summary.openingCash)} />
-              <Row label="Ventas totales" value={fCurrency(detail.summary.salesTotal)} />
-              <Row label="Efectivo esperado" value={fCurrency(detail.summary.expectedCash)} />
-              <Row label="Total en caja (esperado)" value={fCurrency(detail.summary.cashInDrawer)} />
-              {detail.countedCash != null && <Row label="Efectivo contado" value={fCurrency(detail.countedCash)} />}
-              {detail.difference != null && (
+
+              <Typography variant="subtitle2" color="text.secondary">
+                Resumen financiero
+              </Typography>
+              <Stack spacing={0.5}>
+                <Row label="Saldo inicial" value={fCurrency(parseFloat(shiftDetail.opening_balance))} />
                 <Row
-                  label="Diferencia"
+                  label="Total ventas"
+                  value={<Typography color="success.main">{fCurrency(parseFloat(shiftDetail.total_sales))}</Typography>}
+                />
+                <Row
+                  label="Total depósitos"
                   value={
-                    <Typography
-                      color={
-                        (detail.difference || 0) === 0
-                          ? 'text.primary'
-                          : detail.difference > 0
-                          ? 'success.main'
-                          : 'error.main'
-                      }
-                    >
-                      {fCurrency(detail.difference)}
-                    </Typography>
+                    <Typography color="success.main">{fCurrency(parseFloat(shiftDetail.total_deposits))}</Typography>
                   }
                 />
+                <Row
+                  label="Total retiros"
+                  value={
+                    <Typography color="error.main">{fCurrency(parseFloat(shiftDetail.total_withdrawals))}</Typography>
+                  }
+                />
+                <Row
+                  label="Total gastos"
+                  value={
+                    <Typography color="error.main">{fCurrency(parseFloat(shiftDetail.total_expenses))}</Typography>
+                  }
+                />
+                {parseFloat(shiftDetail.total_adjustments) !== 0 && (
+                  <Row label="Ajustes" value={fCurrency(parseFloat(shiftDetail.total_adjustments))} />
+                )}
+                <Row label="Saldo esperado" value={fCurrency(parseFloat(shiftDetail.expected_balance))} />
+                {shiftDetail.declared_balance && (
+                  <Row label="Saldo declarado" value={fCurrency(parseFloat(shiftDetail.declared_balance))} />
+                )}
+                {shiftDetail.difference && (
+                  <Row
+                    label="Diferencia"
+                    value={
+                      <Typography
+                        color={
+                          parseFloat(shiftDetail.difference) === 0
+                            ? 'text.primary'
+                            : parseFloat(shiftDetail.difference) > 0
+                            ? 'success.main'
+                            : 'error.main'
+                        }
+                      >
+                        {fCurrency(parseFloat(shiftDetail.difference))}
+                      </Typography>
+                    }
+                  />
+                )}
+                {shiftDetail.physical_cash_count && (
+                  <Row label="Conteo físico efectivo" value={fCurrency(parseFloat(shiftDetail.physical_cash_count))} />
+                )}
+              </Stack>
+
+              <Divider />
+
+              <Typography variant="subtitle2" color="text.secondary">
+                Desglose por método de pago
+              </Typography>
+              <Stack spacing={0.5}>
+                {Object.entries(shiftDetail.payment_methods_breakdown).map(([method, amount]) => (
+                  <Row key={method} label={method} value={fCurrency(parseFloat(amount as string))} />
+                ))}
+              </Stack>
+
+              <Divider />
+
+              <Typography variant="subtitle2" color="text.secondary">
+                Estadísticas
+              </Typography>
+              <Stack spacing={0.5}>
+                <Row label="Total transacciones" value={shiftDetail.total_transactions.toString()} />
+                <Row label="Total facturas" value={shiftDetail.total_invoices.toString()} />
+              </Stack>
+
+              {shiftDetail.closing_notes && (
+                <>
+                  <Divider />
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Notas de cierre
+                  </Typography>
+                  <Typography variant="body2">{shiftDetail.closing_notes}</Typography>
+                </>
               )}
-              {detail.notes && <Row label="Notas" value={detail.notes} />}
             </Stack>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailOpen(false)}>Cerrar</Button>
+          <Button onClick={handleCloseDetail}>Cerrar</Button>
         </DialogActions>
       </Dialog>
 
@@ -260,12 +328,14 @@ export default function ShiftHistoryView() {
         onClose={() => setOpenPicker(false)}
         variant="calendar"
         title="Seleccionar rango"
-        startDate={filters.start ? new Date(filters.start) : null}
-        endDate={filters.end ? new Date(filters.end) : null}
+        startDate={filters.date_from ? new Date(filters.date_from) : null}
+        endDate={filters.date_to ? new Date(filters.date_to) : null}
         onChangeStartDate={(d) =>
-          setFilters((p) => ({ ...p, start: d ? new Date(d).toISOString().slice(0, 10) : null }))
+          setFilters((p) => ({ ...p, date_from: d ? new Date(d).toISOString().slice(0, 10) : undefined }))
         }
-        onChangeEndDate={(d) => setFilters((p) => ({ ...p, end: d ? new Date(d).toISOString().slice(0, 10) : null }))}
+        onChangeEndDate={(d) =>
+          setFilters((p) => ({ ...p, date_to: d ? new Date(d).toISOString().slice(0, 10) : undefined }))
+        }
         error={dateError}
       />
     </Container>

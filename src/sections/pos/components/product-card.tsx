@@ -29,14 +29,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct, curren
 
     // Buscar stock en el PDV actual
     const currentPdvStock = product.productPdv.find((pdv) => pdv.pdv_id === currentPdvId);
-    
+
     if (!currentPdvStock) {
       // Si no existe el PDV en productPdv, NO tiene stock en este PDV
       const otherPdvs = product.productPdv.map((pdv) => ({
         pdv_name: pdv.pdv_name,
         quantity: pdv.quantity
       }));
-      
+
       return {
         available: 0,
         hasStock: false,
@@ -79,17 +79,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct, curren
   };
 
   // URL de imagen placeholder si no existe
-  const imageUrl =
-    product.image || `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShgQohP7LbySUaHF37ObdMPlqm-rIsjQ4fOQ&s`;
+  const imageUrl = product.image || `https://app.ally360.co/logo/logoFondoTransparentesvg.svg`;
 
   // Tooltip para productos sin stock
   const stockTooltip = useMemo(() => {
     if (stockInfo.hasStock) return '';
-    
+
     if (stockInfo.otherPdvs.length === 0) {
       return 'Sin stock en ningún punto de venta';
     }
-    
+
     return (
       <>
         <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', mb: 0.5 }}>
@@ -105,8 +104,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct, curren
   }, [stockInfo]);
 
   return (
-    <Tooltip 
-      title={stockTooltip} 
+    <Tooltip
+      title={stockTooltip}
       placement="top"
       arrow
       componentsProps={{
@@ -114,10 +113,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct, curren
           sx: {
             bgcolor: 'grey.900',
             '& .MuiTooltip-arrow': {
-              color: 'grey.900',
-            },
-          },
-        },
+              color: 'grey.900'
+            }
+          }
+        }
       }}
     >
       <Card
@@ -130,155 +129,161 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct, curren
           cursor: isOutOfStock && !product.sellInNegative ? 'not-allowed' : 'pointer',
           opacity: isOutOfStock && !product.sellInNegative ? 0.5 : 1,
           filter: isOutOfStock && !product.sellInNegative ? 'grayscale(70%)' : 'none',
-          '&:hover': isOutOfStock && !product.sellInNegative ? {} : {
-            transform: 'translateY(-4px) scale(1.02)',
-            boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
-            '& .product-image': {
-              transform: 'scale(1.1)'
-            },
-            '& .add-button': {
-              transform: 'translateY(0)',
-              opacity: 1
-            }
-          }
+          '&:hover':
+            isOutOfStock && !product.sellInNegative
+              ? {}
+              : {
+                  transform: 'translateY(-4px) scale(1.02)',
+                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                  '& .product-image': {
+                    transform: 'scale(1.1)'
+                  },
+                  '& .add-button': {
+                    transform: 'translateY(0)',
+                    opacity: 1
+                  }
+                }
         }}
         onClick={handleAddProduct}
       >
-      {/* Image Container */}
-      <Box
-        sx={{
-          height: 140,
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
-        <Box
-          component="img"
-          className="product-image"
-          src={product?.images?.length > 0 ? product.images[0] : imageUrl}
-          alt={product.name}
-          sx={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            transition: 'transform 0.3s ease'
-          }}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-          }}
-        />
-
-        {/* Category Badge */}
-        {product.category && (
-          <Chip
-            label={product.category}
-            size="small"
-            sx={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              bgcolor: 'grey.700',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '0.75rem'
-            }}
-          />
-        )}
-
-        {/* Stock Status Badge */}
+        {/* Image Container */}
         <Box
           sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            bgcolor: alpha(
-              stockStatus.color === 'error' ? '#f44336' : stockStatus.color === 'warning' ? '#ff9800' : '#4caf50',
-              0.9
-            ),
-            color: 'white',
-            px: 1,
-            py: 0.25,
-            borderRadius: 1,
-            fontSize: '0.7rem',
-            fontWeight: 600
+            height: 140,
+            position: 'relative',
+            overflow: 'hidden'
           }}
         >
-          {`Stock: ${stockInfo.available}`}
-        </Box>
-
-        {/* Out of Stock Overlay */}
-        {isOutOfStock && !product.sellInNegative && (
           <Box
+            component="img"
+            className="product-image"
+            src={product?.images?.length > 0 ? product.images[0] : imageUrl}
+            alt={product.name}
             sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              bgcolor: 'rgba(0,0,0,0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+              width: !product?.images?.length ? '50%' : '100%',
+              height: '100%',
+              objectFit: 'contain',
+              margin: !product?.images?.length ? '0 auto' : '0',
+              display: 'block',
+              transition: 'transform 0.3s ease',
+              filter: !product?.images?.length ? 'grayscale(1)' : 'none'
             }}
-          >
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+
+          {/* Category Badge */}
+          {product.category && (
             <Chip
-              label="SIN STOCK"
-              color="error"
+              label={product.category}
+              size="small"
               sx={{
-                fontWeight: 700,
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                bgcolor: 'grey.700',
+                color: 'white',
+                fontWeight: 600,
                 fontSize: '0.75rem'
               }}
             />
-          </Box>
-        )}
-      </Box>
+          )}
 
-      {/* Content */}
-      <CardContent sx={{ p: 1.5, height: 140, display: 'flex', flexDirection: 'column' }}>
-        {/* Product Name */}
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            lineHeight: 1.2,
-            mb: 0.5,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            color: 'text.primary'
-          }}
-        >
-          {product.name}
-        </Typography>
-
-        {/* SKU */}
-        <Typography
-          variant="caption"
-          sx={{
-            color: 'text.secondary',
-            fontSize: '0.7rem',
-            mb: 1
-          }}
-        >
-          {product.sku}
-        </Typography>
-
-        {/* Price and Stock */}
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 'auto' }}>
-          <Typography
-            variant="h6"
+          {/* Stock Status Badge */}
+          <Box
             sx={{
-              fontWeight: 800,
-              fontSize: '1.1rem',
-              color: 'primary.main',
-              textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              bgcolor: alpha(
+                stockStatus.color === 'error' ? '#f44336' : stockStatus.color === 'warning' ? '#ff9800' : '#4caf50',
+                0.9
+              ),
+              color: 'white',
+              px: 1,
+              py: 0.25,
+              borderRadius: 1,
+              fontSize: '0.7rem',
+              fontWeight: 600
             }}
           >
-            {formatCurrency(product.price)}
+            {`Stock: ${stockInfo.available}`}
+          </Box>
+
+          {/* Out of Stock Overlay */}
+          {isOutOfStock && !product.sellInNegative && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                bgcolor: 'rgba(0,0,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Chip
+                label="SIN STOCK"
+                color="error"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.75rem'
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+
+        {/* Content */}
+        <CardContent sx={{ p: 1.5, height: 140, display: 'flex', flexDirection: 'column' }}>
+          {/* Product Name */}
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              lineHeight: 1.2,
+              mb: 0.5,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              color: 'text.primary'
+            }}
+          >
+            {product.name}
           </Typography>
-          {/* 
+
+          {/* SKU */}
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              fontSize: '0.7rem',
+              mb: 1
+            }}
+          >
+            {product.sku}
+          </Typography>
+
+          {/* Price and Stock */}
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 'auto' }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                fontSize: '1.1rem',
+                color: 'primary.main',
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+              }}
+            >
+              {formatCurrency(product.price)}
+            </Typography>
+            {/* 
           <Box
             sx={{
               px: 1,
@@ -303,34 +308,34 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddProduct, curren
               {stockStatus.text}
             </Typography>
           </Box> */}
-        </Stack>
+          </Stack>
 
-        {/* Main Add Button */}
-        <Button
-          variant="outlined"
-          fullWidth
-          size="small"
-          disabled={isOutOfStock && !product.sellInNegative}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAddProduct();
-          }}
-          startIcon={<Icon icon="mdi:cart-plus" />}
-          sx={{
-            mt: 1,
-            height: 32,
-            fontWeight: 600,
-            textTransform: 'none',
-            borderRadius: 1.5,
-            background: 'primary.lighter',
-            boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
-            color: 'primary.main'
-          }}
-        >
-          {isOutOfStock && !product.sellInNegative ? 'Sin stock' : 'Agregar'}
-        </Button>
-      </CardContent>
-    </Card>
+          {/* Main Add Button */}
+          <Button
+            variant="outlined"
+            fullWidth
+            size="small"
+            disabled={isOutOfStock && !product.sellInNegative}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddProduct();
+            }}
+            startIcon={<Icon icon="mdi:cart-plus" />}
+            sx={{
+              mt: 1,
+              height: 32,
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: 1.5,
+              background: 'primary.lighter',
+              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
+              color: 'primary.main'
+            }}
+          >
+            {isOutOfStock && !product.sellInNegative ? 'Sin stock' : 'Agregar'}
+          </Button>
+        </CardContent>
+      </Card>
     </Tooltip>
   );
 };

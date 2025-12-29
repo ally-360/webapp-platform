@@ -5,6 +5,12 @@ export { useTabManagement } from './useTabManagement';
 export { useDrawerPersistence } from './useDrawerPersistence';
 export { useDrawerWidth } from './useDrawerWidth';
 export { useCashRegister } from './useCashRegister';
+export { useSyncCashRegister } from './useSyncCashRegister';
+
+// Hooks de sincronización con backend
+export { useSaleWindowSync } from './useSaleWindowSync';
+export { useSaleDraftsLoader } from './useSaleDraftsLoader';
+export { useCreateWindowWithDraft } from './useCreateWindowWithDraft';
 
 // Hooks específicos de window view
 export { useCustomerSelection } from './useCustomerSelection';

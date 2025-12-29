@@ -18,7 +18,9 @@ import {
   Chip,
   Stack,
   Card,
-  Paper
+  Paper,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -27,8 +29,9 @@ import { es } from 'date-fns/locale';
 import { Icon } from '@iconify/react';
 
 // redux
-import { useAppSelector } from 'src/hooks/store';
+import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { useCreatePOSSaleMutation, useGetSellersQuery } from 'src/redux/services/posApi';
+import { completeSale } from 'src/redux/pos/posSlice';
 import { useSnackbar } from 'src/components/snackbar';
 
 // utils
@@ -50,8 +53,9 @@ interface Props {
   saleWindow: SaleWindow;
 }
 
-export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWindow }: Props) {
+export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConfirm, saleWindow }: Props) {
   const { enqueueSnackbar } = useSnackbar();
+  const dispatch = useAppDispatch();
 
   // Redux state
   const { currentRegister } = useAppSelector((state) => state.pos);
@@ -73,6 +77,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
   const [discountType, setDiscountType] = useState<'percentage' | 'amount'>('percentage');
   const [discountValue, setDiscountValue] = useState(0);
   const [notes, setNotes] = useState('');
+  const [shouldPrintTicket, setShouldPrintTicket] = useState(true); // ✅ Estado para controlar impresión
   const [recalculatedTotals, setRecalculatedTotals] = useState({
     subtotal: 0,
     tax_amount: 0,
@@ -153,6 +158,11 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
   };
 
   const handleConfirm = async () => {
+    // Prevenir múltiples clicks mientras se procesa
+    if (isCreatingSale) {
+      return;
+    }
+
     if (!currentRegister?.pdv_id) {
       enqueueSnackbar('Error: No hay un PDV activo seleccionado', { variant: 'error' });
       return;
@@ -179,22 +189,24 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
       // Mapear pagos al formato requerido por la API
       const payments = saleWindow.payments.map((payment) => {
-        // Mapear métodos de pago al formato de la API
-        let apiMethod: 'cash' | 'card' | 'transfer' | 'other';
+        // Mapear métodos de pago al formato de la API (UPPERCASE requerido por backend)
+        let apiMethod: 'CASH' | 'CARD' | 'TRANSFER' | 'QR_CODE' | 'OTHER';
         switch (payment.method) {
           case 'cash':
-            apiMethod = 'cash';
+            apiMethod = 'CASH';
             break;
           case 'card':
-            apiMethod = 'card';
+            apiMethod = 'CARD';
             break;
           case 'transfer':
-            apiMethod = 'transfer';
+            apiMethod = 'TRANSFER';
             break;
           case 'nequi':
+            apiMethod = 'TRANSFER'; // Nequi se mapea como TRANSFER
+            break;
           case 'credit':
           default:
-            apiMethod = 'other';
+            apiMethod = 'OTHER';
             break;
         }
 
@@ -208,7 +220,6 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
       // Preparar datos para la API
       const saleData: any = {
-        pdv_id: currentRegister.pdv_id,
         customer_id: saleWindow.customer.id, // UUID requerido por backend
         seller_id: seller || '', // Convertir null a string vacío
         items,
@@ -221,23 +232,79 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
         sale_date: saleDate.toISOString()
       };
 
-      console.log('🎯 Enviando datos de venta:', saleData);
+      console.log('🎯 Enviando datos de venta:', {
+        pdv_id: currentRegister.pdv_id,
+        ...saleData
+      });
 
       // Crear la venta usando RTK Query
-      await createPOSSale(saleData).unwrap();
+      // El endpoint espera { pdv_id, ...data } donde pdv_id va como query param
+      const backendResponse = await createPOSSale({
+        pdv_id: currentRegister.pdv_id,
+        ...saleData
+      }).unwrap();
 
       enqueueSnackbar('¡Venta creada exitosamente!', { variant: 'success' });
 
-      // Llamar a la función original onConfirm para compatibilidad
-      onConfirm({
-        seller_id: seller,
-        seller_name: sellerName,
-        sale_date: saleDate,
-        tax_rate: taxRate,
-        discount_percentage: discountType === 'percentage' ? discountValue : undefined,
-        discount_amount: finalDiscountAmount,
-        notes: notes || undefined
-      });
+      // 🔥 Limpiar la ventana del POS después de venta exitosa
+      dispatch(
+        completeSale({
+          windowId: saleWindow.id,
+          pos_type: 'simple', // Tipo de venta (puede ser 'electronic' si tiene documento)
+          invoice_number: backendResponse.number,
+          seller_id: seller,
+          seller_name: sellerName,
+          sale_date: saleDate.toISOString(),
+          tax_rate: taxRate,
+          discount_percentage: discountType === 'percentage' ? discountValue : undefined,
+          discount_amount: finalDiscountAmount,
+          notes: notes || undefined
+        })
+      );
+
+      // ✅ Imprimir ticket si está habilitado
+      if (shouldPrintTicket) {
+        try {
+          const { printReceipt } = await import('./pos-print-receipt');
+
+          // Construir los datos de la venta completada para el ticket
+          const completedSale = {
+            id: backendResponse.id || backendResponse.number,
+            sale_window_id: saleWindow.id,
+            register_id: currentRegister.id,
+            customer: saleWindow.customer,
+            products: saleWindow.products,
+            payments: saleWindow.payments,
+            subtotal: recalculatedTotals.subtotal,
+            tax_amount: recalculatedTotals.tax_amount,
+            total: recalculatedTotals.total,
+            created_at: saleDate.toISOString(),
+            invoice_number: backendResponse.number,
+            pos_type: 'simple',
+            notes: notes || undefined,
+            seller_id: seller,
+            seller_name: sellerName,
+            sale_date: saleDate.toISOString(),
+            discount_percentage: discountType === 'percentage' ? discountValue : undefined,
+            discount_amount: finalDiscountAmount
+          };
+
+          printReceipt({
+            sale: completedSale,
+            registerInfo: {
+              pdv_name: currentRegister.pdv_name,
+              user_name: currentRegister.user_name
+            }
+          });
+        } catch (printError) {
+          console.error('Error al imprimir ticket:', printError);
+          // No mostrar error al usuario, la venta ya se completó
+        }
+      }
+
+      // ✅ NO llamar onConfirm - ya se completó la venta aquí
+      // El callback onConfirm era de la implementación anterior
+      // Ahora la lógica de creación está completamente manejada en este diálogo
 
       handleClose();
     } catch (error: any) {
@@ -648,27 +715,44 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
           </Grid>
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, gap: 2 }}>
-          <Button
-            onClick={handleClose}
-            variant="outlined"
-            size="large"
-            startIcon={<Icon icon="solar:close-circle-bold" />}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleConfirm}
-            disabled={!canConfirm}
-            size="large"
-            startIcon={
-              isCreatingSale ? <Icon icon="svg-spinners:180-ring-with-bg" /> : <Icon icon="solar:check-circle-bold" />
+        <DialogActions sx={{ p: 3, gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={shouldPrintTicket}
+                onChange={(e) => setShouldPrintTicket(e.target.checked)}
+                color="primary"
+              />
             }
-            sx={{ minWidth: 160 }}
-          >
-            {isCreatingSale ? 'Procesando...' : 'Confirmar Venta'}
-          </Button>
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Icon icon="solar:printer-bold-duotone" width={18} />
+                <Typography variant="body2">Imprimir ticket</Typography>
+              </Box>
+            }
+          />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              size="large"
+              startIcon={<Icon icon="solar:close-circle-bold" />}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleConfirm}
+              disabled={!canConfirm || isCreatingSale}
+              size="large"
+              startIcon={
+                isCreatingSale ? <Icon icon="svg-spinners:180-ring-with-bg" /> : <Icon icon="solar:check-circle-bold" />
+              }
+              sx={{ minWidth: 160 }}
+            >
+              {isCreatingSale ? 'Procesando...' : 'Confirmar Venta'}
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
     </LocalizationProvider>

@@ -32,16 +32,15 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 // ----------------------------------------------------------------------
 
 const PAYMENT_METHOD_CONFIG = {
-  cash: { label: 'Efectivo', icon: 'solar:wallet-money-bold', color: 'success' },
-  transfer: { label: 'Transferencia', icon: 'solar:card-transfer-bold', color: 'info' },
-  card: { label: 'Tarjeta', icon: 'solar:card-bold', color: 'primary' },
-  check: { label: 'Cheque', icon: 'solar:document-text-bold', color: 'warning' },
-  other: { label: 'Otro', icon: 'solar:money-bag-bold', color: 'default' }
+  CASH: { label: 'Efectivo', icon: 'solar:wallet-money-bold', color: 'success' },
+  TRANSFER: { label: 'Transferencia', icon: 'solar:card-transfer-bold', color: 'info' },
+  CARD: { label: 'Tarjeta', icon: 'solar:card-bold', color: 'primary' },
+  OTHER: { label: 'Otro', icon: 'solar:money-bag-bold', color: 'default' }
 };
 
 // ----------------------------------------------------------------------
 
-export default function BillPaymentHistory({ billId }) {
+export default function BillPaymentHistory({ billId, canAddPayment, onAddPayment }) {
   const { data: payments = [], isLoading } = useGetBillPaymentsQuery(billId);
 
   if (isLoading) {
@@ -69,7 +68,14 @@ export default function BillPaymentHistory({ billId }) {
           sx={{ color: 'text.secondary' }}
         >
           <Iconify icon="solar:wallet-money-bold" width={64} sx={{ mb: 2, opacity: 0.5 }} />
-          <Typography variant="body2">No hay pagos registrados</Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            No hay pagos registrados
+          </Typography>
+          {canAddPayment && (
+            <Button variant="contained" startIcon={<Iconify icon="solar:wallet-money-bold" />} onClick={onAddPayment}>
+              Registrar Primer Pago
+            </Button>
+          )}
         </Box>
       </Card>
     );
@@ -80,8 +86,15 @@ export default function BillPaymentHistory({ billId }) {
   return (
     <Card sx={{ p: 3, mt: 3 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        <Typography variant="h6">Historial de Pagos</Typography>
-        <Chip label={`${payments.length} ${payments.length === 1 ? 'pago' : 'pagos'}`} color="primary" />
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="h6">Historial de Pagos</Typography>
+          <Chip label={`${payments.length} ${payments.length === 1 ? 'pago' : 'pagos'}`} color="primary" />
+        </Stack>
+        {canAddPayment && (
+          <Button variant="contained" startIcon={<Iconify icon="eva:plus-fill" />} onClick={onAddPayment} size="small">
+            Agregar Pago
+          </Button>
+        )}
       </Stack>
 
       <TableContainer sx={{ overflow: 'unset' }}>
@@ -90,12 +103,12 @@ export default function BillPaymentHistory({ billId }) {
             <TableRow>
               <TableCell>Fecha</TableCell>
               <TableCell>Método</TableCell>
+              <TableCell>Referencia</TableCell>
               <TableCell align="right">Monto</TableCell>
               <TableCell>Notas</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
-          </TableHead>
-
+          </TableHead>{' '}
           <TableBody>
             {payments.map((payment) => (
               <PaymentTableRow key={payment.id} payment={payment} />
@@ -120,7 +133,9 @@ export default function BillPaymentHistory({ billId }) {
 }
 
 BillPaymentHistory.propTypes = {
-  billId: PropTypes.string.isRequired
+  billId: PropTypes.string.isRequired,
+  canAddPayment: PropTypes.bool,
+  onAddPayment: PropTypes.func
 };
 
 // ----------------------------------------------------------------------
@@ -130,7 +145,7 @@ function PaymentTableRow({ payment }) {
   const popover = usePopover();
   const confirm = useBoolean(false);
 
-  const methodConfig = PAYMENT_METHOD_CONFIG[payment.payment_method] || PAYMENT_METHOD_CONFIG.other;
+  const methodConfig = PAYMENT_METHOD_CONFIG[payment.method] || PAYMENT_METHOD_CONFIG.OTHER;
 
   const handleDeletePayment = useCallback(async () => {
     try {
@@ -158,6 +173,12 @@ function PaymentTableRow({ payment }) {
             <Iconify icon={methodConfig.icon} width={20} />
             <Chip label={methodConfig.label} size="small" color={methodConfig.color as any} />
           </Stack>
+        </TableCell>
+
+        <TableCell>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            {payment.reference || '-'}
+          </Typography>
         </TableCell>
 
         <TableCell align="right">
@@ -217,4 +238,10 @@ function PaymentTableRow({ payment }) {
 
 PaymentTableRow.propTypes = {
   payment: PropTypes.object.isRequired
+};
+
+BillPaymentHistory.propTypes = {
+  billId: PropTypes.string.isRequired,
+  canAddPayment: PropTypes.bool,
+  onAddPayment: PropTypes.func
 };

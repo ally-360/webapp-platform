@@ -53,12 +53,14 @@ export const useSyncCashRegister = () => {
 
         dispatch(
           openRegister({
+            register_id: cashRegister.id, // ✅ Pasar el UUID real del backend
             user_id: cashRegister.opened_by,
             user_name: cashRegister.opened_by,
             pdv_id: cashRegister.pdv_id,
             pdv_name: cashRegister.name || 'PDV',
             opening_amount: cashRegister.opening_balance,
-            notes: cashRegister.opening_notes
+            notes: cashRegister.opening_notes,
+            shift_id: cashRegister.id // El ID de la caja es el shift_id
           })
         );
 
@@ -76,22 +78,35 @@ export const useSyncCashRegister = () => {
   useEffect(() => {
     // Manejar error 404 (no hay caja abierta)
     if (error && 'status' in error && error.status === 404) {
-      console.log('No hay caja abierta para este PDV');
+      console.log('ℹ️ No hay caja abierta para este PDV - Se requiere abrir caja');
       // No mostrar error al usuario, es un estado válido
       // El componente RegisterOpenScreen se encargará de mostrar la UI apropiada
     } else if (error) {
       // Otros errores sí deben notificarse
-      console.error('Error al sincronizar caja registradora:', error);
+      console.error('❌ Error al sincronizar caja registradora:', error);
       enqueueSnackbar('Error al sincronizar información de la caja', {
         variant: 'error'
       });
     }
   }, [error]);
 
+  // Determinar si necesita abrir caja
+  const needsToOpenRegister =
+    !isLoading &&
+    error &&
+    'status' in error &&
+    error.status === 404 &&
+    'data' in error &&
+    typeof error.data === 'object' &&
+    error.data !== null &&
+    'detail' in error.data &&
+    error.data.detail === 'No hay caja abierta para este PDV';
+
   return {
     cashRegister,
     isLoading,
     hasOpenRegister: !!cashRegister && cashRegister.status === 'open',
+    needsToOpenRegister,
     error,
     refetch,
     pdvId

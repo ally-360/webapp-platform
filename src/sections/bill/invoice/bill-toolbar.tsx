@@ -16,6 +16,9 @@ import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useSnackbar } from 'src/components/snackbar';
+// api
+import { useUpdateBillMutation } from 'src/redux/services/billsApi';
 // components
 import Iconify from 'src/components/iconify';
 //
@@ -25,12 +28,46 @@ import BillPDF from './bill-pdf';
 
 export default function BillToolbar({ invoice, currentStatus, statusOptions, onChangeStatus, onAddPayment }) {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+  const [updateBill, { isLoading: isUpdating }] = useUpdateBillMutation();
 
   const view = useBoolean(false);
 
   const handleEdit = useCallback(() => {
     router.push(paths.dashboard.bill.edit(invoice?.id));
   }, [invoice?.id, router]);
+
+  const handleStatusChange = useCallback(
+    async (event) => {
+      const newStatus = event.target.value;
+
+      // Solo permitir cambio de DRAFT a OPEN
+      if (currentStatus === 'draft' && newStatus === 'open') {
+        try {
+          await updateBill({
+            id: invoice.id,
+            bill: { status: 'OPEN' }
+          }).unwrap();
+
+          enqueueSnackbar('Estado actualizado a ABIERTO. El inventario ha sido incrementado automáticamente.', {
+            variant: 'success'
+          });
+
+          // Llamar al callback para actualizar el estado local
+          onChangeStatus(event);
+        } catch (error) {
+          console.error('Error updating bill status:', error);
+          enqueueSnackbar('Error al actualizar el estado de la factura', { variant: 'error' });
+        }
+      } else {
+        // Otros cambios de estado son automáticos (pagos) o no permitidos
+        enqueueSnackbar('Los cambios de estado se realizan automáticamente al registrar pagos', {
+          variant: 'info'
+        });
+      }
+    },
+    [currentStatus, invoice?.id, updateBill, enqueueSnackbar, onChangeStatus]
+  );
 
   const handleDownloadPdf = useCallback(async () => {
     try {
@@ -50,7 +87,9 @@ export default function BillToolbar({ invoice, currentStatus, statusOptions, onC
   }, [invoice, currentStatus]);
 
   const canAddPayment =
-    (currentStatus === 'OPEN' || currentStatus === 'partial') && parseFloat(invoice?.balance_due || '0') > 0;
+    (currentStatus === 'open' || currentStatus === 'partial') && parseFloat(invoice?.balance_due || '0') > 0;
+
+  const canChangeStatus = currentStatus === 'draft';
 
   return (
     <>
@@ -62,7 +101,7 @@ export default function BillToolbar({ invoice, currentStatus, statusOptions, onC
       >
         <Stack direction="row" spacing={1} flexGrow={1} sx={{ width: 1 }}>
           <Tooltip title="Editar">
-            <IconButton onClick={handleEdit}>
+            <IconButton onClick={handleEdit} disabled={currentStatus !== 'draft'}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>
           </Tooltip>
@@ -110,11 +149,16 @@ export default function BillToolbar({ invoice, currentStatus, statusOptions, onC
           select
           label="Estado"
           value={currentStatus}
-          onChange={onChangeStatus}
-          disabled
+          onChange={handleStatusChange}
+          disabled={!canChangeStatus}
           sx={{
             maxWidth: 160
           }}
+          helperText={
+            currentStatus === 'draft'
+              ? 'Cambie a ABIERTO cuando reciba la mercancía'
+              : 'Estado actualizado automáticamente'
+          }
         >
           {statusOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>

@@ -183,7 +183,7 @@ export const productsApi = createApi({
       query: ({ productId, tax_ids }) => ({
         url: `/products/${productId}/taxes`,
         method: 'POST',
-        body: { tax_ids }
+        body: tax_ids // Enviar directamente el array, no un objeto
       }),
       invalidatesTags: (result, error, { productId }) => [
         { type: 'Product', id: productId },

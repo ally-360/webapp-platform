@@ -6,7 +6,6 @@ import { Alert } from '@mui/material';
 
 // redux
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
-import { addSaleWindow } from 'src/redux/pos/posSlice';
 
 // hooks
 import {
@@ -15,8 +14,11 @@ import {
   useTabManagement,
   useDrawerPersistence,
   useDrawerWidth,
-  useCashRegister
+  useCashRegister,
+  useSyncCashRegister
 } from '../hooks';
+import { useSaleDraftsLoader } from '../hooks/useSaleDraftsLoader';
+import { useCreateWindowWithDraft } from '../hooks/useCreateWindowWithDraft';
 
 // components
 import PosWindowView from './pos-window-view-new';
@@ -74,15 +76,35 @@ export default function PosContainerView() {
   useTabManagement(salesWindows, addingNewSale, openTab, setOpenTab, setAddingNewSale);
   useDrawerPersistence(openDrawer);
 
+  // Hook para sincronización con backend
+  const { hasOpenRegister, needsToOpenRegister, isLoading: isSyncLoading } = useSyncCashRegister();
+
+  // Hook para cargar drafts desde backend (persistencia)
+  const { isLoadingDrafts, loadedWindowsCount, reloadDrafts } = useSaleDraftsLoader();
+
+  // Hook para crear ventanas con draft automático
+  const { createNewWindow, isCreating: isCreatingWindow } = useCreateWindowWithDraft();
+
   // Hook para gestión de caja registradora con backend
   const { handleOpenRegister } = useCashRegister();
 
+  // Effect para abrir automáticamente la primera ventana cuando se cargan drafts
+  useEffect(() => {
+    if (loadedWindowsCount > 0 && salesWindows.length > 0 && openTab === 0) {
+      console.log('🎯 Abriendo automáticamente la primera ventana cargada');
+      setOpenTab(salesWindows[0].id);
+    }
+  }, [loadedWindowsCount, salesWindows, openTab]);
+
   // Valores derivados (memoized para performance)
-  const isRegisterOpen = useMemo(() => Boolean(currentRegister?.status === 'open'), [currentRegister?.status]);
+  const isRegisterOpen = useMemo(
+    () => Boolean(currentRegister?.status === 'open') || hasOpenRegister,
+    [currentRegister?.status, hasOpenRegister]
+  );
 
   const shouldShowRegisterDialog = useMemo(
-    () => showRegisterDialog && !isRegisterOpen,
-    [showRegisterDialog, isRegisterOpen]
+    () => !isSyncLoading && ((showRegisterDialog && !isRegisterOpen) || needsToOpenRegister),
+    [isSyncLoading, showRegisterDialog, isRegisterOpen, needsToOpenRegister]
   );
 
   const computedBottomBarWidth = useMemo(
@@ -99,15 +121,17 @@ export default function PosContainerView() {
     setOpenTab(newValue);
   }, []);
 
-  const handleAddTab = useCallback(() => {
+  const handleAddTab = useCallback(async () => {
     if (!isRegisterOpen) {
       setShowRegisterDialog(true);
       setOpenRegisterDialog(true);
       return;
     }
-    dispatch(addSaleWindow());
+
+    // Crear ventana con draft en backend
+    await createNewWindow();
     setAddingNewSale(true);
-  }, [isRegisterOpen, dispatch]);
+  }, [isRegisterOpen, createNewWindow]);
 
   const handleRegisterOpen = useCallback(
     async (registerData: RegisterOpenData) => {
@@ -138,7 +162,10 @@ export default function PosContainerView() {
 
   // Effect para controlar mostrar/ocultar dialog de registro
   useEffect(() => {
-    if (!isRegisterOpen) {
+    // Mostrar pantalla de apertura si:
+    // 1. No hay caja abierta en Redux, O
+    // 2. El backend indica que necesita abrir caja (404)
+    if (!isRegisterOpen || needsToOpenRegister) {
       setShowRegisterDialog(true);
     } else {
       setShowRegisterDialog(false);
@@ -147,7 +174,7 @@ export default function PosContainerView() {
         setOpenTab(salesWindows[0].id);
       }
     }
-  }, [isRegisterOpen, salesWindows.length, salesWindows, openTab]);
+  }, [isRegisterOpen, needsToOpenRegister, salesWindows.length, salesWindows, openTab]);
 
   // Early return: Pantalla de apertura de caja
   if (shouldShowRegisterDialog) {

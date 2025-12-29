@@ -6,9 +6,10 @@ import { Icon } from '@iconify/react';
 interface Props {
   canComplete: boolean;
   onCompleteSale: () => void;
+  onCancel: () => void;
 }
 
-const PosSaleActions = memo(({ canComplete, onCompleteSale }: Props) => (
+const PosSaleActions = memo(({ canComplete, onCompleteSale, onCancel }: Props) => (
   <Box
     sx={{
       p: 2,
@@ -36,7 +37,14 @@ const PosSaleActions = memo(({ canComplete, onCompleteSale }: Props) => (
         <Button variant="outlined" size="medium" fullWidth startIcon={<Icon icon="mdi:content-save" />}>
           Guardar
         </Button>
-        <Button variant="outlined" size="medium" fullWidth color="error" startIcon={<Icon icon="mdi:cancel" />}>
+        <Button 
+          variant="outlined" 
+          size="medium" 
+          fullWidth 
+          color="error" 
+          onClick={onCancel}
+          startIcon={<Icon icon="mdi:cancel" />}
+        >
           Cancelar
         </Button>
       </Stack>

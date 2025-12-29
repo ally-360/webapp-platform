@@ -82,7 +82,7 @@ export interface GetInvoicesRequest {
 export const invoicesApi = createApi({
   reducerPath: 'invoicesApi',
   baseQuery: baseQueryWithAuth,
-  tagTypes: ['Invoice', 'InvoicePayment', 'InvoiceSummary'],
+  tagTypes: ['Invoice', 'InvoicePayment', 'InvoiceSummary', 'Product', 'ProductList'],
   endpoints: (builder) => ({
     // Get all invoices with optional filters
     getInvoices: builder.query<Invoice[], GetInvoicesRequest>({
@@ -115,7 +115,7 @@ export const invoicesApi = createApi({
         method: 'POST',
         body: invoice
       }),
-      invalidatesTags: ['Invoice', 'InvoiceSummary']
+      invalidatesTags: ['Invoice', 'InvoiceSummary', 'Product', 'ProductList']
     }),
 
     // Update existing invoice

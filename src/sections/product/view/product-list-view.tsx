@@ -186,7 +186,8 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
     isLoading: productsLoading,
     refetch: refetchProducts
   } = useGetProductsQuery(backendFilters, {
-    skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
+    skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2), // Solo hacer request si hay usuario y búsqueda válida
+    refetchOnMountOrArgChange: true // Refetch cuando se monta el componente o cuando el caché está invalidado
   });
 
   const [deleteProduct] = useDeleteProductMutation();
