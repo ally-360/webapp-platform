@@ -31,7 +31,7 @@ const steps = [
     description:
       'Puedes crear tu primer producto haciendo click en el botón "Nuevo producto" o en el menú lateral. Puedes crear categorías, marcas y asociarlas a tu producto.',
     icon: 'solar:box-bold-duotone',
-    action: 'Crear producto',
+    action: 'Crear productos',
     img: '/assets/icons/faqs/ic_package.svg',
     url: paths.dashboard.inventory.newProduct
   },
