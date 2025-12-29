@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const {
     data: currentUser,
     isLoading: userLoading,
-    error: userError
+    error: _userError
   } = useGetCurrentUserQuery(undefined, {
     skip: !token
   });
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { readonly children: React.ReactNode 
   const {
     data: userCompanies,
     isLoading: companiesLoading,
-    error: companiesError
+    error: _companiesError
   } = useGetMyCompaniesQuery(undefined, {
     skip: !token || userLoading || !currentUser || currentUser?.first_login === true
   });

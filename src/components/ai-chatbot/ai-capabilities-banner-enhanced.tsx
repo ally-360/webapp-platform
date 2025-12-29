@@ -6,7 +6,7 @@ import { keyframes } from '@mui/material/styles';
 import Iconify from '../iconify';
 
 // Enhanced animations
-const gradientFlow = keyframes`
+const _gradientFlow = keyframes`
   0%, 100% {
     background-position: 0% 50%;
   }

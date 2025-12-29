@@ -6,7 +6,7 @@ import { useRouter } from 'src/routes/hook';
 
 // ----------------------------------------------------------------------
 
-const loginPaths = {
+const _loginPaths = {
   jwt: paths.auth.jwt.login
 };
 

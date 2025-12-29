@@ -42,7 +42,7 @@ interface AuthGuardProps {
 export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { authenticated, method, isFirstLogin, loading } = useAuthContext();
+  const { authenticated, method, loading } = useAuthContext();
 
   useTokenValidation(TOKEN_VALIDATION_CONFIG);
 

@@ -299,36 +299,32 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
               px: 2,
               py: 1.5,
               borderRadius: message.isBot ? '20px 20px 20px 5px' : '20px 20px 5px 20px',
-              background: (theme) =>
-                message.isBot
-                  ? theme.palette.mode === 'dark'
-                    ? '#334155'
-                    : '#f1f5f9' // Bot messages - más claro en modo diurno
-                  : 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)', // User messages
-              border: (theme) =>
-                message.isBot
-                  ? theme.palette.mode === 'dark'
-                    ? '1px solid rgba(71, 85, 105, 0.5)'
-                    : '1px solid rgba(148, 163, 184, 0.3)' // Borde más visible en modo diurno
-                  : 'none',
-              boxShadow: (theme) =>
-                message.isBot
-                  ? theme.palette.mode === 'dark'
-                    ? '0 4px 12px rgba(0, 0, 0, 0.3)'
-                    : '0 2px 8px rgba(0, 0, 0, 0.08)' // Sombra más sutil en modo diurno
-                  : '0 4px 12px rgba(0, 176, 240, 0.3)',
+              background: (t) => {
+                if (!message.isBot) return 'linear-gradient(135deg, #00B0F0 0%, #004C97 100%)';
+                return t.palette.mode === 'dark' ? '#334155' : '#f1f5f9';
+              },
+              border: (t) => {
+                if (!message.isBot) return 'none';
+                return t.palette.mode === 'dark'
+                  ? '1px solid rgba(71, 85, 105, 0.5)'
+                  : '1px solid rgba(148, 163, 184, 0.3)';
+              },
+              boxShadow: (t) => {
+                if (!message.isBot) return '0 4px 12px rgba(0, 176, 240, 0.3)';
+                return t.palette.mode === 'dark'
+                  ? '0 4px 12px rgba(0, 0, 0, 0.3)'
+                  : '0 2px 8px rgba(0, 0, 0, 0.08)';
+              },
               position: 'relative'
             }}
           >
             <Typography
               variant="body2"
               sx={{
-                color: (theme) =>
-                  message.isBot
-                    ? theme.palette.mode === 'dark'
-                      ? 'rgba(255,255,255,0.9)'
-                      : '#334155' // Texto más oscuro en modo diurno
-                    : 'white',
+                color: (t) => {
+                  if (!message.isBot) return 'white';
+                  return t.palette.mode === 'dark' ? 'rgba(255,255,255,0.9)' : '#334155';
+                },
                 fontWeight: 500,
                 lineHeight: 1.6
               }}
@@ -374,9 +370,9 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
               px: 2,
               py: 1.5,
               borderRadius: '20px 20px 20px 5px',
-              background: (theme) => (theme.palette.mode === 'dark' ? '#334155' : '#f1f5f9'),
-              border: (theme) =>
-                theme.palette.mode === 'dark'
+              background: (t) => (t.palette.mode === 'dark' ? '#334155' : '#f1f5f9'),
+              border: (t) =>
+                t.palette.mode === 'dark'
                   ? '1px solid rgba(71, 85, 105, 0.5)'
                   : '1px solid rgba(148, 163, 184, 0.3)',
               minWidth: 80
