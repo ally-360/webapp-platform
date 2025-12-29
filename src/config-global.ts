@@ -14,7 +14,7 @@ interface EnvOptions extends ImportMeta {
   };
 }
 
-export const HOST_API = (import.meta as EnvOptions).env.VITE_HOST_API;
+export const HOST_API = (import.meta as EnvOptions).env.VITE_HOST_API || 'https://api.ally360.co';
 export const ASSETS_API = (import.meta as EnvOptions).env.VITE_ASSETS_API;
 export const MAPBOX_API = (import.meta as EnvOptions).env.VITE_MAPBOX_API;
 
