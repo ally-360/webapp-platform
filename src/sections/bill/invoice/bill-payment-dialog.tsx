@@ -23,11 +23,10 @@ import { fCurrency } from 'src/utils/format-number';
 // ----------------------------------------------------------------------
 
 const PAYMENT_METHODS = [
-  { value: 'cash', label: 'Efectivo' },
-  { value: 'transfer', label: 'Transferencia' },
-  { value: 'card', label: 'Tarjeta' },
-  { value: 'check', label: 'Cheque' },
-  { value: 'other', label: 'Otro' }
+  { value: 'CASH', label: 'Efectivo' },
+  { value: 'TRANSFER', label: 'Transferencia' },
+  { value: 'CARD', label: 'Tarjeta' },
+  { value: 'OTHER', label: 'Otro' }
 ];
 
 // ----------------------------------------------------------------------
@@ -50,7 +49,8 @@ export default function BillPaymentDialog({ open, onClose, bill }) {
     defaultValues: {
       amount: '',
       payment_date: new Date(),
-      payment_method: 'cash',
+      method: 'CASH',
+      reference: '',
       notes: ''
     }
   });
@@ -76,12 +76,25 @@ export default function BillPaymentDialog({ open, onClose, bill }) {
         payment: {
           amount,
           payment_date: data.payment_date.toISOString().split('T')[0],
-          payment_method: data.payment_method as 'cash' | 'transfer' | 'card' | 'check' | 'other',
+          method: data.method as 'CASH' | 'TRANSFER' | 'CARD' | 'OTHER',
+          reference: data.reference || undefined,
           notes: data.notes || undefined
         }
       }).unwrap();
 
-      enqueueSnackbar('Pago registrado exitosamente', { variant: 'success' });
+      // Calcular si es pago completo o parcial
+      const remainingBalance = balanceDue - amount;
+      const isFullPayment = remainingBalance <= 0.01; // Tolerancia de 1 centavo
+
+      enqueueSnackbar(
+        isFullPayment
+          ? `¡Pago registrado! La factura ha sido marcada como PAGADA.`
+          : `Pago parcial registrado. Saldo pendiente: ${fCurrency(remainingBalance)}`,
+        {
+          variant: 'success'
+        }
+      );
+
       reset();
       onClose();
     } catch (error) {
@@ -150,7 +163,21 @@ export default function BillPaymentDialog({ open, onClose, bill }) {
           />
 
           <Controller
-            name="payment_method"
+            name="reference"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Referencia (opcional)"
+                fullWidth
+                placeholder="Ej: Nº de transferencia, cheque, etc."
+                helperText="Número de referencia del pago"
+              />
+            )}
+          />
+
+          <Controller
+            name="method"
             control={control}
             rules={{ required: 'El método de pago es requerido' }}
             render={({ field }) => (
@@ -159,8 +186,8 @@ export default function BillPaymentDialog({ open, onClose, bill }) {
                 select
                 label="Método de Pago"
                 fullWidth
-                error={!!errors.payment_method}
-                helperText={errors.payment_method?.message}
+                error={!!errors.method}
+                helperText={errors.method?.message}
               >
                 {PAYMENT_METHODS.map((option) => (
                   <MenuItem key={option.value} value={option.value}>

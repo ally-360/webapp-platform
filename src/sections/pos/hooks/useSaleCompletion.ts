@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from 'src/hooks/store';
 import { completeSale, type SaleWindow, type Customer } from 'src/redux/pos/posSlice';
 import { canCloseSaleWindow, getRemainingAmount } from 'src/redux/pos/posUtils';
-import { useCreatePOSSaleMutation } from 'src/redux/services/posApi';
+import { useCreatePOSSaleMutation, useDeleteSaleDraftMutation } from 'src/redux/services/posApi';
 import { enqueueSnackbar } from 'notistack';
-import { PaymentMethodType } from 'src/types/pos';
+import type { PaymentMethodTypeType } from 'src/types/pos';
 
 /**
  * Hook para manejar la completación de ventas
@@ -14,27 +14,46 @@ export const useSaleCompletion = (sale: SaleWindow, selectedCustomer: Customer |
   const { currentRegister } = useAppSelector((state) => state.pos);
   const [openSaleConfirmDialog, setOpenSaleConfirmDialog] = useState(false);
   const [createPOSSale] = useCreatePOSSaleMutation();
+  const [deleteDraft] = useDeleteSaleDraftMutation();
 
   const remainingAmount = getRemainingAmount(sale);
   const canComplete = canCloseSaleWindow(sale);
 
   // Función auxiliar para mapear métodos de pago
-  const mapPaymentMethod = (method: 'cash' | 'card' | 'nequi' | 'transfer' | 'credit'): PaymentMethodType => {
+  const mapPaymentMethod = (method: 'cash' | 'card' | 'nequi' | 'transfer' | 'credit'): PaymentMethodTypeType => {
     switch (method) {
       case 'cash':
-        return PaymentMethodType.CASH;
+        return 'CASH';
       case 'card':
-        return PaymentMethodType.CARD;
+        return 'CARD';
       case 'transfer':
-        return PaymentMethodType.TRANSFER;
+      case 'nequi': // Nequi se mapea como TRANSFER
+        return 'TRANSFER';
+      case 'credit':
+        return 'OTHER';
       default:
-        return PaymentMethodType.OTHER;
+        return 'OTHER';
     }
   };
 
   const handleInitiateCompleteSale = () => {
+    // ✅ Validar cliente ANTES de abrir el modal
+    if (!selectedCustomer?.id) {
+      enqueueSnackbar('Debes seleccionar un cliente antes de completar la venta', {
+        variant: 'warning',
+        autoHideDuration: 4000
+      });
+      return;
+    }
+
+    // ✅ Validar que la venta se pueda completar (pagos, productos, etc)
     if (canComplete) {
       setOpenSaleConfirmDialog(true);
+    } else {
+      enqueueSnackbar('La venta no puede ser completada. Verifica productos y pagos', {
+        variant: 'error',
+        autoHideDuration: 4000
+      });
     }
   };
 
@@ -48,12 +67,30 @@ export const useSaleCompletion = (sale: SaleWindow, selectedCustomer: Customer |
     notes?: string;
   }) => {
     try {
+      // ✅ Validación adicional: verificar que customer_id sea un UUID válido
+      if (!selectedCustomer?.id || selectedCustomer.id === '0' || selectedCustomer.id === 0) {
+        enqueueSnackbar('Cliente inválido. Por favor selecciona un cliente válido.', {
+          variant: 'error',
+          autoHideDuration: 4000
+        });
+        return;
+      }
+
       // Convertir sale_date a string para Redux serialization
       const posType: 'electronic' | 'simple' = selectedCustomer && selectedCustomer.document ? 'electronic' : 'simple';
 
+      // ✅ Asegurar que customer_id sea string y no vacío
+      const customerId =
+        typeof selectedCustomer.id === 'string' ? selectedCustomer.id : selectedCustomer.id?.toString();
+
+      if (!customerId || customerId === '0') {
+        enqueueSnackbar('Error: ID de cliente inválido', { variant: 'error' });
+        return;
+      }
+
       // Preparar datos para la API del backend
       const backendSaleData = {
-        customer_id: selectedCustomer?.id?.toString() || '',
+        customer_id: customerId,
         seller_id: saleData.seller_id || '',
         notes: saleData.notes,
         items: sale.products.map((product) => ({
@@ -61,12 +98,26 @@ export const useSaleCompletion = (sale: SaleWindow, selectedCustomer: Customer |
           quantity: product.quantity,
           unit_price: product.price
         })),
-        payments: sale.payments.map((payment) => ({
-          method: mapPaymentMethod(payment.method),
-          amount: payment.amount,
-          reference: payment.reference
-        }))
+        payments: sale.payments.map((payment) => {
+          const mappedMethod = mapPaymentMethod(payment.method);
+          console.log('🔄 Mapping payment:', {
+            original: payment.method,
+            mapped: mappedMethod,
+            payment
+          });
+          return {
+            method: mappedMethod,
+            amount: payment.amount,
+            reference: payment.reference
+          };
+        })
       };
+
+      console.log('🎯 Datos de venta preparados:', {
+        customer_id: customerId,
+        customer: selectedCustomer,
+        backendSaleData
+      });
 
       // Crear venta en el backend
       const backendResponse = await createPOSSale(backendSaleData).unwrap();
@@ -87,6 +138,17 @@ export const useSaleCompletion = (sale: SaleWindow, selectedCustomer: Customer |
 
       const saleCompleted = dispatch(completeSale(saleDataForRedux));
       setOpenSaleConfirmDialog(false);
+
+      // 🗑️ Eliminar draft del backend después de completar la venta
+      if (sale.draft_id) {
+        try {
+          await deleteDraft(sale.draft_id).unwrap();
+          console.log('✅ Draft eliminado del backend:', sale.draft_id);
+        } catch (deleteError) {
+          console.error('⚠️ Error al eliminar draft (venta ya completada):', deleteError);
+          // No mostrar error al usuario, la venta ya se completó exitosamente
+        }
+      }
 
       // Mostrar mensaje de éxito
       enqueueSnackbar(`Venta creada exitosamente. Factura: ${backendResponse.number}`, {

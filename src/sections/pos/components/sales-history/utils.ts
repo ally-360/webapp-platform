@@ -2,11 +2,18 @@ import { format } from 'date-fns';
 import { fCurrency } from 'src/utils/format-number';
 
 export const PAYMENT_LABEL: Record<string, string> = {
+  // Lowercase (legacy UI)
   cash: 'Efectivo',
   card: 'Tarjeta',
   nequi: 'Nequi',
   transfer: 'Transferencia',
-  credit: 'Crédito'
+  credit: 'Crédito',
+  // Uppercase (backend format)
+  CASH: 'Efectivo',
+  CARD: 'Tarjeta',
+  TRANSFER: 'Transferencia',
+  QR_CODE: 'QR Code',
+  OTHER: 'Otro'
 };
 
 export function escapeCsv(value: string) {

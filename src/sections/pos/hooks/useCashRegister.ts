@@ -7,8 +7,7 @@ import {
   useGetRegisterStatusQuery,
   useGetSellersQuery,
   useCreateSellerMutation,
-  useLazyGetCashRegistersQuery,
-  useLazyGetCurrentShiftQuery
+  useLazyGetCashRegistersQuery
 } from 'src/redux/services/posApi';
 import { useGetPDVsQuery, type PDV } from 'src/redux/services/pdvsApi';
 import { enqueueSnackbar } from 'notistack';
@@ -38,7 +37,6 @@ export const useCashRegister = () => {
   // RTK Query hooks
   const [openCashRegister] = useOpenCashRegisterMutation();
   const [triggerGetCashRegisters] = useLazyGetCashRegistersQuery();
-  const [triggerGetCurrentShift] = useLazyGetCurrentShiftQuery();
   const [closeCashRegister] = useCloseCashRegisterMutation();
   const [createSeller] = useCreateSellerMutation();
   const { data: registerStatus, isLoading: isLoadingStatus, refetch: refetchStatus } = useGetRegisterStatusQuery();
@@ -51,7 +49,7 @@ export const useCashRegister = () => {
     isLoading: isLoadingSellers,
     refetch: refetchSellers
   } = useGetSellersQuery({
-    is_active: true,
+    active_only: true,
     size: 100
   });
   /**
@@ -59,13 +57,26 @@ export const useCashRegister = () => {
    */
   const getCurrentShiftForPDV = async (pdv_id: string) => {
     try {
-      const currentShift = await triggerGetCurrentShift({ pdv_id }).unwrap();
-      return { success: true, data: currentShift };
+      // Buscar la caja abierta para este PDV usando el endpoint de lista
+      const list = await triggerGetCashRegisters({
+        page: 1,
+        size: 50
+      }).unwrap();
+
+      const items = Array.isArray((list as any)?.items) ? (list as any).items : [];
+      const openForPDV = items.find((r: any) => r?.pdv_id === pdv_id && r?.status === 'open');
+
+      if (openForPDV) {
+        return { success: true, data: openForPDV };
+      }
+
+      return { success: false, error: 'No hay caja abierta para este PDV' };
     } catch (error: any) {
       const errorMessage = error?.data?.message || error?.message || 'Error al obtener turno actual';
       return { success: false, error: errorMessage };
     }
   };
+
   const handleCreateSeller = async (sellerData: SellerCreate) => {
     try {
       const response = await createSeller(sellerData).unwrap();
@@ -109,58 +120,36 @@ export const useCashRegister = () => {
         const msg = error?.data?.detail || error?.data?.message || error?.message || '';
         const alreadyOpen = /ya existe una caja abierta/i.test(msg) || /existe una caja abierta/i.test(msg);
         if (alreadyOpen) {
-          // Intentar usar el endpoint específico de turno actual primero
-          try {
-            const currentShift = await triggerGetCurrentShift({ pdv_id: registerData.pdv_id }).unwrap();
-            if (currentShift && currentShift.status === 'open') {
-              // Inicializar con datos del turno actual
-              dispatch(
-                openRegister({
-                  user_id: currentShift.opened_by || 'current_user',
-                  user_name: registerData.seller_name || 'Usuario',
-                  pdv_id: currentShift.pdv_id,
-                  pdv_name: registerData.pdv_name,
-                  opening_amount: parseFloat(currentShift.opening_balance) || 0,
-                  notes: currentShift.opening_notes
-                })
-              );
-              enqueueSnackbar('Ya había una caja abierta. Usando la existente.', { variant: 'info' });
-              refetchStatus();
-              return { success: true, data: currentShift };
-            }
-          } catch (shiftError) {
-            // Si no funciona el endpoint de shift, usar fallback anterior
-            console.warn('No se pudo obtener turno actual, usando fallback:', shiftError);
-          }
-
-          // Fallback: Buscar cajas abiertas para ese PDV y usar la más reciente
+          // Buscar la caja abierta para este PDV
           const list = await triggerGetCashRegisters({ page: 1, size: 50 }).unwrap();
           const items = Array.isArray((list as any)?.items) ? (list as any).items : [];
           const openForPDV = items
             .filter((r: any) => r?.pdv_id === registerData.pdv_id && r?.status === 'open')
             .sort((a: any, b: any) => new Date(b.opened_at).getTime() - new Date(a.opened_at).getTime());
 
-          const current = openForPDV[0];
-          if (current) {
-            // Inicializar estado local con la caja del backend
+          const currentShift = openForPDV[0];
+          if (currentShift) {
+            // Inicializar con datos del turno actual
             dispatch(
               openRegister({
-                user_id: current.opened_by || 'current_user',
+                user_id: currentShift.opened_by || 'current_user',
                 user_name: registerData.seller_name || 'Usuario',
-                pdv_id: current.pdv_id,
+                pdv_id: currentShift.pdv_id,
                 pdv_name: registerData.pdv_name,
-                opening_amount: current.opening_balance,
-                notes: current.opening_notes
+                opening_amount: parseFloat(currentShift.opening_balance) || 0,
+                notes: currentShift.opening_notes,
+                shift_id: currentShift.id // El ID de la caja es el shift_id
               })
             );
             enqueueSnackbar('Ya había una caja abierta. Usando la existente.', { variant: 'info' });
             refetchStatus();
-            return { success: true, data: current };
+            return { success: true, data: currentShift };
           }
 
-          // Si no la encontramos, relanzar error original
-          throw error;
+          // Si no se encontró la caja, lanzar error
+          throw new Error('No se encontró la caja abierta');
         }
+
         // Otros errores
         throw error;
       }
@@ -173,7 +162,8 @@ export const useCashRegister = () => {
           pdv_id: registerData.pdv_id,
           pdv_name: registerData.pdv_name,
           opening_amount: registerData.opening_amount,
-          notes: registerData.notes
+          notes: registerData.notes,
+          shift_id: backendResponse.id // El ID de la caja es el shift_id
         })
       );
 

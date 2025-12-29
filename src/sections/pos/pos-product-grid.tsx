@@ -31,6 +31,8 @@ interface Props {
   searchTerm?: string;
   isSearchValid?: boolean;
   minSearchLength?: number;
+  // New prop for PDV stock validation
+  currentPdvId?: string;
 }
 
 export default function PosProductGrid({
@@ -48,7 +50,8 @@ export default function PosProductGrid({
   totalPages = 1,
   searchTerm: externalSearchTerm,
   isSearchValid: _isSearchValid = true,
-  minSearchLength = 2
+  minSearchLength = 2,
+  currentPdvId
 }: Props) {
   const [openFiltersDrawer, setOpenFiltersDrawer] = useState(false);
 
@@ -139,7 +142,7 @@ export default function PosProductGrid({
       <Grid container spacing={2}>
         {displayProducts.map((product) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={product.id}>
-            <ProductCard product={product} onAddProduct={handleAddProduct} />
+            <ProductCard product={product} onAddProduct={handleAddProduct} currentPdvId={currentPdvId} />
           </Grid>
         ))}
       </Grid>

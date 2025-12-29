@@ -210,12 +210,6 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
   const [updateProductMinStock] = useUpdateProductMinStockMutation();
 
   const onSubmit = handleSubmit(async (data: NewProductInterface & { tax_ids?: string[] }) => {
-    // ✅ Validación de staged uploads
-    if (!uploadIds || uploadIds.length === 0) {
-      enqueueSnackbar('Debes subir al menos una imagen del producto', { variant: 'error' });
-      return;
-    }
-
     const lastProductsPdvs = data.productsPdvs;
     const priceBaseNum = Number(String(data.priceBase).replace(/[^0-9.-]+/g, '')) || 0;
     const priceSaleNum = Number(String(data.priceSale).replace(/[^0-9.-]+/g, '')) || 0;
@@ -226,7 +220,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
         data.productsPdvs.reduce((acc: number, pdv: PDVproduct) => acc + Number(pdv.quantity || 0), 0) || 0
       );
 
-      // 🆕 NUEVO SISTEMA: Usar upload_ids en lugar de base64 images
+      // 🆕 NUEVO SISTEMA: Usar upload_ids en lugar de base64 images (ahora opcional)
       const payload: CreateProductRequest = {
         name: data.name,
         sku: data.sku || undefined,
@@ -241,7 +235,7 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
         category_id: String((data.category as any)?.id || ''),
         tax_ids: Array.isArray((data as any).tax_ids) ? ((data as any).tax_ids as string[]) : [],
 
-        // ✅ STAGED UPLOADS - Enviar IDs de uploads confirmados
+        // ✅ STAGED UPLOADS - Enviar IDs de uploads confirmados (opcional)
         upload_ids: uploadIds,
 
         stocks: data.productsPdvs.map((pdv: PDVproduct) => ({
@@ -324,26 +318,68 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
     setPreviousBrandCount(brands.length);
     dispatch(switchPopupStateBrand(true));
   };
+
   const priceBase = watch('priceBase');
-  // Calculate priceSale based on selected taxes
+  const priceSale = watch('priceSale');
+  const taxIds = watch('tax_ids');
+
+  // 🔄 Calcular precio base cuando cambia precio de venta
+  const [isCalculatingFromSale, setIsCalculatingFromSale] = useState(false);
+
   useEffect(() => {
-    const selectedTaxIds: string[] = values.tax_ids || [];
-    if (!priceBase) {
-      setValueAny('priceSale', '');
+    if (isCalculatingFromSale) {
+      setIsCalculatingFromSale(false);
       return;
     }
-    const base = Number(String(priceBase).replace(/[^0-9.-]+/g, '')) || 0;
+
+    const selectedTaxIds: string[] = taxIds || [];
+    if (!priceSale) {
+      return;
+    }
+
+    const sale = Number(String(priceSale).replace(/[^0-9.-]+/g, '')) || 0;
+
     if (!selectedTaxIds.length) {
-      setValueAny('priceSale', fNumber(base));
+      setValueAny('priceBase', fNumber(sale));
       return;
     }
+
     const totalPercentage = selectedTaxIds.reduce((acc, id) => {
       const found = taxes.find((t) => t.id === id);
       return acc + (found?.percentage || 0);
     }, 0);
+
+    // Calcular precio base desde precio de venta: base = sale / (1 + tax%)
+    const base = sale / (1 + totalPercentage / 100);
+    setValueAny('priceBase', fNumber(base));
+  }, [priceSale, taxes, taxIds, setValueAny, isCalculatingFromSale]);
+
+  // 🔄 Calcular precio de venta cuando cambia precio base o impuestos
+  useEffect(() => {
+    const selectedTaxIds: string[] = taxIds || [];
+    if (!priceBase) {
+      setValueAny('priceSale', '');
+      return;
+    }
+
+    const base = Number(String(priceBase).replace(/[^0-9.-]+/g, '')) || 0;
+
+    if (!selectedTaxIds.length) {
+      setIsCalculatingFromSale(true);
+      setValueAny('priceSale', fNumber(base));
+      return;
+    }
+
+    const totalPercentage = selectedTaxIds.reduce((acc, id) => {
+      const found = taxes.find((t) => t.id === id);
+      return acc + (found?.percentage || 0);
+    }, 0);
+
     const final = base + base * (totalPercentage / 100);
+    setIsCalculatingFromSale(true);
     setValueAny('priceSale', fNumber(final));
-  }, [priceBase, taxes, values.tax_ids, setValueAny]);
+  }, [priceBase, taxes, taxIds, setValueAny]);
+
   // Assign inventory
 
   // Edit inventory
@@ -640,10 +676,10 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
         <Stack spacing={3}>
           <Typography variant="subtitle1">Indica el valor de venta y el costo de compra de tu producto.</Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-            {/* Agregar precios */}
+            {/* Precio base (sin impuestos) */}
             <RHFTextField
               name="priceBase"
-              label="Precio de venta"
+              label="Precio base"
               onChange={(event) => {
                 setValueAny('priceBase', fNumber(event.target.value));
               }}
@@ -659,13 +695,16 @@ export default function ProductNewEditForm({ currentProduct }: { currentProduct:
               ))}
             </RHFSelect>
 
+            {/* Precio de venta (con impuestos incluidos) */}
             <RHFTextField
               name="priceSale"
               label="Precio de venta"
+              onChange={(event) => {
+                setValueAny('priceSale', fNumber(event.target.value));
+              }}
               InputProps={{
                 startAdornment: <InputAdornment position="start">$</InputAdornment>
               }}
-              disabled
             />
           </Stack>
         </Stack>

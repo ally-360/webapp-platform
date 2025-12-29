@@ -98,7 +98,12 @@ export default function BillListView() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   // RTK Query hooks
-  const { data: bills = [], isLoading } = useGetBillsQuery();
+  const { data: bills = [], isLoading } = useGetBillsQuery({
+    status: filters.status !== 'all' ? (filters.status as any) : undefined,
+    date_from: filters.startDate ? fDate(filters.startDate, 'yyyy-MM-dd') : undefined,
+    date_to: filters.endDate ? fDate(filters.endDate, 'yyyy-MM-dd') : undefined,
+    limit: 1000 // Adjust as needed
+  });
   const { data: contacts = [] } = useGetContactsQuery({});
   const [voidBill] = useVoidBillMutation();
 
@@ -802,7 +807,19 @@ export default function BillListView() {
                     emptyRows={emptyRows(table.page, table.rowsPerPage, enrichedBills.length)}
                   />
 
-                  <TableNoData notFound={notFound} />
+                  <TableNoData
+                    notFound={notFound}
+                    hasFilters={canReset}
+                    emptyStateConfig={{
+                      title: 'No tienes facturas de compra registradas',
+                      description: 'Registra tus compras a proveedores para llevar el control de inventario',
+                      action: {
+                        label: 'Nueva Compra',
+                        href: paths.dashboard.bill.newBill,
+                        icon: 'mingcute:add-line'
+                      }
+                    }}
+                  />
                 </TableBody>
               </Table>
             </Scrollbar>

@@ -1,6 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // Types para el POS
+interface ProductPdv {
+  pdv_id: string;
+  pdv_name: string;
+  quantity: number;
+  min_quantity: number;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -13,8 +20,12 @@ interface Product {
   sellInNegative?: boolean;
   tax_rate?: number;
   category?: string;
-  stock?: number;
+  stock?: number; // Stock total (quantityStock del backend)
+  globalStock?: number; // Stock global
+  quantityStock?: number; // Stock total del producto
+  productPdv?: ProductPdv[]; // Stock por cada PDV (campo del backend)
   image?: string;
+  images?: string[];
 }
 
 interface Customer {
@@ -29,7 +40,7 @@ interface Customer {
 
 interface PaymentMethod {
   id: string;
-  method: 'cash' | 'card' | 'nequi' | 'transfer' | 'credit';
+  method: 'cash' | 'card' | 'nequi' | 'transfer' | 'credit'; // UI uses lowercase
   amount: number;
   reference?: string;
 }
@@ -45,9 +56,15 @@ interface SaleWindow {
   total: number;
   status: 'draft' | 'pending_payment' | 'paid' | 'cancelled';
   created_at: string;
+  last_modified?: string;
   notes?: string;
   discount_percentage?: number;
   discount_amount?: number;
+  // Campos de sincronización con backend
+  draft_id?: string; // UUID del draft en backend
+  synced?: boolean; // true si está sincronizado
+  synced_at?: string; // Timestamp de última sincronización
+  sync_error?: string; // Mensaje de error si falla sync
 }
 
 interface POSRegister {
@@ -65,6 +82,7 @@ interface POSRegister {
   total_cash: number;
   difference_cash: number;
   notes?: string;
+  shift_id?: string; // ID del turno actual (si existe)
 }
 
 interface CompletedSale {
@@ -153,17 +171,19 @@ const posSlice = createSlice({
     openRegister(
       state,
       action: PayloadAction<{
+        register_id?: string; // ✅ ID del backend (UUID)
         user_id: string;
         user_name: string;
         pdv_id: string;
         pdv_name: string;
         opening_amount: number;
         notes?: string;
+        shift_id?: string; // ID del turno/shift (mismo que register_id usualmente)
       }>
     ) {
-      const { user_id, user_name, pdv_id, pdv_name, opening_amount, notes } = action.payload;
+      const { register_id, user_id, user_name, pdv_id, pdv_name, opening_amount, notes, shift_id } = action.payload;
       const register: POSRegister = {
-        id: `register_${Date.now()}`,
+        id: register_id || `register_${Date.now()}`, // ✅ Usar ID del backend si existe
         user_id,
         user_name,
         pdv_id,
@@ -174,7 +194,8 @@ const posSlice = createSlice({
         total_sales: 0,
         total_cash: opening_amount,
         difference_cash: 0,
-        notes
+        notes,
+        shift_id: shift_id || register_id // Usar shift_id si existe, sino usar register_id
       };
       state.currentRegister = register;
       state.salesWindows = [];
@@ -201,6 +222,7 @@ const posSlice = createSlice({
 
     // ===== SALES WINDOWS MANAGEMENT =====
     addSaleWindow(state) {
+      const now = new Date().toISOString();
       const newWindow: SaleWindow = {
         id: Date.now(),
         name: `Venta ${state.salesWindows.length + 1}`,
@@ -211,7 +233,13 @@ const posSlice = createSlice({
         tax_amount: 0,
         total: 0,
         status: 'draft',
-        created_at: new Date().toISOString()
+        created_at: now,
+        last_modified: now,
+        // Inicializar campos de sincronización
+        draft_id: undefined,
+        synced: false,
+        synced_at: undefined,
+        sync_error: undefined
       };
       state.salesWindows.push(newWindow);
     },
@@ -239,6 +267,10 @@ const posSlice = createSlice({
         window.products.push({ ...action.payload.product });
       }
 
+      // Marcar como modificada
+      window.last_modified = new Date().toISOString();
+      window.synced = false;
+
       // Recalcular totales
       posSlice.caseReducers.recalculateTotals(state, {
         payload: action.payload.windowId,
@@ -251,6 +283,11 @@ const posSlice = createSlice({
       if (!window) return;
 
       window.products = window.products.filter((p) => p.id !== action.payload.productId);
+
+      // Marcar como modificada
+      window.last_modified = new Date().toISOString();
+      window.synced = false;
+
       posSlice.caseReducers.recalculateTotals(state, {
         payload: action.payload.windowId,
         type: 'recalculateTotals'
@@ -264,6 +301,11 @@ const posSlice = createSlice({
       const product = window.products.find((p) => p.id === action.payload.productId);
       if (product && action.payload.quantity > 0) {
         product.quantity = action.payload.quantity;
+
+        // Marcar como modificada
+        window.last_modified = new Date().toISOString();
+        window.synced = false;
+
         posSlice.caseReducers.recalculateTotals(state, {
           payload: action.payload.windowId,
           type: 'recalculateTotals'
@@ -276,6 +318,10 @@ const posSlice = createSlice({
       const window = state.salesWindows.find((w) => w.id === action.payload.windowId);
       if (window) {
         window.customer = action.payload.customer;
+
+        // Marcar como modificada
+        window.last_modified = new Date().toISOString();
+        window.synced = false;
       }
     },
 
@@ -284,15 +330,24 @@ const posSlice = createSlice({
       const window = state.salesWindows.find((w) => w.id === action.payload.windowId);
       if (!window) return;
 
-      const existingPayment = window.payments.find((p) => p.id === action.payload.payment.id);
-      if (existingPayment) {
-        existingPayment.amount = action.payload.payment.amount;
+      const existingPaymentIndex = window.payments.findIndex((p) => p.id === action.payload.payment.id);
+      if (existingPaymentIndex >= 0) {
+        // Crear nuevo array con el pago actualizado para que useEffect detecte el cambio
+        window.payments = [
+          ...window.payments.slice(0, existingPaymentIndex),
+          { ...window.payments[existingPaymentIndex], amount: action.payload.payment.amount },
+          ...window.payments.slice(existingPaymentIndex + 1)
+        ];
       } else {
         window.payments.push({ ...action.payload.payment });
       }
 
       const totalPaid = window.payments.reduce((sum, p) => sum + p.amount, 0);
       window.status = totalPaid >= window.total ? 'paid' : 'pending_payment';
+
+      // Marcar como modificada
+      window.last_modified = new Date().toISOString();
+      window.synced = false;
     },
 
     removePaymentFromSaleWindow(state, action: PayloadAction<{ windowId: number; paymentId: string }>) {
@@ -308,6 +363,10 @@ const posSlice = createSlice({
       } else {
         window.status = 'draft';
       }
+
+      // Marcar como modificada
+      window.last_modified = new Date().toISOString();
+      window.synced = false;
     },
 
     // ===== DISCOUNTS =====
@@ -324,6 +383,11 @@ const posSlice = createSlice({
 
       window.discount_percentage = action.payload.discount_percentage;
       window.discount_amount = action.payload.discount_amount;
+
+      // Marcar como modificada
+      window.last_modified = new Date().toISOString();
+      window.synced = false;
+
       posSlice.caseReducers.recalculateTotals(state, {
         payload: action.payload.windowId,
         type: 'recalculateTotals'
@@ -480,6 +544,108 @@ const posSlice = createSlice({
       }
     },
 
+    // ===== SALE DRAFT SYNC =====
+    /**
+     * Actualizar draft_id y estado de sincronización después de crear/actualizar en backend
+     */
+    updateWindowSyncStatus(
+      state,
+      action: PayloadAction<{
+        windowId: number;
+        draft_id?: string;
+        synced?: boolean;
+        synced_at?: string;
+        sync_error?: string;
+      }>
+    ) {
+      const window = state.salesWindows.find((w) => w.id === action.payload.windowId);
+      if (window) {
+        if (action.payload.draft_id !== undefined) window.draft_id = action.payload.draft_id;
+        if (action.payload.synced !== undefined) window.synced = action.payload.synced;
+        if (action.payload.synced_at !== undefined) window.synced_at = action.payload.synced_at;
+        if (action.payload.sync_error !== undefined) window.sync_error = action.payload.sync_error;
+      }
+    },
+
+    /**
+     * Agregar ventana desde draft del backend (al cargar borradores)
+     */
+    addSaleWindowFromDraft(
+      state,
+      action: PayloadAction<{
+        draft_id: string;
+        window_id: string;
+        name?: string;
+        products: Product[];
+        customer?: Customer | null;
+        seller_id?: string;
+        seller_name?: string;
+        payments: PaymentMethod[];
+        subtotal: number;
+        tax_amount: number;
+        total: number;
+        notes?: string;
+        created_at: string;
+        updated_at: string;
+      }>
+    ) {
+      const draft = action.payload;
+
+      // Buscar si ya existe una ventana con este draft_id
+      const existingWindow = state.salesWindows.find((w) => w.draft_id === draft.draft_id);
+
+      if (existingWindow) {
+        // Actualizar ventana existente con datos del backend
+        existingWindow.products = draft.products;
+        existingWindow.customer = draft.customer || null;
+        existingWindow.payments = draft.payments;
+        existingWindow.subtotal = draft.subtotal;
+        existingWindow.tax_amount = draft.tax_amount;
+        existingWindow.total = draft.total;
+        existingWindow.notes = draft.notes;
+        existingWindow.synced = true;
+        existingWindow.synced_at = draft.updated_at;
+        existingWindow.last_modified = draft.updated_at;
+      } else {
+        // Generar ID numérico único para la nueva ventana
+        const windowId = Date.now() + state.salesWindows.length;
+
+        // Crear nueva ventana desde draft
+        const newWindow: SaleWindow = {
+          id: windowId,
+          name: draft.name || `Venta ${state.salesWindows.length + 1}`,
+          products: draft.products,
+          customer: draft.customer || null,
+          payments: draft.payments,
+          subtotal: draft.subtotal,
+          tax_amount: draft.tax_amount,
+          total: draft.total,
+          status: 'draft',
+          created_at: draft.created_at,
+          last_modified: draft.updated_at,
+          notes: draft.notes,
+          seller_id: draft.seller_id,
+          seller_name: draft.seller_name,
+          // Sincronización
+          draft_id: draft.draft_id,
+          synced: true,
+          synced_at: draft.updated_at
+        };
+        state.salesWindows.push(newWindow);
+      }
+    },
+
+    /**
+     * Marcar ventana como modificada (para disparar sincronización)
+     */
+    markWindowAsModified(state, action: PayloadAction<number>) {
+      const window = state.salesWindows.find((w) => w.id === action.payload);
+      if (window) {
+        window.last_modified = new Date().toISOString();
+        window.synced = false;
+      }
+    },
+
     // ===== COMPANY RESET =====
     resetPOSState(_state) {
       // Reset al estado inicial cuando se cambia de empresa
@@ -511,6 +677,9 @@ export const {
   recalculateTotals,
   completeSale,
   initializeFromStorage,
+  updateWindowSyncStatus,
+  addSaleWindowFromDraft,
+  markWindowAsModified,
   resetPOSState
 } = posSlice.actions;
 

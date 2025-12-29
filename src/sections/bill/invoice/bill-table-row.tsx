@@ -43,7 +43,7 @@ export default function BillTableRow({ row, selected, onSelectRow, onViewRow, on
   const { enqueueSnackbar } = useSnackbar();
   const [isSending, setIsSending] = useState(false);
 
-  const canAddPayment = (status === 'open' || status === 'partial') && balance_due > 0;
+  const canAddPayment = (status === 'OPEN' || status === 'PARTIAL') && balance_due > 0;
 
   const handleDownloadPdf = useCallback(async () => {
     try {

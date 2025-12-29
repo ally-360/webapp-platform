@@ -6,8 +6,10 @@ import { useTheme } from '@mui/material/styles';
 
 // redux & utils
 import { useAppSelector, useAppDispatch } from 'src/hooks/store';
-import { type SaleWindow } from 'src/redux/pos/posSlice';
+import { type SaleWindow, removeSaleWindow } from 'src/redux/pos/posSlice';
 import { openPopup } from 'src/redux/inventory/contactsSlice';
+import { useDeleteSaleDraftMutation } from 'src/redux/services/posApi';
+import { enqueueSnackbar } from 'notistack';
 
 // hooks
 import {
@@ -19,6 +21,7 @@ import {
   usePosProducts,
   usePosCustomers
 } from '../hooks';
+import { useSaleWindowSync } from '../hooks/useSaleWindowSync';
 
 // components
 import PosProductGrid from '../pos-product-grid';
@@ -98,6 +101,38 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
     handleConfirmSale,
     handleCloseSaleConfirmDialog
   } = useSaleCompletion(sale, selectedCustomer);
+
+  // Hook de sincronización con backend (auto-save)
+  useSaleWindowSync(sale, {
+    enabled: true,
+    debounceMs: 5000 // 5 segundos de debounce
+  });
+
+  // Hook para eliminar draft
+  const [deleteDraft] = useDeleteSaleDraftMutation();
+
+  // Handler para cancelar venta
+  const handleCancelSale = async () => {
+    // Si tiene draft_id, eliminarlo del backend
+    if (sale.draft_id) {
+      try {
+        await deleteDraft(sale.draft_id).unwrap();
+        console.log('✅ Draft eliminado al cancelar:', sale.draft_id);
+      } catch (error) {
+        console.error('⚠️ Error al eliminar draft (ventana se cerrará igual):', error);
+        // No bloquear el cierre de la ventana
+      }
+    }
+
+    // Cerrar ventana
+    dispatch(removeSaleWindow(sale.id));
+
+    // Notificar al usuario
+    enqueueSnackbar('Venta cancelada', {
+      variant: 'info',
+      autoHideDuration: 3000
+    });
+  };
 
   // Calculate drawer width for cart icon positioning
   const calculateDrawerWidthForIcon = () => {
@@ -182,6 +217,7 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
           searchTerm={searchTerm}
           isSearchValid={isSearchValid}
           minSearchLength={minSearchLength}
+          currentPdvId={currentRegister?.pdv_id}
         />
       </Grid>
 
@@ -242,7 +278,11 @@ export default function PosWindowView({ sale, openDrawer, hiddenDrawer }: Props)
 
             <Divider />
 
-            <PosSaleActions canComplete={canComplete} onCompleteSale={handleInitiateCompleteSale} />
+            <PosSaleActions
+              canComplete={canComplete}
+              onCompleteSale={handleInitiateCompleteSale}
+              onCancel={handleCancelSale}
+            />
           </Box>
         </Card>
       </PosResponsiveDrawer>

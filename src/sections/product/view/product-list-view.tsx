@@ -186,7 +186,8 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
     isLoading: productsLoading,
     refetch: refetchProducts
   } = useGetProductsQuery(backendFilters, {
-    skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2) // Solo hacer request si hay usuario y búsqueda válida
+    skip: !user || (debouncedSearch.length > 0 && debouncedSearch.length < 2), // Solo hacer request si hay usuario y búsqueda válida
+    refetchOnMountOrArgChange: true // Refetch cuando se monta el componente o cuando el caché está invalidado
   });
 
   const [deleteProduct] = useDeleteProductMutation();
@@ -453,7 +454,19 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                         />
                       ))}
 
-                    <TableNoData notFound={notFound} text="No se encontraron productos" />
+                    <TableNoData
+                      notFound={notFound}
+                      hasFilters={canReset}
+                      emptyStateConfig={{
+                        title: 'No tienes productos creados',
+                        description: 'Comienza agregando tu primer producto para gestionar tu inventario',
+                        action: {
+                          label: 'Crear Producto',
+                          href: paths.dashboard.product.new,
+                          icon: 'mingcute:add-line'
+                        }
+                      }}
+                    />
                   </TableBody>
                 </Table>
               </Scrollbar>
@@ -537,7 +550,21 @@ export default function ProductListView({ categoryView = false, brandView }: Pro
                         onViewRow={() => handleViewRow(row.id)}
                       />
                     ))}
-                  <TableNoData notFound={notFound} text="No hay productos en esta categoría" />
+                  <TableNoData
+                    notFound={notFound}
+                    hasFilters={canReset}
+                    emptyStateConfig={{
+                      title: categoryView
+                        ? `No hay productos en ${categoryView.name}`
+                        : 'No hay productos en esta categoría',
+                      description: 'Agrega productos a esta categoría para comenzar',
+                      action: {
+                        label: 'Crear Producto',
+                        href: paths.dashboard.product.new,
+                        icon: 'mingcute:add-line'
+                      }
+                    }}
+                  />
                 </TableBody>
               </Table>
             </Scrollbar>

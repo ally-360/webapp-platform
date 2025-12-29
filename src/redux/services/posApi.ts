@@ -17,19 +17,27 @@ import type {
   POSInvoice,
   POSInvoiceCreate,
   POSSalesParams,
-  ShiftCurrent,
-  ShiftClose,
   ShiftHistory,
   ShiftHistoryParams,
+  ShiftDetail,
   DailyReport,
-  PaginatedResponse
+  ShiftStatusResponse,
+  DailyClosingReport,
+  ShiftSalesParams,
+  PaginatedResponse,
+  SaleDraftCreate,
+  SaleDraftUpdate,
+  SaleDraftResponse,
+  SaleDraftListResponse,
+  SaleDraftsParams,
+  SaleDraftCompleteRequest
 } from 'src/types/pos';
 import { baseQueryWithReauth } from './baseQuery';
 
 export const posApi = createApi({
   reducerPath: 'posApi',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['CashRegister', 'CashMovement', 'Seller', 'POSSale', 'Shift'],
+  tagTypes: ['CashRegister', 'CashMovement', 'Seller', 'POSSale', 'Shift', 'Product', 'ProductList', 'SaleDraft'],
   endpoints: (builder) => ({
     // ========================================
     // 🏦 CASH REGISTER ENDPOINTS
@@ -83,6 +91,48 @@ export const posApi = createApi({
       providesTags: (result, error, id) => [{ type: 'CashRegister', id }]
     }),
 
+    /**
+     * ✅ Obtener caja abierta actual para un PDV
+     * GET /cash-registers/current?pdv_id={pdv_id}
+     * Devuelve 404 si no hay caja abierta
+     */
+    getCurrentCashRegister: builder.query<CashRegister, string>({
+      query: (pdv_id) => ({
+        url: '/cash-registers/current',
+        params: { pdv_id }
+      }),
+      providesTags: ['CashRegister']
+    }),
+
+    /**
+     * Obtener resumen de cierre de caja
+     * GET /cash-registers/{register_id}/closing-summary
+     */
+    getClosingSummary: builder.query<
+      {
+        register_id: string;
+        pdv_id: string;
+        pdv_name: string;
+        opened_at: string;
+        opened_by_name: string;
+        opening_balance: string;
+        total_sales: string;
+        total_deposits: string;
+        total_withdrawals: string;
+        total_expenses: string;
+        total_adjustments: string;
+        expected_balance: string;
+        payment_methods_breakdown: Record<string, string>;
+        total_transactions: number;
+        total_invoices: number;
+        movements_by_type: Record<string, any[]>;
+      },
+      string
+    >({
+      query: (register_id) => `/cash-registers/${register_id}/closing-summary`,
+      providesTags: (result, error, id) => [{ type: 'CashRegister', id }]
+    }),
+
     // ========================================
     // 💰 CASH MOVEMENTS ENDPOINTS
     // ========================================
@@ -133,10 +183,14 @@ export const posApi = createApi({
      * Listar vendedores
      * GET /sellers
      */
-    getSellers: builder.query<SellersResponse, { page?: number; size?: number; is_active?: boolean }>({
-      query: ({ page = 1, size = 100, is_active = true } = {}) => ({
+    getSellers: builder.query<SellersResponse, { page?: number; size?: number; active_only?: boolean }>({
+      query: ({ page = 1, size = 100, active_only = true } = {}) => ({
         url: '/sellers',
-        params: { page, size, is_active }
+        params: {
+          limit: size,
+          offset: (page - 1) * size,
+          active_only
+        }
       }),
       providesTags: ['Seller']
     }),
@@ -181,7 +235,7 @@ export const posApi = createApi({
         params: { pdv_id },
         body: data
       }),
-      invalidatesTags: ['POSSale', 'CashMovement', 'CashRegister']
+      invalidatesTags: ['POSSale', 'CashMovement', 'CashRegister', 'Product', 'ProductList']
     }),
 
     /**
@@ -193,6 +247,19 @@ export const posApi = createApi({
         url: '/pos/sales/',
         params
       }),
+      transformResponse: (response: POSInvoice[] | PaginatedResponse<POSInvoice>) => {
+        // Backend returns array directly, not paginated response
+        if (Array.isArray(response)) {
+          return {
+            items: response,
+            total: response.length,
+            page: 1,
+            size: response.length,
+            pages: 1
+          };
+        }
+        return response;
+      },
       providesTags: ['POSSale']
     }),
 
@@ -203,27 +270,40 @@ export const posApi = createApi({
     getPOSSale: builder.query<
       {
         id: string;
-        pdv_id: string;
-        customer_id: string;
-        seller_id: string;
+        invoice_number: string;
         number: string;
-        status: string;
         issue_date: string;
-        notes?: string;
-        currency: string;
-        subtotal: string;
-        taxes_total: string;
-        total_amount: string;
-        paid_amount: string;
-        balance_due: string;
         created_at: string;
-        updated_at: string;
+        customer_id: string;
         customer_name: string;
+        customer_dni?: string;
+        items_count: number;
+        line_items: Array<{
+          product_name: string;
+          sku: string;
+          quantity: number;
+          unit_price: number;
+          subtotal: number;
+          tax: number;
+        }>;
+        subtotal: number;
+        tax: number;
+        discount: number;
+        total: number;
+        payments: Array<{
+          method: string;
+          amount: number;
+          reference?: string;
+        }>;
+        total_paid: number;
+        payment_status: 'paid' | 'pending' | 'partial' | 'cancelled';
+        seller_id: string;
         seller_name: string;
+        pos_type: string;
+        pdv_id: string;
         pdv_name: string;
-        line_items: any[];
-        payments: any[];
-        cash_movements: any[];
+        status: 'PAID' | 'CANCELLED' | 'REFUNDED' | 'PENDING';
+        notes?: string;
       },
       string
     >({
@@ -280,54 +360,65 @@ export const posApi = createApi({
     // ========================================
 
     /**
-     * Obtener turno actual
-     * GET /pos/shift/current?pdv_id={pdv_id}
-     */
-    getCurrentShift: builder.query<ShiftCurrent, { pdv_id: string }>({
-      query: ({ pdv_id }) => ({
-        url: '/pos/shift/current',
-        params: { pdv_id }
-      }),
-      providesTags: ['Shift']
-    }),
-
-    /**
-     * Cerrar turno actual
-     * POST /pos/shift/close
-     */
-    closeCurrentShift: builder.mutation<ShiftCurrent, ShiftClose>({
-      query: (data) => ({
-        url: '/pos/shift/close',
-        method: 'POST',
-        body: data
-      }),
-      invalidatesTags: ['Shift', 'CashRegister']
-    }),
-
-    /**
-     * Obtener historial de turnos
-     * GET /pos/shift/history
+     * Obtener historial de turnos con filtros y paginación
+     * GET /cash-registers/shifts/history
      */
     getShiftHistory: builder.query<PaginatedResponse<ShiftHistory>, ShiftHistoryParams>({
       query: (params) => ({
-        url: '/pos/shift/history',
+        url: '/cash-registers/shifts/history',
         params
       }),
       providesTags: ['Shift']
     }),
 
     /**
-     * Obtener detalle de turno específico
-     * GET /pos/shift/{id}
+     * Obtener detalle completo de un turno específico
+     * GET /cash-registers/shifts/{register_id}/detail
      */
-    getShift: builder.query<ShiftCurrent, string>({
-      query: (id) => `/pos/shift/${id}`,
+    getShiftDetail: builder.query<ShiftDetail, string>({
+      query: (register_id) => `/cash-registers/shifts/${register_id}/detail`,
       providesTags: (result, error, id) => [{ type: 'Shift', id }]
     }),
 
     // ========================================
     // 📊 REPORTS ENDPOINTS
     // ========================================
+
+    /**
+     * ✅ Estado en tiempo real del turno actual abierto
+     * GET /cash-registers/shift/status?pdv_id={pdv_id}
+     */
+    getShiftStatus: builder.query<ShiftStatusResponse, { pdv_id: string }>({
+      query: (params) => ({
+        url: '/cash-registers/shift/status',
+        params
+      }),
+      providesTags: ['Shift', 'CashRegister', 'POSSale']
+    }),
+
+    /**
+     * ✅ Reporte diario/cierre de caja completo
+     * GET /cash-registers/shift/daily-report?register_id={register_id}
+     */
+    getDailyClosingReport: builder.query<DailyClosingReport, { register_id: string }>({
+      query: (params) => ({
+        url: '/cash-registers/shift/daily-report',
+        params
+      }),
+      providesTags: ['Shift', 'CashRegister']
+    }),
+
+    /**
+     * ✅ Ventas del turno actual abierto
+     * GET /pos/sales/shift/sales
+     */
+    getShiftSales: builder.query<PaginatedResponse<POSInvoice>, ShiftSalesParams>({
+      query: (params) => ({
+        url: '/pos/sales/shift/sales',
+        params
+      }),
+      providesTags: ['POSSale', 'Shift']
+    }),
 
     /**
      * Obtener reporte diario
@@ -364,12 +455,125 @@ export const posApi = createApi({
       {
         hasOpenRegister: boolean;
         currentRegister?: CashRegister;
-        currentShift?: ShiftCurrent;
       },
       void
     >({
       query: () => '/pos/sales',
       providesTags: ['CashRegister', 'Shift']
+    }),
+
+    // ========================================
+    // 📋 SALE DRAFTS ENDPOINTS
+    // ========================================
+
+    /**
+     * Crear nuevo borrador de venta
+     * POST /pos/drafts
+     *
+     * Auto-merge: Si ya existe un borrador activo con el mismo window_id,
+     * se actualizará en lugar de crear uno nuevo.
+     */
+    createSaleDraft: builder.mutation<SaleDraftResponse, SaleDraftCreate>({
+      query: (data) => ({
+        url: '/pos/drafts',
+        method: 'POST',
+        body: data
+      }),
+      invalidatesTags: ['SaleDraft']
+    }),
+
+    /**
+     * Listar borradores de venta
+     * GET /pos/drafts
+     */
+    getSaleDrafts: builder.query<SaleDraftListResponse, SaleDraftsParams>({
+      query: (params) => ({
+        url: '/pos/drafts',
+        params
+      }),
+      providesTags: (result) =>
+        result
+          ? [...result.items.map(({ id }) => ({ type: 'SaleDraft' as const, id })), { type: 'SaleDraft', id: 'LIST' }]
+          : [{ type: 'SaleDraft', id: 'LIST' }]
+    }),
+
+    /**
+     * Obtener borrador específico
+     * GET /pos/drafts/{draft_id}
+     */
+    getSaleDraft: builder.query<SaleDraftResponse, string>({
+      query: (draft_id) => `/pos/drafts/${draft_id}`,
+      providesTags: (result, error, id) => [{ type: 'SaleDraft', id }]
+    }),
+
+    /**
+     * Actualizar borrador de venta
+     * PATCH /pos/drafts/{draft_id}
+     */
+    updateSaleDraft: builder.mutation<SaleDraftResponse, { draft_id: string; data: SaleDraftUpdate }>({
+      query: ({ draft_id, data }) => ({
+        url: `/pos/drafts/${draft_id}`,
+        method: 'PATCH',
+        body: data
+      }),
+      invalidatesTags: (result, error, { draft_id }) => [
+        { type: 'SaleDraft', id: draft_id },
+        { type: 'SaleDraft', id: 'LIST' }
+      ]
+    }),
+
+    /**
+     * Eliminar borrador
+     * DELETE /pos/drafts/{draft_id}
+     */
+    deleteSaleDraft: builder.mutation<void, string>({
+      query: (draft_id) => ({
+        url: `/pos/drafts/${draft_id}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'SaleDraft', id },
+        { type: 'SaleDraft', id: 'LIST' }
+      ]
+    }),
+
+    /**
+     * Completar venta desde borrador
+     * POST /pos/drafts/{draft_id}/complete
+     *
+     * Convierte el borrador en una venta finalizada.
+     * El borrador se elimina automáticamente después.
+     */
+    completeSaleDraft: builder.mutation<POSInvoice, { draft_id: string; data?: SaleDraftCompleteRequest }>({
+      query: ({ draft_id, data = {} }) => ({
+        url: `/pos/drafts/${draft_id}/complete`,
+        method: 'POST',
+        body: data
+      }),
+      invalidatesTags: (result, error, { draft_id }) => [
+        { type: 'SaleDraft', id: draft_id },
+        { type: 'SaleDraft', id: 'LIST' },
+        'POSSale',
+        'CashMovement',
+        'CashRegister',
+        'Product',
+        'ProductList'
+      ]
+    }),
+
+    /**
+     * Limpiar borradores antiguos
+     * POST /pos/drafts/cleanup
+     *
+     * Elimina borradores abandonados (sin actividad por X días)
+     */
+    cleanupOldDrafts: builder.mutation<{ deleted_count: number }, { days_old?: number }>({
+      query: (params = {}) => ({
+        url: '/pos/drafts/cleanup',
+        method: 'POST',
+        params
+      }),
+      invalidatesTags: [{ type: 'SaleDraft', id: 'LIST' }]
     })
   })
 });
@@ -385,6 +589,10 @@ export const {
   useGetCashRegistersQuery,
   useLazyGetCashRegistersQuery,
   useGetCashRegisterQuery,
+  useGetCurrentCashRegisterQuery,
+  useLazyGetCurrentCashRegisterQuery,
+  useGetClosingSummaryQuery,
+  useLazyGetClosingSummaryQuery,
 
   // Cash Movements
   useCreateCashMovementMutation,
@@ -405,16 +613,31 @@ export const {
   useLazyDownloadSaleReceiptQuery,
 
   // Shifts
-  useGetCurrentShiftQuery,
-  useLazyGetCurrentShiftQuery,
-  useCloseCurrentShiftMutation,
   useGetShiftHistoryQuery,
-  useGetShiftQuery,
+  useGetShiftDetailQuery,
+  useLazyGetShiftDetailQuery,
 
   // Reports
+  useGetShiftStatusQuery,
+  useLazyGetShiftStatusQuery,
+  useGetDailyClosingReportQuery,
+  useLazyGetDailyClosingReportQuery,
+  useGetShiftSalesQuery,
+  useLazyGetShiftSalesQuery,
   useGetDailyReportQuery,
   useLazyDownloadShiftReportQuery,
 
   // Status
-  useGetRegisterStatusQuery
+  useGetRegisterStatusQuery,
+
+  // Sale Drafts
+  useCreateSaleDraftMutation,
+  useGetSaleDraftsQuery,
+  useLazyGetSaleDraftsQuery,
+  useGetSaleDraftQuery,
+  useLazyGetSaleDraftQuery,
+  useUpdateSaleDraftMutation,
+  useDeleteSaleDraftMutation,
+  useCompleteSaleDraftMutation,
+  useCleanupOldDraftsMutation
 } = posApi;

@@ -18,7 +18,9 @@ import {
   Chip,
   Stack,
   Card,
-  Paper
+  Paper,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -27,8 +29,9 @@ import { es } from 'date-fns/locale';
 import { Icon } from '@iconify/react';
 
 // redux
-import { useAppSelector } from 'src/hooks/store';
+import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { useCreatePOSSaleMutation, useGetSellersQuery } from 'src/redux/services/posApi';
+import { completeSale } from 'src/redux/pos/posSlice';
 import { useSnackbar } from 'src/components/snackbar';
 
 // utils
@@ -50,24 +53,21 @@ interface Props {
   saleWindow: SaleWindow;
 }
 
-export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWindow }: Props) {
+export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConfirm, saleWindow }: Props) {
   const { enqueueSnackbar } = useSnackbar();
+  const dispatch = useAppDispatch();
 
   // Redux state
   const { currentRegister } = useAppSelector((state) => state.pos);
 
   // RTK Query mutations and queries
   const [createPOSSale, { isLoading: isCreatingSale }] = useCreatePOSSaleMutation();
-  const { data: sellersData } = useGetSellersQuery({
-    is_active: true,
+  const { data: sellersData, isLoading: _isLoadingSellers } = useGetSellersQuery({
+    active_only: true,
     size: 100
   });
 
-  const sellers = useMemo(() => {
-    const sellersList = sellersData?.sellers || [];
-    console.log('📋 Vendedores cargados:', sellersList.length, sellersList);
-    return sellersList;
-  }, [sellersData?.sellers]);
+  const sellers = useMemo(() => sellersData?.sellers || [], [sellersData?.sellers]);
 
   // Form state
   const [seller, setSeller] = useState('');
@@ -77,6 +77,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
   const [discountType, setDiscountType] = useState<'percentage' | 'amount'>('percentage');
   const [discountValue, setDiscountValue] = useState(0);
   const [notes, setNotes] = useState('');
+  const [shouldPrintTicket, setShouldPrintTicket] = useState(true); // ✅ Estado para controlar impresión
   const [recalculatedTotals, setRecalculatedTotals] = useState({
     subtotal: 0,
     tax_amount: 0,
@@ -94,29 +95,23 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
       setNotes(saleWindow.notes || '');
 
       // Set default seller: priorizar el que abrió la caja
-      if (currentRegister?.user_id && sellers.length > 0) {
-        // Buscar el vendedor que coincide con el user_id de la caja registradora
-        const currentCashierSeller = sellers.find((sellerItem) => sellerItem.id === currentRegister.user_id);
-
-        console.log('🎯 Cajero actual:', currentRegister.user_name, 'ID:', currentRegister.user_id);
-        console.log('🔍 Vendedor encontrado:', currentCashierSeller);
+      if (sellers.length > 0) {
+        // Intentar usar el cajero actual si existe en la lista de vendedores
+        const currentCashierSeller = currentRegister?.user_id
+          ? sellers.find((sellerItem) => sellerItem.id === currentRegister.user_id)
+          : null;
 
         if (currentCashierSeller) {
           // Si encontramos al cajero actual en la lista de vendedores, usarlo
           setSeller(currentCashierSeller.id);
           setSellerName(currentCashierSeller.name);
-          console.log('✅ Usando cajero actual como vendedor por defecto');
-        } else if (sellers.length > 0) {
+          console.log('✅ Usando cajero actual como vendedor:', currentCashierSeller.name);
+        } else {
           // Si no se encuentra, usar el primer vendedor disponible
           setSeller(sellers[0].id);
           setSellerName(sellers[0].name);
-          console.log('⚠️ Cajero no encontrado en vendedores, usando primer vendedor disponible');
+          console.log('⚠️ Cajero no está en lista de vendedores, usando primer vendedor:', sellers[0].name);
         }
-      } else if (sellers.length > 0) {
-        // Fallback: usar el primer vendedor si no hay registro de caja
-        setSeller(sellers[0].id);
-        setSellerName(sellers[0].name);
-        console.log('📝 Usando primer vendedor como fallback');
       }
     }
   }, [open, saleWindow, sellers, currentRegister?.user_id, currentRegister?.user_name]);
@@ -163,6 +158,11 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
   };
 
   const handleConfirm = async () => {
+    // Prevenir múltiples clicks mientras se procesa
+    if (isCreatingSale) {
+      return;
+    }
+
     if (!currentRegister?.pdv_id) {
       enqueueSnackbar('Error: No hay un PDV activo seleccionado', { variant: 'error' });
       return;
@@ -189,22 +189,24 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
       // Mapear pagos al formato requerido por la API
       const payments = saleWindow.payments.map((payment) => {
-        // Mapear métodos de pago al formato de la API
-        let apiMethod: 'cash' | 'card' | 'transfer' | 'other';
+        // Mapear métodos de pago al formato de la API (UPPERCASE requerido por backend)
+        let apiMethod: 'CASH' | 'CARD' | 'TRANSFER' | 'QR_CODE' | 'OTHER';
         switch (payment.method) {
           case 'cash':
-            apiMethod = 'cash';
+            apiMethod = 'CASH';
             break;
           case 'card':
-            apiMethod = 'card';
+            apiMethod = 'CARD';
             break;
           case 'transfer':
-            apiMethod = 'transfer';
+            apiMethod = 'TRANSFER';
             break;
           case 'nequi':
+            apiMethod = 'TRANSFER'; // Nequi se mapea como TRANSFER
+            break;
           case 'credit':
           default:
-            apiMethod = 'other';
+            apiMethod = 'OTHER';
             break;
         }
 
@@ -218,7 +220,6 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
       // Preparar datos para la API
       const saleData: any = {
-        pdv_id: currentRegister.pdv_id,
         customer_id: saleWindow.customer.id, // UUID requerido por backend
         seller_id: seller || '', // Convertir null a string vacío
         items,
@@ -231,23 +232,79 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
         sale_date: saleDate.toISOString()
       };
 
-      console.log('🎯 Enviando datos de venta:', saleData);
+      console.log('🎯 Enviando datos de venta:', {
+        pdv_id: currentRegister.pdv_id,
+        ...saleData
+      });
 
       // Crear la venta usando RTK Query
-      await createPOSSale(saleData).unwrap();
+      // El endpoint espera { pdv_id, ...data } donde pdv_id va como query param
+      const backendResponse = await createPOSSale({
+        pdv_id: currentRegister.pdv_id,
+        ...saleData
+      }).unwrap();
 
       enqueueSnackbar('¡Venta creada exitosamente!', { variant: 'success' });
 
-      // Llamar a la función original onConfirm para compatibilidad
-      onConfirm({
-        seller_id: seller,
-        seller_name: sellerName,
-        sale_date: saleDate,
-        tax_rate: taxRate,
-        discount_percentage: discountType === 'percentage' ? discountValue : undefined,
-        discount_amount: finalDiscountAmount,
-        notes: notes || undefined
-      });
+      // 🔥 Limpiar la ventana del POS después de venta exitosa
+      dispatch(
+        completeSale({
+          windowId: saleWindow.id,
+          pos_type: 'simple', // Tipo de venta (puede ser 'electronic' si tiene documento)
+          invoice_number: backendResponse.number,
+          seller_id: seller,
+          seller_name: sellerName,
+          sale_date: saleDate.toISOString(),
+          tax_rate: taxRate,
+          discount_percentage: discountType === 'percentage' ? discountValue : undefined,
+          discount_amount: finalDiscountAmount,
+          notes: notes || undefined
+        })
+      );
+
+      // ✅ Imprimir ticket si está habilitado
+      if (shouldPrintTicket) {
+        try {
+          const { printReceipt } = await import('./pos-print-receipt');
+
+          // Construir los datos de la venta completada para el ticket
+          const completedSale = {
+            id: backendResponse.id || backendResponse.number,
+            sale_window_id: saleWindow.id,
+            register_id: currentRegister.id,
+            customer: saleWindow.customer,
+            products: saleWindow.products,
+            payments: saleWindow.payments,
+            subtotal: recalculatedTotals.subtotal,
+            tax_amount: recalculatedTotals.tax_amount,
+            total: recalculatedTotals.total,
+            created_at: saleDate.toISOString(),
+            invoice_number: backendResponse.number,
+            pos_type: 'simple',
+            notes: notes || undefined,
+            seller_id: seller,
+            seller_name: sellerName,
+            sale_date: saleDate.toISOString(),
+            discount_percentage: discountType === 'percentage' ? discountValue : undefined,
+            discount_amount: finalDiscountAmount
+          };
+
+          printReceipt({
+            sale: completedSale,
+            registerInfo: {
+              pdv_name: currentRegister.pdv_name,
+              user_name: currentRegister.user_name
+            }
+          });
+        } catch (printError) {
+          console.error('Error al imprimir ticket:', printError);
+          // No mostrar error al usuario, la venta ya se completó
+        }
+      }
+
+      // ✅ NO llamar onConfirm - ya se completó la venta aquí
+      // El callback onConfirm era de la implementación anterior
+      // Ahora la lógica de creación está completamente manejada en este diálogo
 
       handleClose();
     } catch (error: any) {
@@ -266,12 +323,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
   const totalPaid = saleWindow.payments.reduce((sum, payment) => sum + payment.amount, 0);
   const canConfirm =
-    !!saleWindow.customer?.id &&
-    !!sellerName &&
-    !!saleDate &&
-    taxRate >= 0 &&
-    recalculatedTotals.total > 0 &&
-    !isCreatingSale;
+    !!saleWindow.customer?.id && seller !== '' && taxRate >= 0 && recalculatedTotals.total > 0 && !isCreatingSale;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
@@ -294,20 +346,19 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
             pb: 2,
             background: (theme) =>
               `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            color: 'primary.contrastText',
-            '& .MuiTypography-root': {
-              color: 'inherit'
-            }
+            color: 'primary.contrastText'
           }}
         >
           <Stack direction="row" alignItems="center" spacing={2}>
-            <Icon icon="mdi:cash-register" width={32} height={32} />
+            <Icon icon="solar:bill-check-bold-duotone" width={32} height={32} />
             <Box>
-              <Typography variant="h5" component="div">
+              <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
                 Confirmar Venta
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Ventana #{saleWindow.id} • {formatCurrency(recalculatedTotals.total)}
+              <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+                {saleWindow.products.length} producto{saleWindow.products.length !== 1 ? 's' : ''}
+                {' • '}
+                {formatCurrency(recalculatedTotals.total)}
               </Typography>
             </Box>
           </Stack>
@@ -319,71 +370,43 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
             <Grid item xs={12} md={7}>
               <Stack spacing={3}>
                 {/* Seller Selection */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
+                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
                   <Typography
                     variant="subtitle2"
                     gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
                   >
-                    <Icon icon="mdi:account-tie" />
+                    <Icon icon="solar:user-check-bold-duotone" width={20} />
                     Vendedor Responsable
                   </Typography>
 
-                  {/* Información del cajero actual */}
-                  {currentRegister?.user_name && (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ mb: 2, display: 'block', fontStyle: 'italic' }}
-                    >
-                      Por defecto: {currentRegister.user_name} (quien abrió la caja)
-                    </Typography>
-                  )}
-
                   <FormControl fullWidth>
-                    <Select
-                      value={seller}
-                      onChange={(e) => handleSellerChange(e.target.value)}
-                      displayEmpty
-                      sx={{ bgcolor: 'background.paper' }}
-                    >
+                    <Select value={seller} onChange={(e) => handleSellerChange(e.target.value)} displayEmpty>
                       <MenuItem value="" disabled>
                         {sellers.length === 0 ? 'Cargando vendedores...' : 'Seleccionar vendedor'}
                       </MenuItem>
-                      {sellers.length === 0 && (
-                        <MenuItem value="" disabled>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
-                            <Icon icon="mdi:information" width={20} height={20} />
-                            <Typography variant="body2" color="text.secondary">
-                              No hay vendedores disponibles
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                      )}
                       {sellers.map((sellerOption) => (
                         <MenuItem key={sellerOption.id} value={sellerOption.id}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
-                            <Icon icon="mdi:account-circle" width={20} height={20} />
+                            <Icon icon="solar:user-circle-bold" width={20} height={20} />
                             <Box sx={{ flex: 1 }}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="body2" fontWeight="medium">
-                                  {sellerOption.name}
-                                </Typography>
-                                {/* Indicador si es el cajero que abrió la caja */}
-                                {currentRegister?.user_id === sellerOption.id && (
-                                  <Chip
-                                    label="Cajero Actual"
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
-                                    sx={{ fontSize: '0.65rem', height: 18 }}
-                                  />
-                                )}
-                              </Box>
-                              <Typography variant="caption" color="text.secondary">
-                                CC: {sellerOption.document || 'N/A'}
+                              <Typography variant="body2" fontWeight="medium">
+                                {sellerOption.name}
                               </Typography>
+                              {sellerOption.document && (
+                                <Typography variant="caption" color="text.secondary">
+                                  {sellerOption.document}
+                                </Typography>
+                              )}
                             </Box>
+                            {currentRegister?.user_id === sellerOption.id && (
+                              <Chip
+                                label="Cajero"
+                                size="small"
+                                color="primary"
+                                sx={{ fontSize: '0.65rem', height: 20 }}
+                              />
+                            )}
                           </Box>
                         </MenuItem>
                       ))}
@@ -392,13 +415,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                 </Card>
 
                 {/* Date and Time */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
+                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
                   <Typography
                     variant="subtitle2"
                     gutterBottom
                     sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
                   >
-                    <Icon icon="mdi:calendar-clock" />
+                    <Icon icon="solar:calendar-date-bold-duotone" width={20} />
                     Fecha y Hora de Venta
                   </Typography>
                   <DateTimePicker
@@ -407,28 +430,20 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                     onChange={(newValue) => setSaleDate(newValue || new Date())}
                     slotProps={{
                       textField: {
-                        fullWidth: true,
-                        sx: { bgcolor: 'background.paper' },
-                        InputProps: {
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Icon icon="mdi:calendar" />
-                            </InputAdornment>
-                          )
-                        }
+                        fullWidth: true
                       }
                     }}
                   />
                 </Card>
 
                 {/* Tax Configuration */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
+                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
                   <Typography
                     variant="subtitle2"
                     gutterBottom
                     sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
                   >
-                    <Icon icon="mdi:calculator" />
+                    <Icon icon="solar:calculator-bold-duotone" width={20} />
                     Configuración de Impuestos
                   </Typography>
                   <TextField
@@ -437,13 +452,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                     type="number"
                     value={taxRate}
                     onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
-                    sx={{ bgcolor: 'background.paper' }}
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Icon icon="mdi:percent" />
-                        </InputAdornment>
-                      ),
                       endAdornment: (
                         <InputAdornment position="end">
                           <Button
@@ -451,7 +460,6 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                             variant="outlined"
                             onClick={() => setTaxRate(19)}
                             disabled={taxRate === 19}
-                            sx={{ minWidth: 'auto', px: 1.5 }}
                           >
                             IVA 19%
                           </Button>
@@ -467,13 +475,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                 </Card>
 
                 {/* Discount Section */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
+                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
                   <Typography
                     variant="subtitle2"
                     gutterBottom
                     sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
                   >
-                    <Icon icon="mdi:tag-percent" />
+                    <Icon icon="solar:tag-price-bold-duotone" width={20} />
                     Descuento
                   </Typography>
                   <Stack spacing={2}>
@@ -482,17 +490,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                         label="Porcentaje"
                         variant={discountType === 'percentage' ? 'filled' : 'outlined'}
                         onClick={() => setDiscountType('percentage')}
-                        icon={<Icon icon="mdi:percent" />}
                         color={discountType === 'percentage' ? 'primary' : 'default'}
-                        size="medium"
                       />
                       <Chip
                         label="Valor Fijo"
                         variant={discountType === 'amount' ? 'filled' : 'outlined'}
                         onClick={() => setDiscountType('amount')}
-                        icon={<Icon icon="mdi:currency-usd" />}
                         color={discountType === 'amount' ? 'primary' : 'default'}
-                        size="medium"
                       />
                     </Stack>
                     <TextField
@@ -501,14 +505,6 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                       type="number"
                       value={discountValue}
                       onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
-                      sx={{ bgcolor: 'background.paper' }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Icon icon={discountType === 'percentage' ? 'mdi:percent' : 'mdi:currency-usd'} />
-                          </InputAdornment>
-                        )
-                      }}
                       inputProps={{
                         min: 0,
                         step: discountType === 'percentage' ? 0.1 : 100
@@ -518,13 +514,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                 </Card>
 
                 {/* Notes */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.neutral', border: '1px solid', borderColor: 'divider' }}>
+                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
                   <Typography
                     variant="subtitle2"
                     gutterBottom
                     sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
                   >
-                    <Icon icon="mdi:note-text" />
+                    <Icon icon="solar:notes-bold-duotone" width={20} />
                     Observaciones
                   </Typography>
                   <TextField
@@ -534,8 +530,6 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Notas adicionales sobre la venta..."
-                    variant="outlined"
-                    sx={{ bgcolor: 'background.paper' }}
                   />
                 </Card>
               </Stack>
@@ -547,15 +541,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                 sx={{
                   p: 3,
                   height: 'fit-content',
-                  border: '2px solid',
-                  borderColor: 'primary.main',
-                  background: (theme) =>
-                    `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-                  boxShadow: (theme) => theme.shadows[8]
+                  bgcolor: 'background.paper',
+                  position: 'sticky',
+                  top: 24
                 }}
               >
                 <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Icon icon="mdi:receipt" />
+                  <Icon icon="solar:bill-list-bold-duotone" width={24} />
                   Resumen de Venta
                 </Typography>
 
@@ -563,17 +555,11 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
                 {/* Products Summary */}
                 <Box sx={{ mb: 3 }}>
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                  >
-                    <Icon icon="mdi:package-variant" width={16} height={16} />
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     PRODUCTOS ({saleWindow.products.length})
                   </Typography>
-                  <Paper sx={{ maxHeight: 200, overflow: 'auto', p: 1, bgcolor: 'background.paper' }}>
-                    <Stack spacing={0.5}>
+                  <Paper variant="outlined" sx={{ maxHeight: 200, overflow: 'auto', p: 1 }}>
+                    <Stack spacing={1}>
                       {saleWindow.products.map((product, index) => (
                         <Box
                           key={index}
@@ -584,9 +570,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                             py: 1,
                             px: 1.5,
                             borderRadius: 1,
-                            bgcolor: index % 2 === 0 ? 'background.neutral' : 'transparent',
-                            border: '1px solid',
-                            borderColor: 'divider'
+                            bgcolor: index % 2 === 0 ? 'action.hover' : 'transparent'
                           }}
                         >
                           <Box sx={{ flex: 1, mr: 2 }}>
@@ -610,7 +594,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
 
                 {/* Totals */}
                 <Stack spacing={1.5}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="body2">Subtotal:</Typography>
                     <Typography variant="body2" fontWeight="medium">
                       {formatCurrency(recalculatedTotals.subtotal)}
@@ -625,18 +609,11 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                         py: 1,
                         px: 1.5,
                         borderRadius: 1,
-                        bgcolor: 'error.lighter',
-                        border: '1px solid',
-                        borderColor: 'error.light'
+                        bgcolor: 'error.lighter'
                       }}
                     >
-                      <Typography
-                        variant="body2"
-                        color="error.main"
-                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                      >
-                        <Icon icon="mdi:tag-minus" width={16} height={16} />
-                        Descuento ({discountType === 'percentage' ? `${discountValue}%` : 'Fijo'}):
+                      <Typography variant="body2" color="error.main">
+                        Descuento:
                       </Typography>
                       <Typography variant="body2" color="error.main" fontWeight="bold">
                         -{formatCurrency(recalculatedTotals.discount_amount)}
@@ -644,14 +621,14 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                     </Box>
                   )}
 
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="body2">Impuestos ({taxRate}%):</Typography>
                     <Typography variant="body2" fontWeight="medium">
                       {formatCurrency(recalculatedTotals.tax_amount)}
                     </Typography>
                   </Box>
 
-                  <Divider sx={{ my: 1.5 }} />
+                  <Divider />
 
                   <Box
                     sx={{
@@ -664,9 +641,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                       color: 'primary.contrastText'
                     }}
                   >
-                    <Typography variant="h6" fontWeight="bold">
-                      Total:
-                    </Typography>
+                    <Typography variant="h6">Total:</Typography>
                     <Typography variant="h6" fontWeight="bold">
                       {formatCurrency(recalculatedTotals.total)}
                     </Typography>
@@ -679,20 +654,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                       py: 1,
                       px: 1.5,
                       borderRadius: 1,
-                      bgcolor: 'success.lighter',
-                      border: '1px solid',
-                      borderColor: 'success.light'
+                      bgcolor: 'success.lighter'
                     }}
                   >
-                    <Typography
-                      variant="body2"
-                      color="success.main"
-                      sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                    >
-                      <Icon icon="mdi:check-circle" width={16} height={16} />
+                    <Typography variant="body2" color="success.dark">
                       Pagado:
                     </Typography>
-                    <Typography variant="body2" color="success.main" fontWeight="bold">
+                    <Typography variant="body2" color="success.dark" fontWeight="bold">
                       {formatCurrency(totalPaid)}
                     </Typography>
                   </Box>
@@ -705,20 +673,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                         py: 1,
                         px: 1.5,
                         borderRadius: 1,
-                        bgcolor: 'warning.lighter',
-                        border: '1px solid',
-                        borderColor: 'warning.light'
+                        bgcolor: 'warning.lighter'
                       }}
                     >
-                      <Typography
-                        variant="body2"
-                        color="warning.main"
-                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
-                      >
-                        <Icon icon="mdi:clock-outline" width={16} height={16} />
+                      <Typography variant="body2" color="warning.dark">
                         Pendiente:
                       </Typography>
-                      <Typography variant="body2" color="warning.main" fontWeight="bold">
+                      <Typography variant="body2" color="warning.dark" fontWeight="bold">
                         {formatCurrency(recalculatedTotals.total - totalPaid)}
                       </Typography>
                     </Box>
@@ -729,14 +690,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                 {saleWindow.customer && (
                   <>
                     <Divider sx={{ my: 2 }} />
-                    <Card sx={{ p: 2, bgcolor: 'info.lighter', border: '1px solid', borderColor: 'info.light' }}>
+                    <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover' }}>
                       <Typography
                         variant="subtitle2"
-                        color="info.main"
                         gutterBottom
                         sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
                       >
-                        <Icon icon="mdi:account" />
+                        <Icon icon="solar:user-bold-duotone" width={18} />
                         Cliente
                       </Typography>
                       <Typography variant="body2" fontWeight="medium">
@@ -747,7 +707,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
                           {saleWindow.customer.document_type}: {saleWindow.customer.document}
                         </Typography>
                       )}
-                    </Card>
+                    </Box>
                   </>
                 )}
               </Card>
@@ -755,36 +715,44 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm, saleWin
           </Grid>
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, bgcolor: 'background.neutral', gap: 2 }}>
-          <Button
-            onClick={handleClose}
-            variant="outlined"
-            size="large"
-            startIcon={<Icon icon="mdi:close" />}
-            sx={{ minWidth: 120 }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleConfirm}
-            disabled={!canConfirm}
-            size="large"
-            startIcon={
-              isCreatingSale ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:check" />
+        <DialogActions sx={{ p: 3, gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={shouldPrintTicket}
+                onChange={(e) => setShouldPrintTicket(e.target.checked)}
+                color="primary"
+              />
             }
-            sx={{
-              minWidth: 160,
-              background: (theme) =>
-                `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-              '&:hover': {
-                background: (theme) =>
-                  `linear-gradient(135deg, ${theme.palette.success.dark} 0%, ${theme.palette.success.main} 100%)`
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Icon icon="solar:printer-bold-duotone" width={18} />
+                <Typography variant="body2">Imprimir ticket</Typography>
+              </Box>
+            }
+          />
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              size="large"
+              startIcon={<Icon icon="solar:close-circle-bold" />}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleConfirm}
+              disabled={!canConfirm || isCreatingSale}
+              size="large"
+              startIcon={
+                isCreatingSale ? <Icon icon="svg-spinners:180-ring-with-bg" /> : <Icon icon="solar:check-circle-bold" />
               }
-            }}
-          >
-            {isCreatingSale ? 'Procesando...' : 'Confirmar Venta'}
-          </Button>
+              sx={{ minWidth: 160 }}
+            >
+              {isCreatingSale ? 'Procesando...' : 'Confirmar Venta'}
+            </Button>
+          </Box>
         </DialogActions>
       </Dialog>
     </LocalizationProvider>

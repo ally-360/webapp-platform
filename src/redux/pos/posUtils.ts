@@ -111,22 +111,36 @@ export const formatShortDate = (dateString: string): string =>
 // ===== PAYMENT METHOD UTILITIES =====
 export const getPaymentMethodName = (method: string): string => {
   const methodNames: Record<string, string> = {
+    // Lowercase (legacy)
     cash: 'Efectivo',
     card: 'Tarjeta',
     nequi: 'Nequi',
     transfer: 'Transferencia',
-    credit: 'Crédito'
+    credit: 'Crédito',
+    // Uppercase (backend format)
+    CASH: 'Efectivo',
+    CARD: 'Tarjeta',
+    TRANSFER: 'Transferencia',
+    QR_CODE: 'QR Code',
+    OTHER: 'Otro'
   };
   return methodNames[method] || method;
 };
 
 export const getPaymentMethodIcon = (method: string): string => {
   const methodIcons: Record<string, string> = {
+    // Lowercase (legacy)
     cash: 'mdi:cash',
     card: 'mdi:credit-card',
     nequi: 'mdi:cellphone',
     transfer: 'mdi:bank-transfer',
-    credit: 'mdi:credit-card-clock'
+    credit: 'mdi:credit-card-clock',
+    // Uppercase (backend format)
+    CASH: 'mdi:cash',
+    CARD: 'mdi:credit-card',
+    TRANSFER: 'mdi:bank-transfer',
+    QR_CODE: 'mdi:qrcode',
+    OTHER: 'mdi:payment'
   };
   return methodIcons[method] || 'mdi:payment';
 };

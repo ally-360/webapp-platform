@@ -16,6 +16,12 @@ export const useCustomerSelection = (sale: SaleWindow) => {
   }, [selectedCustomer, sale.customer, sale.id, dispatch]);
 
   const handleCustomerChange = (customer: Customer | null) => {
+    console.log('🔍 Cliente seleccionado:', {
+      customer,
+      id: customer?.id,
+      idType: typeof customer?.id,
+      name: customer?.name
+    });
     setSelectedCustomer(customer);
   };
 

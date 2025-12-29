@@ -67,6 +67,14 @@ const PosCustomerSelector = memo(
         return;
       }
 
+      // ✅ Validar que el cliente tenga un ID válido (UUID)
+      if (newValue && (!newValue.id || newValue.id === '0' || newValue.id === 0)) {
+        console.error('❌ Cliente inválido seleccionado:', newValue);
+        return;
+      }
+
+      console.log('✅ Cliente seleccionado:', newValue);
+
       // Limpiar input cuando se selecciona un cliente real
       setInputValue('');
       onCustomerChange(newValue);

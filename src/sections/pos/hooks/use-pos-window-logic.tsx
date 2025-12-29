@@ -141,7 +141,6 @@ export const usePosWindowLogic = ({ sale }: UsePosWindowLogicProps) => {
       const saleCompleted = dispatch(completeSale(saleDataForRedux));
       setOpenSaleConfirmDialog(false);
 
-      // Print receipt after successful completion
       if (saleCompleted) {
         setTimeout(() => {
           import('../pos-print-receipt')

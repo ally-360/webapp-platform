@@ -19,12 +19,24 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField
+  TextField,
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { Icon } from '@iconify/react';
+import { useSnackbar } from 'notistack';
+// Hooks
 import { useRouter } from 'src/routes/hook/use-router';
-import { getPosSalesHistory, closePosRegister, downloadRegisterReport } from 'src/api';
+import { useAppSelector } from 'src/hooks/store';
+// Utils
 import { fCurrency } from 'src/utils/format-number';
+// RTK Query
+import {
+  useGetClosingSummaryQuery,
+  useCloseCashRegisterMutation,
+  useGetCurrentCashRegisterQuery
+} from 'src/redux/services/posApi';
+// Components
 import { PAYMENT_LABEL } from './components/sales-history/utils';
 // Constants
 import { createSettingsOptions, createShiftOptions, GENERAL_SETTINGS, APP_INFO } from './constants';
@@ -36,65 +48,71 @@ interface Props {
 
 export default function PosSettingsDrawer({ open, onClose }: Props) {
   const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
+
+  // Get current cash register from Redux state (might be mock data)
+  const stateRegister = useAppSelector((state) => state.pos.currentRegister);
+
+  // Try to get real cash register from backend using PDV ID
+  const { data: queryRegister } = useGetCurrentCashRegisterQuery(stateRegister?.pdv_id || '', {
+    skip: !stateRegister?.pdv_id
+  });
+
+  // Prefer backend data (has real UUID), fallback to state if backend fails
+  const currentRegister = queryRegister || stateRegister;
+
+  // Helper to check if we have a valid UUID (backend register)
+  const hasValidRegister =
+    currentRegister && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentRegister.id);
 
   // ---------------------------------------
   // Close Register dialog state
   // ---------------------------------------
   const [closeOpen, setCloseOpen] = useState(false);
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [summary, setSummary] = useState<{
-    byMethod: Record<string, number>;
-    total: number;
-    expectedCash: number;
-  } | null>(null);
   const [countedCash, setCountedCash] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
 
-  const todayStr = useMemo(() => formatYMD(new Date()), []);
+  // Fetch closing summary only if we have a valid UUID register
+  const { data: closingSummary, isLoading: loadingSummary } = useGetClosingSummaryQuery(currentRegister?.id || '', {
+    skip: !closeOpen || !currentRegister?.id || !hasValidRegister
+  });
 
-  const handleOpenCloseDialog = () => {
+  // Close cash register mutation
+  const [closeCashRegister, { isLoading: isClosing }] = useCloseCashRegisterMutation();
+
+  const handleOpenCloseDialog = useCallback(() => {
+    if (!currentRegister) {
+      enqueueSnackbar('No hay caja registradora abierta', { variant: 'warning' });
+      return;
+    }
+    if (!hasValidRegister) {
+      enqueueSnackbar('ID de caja registradora inválido. Por favor recarga la página.', {
+        variant: 'error'
+      });
+      return;
+    }
     setCloseOpen(true);
-  };
-  const handleCloseDialog = () => {
+  }, [currentRegister, hasValidRegister, enqueueSnackbar]);
+
+  const handleCloseDialog = useCallback(() => {
     setCloseOpen(false);
-    setSummary(null);
     setCountedCash('');
     setNotes('');
-  };
+  }, []);
 
+  // Set initial counted cash when summary loads
   useEffect(() => {
-    const fetchSummary = async () => {
-      if (!closeOpen) return;
-      setLoadingSummary(true);
-      try {
-        const res = await getPosSalesHistory({ dateFrom: todayStr, dateTo: todayStr, page: 0, limit: 1000 } as any);
-        const rows = (res as any)?.data?.data || [];
-        const byMethod: Record<string, number> = {};
-        let total = 0;
-        rows.forEach((row: any) => {
-          total += row.total || 0;
-          (row.payments || []).forEach((p: any) => {
-            byMethod[p.method] = (byMethod[p.method] || 0) + (p.amount || 0);
-          });
-        });
-        const expectedCash = byMethod.cash || 0;
-        setSummary({ byMethod, total, expectedCash });
-        if (countedCash === '') setCountedCash(expectedCash);
-      } catch (e) {
-        setSummary({ byMethod: {}, total: 0, expectedCash: 0 });
-      } finally {
-        setLoadingSummary(false);
-      }
-    };
-    fetchSummary();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [closeOpen, todayStr]);
+    if (closingSummary && countedCash === '') {
+      setCountedCash(parseFloat(closingSummary.expected_balance));
+    }
+  }, [closingSummary, countedCash]);
 
   const difference = useMemo(() => {
-    if (!summary) return 0;
+    if (!closingSummary) return 0;
     const counted = typeof countedCash === 'number' ? countedCash : parseFloat((countedCash as any) || '0') || 0;
-    return counted - (summary?.expectedCash || 0);
-  }, [countedCash, summary]);
+    const expected = parseFloat(closingSummary.expected_balance || '0');
+    return counted - expected;
+  }, [countedCash, closingSummary]);
 
   const differenceColor = useMemo(() => {
     if (difference === 0) return 'text.primary';
@@ -102,63 +120,76 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
   }, [difference]);
 
   const handleConfirmClose = useCallback(async () => {
-    if (!summary) return;
+    if (!closingSummary || !currentRegister) return;
+
     // Si hay diferencia, exigir nota
     if (difference !== 0 && !notes.trim()) {
-      // eslint-disable-next-line no-alert
-      alert('Debes ingresar una nota cuando hay diferencia de efectivo.');
+      enqueueSnackbar('Debes ingresar una nota cuando hay diferencia de efectivo', { variant: 'warning' });
       return;
     }
-    try {
-      const payload: any = {
-        dateFrom: todayStr,
-        dateTo: todayStr,
-        byMethod: Object.entries(summary.byMethod).map(([method, amount]) => ({ method, amount })),
-        total: summary.total,
-        expectedCash: summary.expectedCash,
-        countedCash: typeof countedCash === 'number' ? countedCash : parseFloat((countedCash as any) || '0') || 0,
-        difference,
-        notes
-      };
-      await closePosRegister(payload);
-      // eslint-disable-next-line no-alert
-      alert('Turno cerrado correctamente (mock).');
-      handleCloseDialog();
-      // Redirigir al reporte diario
-      router.push('/pos/daily-report');
-    } catch (e) {
-      // eslint-disable-next-line no-alert
-      alert('Error al cerrar turno.');
-    }
-  }, [summary, todayStr, countedCash, difference, notes, router]);
 
-  const handleDownloadPDF = useCallback(async () => {
     try {
-      const res = await downloadRegisterReport('pdf', { dateFrom: todayStr, dateTo: todayStr } as any);
-      const url = (res as any)?.data?.url;
-      if (url) window.open(url, '_blank');
-    } catch (e) {
-      // eslint-disable-next-line no-alert
-      alert('No se pudo generar el PDF.');
+      const counted = typeof countedCash === 'number' ? countedCash : parseFloat((countedCash as any) || '0') || 0;
+
+      await closeCashRegister({
+        id: currentRegister.id,
+        data: {
+          closing_balance: counted,
+          closing_notes: notes.trim() || undefined
+        }
+      }).unwrap();
+
+      enqueueSnackbar('Caja cerrada correctamente', { variant: 'success' });
+      handleCloseDialog();
+      onClose?.();
+
+      // Redirigir al reporte diario o historial de turnos
+      router.push('/pos/shift/history');
+    } catch (error: any) {
+      console.error('Error closing cash register:', error);
+      enqueueSnackbar(error?.data?.detail || 'Error al cerrar la caja', { variant: 'error' });
     }
-  }, [todayStr]);
+  }, [
+    closingSummary,
+    currentRegister,
+    difference,
+    notes,
+    countedCash,
+    closeCashRegister,
+    enqueueSnackbar,
+    handleCloseDialog,
+    onClose,
+    router
+  ]);
 
   const handleDownloadExcel = useCallback(() => {
-    if (!summary) return;
-    const lines = ['Método,Total'];
-    Object.entries(summary.byMethod).forEach(([method, amount]) => {
+    if (!closingSummary) return;
+    const lines = ['Método de Pago,Total'];
+
+    // Add payment methods breakdown
+    Object.entries(closingSummary.payment_methods_breakdown || {}).forEach(([method, amount]) => {
       lines.push(`${(PAYMENT_LABEL as any)[method] || method},${amount}`);
     });
-    lines.push(`Total,${summary.total}`);
+
+    lines.push('');
+    lines.push('Resumen');
+    lines.push(`Saldo Inicial,${closingSummary.opening_balance}`);
+    lines.push(`Total Ventas,${closingSummary.total_sales}`);
+    lines.push(`Total Depósitos,${closingSummary.total_deposits}`);
+    lines.push(`Total Retiros,${closingSummary.total_withdrawals}`);
+    lines.push(`Total Gastos,${closingSummary.total_expenses}`);
+    lines.push(`Saldo Esperado,${closingSummary.expected_balance}`);
+
     const csv = lines.join('\n');
     const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `arqueo_${todayStr}.csv`;
+    const today = new Date().toISOString().split('T')[0];
+    a.download = `arqueo_${today}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [summary, todayStr]);
+  }, [closingSummary]);
 
   const handleNavigate = useCallback(
     (href: string) => {
@@ -183,7 +214,7 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
         handleOpenCloseDialog,
         handleNavigate
       }),
-    [handleNavigate]
+    [handleNavigate, handleOpenCloseDialog]
   );
 
   return (
@@ -349,88 +380,193 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
       </Box>
 
       {/* Close Register Dialog */}
-      <Dialog open={closeOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Cerrar Caja (Turno)</DialogTitle>
+      <Dialog open={closeOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogTitle>Cerrar Caja Registradora</DialogTitle>
         <DialogContent dividers>
-          <Stack spacing={2}>
-            <Typography variant="body2" color="text.secondary">
-              Fecha: {todayStr}
-            </Typography>
-
-            <Stack spacing={1}>
-              <Typography variant="subtitle2">Ventas por método</Typography>
-              <Stack spacing={0.5}>
-                {loadingSummary && <Typography variant="body2">Calculando...</Typography>}
-                {!loadingSummary && summary && (
-                  <>
-                    {Object.entries(summary.byMethod).map(([method, amount]) => (
-                      <Stack key={method} direction="row" justifyContent="space-between">
-                        <Typography variant="body2">{(PAYMENT_LABEL as any)[method] || method}</Typography>
-                        <Typography variant="body2">{fCurrency(amount)}</Typography>
-                      </Stack>
-                    ))}
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="subtitle2">Total</Typography>
-                      <Typography variant="subtitle2">{fCurrency(summary.total)}</Typography>
-                    </Stack>
-                  </>
-                )}
-              </Stack>
-            </Stack>
-
-            <Divider />
-
-            <Stack spacing={1}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="subtitle2">Total efectivo esperado</Typography>
-                <Typography variant="subtitle2">{fCurrency(summary?.expectedCash || 0)}</Typography>
-              </Stack>
-              <TextField
-                label="Efectivo contado por cajero"
-                type="number"
-                value={countedCash}
-                onChange={(e) => setCountedCash(e.target.value === '' ? '' : Number(e.target.value))}
-                fullWidth
-              />
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="subtitle2">Diferencia</Typography>
-                <Typography variant="subtitle2" color={differenceColor as any}>
-                  {fCurrency(difference)}
+          <Stack spacing={3}>
+            {/* Loading state */}
+            {loadingSummary && (
+              <Stack alignItems="center" justifyContent="center" sx={{ py: 5 }}>
+                <CircularProgress />
+                <Typography variant="body2" sx={{ mt: 2 }}>
+                  Cargando resumen de caja...
                 </Typography>
               </Stack>
-              <TextField
-                label="Notas u observaciones"
-                multiline
-                minRows={3}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                fullWidth
-              />
-            </Stack>
+            )}
+
+            {/* Información básica */}
+            {!loadingSummary && closingSummary && (
+              <>
+                <Stack spacing={1}>
+                  <Typography variant="overline" color="text.secondary">
+                    Información de la Caja
+                  </Typography>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">PDV:</Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {closingSummary.pdv_name}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">Abierta por:</Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {closingSummary.opened_by_name}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">Hora de apertura:</Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {new Date(closingSummary.opened_at).toLocaleString('es-CO')}
+                    </Typography>
+                  </Stack>
+                </Stack>
+
+                <Divider />
+
+                {/* Resumen de movimientos */}
+                <Stack spacing={1}>
+                  <Typography variant="overline" color="text.secondary">
+                    Resumen de Movimientos
+                  </Typography>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">Saldo inicial:</Typography>
+                    <Typography variant="body2">{fCurrency(parseFloat(closingSummary.opening_balance))}</Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">Total ventas:</Typography>
+                    <Typography variant="body2" color="success.main">
+                      + {fCurrency(parseFloat(closingSummary.total_sales))}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">Total depósitos:</Typography>
+                    <Typography variant="body2" color="success.main">
+                      + {fCurrency(parseFloat(closingSummary.total_deposits))}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">Total retiros:</Typography>
+                    <Typography variant="body2" color="error.main">
+                      - {fCurrency(parseFloat(closingSummary.total_withdrawals))}
+                    </Typography>
+                  </Stack>
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2">Total gastos:</Typography>
+                    <Typography variant="body2" color="error.main">
+                      - {fCurrency(parseFloat(closingSummary.total_expenses))}
+                    </Typography>
+                  </Stack>
+                  {parseFloat(closingSummary.total_adjustments) !== 0 && (
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2">Ajustes:</Typography>
+                      <Typography variant="body2">{fCurrency(parseFloat(closingSummary.total_adjustments))}</Typography>
+                    </Stack>
+                  )}
+                </Stack>
+
+                <Divider />
+
+                {/* Métodos de pago */}
+                <Stack spacing={1}>
+                  <Typography variant="overline" color="text.secondary">
+                    Desglose por Método de Pago
+                  </Typography>
+                  {Object.entries(closingSummary.payment_methods_breakdown || {}).map(([method, amount]) => (
+                    <Stack key={method} direction="row" justifyContent="space-between">
+                      <Typography variant="body2">{(PAYMENT_LABEL as any)[method] || method}:</Typography>
+                      <Typography variant="body2">{fCurrency(parseFloat(amount))}</Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+
+                <Divider />
+
+                {/* Estadísticas */}
+                <Stack direction="row" spacing={3}>
+                  <Stack flex={1}>
+                    <Typography variant="overline" color="text.secondary">
+                      Transacciones
+                    </Typography>
+                    <Typography variant="h4">{closingSummary.total_transactions}</Typography>
+                  </Stack>
+                  <Stack flex={1}>
+                    <Typography variant="overline" color="text.secondary">
+                      Facturas
+                    </Typography>
+                    <Typography variant="h4">{closingSummary.total_invoices}</Typography>
+                  </Stack>
+                </Stack>
+
+                <Divider />
+
+                {/* Arqueo de caja */}
+                <Stack spacing={1.5}>
+                  <Typography variant="overline" color="text.secondary">
+                    Arqueo de Caja
+                  </Typography>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography variant="subtitle2">Saldo esperado:</Typography>
+                    <Typography variant="h6">{fCurrency(parseFloat(closingSummary.expected_balance))}</Typography>
+                  </Stack>
+
+                  <TextField
+                    label="Saldo declarado (efectivo contado)"
+                    type="number"
+                    value={countedCash}
+                    onChange={(e) => setCountedCash(e.target.value === '' ? '' : Number(e.target.value))}
+                    fullWidth
+                    required
+                    helperText="Ingresa el efectivo físico contado en la caja"
+                  />
+
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography variant="subtitle2">Diferencia:</Typography>
+                    <Typography variant="h6" color={differenceColor as any}>
+                      {fCurrency(difference)}
+                    </Typography>
+                  </Stack>
+
+                  {difference !== 0 && (
+                    <Alert severity={difference > 0 ? 'info' : 'warning'}>
+                      {difference > 0
+                        ? `Sobrante de ${fCurrency(Math.abs(difference))}. Por favor explica el motivo en las notas.`
+                        : `Faltante de ${fCurrency(Math.abs(difference))}. Por favor explica el motivo en las notas.`}
+                    </Alert>
+                  )}
+
+                  <TextField
+                    label="Notas del cierre"
+                    multiline
+                    minRows={3}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    fullWidth
+                    required={difference !== 0}
+                    helperText={
+                      difference !== 0 ? 'Las notas son obligatorias cuando hay diferencia en el saldo' : 'Opcional'
+                    }
+                  />
+                </Stack>
+              </>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button color="inherit" onClick={handleCloseDialog}>
+          <Button color="inherit" onClick={handleCloseDialog} disabled={isClosing}>
             Cancelar
           </Button>
-          <Button color="inherit" onClick={handleDownloadExcel}>
+          <Button color="inherit" onClick={handleDownloadExcel} disabled={!closingSummary || isClosing}>
             Descargar Excel
           </Button>
-          <Button color="inherit" onClick={handleDownloadPDF}>
-            Descargar PDF
-          </Button>
-          <Button variant="contained" onClick={handleConfirmClose} disabled={loadingSummary || !summary}>
-            Confirmar cierre
+          <Button
+            variant="contained"
+            onClick={handleConfirmClose}
+            disabled={loadingSummary || !closingSummary || isClosing || countedCash === ''}
+          >
+            {isClosing ? 'Cerrando...' : 'Confirmar cierre'}
           </Button>
         </DialogActions>
       </Dialog>
     </Drawer>
   );
-}
-
-function formatYMD(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
