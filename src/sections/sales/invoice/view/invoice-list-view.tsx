@@ -58,6 +58,7 @@ import {
 //
 import { useAuthContext } from 'src/auth/hooks';
 import Scrollbar from 'src/components/scrollbar';
+import { HOST_API } from 'src/config-global';
 import InvoiceAnalytic from '../invoice-analytic';
 import InvoiceTableRow from '../invoice-table-row';
 import InvoiceTableToolbar from '../invoice-table-toolbar';
@@ -581,17 +582,14 @@ export default function InvoiceListView() {
             formData.append('message', 'Estimado cliente, adjunto encontrará su factura. Gracias por su preferencia.');
             formData.append('pdf_file', pdfBlob, `factura-${fullInvoice.number}.pdf`);
 
-            const response = await fetch(
-              `${HOST_API}/invoices/${invoice.id}/send-email`,
-              {
-                method: 'POST',
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  'X-Company-ID': companyId || ''
-                },
-                body: formData
-              }
-            );
+            const response = await fetch(`${HOST_API}/invoices/${invoice.id}/send-email`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'X-Company-ID': companyId || ''
+              },
+              body: formData
+            });
 
             return { success: response.ok };
           } catch (error) {
