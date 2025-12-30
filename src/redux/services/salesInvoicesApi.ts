@@ -1,5 +1,18 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { baseQueryWithReauth } from './baseQuery';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { HOST_API } from 'src/config-global';
+import type { RootState } from '../store';
+
+// Base query específico para invoices API
+const invoicesBaseQuery = fetchBaseQuery({
+  baseUrl: `${HOST_API}/invoices`,
+  prepareHeaders: (headers, { getState }) => {
+    const token = (getState() as RootState).auth?.token || localStorage.getItem('accessToken');
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  }
+});
 
 // Interfaces
 export interface SalesInvoice {
@@ -116,7 +129,7 @@ export interface InvoiceEmailRequest {
 // API
 export const salesInvoicesApi = createApi({
   reducerPath: 'salesInvoicesApi',
-  baseQuery: baseQueryWithReauth,
+  baseQuery: invoicesBaseQuery,
   tagTypes: ['SalesInvoice', 'InvoicePayment'],
   endpoints: (builder) => ({
     // Get all sales invoices
@@ -292,6 +305,26 @@ export const salesInvoicesApi = createApi({
         };
       },
       providesTags: ['SalesInvoice']
+    }),
+
+    // Get pending invoices by customer
+    getPendingInvoicesByCustomer: builder.query<
+      {
+        invoices: SalesInvoice[];
+        total: number;
+        page: number;
+        size: number;
+        pages: number;
+        customer_id: string;
+        customer_name: string;
+      },
+      { customer_id: string; page?: number; size?: number }
+    >({
+      query: ({ customer_id, page = 1, size = 100 }) => ({
+        url: `/pending-by-customer/${customer_id}`,
+        params: { page, size }
+      }),
+      providesTags: (result, error, { customer_id }) => [{ type: 'SalesInvoice', id: `PENDING-${customer_id}` }]
     })
   })
 });
@@ -310,5 +343,6 @@ export const {
   useSendInvoiceEmailMutation,
   useGetInvoicesSummaryQuery,
   useGetNextInvoiceNumberQuery,
-  useGetMonthlyStatusReportQuery
+  useGetMonthlyStatusReportQuery,
+  useGetPendingInvoicesByCustomerQuery
 } = salesInvoicesApi;

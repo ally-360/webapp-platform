@@ -24,11 +24,10 @@ import { useSnackbar } from 'src/components/snackbar';
 // ----------------------------------------------------------------------
 
 const PAYMENT_METHODS = [
-  { value: 'cash', label: 'Efectivo' },
-  { value: 'transfer', label: 'Transferencia' },
-  { value: 'card', label: 'Tarjeta' },
-  { value: 'check', label: 'Cheque' },
-  { value: 'other', label: 'Otro' }
+  { value: 'CASH', label: 'Efectivo' },
+  { value: 'TRANSFER', label: 'Transferencia' },
+  { value: 'CARD', label: 'Tarjeta' },
+  { value: 'OTHER', label: 'Otro' }
 ];
 
 // ----------------------------------------------------------------------
@@ -40,7 +39,7 @@ export default function InvoicePaymentDialog({ open, onClose, invoice }) {
   const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: {
       amount: '',
-      method: 'cash',
+      method: 'CASH',
       reference: '',
       payment_date: new Date(),
       notes: ''

@@ -149,6 +149,12 @@ export const paths = {
         edit: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}/edit`,
         reversal: (id: string) => `${ROOTS.DASHBOARD}/accounting/journal/${id}/reversal`
       }
+    },
+    paymentsReceived: {
+      root: `${ROOTS.DASHBOARD}/payments-received`,
+      new: `${ROOTS.DASHBOARD}/payments-received/new`,
+      details: (id: string) => `${ROOTS.DASHBOARD}/payments-received/${id}`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/payments-received/${id}/edit`
     }
   }
 };

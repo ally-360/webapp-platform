@@ -49,7 +49,11 @@ export default function InvoiceNewEditDetails() {
   const { data: pdvs = [], isLoading: pdvsLoading, error: pdvsError } = useGetPDVsQuery();
 
   // Get Products using RTK Query
-  const { data: productsResponse, isLoading: productsLoading, error: productsError } = useGetProductsQuery({
+  const {
+    data: productsResponse,
+    isLoading: productsLoading,
+    error: productsError
+  } = useGetProductsQuery({
     page: 1,
     limit: 25,
     is_active: true

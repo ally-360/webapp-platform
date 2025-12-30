@@ -144,6 +144,10 @@ export function useNavData() {
               {
                 title: t('Facturas de venta'),
                 path: paths.dashboard.sales.root
+              },
+              {
+                title: t('Pagos recibidos'),
+                path: paths.dashboard.paymentsReceived.root
               }
             ]
           },
