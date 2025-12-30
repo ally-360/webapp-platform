@@ -18,11 +18,10 @@ import { fCurrency } from 'src/utils/format-number';
 // components
 import Iconify from 'src/components/iconify';
 import { RHFAutocomplete, RHFSelect, RHFTextField } from 'src/components/hook-form';
-import { getAllProducts } from 'src/redux/inventory/productsSlice';
 import { enqueueSnackbar } from 'notistack';
 import { IconButton, Tooltip } from '@mui/material';
 import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
-import { useAppDispatch, useAppSelector } from 'src/hooks/store';
+import { useGetProductsQuery } from 'src/redux/services/productsApi';
 
 // ----------------------------------------------------------------------
 
@@ -46,10 +45,17 @@ export default function InvoiceNewEditDetails() {
     Number(values.shipping || 0) +
     Number(values.totalTaxes || 0);
 
-  const dispatch = useAppDispatch();
-
   // Get PDVs using RTK Query
   const { data: pdvs = [], isLoading: pdvsLoading, error: pdvsError } = useGetPDVsQuery();
+
+  // Get Products using RTK Query
+  const { data: productsResponse, isLoading: productsLoading, error: productsError } = useGetProductsQuery({
+    page: 1,
+    limit: 25,
+    is_active: true
+  });
+
+  const products = productsResponse?.data || [];
 
   useEffect(() => {
     console.log('PDVs data:', pdvs, 'Loading:', pdvsLoading, 'Error:', pdvsError);
@@ -57,15 +63,11 @@ export default function InvoiceNewEditDetails() {
   }, [pdvs, pdvsLoading, pdvsError]);
 
   useEffect(() => {
-    try {
-      dispatch(getAllProducts({ page: 1, pageSize: 25 }));
-    } catch (error) {
-      console.error('Error dispatching getAllProducts:', error);
+    if (productsError) {
+      console.error('Error loading products:', productsError);
       enqueueSnackbar('Error al cargar productos', { variant: 'error' });
     }
-  }, [dispatch]);
-
-  const { products } = useAppSelector((state) => state.products);
+  }, [productsError]);
 
   const [productsOptions, setProductsOptions] = useState<any[]>([]);
 
