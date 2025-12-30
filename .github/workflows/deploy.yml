@@ -66,9 +66,16 @@ jobs:
           port: 22
           script: |
             cd /home/${{ secrets.VPS_USER }}/ally360/webapp-platform
+
             echo "Pulling latest image..."
-            docker pull ghcr.io/ally-360/webpage-platform:${{ github.sha }}
-            echo "Restarting frontend container..."
-            docker compose down
-            docker compose up -d
+            docker pull ghcr.io/ally-360/webpage-platform:latest
+
+            echo "Recreating allyapp..."
+            docker compose up -d --force-recreate --pull always
+
+            echo "Restarting caddy..."
+            docker restart ally360-caddy || true
+
             echo "✅ Frontend deployed successfully!"
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep allyapp || true
+

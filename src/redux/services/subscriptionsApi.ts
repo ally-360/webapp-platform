@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { HOST_API } from 'src/config-global';
 import type { RootState } from '../store';
 
 // ========================================
@@ -6,7 +7,7 @@ import type { RootState } from '../store';
 // ========================================
 
 const baseQueryWithAuth = fetchBaseQuery({
-  baseUrl: (import.meta as any).env?.VITE_HOST_API || 'https://api.ally360.co',
+  baseUrl: HOST_API,
   prepareHeaders: (headers, { getState }) => {
     // Obtener token del estado global
     const token = (getState() as RootState).auth?.token || localStorage.getItem('accessToken');

@@ -3,6 +3,7 @@
 // ========================================
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { HOST_API } from 'src/config-global';
 
 // ========================================
 // 🏷️ AUTH INTERFACES (Backend Schema)
@@ -168,7 +169,7 @@ export interface EmailVerificationResponse {
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: (import.meta as any).env?.VITE_HOST_API || 'https://api.ally360.co',
+    baseUrl: HOST_API,
     prepareHeaders: (headers) => {
       // Obtener token del localStorage directamente
       const token = localStorage.getItem('accessToken');

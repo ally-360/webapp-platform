@@ -556,7 +556,7 @@ export default function InvoiceListView() {
         selectedInvoices.map(async (invoice) => {
           try {
             // Primero obtener los detalles completos de la factura
-            const detailResponse = await fetch(`${(import.meta as any).env.VITE_HOST_API}/invoices/${invoice.id}`, {
+            const detailResponse = await fetch(`${HOST_API}/invoices/${invoice.id}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 'X-Company-ID': companyId || ''
@@ -582,7 +582,7 @@ export default function InvoiceListView() {
             formData.append('pdf_file', pdfBlob, `factura-${fullInvoice.number}.pdf`);
 
             const response = await fetch(
-              `${(import.meta as any).env.VITE_HOST_API}/invoices/${invoice.id}/send-email`,
+              `${HOST_API}/invoices/${invoice.id}/send-email`,
               {
                 method: 'POST',
                 headers: {

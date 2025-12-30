@@ -2,6 +2,7 @@ import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { enqueueSnackbar } from 'notistack';
 import { isTokenExpired } from 'src/auth/utils/token-validation';
 import { createBrowserHistory } from 'history';
+import { HOST_API } from 'src/config-global';
 import type { RootState } from '../store';
 
 /**
@@ -11,7 +12,7 @@ import type { RootState } from '../store';
  * - Redirección automática al login
  */
 export const baseQueryWithAuth = fetchBaseQuery({
-  baseUrl: (import.meta as any).env.VITE_HOST_API || 'https://api.ally360.co',
+  baseUrl: HOST_API,
   prepareHeaders: (headers, { getState }) => {
     // Obtener token del estado global o localStorage
     const token = (getState() as RootState).auth?.token || localStorage.getItem('accessToken');

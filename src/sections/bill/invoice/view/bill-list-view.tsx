@@ -482,7 +482,7 @@ export default function BillListView() {
             formData.append('message', 'Estimado proveedor, adjunto encontrará la factura de compra. Gracias.');
             formData.append('pdf_file', pdfBlob, `factura-compra-${bill.number}.pdf`);
 
-            const response = await fetch(`${(import.meta as any).env.VITE_HOST_API}/bills/${bill.id}/send-email`, {
+            const response = await fetch(`${HOST_API}/bills/${bill.id}/send-email`, {
               method: 'POST',
               headers: {
                 Authorization: `Bearer ${token}`,

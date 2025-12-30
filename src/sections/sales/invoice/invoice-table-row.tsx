@@ -85,7 +85,7 @@ export default function InvoiceTableRow({ row, selected, onSelectRow, onViewRow,
       const token = localStorage.getItem('accessToken');
       const companyId = localStorage.getItem('companyId');
 
-      const response = await fetch(`${(import.meta as any).env.VITE_HOST_API}/invoices/${row.id}/send-email`, {
+      const response = await fetch(`${HOST_API}/invoices/${row.id}/send-email`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

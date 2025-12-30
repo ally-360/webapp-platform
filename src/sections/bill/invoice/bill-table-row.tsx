@@ -79,7 +79,7 @@ export default function BillTableRow({ row, selected, onSelectRow, onViewRow, on
       const token = localStorage.getItem('accessToken');
       const companyId = localStorage.getItem('companyId');
 
-      const response = await fetch(`${(import.meta as any).env.VITE_HOST_API}/bills/${row.id}/send-email`, {
+      const response = await fetch(`${HOST_API}/bills/${row.id}/send-email`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
