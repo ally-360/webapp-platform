@@ -70,12 +70,15 @@ jobs:
             echo "Pulling latest image..."
             docker pull ghcr.io/ally-360/webpage-platform:latest
 
-            echo "Recreating allyapp..."
-            docker compose up -d --force-recreate --pull always
+            echo "Removing old allyapp (if exists)..."
+            docker rm -f allyapp || true
+
+            echo "Starting with docker compose..."
+            docker compose up -d --pull always --force-recreate --remove-orphans
 
             echo "Restarting caddy..."
             docker restart ally360-caddy || true
 
             echo "✅ Frontend deployed successfully!"
             docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | grep allyapp || true
-
+            docker inspect allyapp --format 'Container={{.Name}} Created={{.Created}} Image={{.Config.Image}}' || true
