@@ -13,7 +13,6 @@ import Typography from '@mui/material/Typography';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import Alert from '@mui/material/Alert';
 // routes
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hook';
@@ -23,12 +22,9 @@ import { useSnackbar } from 'src/components/snackbar';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField, RHFSelect, RHFAutocomplete } from 'src/components/hook-form';
+import { Alert } from '@mui/material';
 // redux
-import {
-  useCreatePaymentMutation,
-  useUpdatePaymentMutation,
-  useAllocatePaymentMutation
-} from 'src/redux/services/paymentsReceivedApi';
+import { useCreatePaymentMutation, useUpdatePaymentMutation, useAllocatePaymentMutation } from 'src/redux/services/paymentsReceivedApi';
 import { useGetContactsQuery } from 'src/redux/services/contactsApi';
 // types
 import type { PaymentReceived, PaymentMethod, CreatePaymentReceivedRequest } from 'src/types/payment-received';
@@ -69,23 +65,23 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
 
   const isEdit = !!currentPayment;
 
-  // Schema validation - Dinámica según el tipo de pago
+  // Schema validation
   const PaymentSchema = Yup.object().shape({
-    contact_id: Yup.string().when([], {
-      is: () => paymentType === 'advance' || paymentType === 'with_invoice',
-      then: (schema) => schema.required('Cliente es obligatorio'),
-      otherwise: (schema) => schema
+    contact_id: Yup.string().when('invoice_id', {
+      is: (val: string) => !val,
+      then: (schema) => schema.required('Cliente es obligatorio para pagos anticipados')
     }),
     invoice_id: Yup.string(),
     payment_date: Yup.date().required('Fecha de pago es obligatoria'),
-    amount: Yup.number().required('Monto es obligatorio').positive('Monto debe ser mayor a 0'),
+    amount: Yup.number()
+      .required('Monto es obligatorio')
+      .positive('Monto debe ser mayor a 0'),
     method: Yup.string().required('Método de pago es obligatorio'),
     reference: Yup.string(),
     notes: Yup.string(),
-    bank_account_id: Yup.string().when([], {
-      is: () => paymentType === 'advance',
-      then: (schema) => schema.required('Cuenta bancaria es obligatoria para pagos anticipados'),
-      otherwise: (schema) => schema
+    bank_account_id: Yup.string().when('invoice_id', {
+      is: (val: string) => !val,
+      then: (schema) => schema.required('Cuenta bancaria es obligatoria para pagos anticipados')
     })
   });
 
@@ -129,31 +125,12 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
     (event: React.MouseEvent<HTMLElement>, newType: PaymentType | null) => {
       if (newType !== null) {
         setPaymentType(newType);
-        // Revalidar el formulario cuando cambia el tipo de pago
-        setTimeout(() => methods.trigger(), 0);
       }
     },
-    [methods]
+    []
   );
 
-  const handleInvoicesChange = useCallback((invoices: InvoiceAllocation[]) => {
-    console.log('Invoices changed:', invoices);
-    setSelectedInvoices(invoices);
-  }, []);
-
-  // Debug: Ver estado del formulario
-  useEffect(() => {
-    console.log('📋 Form state changed:', {
-      isValid: methods.formState.isValid,
-      isSubmitting: methods.formState.isSubmitting,
-      errors: methods.formState.errors,
-      isDirty: methods.formState.isDirty
-    });
-  }, [methods.formState]);
-
   const onSubmit = handleSubmit(async (data) => {
-    console.log('🚀 SUBMIT TRIGGERED!');
-    console.log('Data received:', data);
     loadingSave.onTrue();
 
     try {
@@ -167,10 +144,6 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
 
       // Pago con factura(s)
       if (paymentType === 'with_invoice') {
-        console.log('Selected invoices at submit:', selectedInvoices);
-        console.log('Payment type:', paymentType);
-        console.log('Form data:', data);
-
         if (selectedInvoices.length === 0) {
           enqueueSnackbar('Debe seleccionar al menos una factura', { variant: 'error' });
           loadingSave.onFalse();
@@ -178,15 +151,7 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
         }
 
         // Validar que la suma de asignaciones no exceda el monto del pago
-        const totalAllocated = selectedInvoices.reduce((sum, inv) => sum + (inv.amount_applied || 0), 0);
-        console.log('Total allocated:', totalAllocated);
-
-        if (totalAllocated === 0) {
-          enqueueSnackbar('Debe asignar al menos un monto a las facturas seleccionadas', { variant: 'error' });
-          loadingSave.onFalse();
-          return;
-        }
-
+        const totalAllocated = selectedInvoices.reduce((sum, inv) => sum + inv.amount_applied, 0);
         if (totalAllocated > data.amount) {
           enqueueSnackbar('El total asignado excede el monto del pago', { variant: 'error' });
           loadingSave.onFalse();
@@ -197,48 +162,29 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
           enqueueSnackbar('Debe seleccionar un cliente', { variant: 'error' });
           loadingSave.onFalse();
           return;
-        }
+        enqueueSnackbar('Pago anticipado registrado exitosamente', { variant: 'success' });
+      }
 
-        console.log('About to create payment...');
+      router.push(paths.dashboard.paymentsReceived.root);
+    } catch (error) {
+      console.error('Error al guardar pago:', error);
+      enqueueSnackbar(error?.data?.detail || 'Error al guardar el pago', { variant: 'error' });
+    } finally {
+      loadingSave.onFalse();
+    }
+  });
 
-        // CASO 1: Una sola factura - usar endpoint directo con invoice_id
-        if (selectedInvoices.length === 1) {
-          payload.invoice_id = selectedInvoices[0].invoice_id;
-          // Ajustar el monto al aplicado (puede ser menor que el total del pago)
-          payload.amount = selectedInvoices[0].amount_applied;
+  const handleInvoicesChange = useCallback((invoices: InvoiceAllocation[]) => {
+    setSelectedInvoices(invoices);
+    // Ya no necesitamos actualizar invoice_id porque usaremos allocate
+  }, []);   }).unwrap();
 
-          console.log('Creating payment for single invoice:', payload);
-          await createPayment(payload).unwrap();
-          enqueueSnackbar('Pago registrado y aplicado a factura exitosamente', { variant: 'success' });
-        }
-        // CASO 2: Múltiples facturas - crear pago anticipado y usar allocate
-        else {
-          payload.contact_id = data.contact_id;
-          payload.bank_account_id = data.bank_account_id || undefined;
-
-          console.log('Creating advance payment:', payload);
-          const createdPayment = await createPayment(payload).unwrap();
-          console.log('Payment created:', createdPayment);
-
-          const allocationsData = {
-            allocations: selectedInvoices.map((inv) => ({
-              invoice_id: inv.invoice_id,
-              allocated_amount: inv.amount_applied,
-              notes: `Pago aplicado a factura ${inv.invoice_number}`
-            }))
-          };
-          console.log('Allocating payment:', allocationsData);
-
-          // Aplicar el pago a las facturas seleccionadas
-          await allocatePayment({
-            id: createdPayment.id,
-            data: allocationsData
-          }).unwrap();
-
-          enqueueSnackbar(`Pago registrado y aplicado a ${selectedInvoices.length} facturas exitosamente`, {
-            variant: 'success'
-          });
-        }
+        enqueueSnackbar(
+          selectedInvoices.length === 1
+            ? 'Pago registrado y aplicado a factura exitosamente'
+            : `Pago registrado y aplicado a ${selectedInvoices.length} facturas exitosamente`,
+          { variant: 'success' }
+        );
       }
       // Pago anticipado sin facturas
       else {
@@ -252,6 +198,17 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
 
         await createPayment(payload).unwrap();
         enqueueSnackbar('Pago anticipado registrado exitosamente', { variant: 'success' });
+      }
+
+      if (isEdit && currentPayment) {
+        await updatePayment({
+          id: currentPayment.id,
+          ...payload
+        }).unwrap();
+        enqueueSnackbar('Pago actualizado exitosamente', { variant: 'success' });
+      } else {
+        await createPayment(payload).unwrap();
+        enqueueSnackbar('Pago registrado exitosamente', { variant: 'success' });
       }
 
       router.push(paths.dashboard.paymentsReceived.root);
@@ -278,7 +235,9 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
         {/* Header */}
         <Card sx={{ p: 3 }}>
           <Stack spacing={3}>
-            <Typography variant="h6">{isEdit ? 'Editar Pago Recibido' : 'Nuevo Pago Recibido'}</Typography>
+            <Typography variant="h6">
+              {isEdit ? 'Editar Pago Recibido' : 'Nuevo Pago Recibido'}
+            </Typography>
 
             {/* Tipo de Pago */}
             {!isEdit && (
@@ -294,13 +253,13 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
                   <ToggleButton value="with_invoice" aria-label="with invoice">
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Iconify icon="solar:document-text-bold" width={20} />
-                      <span>Pago con factura</span>
+                      <span>Sí - Pago con factura</span>
                     </Stack>
                   </ToggleButton>
                   <ToggleButton value="advance" aria-label="advance payment">
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Iconify icon="solar:wallet-money-bold" width={20} />
-                      <span>Otros ingresos</span>
+                      <span>No - Pago anticipado</span>
                     </Stack>
                   </ToggleButton>
                 </ToggleButtonGroup>
@@ -318,7 +277,7 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
               getOptionLabel={(option) => {
                 // Si option es string (el value guardado), buscar el label
                 if (typeof option === 'string') {
-                  const found = customers.find((c) => c.value === option);
+                  const found = customers.find(c => c.value === option);
                   return found?.label || option;
                 }
                 // Si es el objeto completo, retornar el label
@@ -360,11 +319,19 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
 
             {/* Cuenta Bancaria (si es transferencia) */}
             {values.method === 'TRANSFER' && (
-              <RHFTextField name="bank_account_id" label="Cuenta Bancaria *" placeholder="Seleccionar cuenta..." />
+              <RHFTextField
+                name="bank_account_id"
+                label="Cuenta Bancaria *"
+                placeholder="Seleccionar cuenta..."
+              />
             )}
 
             {/* Referencia */}
-            <RHFTextField name="reference" label="Referencia" placeholder="Número de transacción, cheque, etc." />
+            <RHFTextField
+              name="reference"
+              label="Referencia"
+              placeholder="Número de transacción, cheque, etc."
+            />
 
             {/* Monto */}
             <RHFTextField
@@ -378,12 +345,18 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
             />
 
             {/* Notas */}
-            <RHFTextField name="notes" label="Notas" multiline rows={3} placeholder="Observaciones adicionales..." />
+            <RHFTextField
+              name="notes"
+              label="Notas"
+              multiline
+              rows={3}
+              placeholder="Observaciones adicionales..."
+            />
           </Stack>
         </Card>
 
         {/* Selector de Facturas (solo para pagos con factura) */}
-        {paymentType === 'with_invoice' && values.contact_id && (
+        {paymentType === 'with_invoice' && values.contact_id && values.amount > 0 && (
           <PaymentInvoiceSelector
             customerId={values.contact_id}
             paymentAmount={Number(values.amount) || 0}
@@ -391,16 +364,23 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
           />
         )}
 
-        {/* Mensaje si falta cliente */}
-        {paymentType === 'with_invoice' && !values.contact_id && (
+        {/* Mensaje si falta info para mostrar facturas */}
+        {paymentType === 'with_invoice' && (!values.contact_id || values.amount <= 0) && (
           <Card sx={{ p: 3 }}>
-            <Alert severity="info">Por favor seleccione un cliente para ver sus facturas pendientes.</Alert>
+            <Alert severity="info">
+              {!values.contact_id && 'Por favor seleccione un cliente para ver sus facturas pendientes.'}
+              {values.contact_id && values.amount <= 0 && 'Por favor ingrese el monto del pago para continuar.'}
+            </Alert>
           </Card>
         )}
 
         {/* Acciones */}
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button variant="outlined" color="inherit" onClick={() => router.push(paths.dashboard.paymentsReceived.root)}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={() => router.push(paths.dashboard.paymentsReceived.root)}
+          >
             Cancelar
           </Button>
           <LoadingButton
@@ -408,7 +388,6 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
             variant="contained"
             loading={loadingSave.value || isSubmitting}
             startIcon={<Iconify icon="solar:check-circle-bold" />}
-            onClick={() => console.log('🔘 Button clicked!', { loadingSave: loadingSave.value, isSubmitting })}
           >
             {isEdit ? 'Actualizar Pago' : 'Registrar Pago'}
           </LoadingButton>

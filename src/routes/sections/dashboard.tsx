@@ -63,6 +63,12 @@ const PaymentReceivedNewPage = lazy(() => import('src/pages/dashboard/payments-r
 const PaymentReceivedEditPage = lazy(() => import('src/pages/dashboard/payments-received/edit'));
 const PaymentReceivedDetailsPage = lazy(() => import('src/pages/dashboard/payments-received/details'));
 
+// DEBIT NOTES
+const DebitNoteListPage = lazy(() => import('src/pages/dashboard/debit-notes/list'));
+const DebitNoteNewPage = lazy(() => import('src/pages/dashboard/debit-notes/new'));
+const DebitNoteEditPage = lazy(() => import('src/pages/dashboard/debit-notes/edit'));
+const DebitNoteDetailsPage = lazy(() => import('src/pages/dashboard/debit-notes/details'));
+
 const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
 
 // USER
@@ -187,6 +193,15 @@ export const dashboardRoutes = [
           { path: 'new', element: <PaymentReceivedNewPage /> },
           { path: ':id', element: <PaymentReceivedDetailsPage /> },
           { path: ':id/edit', element: <PaymentReceivedEditPage /> }
+        ]
+      },
+      {
+        path: 'debit-notes',
+        children: [
+          { element: <DebitNoteListPage />, index: true },
+          { path: 'new', element: <DebitNoteNewPage /> },
+          { path: ':id', element: <DebitNoteDetailsPage /> },
+          { path: ':id/edit', element: <DebitNoteEditPage /> }
         ]
       },
       {

@@ -25,6 +25,7 @@ import { subscriptionsApi } from './services/subscriptionsApi';
 import { posApi } from './services/posApi';
 import { uploadsApi } from './services/uploadsApi';
 import { paymentsReceivedApi } from './services/paymentsReceivedApi';
+import { debitNotesApi } from './services/debitNotesApi';
 
 export const store = configureStore({
   reducer: {
@@ -45,6 +46,7 @@ export const store = configureStore({
     [posApi.reducerPath]: posApi.reducer,
     [uploadsApi.reducerPath]: uploadsApi.reducer,
     [paymentsReceivedApi.reducerPath]: paymentsReceivedApi.reducer,
+    [debitNotesApi.reducerPath]: debitNotesApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -73,7 +75,8 @@ export const store = configureStore({
       subscriptionsApi.middleware,
       posApi.middleware,
       uploadsApi.middleware,
-      paymentsReceivedApi.middleware
+      paymentsReceivedApi.middleware,
+      debitNotesApi.middleware
     )
 });
 

@@ -155,6 +155,12 @@ export const paths = {
       new: `${ROOTS.DASHBOARD}/payments-received/new`,
       details: (id: string) => `${ROOTS.DASHBOARD}/payments-received/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/payments-received/${id}/edit`
+    },
+    debitNotes: {
+      root: `${ROOTS.DASHBOARD}/debit-notes`,
+      new: `${ROOTS.DASHBOARD}/debit-notes/new`,
+      details: (id: string) => `${ROOTS.DASHBOARD}/debit-notes/${id}`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/debit-notes/${id}/edit`
     }
   }
 };

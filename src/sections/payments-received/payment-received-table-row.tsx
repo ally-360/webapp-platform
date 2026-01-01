@@ -1,5 +1,7 @@
-import PropTypes from 'prop-types';
-import { format, es } from 'date-fns';
+/* eslint-disable import/no-duplicates */
+/* eslint-disable prettier/prettier */
+import { format} from 'date-fns';
+import { es } from 'date-fns/locale';
 // @mui
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';

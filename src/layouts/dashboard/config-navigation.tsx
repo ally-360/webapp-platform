@@ -148,6 +148,10 @@ export function useNavData() {
               {
                 title: t('Pagos recibidos'),
                 path: paths.dashboard.paymentsReceived.root
+              },
+              {
+                title: t('Notas débito'),
+                path: paths.dashboard.debitNotes.root
               }
             ]
           },
