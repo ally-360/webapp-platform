@@ -10,7 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 // routes
 import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hooks/use-router';
+import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
@@ -100,15 +100,16 @@ export default function DebitNoteListView() {
   const [deleteDebitNote] = useDeleteDebitNoteMutation();
   const [voidDebitNote] = useVoidDebitNoteMutation();
 
-  const debitNotes = data?.items || [];
   const totalCount = data?.total || 0;
 
   // Filtro local por cliente
   const dataFiltered = useMemo(() => {
+    const debitNotes = data?.items || [];
+
     if (!filters.customer) return debitNotes;
 
-    return debitNotes.filter((note) => note.customer_name?.toLowerCase().includes(filters.customer.toLowerCase()));
-  }, [debitNotes, filters.customer]);
+    return debitNotes.filter((note) => note.customer_name?.toLowerCase().includes(filters.customer!.toLowerCase()));
+  }, [data?.items, filters.customer]);
 
   const denseHeight = table.dense ? 52 : 72;
   const notFound = !isLoading && !dataFiltered.length;
@@ -173,6 +174,7 @@ export default function DebitNoteListView() {
           { name: 'Notas Débito', href: paths.dashboard.debitNotes.root },
           { name: 'Listado' }
         ]}
+        icon="solar:document-text-bold"
         action={
           <Button
             component={RouterLink}

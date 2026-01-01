@@ -166,15 +166,15 @@ export function useNavData() {
               }
             ]
           },
-          // {
-          //   title: t('Contabilidad'),
-          //   path: paths.dashboard.accounting.root,
-          //   icon: ICONS.invoice,
-          //   children: [
-          //     { title: t('Catálogo de cuentas'), path: paths.dashboard.accounting.chartOfAccounts },
-          //     { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
-          //   ]
-          // },
+          {
+            title: t('Contabilidad'),
+            path: paths.dashboard.accounting.root,
+            icon: ICONS.invoice,
+            children: [
+              { title: t('Catálogo de cuentas'), path: paths.dashboard.accounting.chartOfAccounts },
+              { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
+            ]
+          },
           // {
           //   title: t('orden de compra'),
           //   path: paths.dashboard.order.root,

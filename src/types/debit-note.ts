@@ -14,11 +14,16 @@ export type DebitNoteTax = {
 
 export type DebitNoteLineItem = {
   id?: string;
-  description: string;
+  product_id?: string | null;
+  name: string; // Obligatorio según API
+  description?: string; // Alias de name para compatibilidad
   quantity?: number | null;
   unit_price?: number | null;
   subtotal: number;
   line_taxes: DebitNoteTax[];
+  // Campos opcionales del producto (para UI)
+  sku?: string;
+  priceSale?: number;
 };
 
 export type DebitNote = {

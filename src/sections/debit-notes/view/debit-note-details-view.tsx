@@ -1,4 +1,7 @@
-import { format, es } from 'date-fns';
+/* eslint-disable import/no-duplicates */
+/* eslint-disable prettier/prettier */
+import { format} from 'date-fns';
+import { es } from 'date-fns/locale';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -14,7 +17,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 // routes
 import { paths } from 'src/routes/paths';
-import { useParams } from 'src/routes/hooks/use-params';
+import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 // redux
 import { useGetDebitNoteByIdQuery, useVoidDebitNoteMutation } from 'src/redux/services/debitNotesApi';
@@ -81,6 +84,7 @@ export default function DebitNoteDetailsView() {
           { name: 'Notas Débito', href: paths.dashboard.debitNotes.root },
           { name: debitNote.number }
         ]}
+        icon="solar:document-text-bold"
         action={
           <Stack direction="row" spacing={1}>
             {debitNote.status === 'open' && (
@@ -199,22 +203,28 @@ export default function DebitNoteDetailsView() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {debitNote.line_items.map((item, index) => {
-                const lineTaxTotal = item.line_taxes.reduce((sum, tax) => sum + tax.tax_amount, 0);
-                const lineTotal = item.subtotal + lineTaxTotal;
+              {debitNote.line_items?.map((item, index) => {
+                const lineTaxTotal = (item.line_taxes || []).reduce((sum, tax) => sum + (tax.tax_amount || 0), 0);
+                const lineTotal = (item.subtotal || 0) + lineTaxTotal;
 
                 return (
                   <TableRow key={index}>
-                    <TableCell>{item.description}</TableCell>
+                    <TableCell>{item.name || item.description || '-'}</TableCell>
                     <TableCell align="right">{item.quantity || '-'}</TableCell>
                     <TableCell align="right">{item.unit_price ? fCurrency(item.unit_price) : '-'}</TableCell>
-                    <TableCell align="right">{fCurrency(item.subtotal)}</TableCell>
+                    <TableCell align="right">{fCurrency(item.subtotal || 0)}</TableCell>
                     <TableCell align="right">
-                      {item.line_taxes.map((tax, taxIndex) => (
-                        <Typography key={taxIndex} variant="caption" display="block">
-                          {tax.tax_name} ({tax.tax_rate}%): {fCurrency(tax.tax_amount)}
+                      {item.line_taxes && item.line_taxes.length > 0 ? (
+                        item.line_taxes.map((tax, taxIndex) => (
+                          <Typography key={taxIndex} variant="caption" display="block">
+                            {tax.tax_name} ({tax.tax_rate}%): {fCurrency(tax.tax_amount || 0)}
+                          </Typography>
+                        ))
+                      ) : (
+                        <Typography variant="caption" color="text.secondary">
+                          Sin impuestos
                         </Typography>
-                      ))}
+                      )}
                     </TableCell>
                     <TableCell align="right">{fCurrency(lineTotal)}</TableCell>
                   </TableRow>

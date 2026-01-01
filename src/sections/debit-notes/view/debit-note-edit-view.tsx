@@ -1,7 +1,7 @@
 import Container from '@mui/material/Container';
 // routes
 import { paths } from 'src/routes/paths';
-import { useParams } from 'src/routes/hooks';
+import { useParams } from 'src/routes/hook';
 // redux
 import { useGetDebitNoteByIdQuery } from 'src/redux/services/debitNotesApi';
 // components
@@ -36,6 +36,7 @@ export default function DebitNoteEditView() {
           { name: 'Notas Débito', href: paths.dashboard.debitNotes.root },
           { name: currentDebitNote?.number || 'Editar' }
         ]}
+        icon="solar:pen-bold"
         sx={{
           mb: { xs: 3, md: 5 }
         }}

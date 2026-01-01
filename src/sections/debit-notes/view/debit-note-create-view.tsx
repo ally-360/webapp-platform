@@ -21,6 +21,7 @@ export default function DebitNoteCreateView() {
           { name: 'Notas Débito', href: paths.dashboard.debitNotes.root },
           { name: 'Nueva' }
         ]}
+        icon="solar:add-circle-bold"
         sx={{
           mb: { xs: 3, md: 5 }
         }}
