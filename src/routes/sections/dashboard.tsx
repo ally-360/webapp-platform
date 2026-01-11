@@ -57,6 +57,18 @@ const BillInvoiceCreatePage = lazy(() => import('src/pages/dashboard/bill/invoic
 const BillInvoiceEditPage = lazy(() => import('src/pages/dashboard/bill/invoice/edit'));
 const BillInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/bill/invoice/details'));
 
+// PAYMENTS RECEIVED
+const PaymentReceivedListPage = lazy(() => import('src/pages/dashboard/payments-received/list'));
+const PaymentReceivedNewPage = lazy(() => import('src/pages/dashboard/payments-received/new'));
+const PaymentReceivedEditPage = lazy(() => import('src/pages/dashboard/payments-received/edit'));
+const PaymentReceivedDetailsPage = lazy(() => import('src/pages/dashboard/payments-received/details'));
+
+// DEBIT NOTES
+const DebitNoteListPage = lazy(() => import('src/pages/dashboard/debit-notes/list'));
+const DebitNoteNewPage = lazy(() => import('src/pages/dashboard/debit-notes/new'));
+const DebitNoteEditPage = lazy(() => import('src/pages/dashboard/debit-notes/edit'));
+const DebitNoteDetailsPage = lazy(() => import('src/pages/dashboard/debit-notes/details'));
+
 const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
 
 // USER
@@ -172,6 +184,24 @@ export const dashboardRoutes = [
           { path: 'new-provide', element: <BillInvoiceCreatePage /> },
           { path: 'provide/:id', element: <BillInvoiceDetailsPage /> },
           { path: 'provide/:id/edit', element: <BillInvoiceEditPage /> }
+        ]
+      },
+      {
+        path: 'payments-received',
+        children: [
+          { element: <PaymentReceivedListPage />, index: true },
+          { path: 'new', element: <PaymentReceivedNewPage /> },
+          { path: ':id', element: <PaymentReceivedDetailsPage /> },
+          { path: ':id/edit', element: <PaymentReceivedEditPage /> }
+        ]
+      },
+      {
+        path: 'debit-notes',
+        children: [
+          { element: <DebitNoteListPage />, index: true },
+          { path: 'new', element: <DebitNoteNewPage /> },
+          { path: ':id', element: <DebitNoteDetailsPage /> },
+          { path: ':id/edit', element: <DebitNoteEditPage /> }
         ]
       },
       {
