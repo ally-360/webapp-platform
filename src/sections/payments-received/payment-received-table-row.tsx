@@ -234,15 +234,3 @@ export default function PaymentReceivedTableRow({
     </>
   );
 }
-
-PaymentReceivedTableRow.propTypes = {
-  onDeleteRow: PropTypes.func,
-  onEditRow: PropTypes.func,
-  onSelectRow: PropTypes.func,
-  onViewRow: PropTypes.func,
-  onVoidRow: PropTypes.func,
-  onSendEmail: PropTypes.func,
-  onPrint: PropTypes.func,
-  row: PropTypes.object,
-  selected: PropTypes.bool
-};
