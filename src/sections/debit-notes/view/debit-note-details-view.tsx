@@ -30,6 +30,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import { useSnackbar } from 'src/components/snackbar';
 // utils
 import { fCurrency } from 'src/utils/format-number';
+import DebitNoteJournalEntry from '../debit-note-journal-entry';
 
 // ----------------------------------------------------------------------
 
@@ -260,6 +261,9 @@ export default function DebitNoteDetailsView() {
           </Stack>
         </Stack>
       </Card>
+
+      {/* Asiento Contable */}
+      <DebitNoteJournalEntry debitNoteId={id!} />
     </Container>
   );
 }

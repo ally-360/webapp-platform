@@ -1,15 +1,16 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { baseQueryWithReauth } from './baseQuery';
 import type {
   AccountingAccount,
   GetAccountsResponse,
   GetAccountsParams,
-  JournalEntry,
+  CreateAccountPayload,
+  UpdateAccountPayload,
   JournalEntryDetail,
   GetJournalEntriesResponse,
   GetJournalEntriesParams,
   AccountingCatalogs
 } from 'src/sections/accounting/types';
+import { baseQueryWithReauth } from './baseQuery';
 
 export const accountingApi = createApi({
   reducerPath: 'accountingApi',
@@ -40,6 +41,32 @@ export const accountingApi = createApi({
     getAccountById: builder.query<AccountingAccount, string>({
       query: (id) => `/accounting/accounts/${id}`,
       providesTags: (result, error, id) => [{ type: 'AccountingAccount', id }]
+    }),
+    createAccount: builder.mutation<AccountingAccount, CreateAccountPayload>({
+      query: (payload) => ({
+        url: '/accounting/accounts',
+        method: 'POST',
+        body: payload
+      }),
+      invalidatesTags: [{ type: 'AccountingAccount', id: 'LIST' }]
+    }),
+    updateAccount: builder.mutation<AccountingAccount, { id: string; payload: UpdateAccountPayload }>({
+      query: ({ id, payload }) => ({
+        url: `/accounting/accounts/${id}`,
+        method: 'PUT',
+        body: payload
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'AccountingAccount', id },
+        { type: 'AccountingAccount', id: 'LIST' }
+      ]
+    }),
+    deleteAccount: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/accounting/accounts/${id}`,
+        method: 'DELETE'
+      }),
+      invalidatesTags: [{ type: 'AccountingAccount', id: 'LIST' }]
     }),
 
     // Journal Entries endpoints
@@ -78,6 +105,9 @@ export const accountingApi = createApi({
 export const {
   useGetAccountsQuery,
   useGetAccountByIdQuery,
+  useCreateAccountMutation,
+  useUpdateAccountMutation,
+  useDeleteAccountMutation,
   useGetJournalEntriesQuery,
   useGetJournalEntryByIdQuery,
   useGetCatalogsQuery

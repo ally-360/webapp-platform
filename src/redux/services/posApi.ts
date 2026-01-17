@@ -11,6 +11,8 @@ import type {
   CashMovementCreate,
   CashMovementsParams,
   Seller,
+  SellerInvite,
+  SellerInviteResponse,
   SellerCreate,
   SellerUpdate,
   SellersResponse,
@@ -165,10 +167,26 @@ export const posApi = createApi({
     // ========================================
     // 👥 SELLERS ENDPOINTS
     // ========================================
+    // Nueva arquitectura: Sellers son usuarios del sistema
+    // Flujo principal: invite → aceptación → aparece como seller
 
     /**
-     * Crear vendedor
+     * Invitar vendedor (nuevo flujo recomendado)
+     * POST /sellers/invite
+     */
+    inviteSeller: builder.mutation<SellerInviteResponse, SellerInvite>({
+      query: (data) => ({
+        url: '/sellers/invite',
+        method: 'POST',
+        body: data
+      }),
+      invalidatesTags: ['Seller']
+    }),
+
+    /**
+     * Crear vendedor (legacy - usar invite en su lugar)
      * POST /sellers
+     * @deprecated Usar inviteSeller en su lugar
      */
     createSeller: builder.mutation<Seller, SellerCreate>({
       query: (data) => ({
@@ -182,6 +200,8 @@ export const posApi = createApi({
     /**
      * Listar vendedores
      * GET /sellers
+     * Incluye: usuarios con role='seller', 'admin', 'owner'
+     * El admin/owner aparece automáticamente
      */
     getSellers: builder.query<SellersResponse, { page?: number; size?: number; active_only?: boolean }>({
       query: ({ page = 1, size = 100, active_only = true } = {}) => ({
@@ -192,12 +212,26 @@ export const posApi = createApi({
           active_only
         }
       }),
-      providesTags: ['Seller']
+      providesTags: (result) =>
+        result
+          ? [...result.sellers.map(({ id }) => ({ type: 'Seller' as const, id })), { type: 'Seller', id: 'LIST' }]
+          : [{ type: 'Seller', id: 'LIST' }]
     }),
 
     /**
-     * Actualizar vendedor
+     * Obtener vendedor por ID
+     * GET /sellers/{id}
+     */
+    getSellerById: builder.query<Seller, string>({
+      query: (id) => `/sellers/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Seller', id }]
+    }),
+
+    /**
+     * Actualizar configuración POS del vendedor
      * PATCH /sellers/{id}
+     * Solo actualiza: commission_rate, base_salary, notes, is_active
+     * Los datos del usuario (nombre, email) se gestionan en el módulo de usuarios
      */
     updateSeller: builder.mutation<Seller, { id: string; data: SellerUpdate }>({
       query: ({ id, data }) => ({
@@ -205,19 +239,26 @@ export const posApi = createApi({
         method: 'PATCH',
         body: data
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Seller', id }, 'Seller']
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Seller', id },
+        { type: 'Seller', id: 'LIST' }
+      ]
     }),
 
     /**
      * Desactivar vendedor
      * DELETE /sellers/{id}
+     * Soft delete - el usuario sigue existiendo pero no aparece como seller activo
      */
     deactivateSeller: builder.mutation<void, string>({
       query: (id) => ({
         url: `/sellers/${id}`,
         method: 'DELETE'
       }),
-      invalidatesTags: (result, error, id) => [{ type: 'Seller', id }, 'Seller']
+      invalidatesTags: (result, error, id) => [
+        { type: 'Seller', id },
+        { type: 'Seller', id: 'LIST' }
+      ]
     }),
 
     // ========================================
@@ -599,8 +640,10 @@ export const {
   useGetCashMovementsQuery,
 
   // Sellers
+  useInviteSellerMutation,
   useCreateSellerMutation,
   useGetSellersQuery,
+  useGetSellerByIdQuery,
   useUpdateSellerMutation,
   useDeactivateSellerMutation,
 

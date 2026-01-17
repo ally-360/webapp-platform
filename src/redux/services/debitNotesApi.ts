@@ -78,6 +78,12 @@ export const debitNotesApi = createApi({
         method: 'DELETE'
       }),
       invalidatesTags: [{ type: 'DebitNoteList', id: 'LIST' }]
+    }),
+
+    // Obtener asiento contable de nota débito
+    getDebitNoteJournalEntry: builder.query<any, string>({
+      query: (id) => `/debit-notes/${id}/journal-entry`,
+      providesTags: (result, error, id) => [{ type: 'DebitNote', id }]
     })
   })
 });
@@ -88,5 +94,6 @@ export const {
   useCreateDebitNoteMutation,
   useUpdateDebitNoteMutation,
   useVoidDebitNoteMutation,
-  useDeleteDebitNoteMutation
+  useDeleteDebitNoteMutation,
+  useGetDebitNoteJournalEntryQuery
 } = debitNotesApi;

@@ -1,23 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  IconButton,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Icon } from '@iconify/react';
-import { enqueueSnackbar } from 'notistack';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { useGetAccountsQuery } from 'src/redux/services/accountingApi';
 import { AccountDetailDrawer } from 'src/sections/accounting/components/AccountDetailDrawer';
+import { AccountFormDialog } from 'src/sections/accounting/components/AccountFormDialog';
+import { AccountDeleteDialog } from 'src/sections/accounting/components/AccountDeleteDialog';
 import type { AccountingAccount, AccountType } from 'src/sections/accounting/types';
 
 const accountTypeLabels: Record<AccountType, string> = {
@@ -42,6 +31,10 @@ function ChartOfAccountsPage() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<AccountType | ''>('');
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<AccountingAccount | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState<AccountingAccount | null>(null);
 
   // Fetch accounts from backend
   const { data, isLoading, error } = useGetAccountsQuery({
@@ -50,7 +43,7 @@ function ChartOfAccountsPage() {
     ...(activeFilter && { account_type: activeFilter })
   });
 
-  const accounts = data?.accounts || [];
+  const accounts = useMemo(() => data?.accounts || [], [data]);
 
   // Build tree structure
   const accountTree = useMemo(() => {
@@ -114,6 +107,31 @@ function ChartOfAccountsPage() {
     setDetailDrawerOpen(true);
   };
 
+  const handleCreateAccount = () => {
+    setEditingAccount(null);
+    setFormDialogOpen(true);
+  };
+
+  const handleEditAccount = (account: AccountingAccount) => {
+    setEditingAccount(account);
+    setFormDialogOpen(true);
+  };
+
+  const handleDeleteAccount = (account: AccountingAccount) => {
+    setDeletingAccount(account);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormDialogOpen(false);
+    setEditingAccount(null);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteDialogOpen(false);
+    setDeletingAccount(null);
+  };
+
   const columns = useMemo<GridColDef[]>(
     () => [
       {
@@ -168,7 +186,7 @@ function ChartOfAccountsPage() {
             label={accountTypeLabels[row.account_type as AccountType]}
             color={accountTypeColors[row.account_type as AccountType]}
             size="small"
-            variant="soft"
+            variant="filled"
           />
         )
       },
@@ -209,9 +227,44 @@ function ChartOfAccountsPage() {
           <Stack direction="row" spacing={0.5} flexWrap="wrap">
             {row.use === 'movement' && <Chip size="small" label="Movimiento" variant="outlined" />}
             {row.accepts_third_party && <Chip size="small" label="Tercero" variant="outlined" />}
-            {row.behavior !== 'NONE' && (
-              <Chip size="small" label={row.behavior} color="primary" variant="soft" />
-            )}
+            {row.behavior !== 'NONE' && <Chip size="small" label={row.behavior} color="primary" variant="filled" />}
+          </Stack>
+        )
+      },
+      {
+        field: 'actions',
+        headerName: 'Acciones',
+        width: 120,
+        sortable: false,
+        renderCell: ({ row }) => (
+          <Stack direction="row" spacing={0.5}>
+            <Tooltip title="Editar">
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditAccount(row);
+                }}
+                disabled={row.is_system}
+              >
+                <Icon icon="mdi:pencil" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={row.is_system ? 'Cuenta de sistema' : 'Eliminar'}>
+              <span>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteAccount(row);
+                  }}
+                  disabled={row.is_system}
+                >
+                  <Icon icon="mdi:delete" />
+                </IconButton>
+              </span>
+            </Tooltip>
           </Stack>
         )
       }
@@ -243,18 +296,9 @@ function ChartOfAccountsPage() {
               <Icon icon="mdi:arrow-collapse-vertical" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Disponible en fase futura">
-            <span>
-              <Button
-                variant="contained"
-                startIcon={<Icon icon="mdi:plus" />}
-                disabled
-                sx={{ ml: 2 }}
-              >
-                Crear cuenta
-              </Button>
-            </span>
-          </Tooltip>
+          <Button variant="contained" startIcon={<Icon icon="mdi:plus" />} onClick={handleCreateAccount} sx={{ ml: 2 }}>
+            Crear cuenta
+          </Button>
         </Stack>
       </Stack>
 
@@ -292,18 +336,18 @@ function ChartOfAccountsPage() {
         </CardContent>
       </Card>
 
-      {/* Info banner - READ ONLY */}
-      <Card sx={{ mb: 3, bgcolor: 'info.lighter' }}>
+      {/* Info banner */}
+      <Card sx={{ mb: 3, bgcolor: 'success.lighter' }}>
         <CardContent>
           <Stack direction="row" spacing={2} alignItems="center">
-            <Icon icon="mdi:information" width={24} color="#0288d1" />
+            <Icon icon="mdi:check-circle" width={24} color="#2e7d32" />
             <Box>
-              <Typography variant="subtitle2" color="info.darker">
-                Fase 1 - Solo lectura
+              <Typography variant="subtitle2" color="success.darker">
+                Catálogo de Cuentas (PUC)
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Este módulo está en modo de solo lectura. Las funciones de creación, edición y
-                eliminación estarán disponibles en una fase futura.
+                Gestiona el plan contable de tu empresa. Puedes crear, editar y eliminar cuentas según tus necesidades.
+                Las cuentas de sistema no pueden ser modificadas.
               </Typography>
             </Box>
           </Stack>
@@ -323,9 +367,7 @@ function ChartOfAccountsPage() {
                   No se encontraron cuentas
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {searchText || activeFilter
-                    ? 'Intenta ajustar los filtros'
-                    : 'El catálogo de cuentas está vacío'}
+                  {searchText || activeFilter ? 'Intenta ajustar los filtros' : 'El catálogo de cuentas está vacío'}
                 </Typography>
               </Stack>
             ) : (
@@ -367,6 +409,17 @@ function ChartOfAccountsPage() {
           setSelectedAccountId(null);
         }}
       />
+
+      {/* Form Dialog */}
+      <AccountFormDialog
+        open={formDialogOpen}
+        onClose={handleFormClose}
+        account={editingAccount}
+        mode={editingAccount ? 'edit' : 'create'}
+      />
+
+      {/* Delete Dialog */}
+      <AccountDeleteDialog open={deleteDialogOpen} onClose={handleDeleteClose} account={deletingAccount} />
     </Box>
   );
 }

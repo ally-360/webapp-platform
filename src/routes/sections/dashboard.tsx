@@ -37,11 +37,6 @@ const BrandsListView = lazy(() => import('src/pages/dashboard/brands/list'));
 // ORDER
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
-// INVOICE
-const InvoiceListPage = lazy(() => import('src/pages/dashboard/invoice/list'));
-const InvoiceDetailsPage = lazy(() => import('src/pages/dashboard/invoice/details'));
-const InvoiceCreatePage = lazy(() => import('src/pages/dashboard/invoice/new'));
-const InvoiceEditPage = lazy(() => import('src/pages/dashboard/invoice/edit'));
 
 // Sales
 
@@ -68,6 +63,14 @@ const DebitNoteListPage = lazy(() => import('src/pages/dashboard/debit-notes/lis
 const DebitNoteNewPage = lazy(() => import('src/pages/dashboard/debit-notes/new'));
 const DebitNoteEditPage = lazy(() => import('src/pages/dashboard/debit-notes/edit'));
 const DebitNoteDetailsPage = lazy(() => import('src/pages/dashboard/debit-notes/details'));
+
+// EXPENSES
+const ExpenseDebitNotesPage = lazy(() => import('src/pages/dashboard/expenses/debit-notes'));
+const ExpenseDebitNoteNewPage = lazy(() => import('src/pages/dashboard/expenses/debit-notes-new'));
+const PurchaseOrdersPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders'));
+const PurchaseOrderNewPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders-new'));
+const PurchaseOrderDetailsPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders-details'));
+const PurchaseOrderEditPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders-edit'));
 
 const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
 
@@ -202,6 +205,27 @@ export const dashboardRoutes = [
           { path: 'new', element: <DebitNoteNewPage /> },
           { path: ':id', element: <DebitNoteDetailsPage /> },
           { path: ':id/edit', element: <DebitNoteEditPage /> }
+        ]
+      },
+      {
+        path: 'expenses',
+        children: [
+          {
+            path: 'debit-notes',
+            children: [
+              { element: <ExpenseDebitNotesPage />, index: true },
+              { path: 'new', element: <ExpenseDebitNoteNewPage /> }
+            ]
+          },
+          {
+            path: 'purchase-orders',
+            children: [
+              { element: <PurchaseOrdersPage />, index: true },
+              { path: 'new', element: <PurchaseOrderNewPage /> },
+              { path: ':id', element: <PurchaseOrderDetailsPage /> },
+              { path: ':id/edit', element: <PurchaseOrderEditPage /> }
+            ]
+          }
         ]
       },
       {

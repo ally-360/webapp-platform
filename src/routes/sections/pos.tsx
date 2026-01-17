@@ -23,6 +23,7 @@ const PosShiftDetailPage = lazy(() => import('../../pages/pos/shift/detail'));
 // Nuevas vistas POS
 const PosReturnPage = lazy(() => import('src/pages/pos/return'));
 const PosDailyReportPage = lazy(() => import('../../pages/pos/daily-report'));
+const PosSellersListPage = lazy(() => import('src/pages/dashboard/pos/sellers-list'));
 // ----------------------------------------------------------------------
 
 export const posRoutes = [
@@ -42,7 +43,9 @@ export const posRoutes = [
     children: [
       { element: <PosContainerView />, index: true },
       { path: 'list', element: <PosListView /> },
+      { path: 'cash-register', element: <PosShiftStatusPage /> },
       { path: 'history', element: <PosSalesHistoryPage /> },
+      { path: 'sellers', element: <PosSellersListPage /> },
       // Turnos POS
       { path: 'shift/status', element: <PosShiftStatusPage /> },
       { path: 'shift/open', element: <PosShiftStatusPage /> },

@@ -311,9 +311,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
               },
               boxShadow: (t) => {
                 if (!message.isBot) return '0 4px 12px rgba(0, 176, 240, 0.3)';
-                return t.palette.mode === 'dark'
-                  ? '0 4px 12px rgba(0, 0, 0, 0.3)'
-                  : '0 2px 8px rgba(0, 0, 0, 0.08)';
+                return t.palette.mode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.08)';
               },
               position: 'relative'
             }}
@@ -372,9 +370,7 @@ export default function AIChatbotEnhanced({ sx, ...other }: AIChatbotEnhancedPro
               borderRadius: '20px 20px 20px 5px',
               background: (t) => (t.palette.mode === 'dark' ? '#334155' : '#f1f5f9'),
               border: (t) =>
-                t.palette.mode === 'dark'
-                  ? '1px solid rgba(71, 85, 105, 0.5)'
-                  : '1px solid rgba(148, 163, 184, 0.3)',
+                t.palette.mode === 'dark' ? '1px solid rgba(71, 85, 105, 0.5)' : '1px solid rgba(148, 163, 184, 0.3)',
               minWidth: 80
             }}
           >

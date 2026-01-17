@@ -119,20 +119,24 @@ export function useNavData() {
           },
           {
             title: t('POS'),
-            path: paths.dashboard.pos,
+            path: paths.dashboard.pos.root,
             icon: ICONS.inventory,
             children: [
               {
                 title: t('Punto de venta'),
-                path: paths.dashboard.pos
+                path: paths.dashboard.pos.root
               },
               {
                 title: t('Caja'),
-                path: paths.dashboard.pos
+                path: paths.dashboard.pos.cashRegister
               },
               {
                 title: t('Historial de ventas'),
-                path: '/pos/history'
+                path: paths.dashboard.pos.history
+              },
+              {
+                title: t('Vendedores'),
+                path: paths.dashboard.pos.sellers
               }
             ]
           },
@@ -143,15 +147,24 @@ export function useNavData() {
             children: [
               {
                 title: t('Facturas de venta'),
-                path: paths.dashboard.sales.root
+                path: paths.dashboard.sales.root,
+                openPopup() {
+                  navigate(paths.dashboard.sales.newSale);
+                }
               },
               {
                 title: t('Pagos recibidos'),
-                path: paths.dashboard.paymentsReceived.root
+                path: paths.dashboard.paymentsReceived.root,
+                openPopup() {
+                  navigate(paths.dashboard.paymentsReceived.new);
+                }
               },
               {
                 title: t('Notas débito'),
-                path: paths.dashboard.debitNotes.root
+                path: paths.dashboard.debitNotes.root,
+                openPopup() {
+                  navigate(paths.dashboard.debitNotes.new);
+                }
               }
             ]
           },
@@ -162,7 +175,24 @@ export function useNavData() {
             children: [
               {
                 title: t('Facturas de compra'),
-                path: paths.dashboard.bill.root
+                path: paths.dashboard.bill.root,
+                openPopup() {
+                  navigate(paths.dashboard.bill.newBill);
+                }
+              },
+              {
+                title: t('Órdenes de compra'),
+                path: paths.dashboard.expenses.purchaseOrders.root,
+                openPopup() {
+                  navigate(paths.dashboard.expenses.purchaseOrders.new);
+                }
+              },
+              {
+                title: t('Notas débito'),
+                path: paths.dashboard.expenses.debitNotes.root,
+                openPopup() {
+                  navigate(paths.dashboard.expenses.debitNotes.new);
+                }
               }
             ]
           },

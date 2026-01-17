@@ -27,7 +27,11 @@ export default function AddressListDialog({
   onSelect
 }) {
   const [searchAddress, setSearchAddress] = useState('');
-  const { data: contacts = [] } = useGetContactsQuery({});
+  const { data: contactsQuery = [] } = useGetContactsQuery({});
+
+  const contacts = Array.isArray(_list) && _list.length ? _list : contactsQuery;
+  const isSelected =
+    typeof selected === 'function' ? selected : (id) => (selected ? `${selected}` === `${id}` : false);
 
   const dataFiltered = applyFilter({
     inputData: contacts,
@@ -63,7 +67,7 @@ export default function AddressListDialog({
           key={contact.id}
           spacing={0.5}
           component={ListItemButton}
-          selected={selected(`${contact.id}`)}
+          selected={isSelected(`${contact.id}`)}
           onClick={() => handleSelectAddress(contact)}
           sx={{
             py: 1,

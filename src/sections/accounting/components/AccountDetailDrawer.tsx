@@ -73,7 +73,7 @@ export function AccountDetailDrawer({ accountId, open, onClose }: AccountDetailD
       {/* Content */}
       <Box sx={{ p: 3 }}>
         {isLoading && <LoadingScreen />}
-        
+
         {!isLoading && account && (
           <Stack spacing={3}>
             {/* Código y Nombre */}
@@ -91,7 +91,7 @@ export function AccountDetailDrawer({ accountId, open, onClose }: AccountDetailD
             {/* Información básica */}
             <Stack spacing={2.5}>
               {renderField('Tipo de cuenta', accountTypeLabels[account.account_type])}
-              
+
               {renderField(
                 'Naturaleza',
                 <Chip
@@ -194,7 +194,7 @@ export function AccountDetailDrawer({ accountId, open, onClose }: AccountDetailD
             )}
           </Stack>
         )}
-        
+
         {!isLoading && !account && (
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             No se pudo cargar la información de la cuenta

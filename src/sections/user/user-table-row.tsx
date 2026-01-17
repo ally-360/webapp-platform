@@ -53,7 +53,6 @@ export default function UserTableRow({ row, selected, onEditRow, onSelectRow, on
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{billing_address?.address}</TableCell>
 
-
         <TableCell>
           <Label
             variant="soft"

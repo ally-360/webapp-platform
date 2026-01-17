@@ -20,11 +20,11 @@ export default function NavList({ data, depth, hasChild, config }) {
   const [open, setOpen] = useState(active);
 
   useEffect(() => {
-    if (!active) {
-      handleClose();
+    if (active) {
+      setOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [pathname, active]);
 
   const handleToggle = useCallback(() => {
     setOpen((prev) => !prev);

@@ -14,6 +14,7 @@ interface RHFAutocompleteProps {
   placeholder?: string;
   helperText?: string;
   options: any[];
+  onChange?: (event: any, value: any) => void;
   [key: string]: any; // Permite pasar otras propiedades adicionales
 }
 
@@ -23,6 +24,7 @@ export default function RHFAutocomplete({
   placeholder,
   helperText,
   options,
+  onChange: onChangeProp,
   ...other
 }: RHFAutocompleteProps) {
   const { control, setValue } = useFormContext();
@@ -45,6 +47,7 @@ export default function RHFAutocomplete({
             onChange={(event, newValue) => {
               setValue(name, newValue ?? null, { shouldValidate: true });
               onChange(newValue ?? null);
+              onChangeProp?.(event, newValue ?? null);
             }}
             options={options}
             onFocus={() => setIsFocused(true)} // Establece isFocused a true cuando se hace focus
