@@ -14,7 +14,9 @@ import {
   Typography
 } from '@mui/material';
 import { Icon } from '@iconify/react';
-import { format } from 'date-fns';
+/* eslint-disable import/no-duplicates */
+/* eslint-disable prettier/prettier */
+import { format} from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { useGetJournalEntryByIdQuery } from 'src/redux/services/accountingApi';
@@ -98,7 +100,7 @@ export function JournalEntryDetailDrawer({ entryId, open, onClose }: JournalEntr
                 <Typography variant="h4">{entry.entry_number}</Typography>
                 <Chip label={statusLabels[entry.status]} color={statusColors[entry.status]} size="small" />
               </Stack>
-              
+
               <Stack spacing={1.5}>
                 <Stack direction="row" spacing={2}>
                   <Typography variant="body2" sx={{ color: 'text.secondary', minWidth: 120 }}>

@@ -52,7 +52,9 @@ const ICONS = {
   inventory: icon('ic_inventory'),
   ventas: icon('ic_arrow_up'),
   gastos: icon('ic_arrow_down'),
-  contact: icon('user-3-fill')
+  contact: icon('user-3-fill'),
+  settings: icon('ic_settings'),
+  treasury: icon('ic_banking')
 };
 
 // ----------------------------------------------------------------------
@@ -119,20 +121,24 @@ export function useNavData() {
           },
           {
             title: t('POS'),
-            path: paths.dashboard.pos,
+            path: paths.dashboard.pos.root,
             icon: ICONS.inventory,
             children: [
               {
                 title: t('Punto de venta'),
-                path: paths.dashboard.pos
+                path: paths.dashboard.pos.root
               },
               {
                 title: t('Caja'),
-                path: paths.dashboard.pos
+                path: paths.dashboard.pos.cashRegister
               },
               {
                 title: t('Historial de ventas'),
-                path: '/pos/history'
+                path: paths.dashboard.pos.history
+              },
+              {
+                title: t('Vendedores'),
+                path: paths.dashboard.pos.sellers
               }
             ]
           },
@@ -143,15 +149,24 @@ export function useNavData() {
             children: [
               {
                 title: t('Facturas de venta'),
-                path: paths.dashboard.sales.root
+                path: paths.dashboard.sales.root,
+                openPopup() {
+                  navigate(paths.dashboard.sales.newSale);
+                }
               },
               {
                 title: t('Pagos recibidos'),
-                path: paths.dashboard.paymentsReceived.root
+                path: paths.dashboard.paymentsReceived.root,
+                openPopup() {
+                  navigate(paths.dashboard.paymentsReceived.new);
+                }
               },
               {
                 title: t('Notas débito'),
-                path: paths.dashboard.debitNotes.root
+                path: paths.dashboard.debitNotes.root,
+                openPopup() {
+                  navigate(paths.dashboard.debitNotes.new);
+                }
               }
             ]
           },
@@ -162,7 +177,24 @@ export function useNavData() {
             children: [
               {
                 title: t('Facturas de compra'),
-                path: paths.dashboard.bill.root
+                path: paths.dashboard.bill.root,
+                openPopup() {
+                  navigate(paths.dashboard.bill.newBill);
+                }
+              },
+              {
+                title: t('Órdenes de compra'),
+                path: paths.dashboard.expenses.purchaseOrders.root,
+                openPopup() {
+                  navigate(paths.dashboard.expenses.purchaseOrders.new);
+                }
+              },
+              {
+                title: t('Notas débito'),
+                path: paths.dashboard.expenses.debitNotes.root,
+                openPopup() {
+                  navigate(paths.dashboard.expenses.debitNotes.new);
+                }
               }
             ]
           },
@@ -173,6 +205,26 @@ export function useNavData() {
             children: [
               { title: t('Catálogo de cuentas'), path: paths.dashboard.accounting.chartOfAccounts },
               { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
+            ]
+          },
+          {
+            title: t('Tesorería'),
+            path: paths.dashboard.treasury.root,
+            icon: ICONS.treasury,
+            children: [
+              {
+                title: t('Cuentas'),
+                path: paths.dashboard.treasury.accounts,
+                openPopup() {
+                  navigate(paths.dashboard.treasury.accounts);
+                  // Trigger dialog open via URL state or event
+                  setTimeout(() => {
+                    const createBtn = document.querySelector('[data-treasury-create-btn]') as HTMLButtonElement;
+                    if (createBtn) createBtn.click();
+                  }, 100);
+                }
+              },
+              { title: t('Movimientos'), path: paths.dashboard.treasury.movements }
             ]
           },
           // {
@@ -207,6 +259,11 @@ export function useNavData() {
             title: t('Reportes'),
             path: paths.dashboard.blank,
             icon: ICONS.product
+          },
+          {
+            title: t('Configuración'),
+            path: paths.dashboard.settings.root,
+            icon: ICONS.settings
           }
         ]
       },

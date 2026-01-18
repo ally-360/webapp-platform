@@ -237,6 +237,19 @@ export default function InvoiceDetails({ invoice }) {
             </Typography>
             {fDate(invoice.due_date, 'dd/MM/yyyy')}
           </Stack>
+
+          {invoice.cost_center && (
+            <Stack sx={{ typography: 'body2' }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Centro de Costo
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {invoice.cost_center.code
+                  ? `${invoice.cost_center.code} · ${invoice.cost_center.name}`
+                  : invoice.cost_center.name}
+              </Typography>
+            </Stack>
+          )}
         </Box>
 
         {renderList}

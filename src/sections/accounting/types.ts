@@ -45,10 +45,33 @@ export interface GetAccountsParams {
   search?: string;
   skip?: number;
   limit?: number;
+  use?: 'treasury' | 'general';
+}
+
+export interface CreateAccountPayload {
+  code: string;
+  name: string;
+  description?: string;
+  account_type: AccountType;
+  nature: AccountNature;
+  use: AccountUse;
+  behavior: AccountBehavior;
+  accepts_third_party: boolean;
+  parent_id?: string | null;
+  is_system?: boolean;
+}
+
+export interface UpdateAccountPayload {
+  name?: string;
+  description?: string;
+  code?: string;
+  is_active?: boolean;
+  accepts_third_party?: boolean;
+  parent_id?: string | null;
 }
 
 // Journal Entry types
-export type JournalEntryType = 
+export type JournalEntryType =
   | 'invoice'
   | 'payment'
   | 'treasury'
@@ -116,6 +139,13 @@ export interface AccountingCatalogs {
     value: JournalEntryStatus;
     label: string;
   }>;
+}
+
+export interface CostCenter {
+  id: string;
+  code?: string;
+  name: string;
+  is_active?: boolean;
 }
 
 // Legacy types for existing UI components (kept for compatibility)

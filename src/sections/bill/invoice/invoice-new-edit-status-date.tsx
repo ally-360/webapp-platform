@@ -5,6 +5,7 @@ import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
 // components
 import { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { CostCenterSelectField } from 'src/components/cost-center';
 import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
 import { useGetNextInvoiceNumberQuery } from 'src/redux/services/invoicesApi';
 import { useEffect } from 'react';
@@ -53,6 +54,8 @@ export default function InvoiceNewEditStatusDate() {
           </MenuItem>
         ))}
       </RHFSelect>
+
+      <CostCenterSelectField />
 
       <RHFTextField disabled name="invoiceNumber" label="Número de factura" value={values.invoiceNumber} />
 

@@ -30,6 +30,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import { useSnackbar } from 'src/components/snackbar';
 // utils
 import { fCurrency } from 'src/utils/format-number';
+import DebitNoteJournalEntry from '../debit-note-journal-entry';
 
 // ----------------------------------------------------------------------
 
@@ -181,6 +182,19 @@ export default function DebitNoteDetailsView() {
               <Typography variant="body2">{debitNote.notes}</Typography>
             </Stack>
           )}
+
+          {debitNote.cost_center && (
+            <Stack direction="row" spacing={2}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', minWidth: 120 }}>
+                Centro de Costo:
+              </Typography>
+              <Typography variant="body2">
+                {debitNote.cost_center.code
+                  ? `${debitNote.cost_center.code} · ${debitNote.cost_center.name}`
+                  : debitNote.cost_center.name}
+              </Typography>
+            </Stack>
+          )}
         </Stack>
 
         <Divider sx={{ mb: 3 }} />
@@ -260,6 +274,9 @@ export default function DebitNoteDetailsView() {
           </Stack>
         </Stack>
       </Card>
+
+      {/* Asiento Contable */}
+      <DebitNoteJournalEntry debitNoteId={id!} />
     </Container>
   );
 }

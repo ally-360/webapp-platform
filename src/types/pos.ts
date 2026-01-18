@@ -85,6 +85,28 @@ export interface CashMovement {
 // ========================================
 // 👥 SELLER TYPES
 // ========================================
+// Nueva arquitectura: Sellers son usuarios del sistema con role='seller', 'admin' o 'owner'
+// La tabla sellers solo almacena configuración POS (comisiones, salarios)
+// Los datos personales vienen de User + Profile
+
+export interface SellerInvite {
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  commission_rate?: number;
+  base_salary?: number;
+  notes?: string;
+}
+
+export interface SellerInviteResponse {
+  status: string;
+  message: string;
+  invitation_id: string;
+  expires_at: string;
+  user_exists: boolean;
+  note?: string;
+}
 
 export interface SellerCreate {
   name: string;
@@ -97,9 +119,6 @@ export interface SellerCreate {
 }
 
 export interface SellerUpdate {
-  name?: string;
-  email?: string;
-  phone?: string;
   commission_rate?: number;
   base_salary?: number;
   notes?: string;
@@ -108,14 +127,25 @@ export interface SellerUpdate {
 
 export interface Seller {
   id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  document?: string;
+  user_id: string | null;
+
+  // Datos del usuario (desde User + Profile)
+  email: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  phone: string | null;
+  document: string | null;
+
+  // Configuración POS
   is_active: boolean;
-  commission_rate?: number;
-  base_salary?: number;
-  notes?: string;
+  commission_rate: number | null;
+  base_salary: number | null;
+  notes: string | null;
+
+  // Metadata
+  role: 'seller' | 'admin' | 'owner';
+  is_invitation_pending: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -147,6 +177,7 @@ export interface POSPaymentCreate {
 export interface POSInvoiceCreate {
   customer_id: string | null; // UUID del cliente o null para cliente genérico
   seller_id: string;
+  cost_center_id?: string;
   items: POSLineItemCreate[];
   payments: POSPaymentCreate[];
   notes?: string;

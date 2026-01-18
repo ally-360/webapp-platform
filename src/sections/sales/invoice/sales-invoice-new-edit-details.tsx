@@ -19,6 +19,7 @@ import { fCurrency } from 'src/utils/format-number';
 // components
 import Iconify from 'src/components/iconify';
 import { RHFSelect, RHFTextField } from 'src/components/hook-form';
+import { CostCenterSelectField } from 'src/components/cost-center';
 // Redux
 import { useGetProductsQuery } from 'src/redux/services/productsApi';
 import { useGetPDVsQuery } from 'src/redux/services/pdvsApi';
@@ -272,6 +273,10 @@ export default function SalesInvoiceNewEditDetails() {
             </Box>
           </Stack>
         )}
+
+        <Box sx={{ maxWidth: 400 }}>
+          <CostCenterSelectField />
+        </Box>
 
         <Typography variant="h6" sx={{ color: 'text.disabled', mb: 3 }}>
           Productos:

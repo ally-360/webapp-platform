@@ -17,11 +17,10 @@ interface CustomBreadcrumbsProps {
   links: Array<{ href?: string; name?: string }>;
   action?: React.ReactNode;
   heading: string;
+  subHeading?: string;
   moreLink?: string[];
   activeLast?: boolean;
   sx?: object;
-
-  [x: string]: unknown;
 }
 
 export default function CustomBreadcrumbs({
@@ -29,10 +28,10 @@ export default function CustomBreadcrumbs({
   links,
   action,
   heading,
+  subHeading,
   moreLink,
   activeLast,
-  sx,
-  ...other
+  sx
 }: CustomBreadcrumbsProps) {
   const lastLink = links[links.length - 1].name;
   const isMobile = useMediaQuery((theme: any) => theme.breakpoints.down('sm'));
@@ -51,9 +50,16 @@ export default function CustomBreadcrumbs({
 
           {heading && icon === '' && <Typography variant="h4">{heading}</Typography>}
 
+          {/* SUBHEADING */}
+          {subHeading && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+              {subHeading}
+            </Typography>
+          )}
+
           {/* BREADCRUMBS */}
           {!!links.length && (
-            <Breadcrumbs separator={<Separator />} {...other}>
+            <Breadcrumbs separator={<Separator />}>
               {links.map((link) => (
                 <LinkItem key={link.name || ''} link={link} activeLast={activeLast} disabled={link.name === lastLink} />
               ))}

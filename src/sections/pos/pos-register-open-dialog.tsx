@@ -58,7 +58,8 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
   } | null>(null);
   const [selectedSeller, setSelectedSeller] = useState<{
     id: string;
-    name: string;
+    full_name?: string;
+    name?: string; // Legacy compatibility
     email?: string;
   } | null>(null);
   const [openingAmount, setOpeningAmount] = useState(0);
@@ -103,7 +104,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
       pdv_name: selectedPDV.name,
       opening_amount: openingAmount,
       seller_id: selectedSeller?.id,
-      seller_name: selectedSeller?.name,
+      seller_name: selectedSeller?.full_name || selectedSeller?.name,
       notes: notes || undefined
     });
     handleClose();
@@ -119,11 +120,9 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
     setCreateSellerDialogOpen(false);
   };
 
-  const handleSellerCreated = (newSeller: { id: string; name: string; email?: string }) => {
-    // Seleccionamos el nuevo vendedor inmediatamente
-    setSelectedSeller(newSeller);
+  const handleSellerCreated = () => {
     setCreateSellerDialogOpen(false);
-    // Intentamos refrescar la lista de vendedores en segundo plano para incorporarlo a las opciones
+    // Refrescar la lista de vendedores para incorporar el nuevo
     try {
       refetchSellers?.();
     } catch (_e) {
@@ -135,11 +134,12 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
     const createOption = {
       id: '__create_new__',
       name: '+ Crear nuevo vendedor',
+      full_name: '+ Crear nuevo vendedor',
       email: undefined,
       isCreateOption: true
     };
 
-    // Obtener el array de sellers - el backend retorna `sellers` pero el tipo dice `items`
+    // Obtener el array de sellers - el backend retorna `sellers`
     let sellersArray: any[] = [];
 
     if (availableSellers) {
@@ -347,7 +347,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
               <Autocomplete
                 fullWidth
                 options={sellersWithCreateOption}
-                getOptionLabel={(option) => option.name}
+                getOptionLabel={(option) => option.full_name || option.name || ''}
                 value={selectedSeller}
                 onChange={(_, newValue) => {
                   if (newValue && 'isCreateOption' in newValue && newValue.isCreateOption) {

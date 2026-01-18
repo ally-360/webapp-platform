@@ -7,6 +7,7 @@ import {
   DialogActions,
   Button,
   TextField,
+  Alert,
   FormControl,
   Select,
   MenuItem,
@@ -31,6 +32,7 @@ import { Icon } from '@iconify/react';
 // redux
 import { useAppSelector, useAppDispatch } from 'src/hooks/store';
 import { useCreatePOSSaleMutation, useGetSellersQuery } from 'src/redux/services/posApi';
+import { useGetCostCentersQuery } from 'src/redux/services/accountingApi';
 import { completeSale } from 'src/redux/pos/posSlice';
 import { useSnackbar } from 'src/components/snackbar';
 
@@ -67,6 +69,8 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
     size: 100
   });
 
+  const { data: costCenters = [] } = useGetCostCentersQuery();
+
   const sellers = useMemo(() => sellersData?.sellers || [], [sellersData?.sellers]);
 
   // Form state
@@ -77,6 +81,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
   const [discountType, setDiscountType] = useState<'percentage' | 'amount'>('percentage');
   const [discountValue, setDiscountValue] = useState(0);
   const [notes, setNotes] = useState('');
+  const [costCenterId, setCostCenterId] = useState('');
   const [shouldPrintTicket, setShouldPrintTicket] = useState(true); // ✅ Estado para controlar impresión
   const [recalculatedTotals, setRecalculatedTotals] = useState({
     subtotal: 0,
@@ -93,6 +98,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
       setDiscountValue(saleWindow.discount_percentage || 0);
       setDiscountType(saleWindow.discount_percentage ? 'percentage' : 'amount');
       setNotes(saleWindow.notes || '');
+      setCostCenterId('');
 
       // Set default seller: priorizar el que abrió la caja
       if (sellers.length > 0) {
@@ -146,6 +152,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
     setTaxRate(19);
     setDiscountValue(0);
     setNotes('');
+    setCostCenterId('');
     onClose();
   };
 
@@ -225,6 +232,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
         items,
         payments,
         notes: notes || undefined,
+        cost_center_id: costCenterId || undefined,
         subtotal: recalculatedTotals.subtotal,
         tax_total: recalculatedTotals.tax_amount,
         discount_total: finalDiscountAmount,
@@ -413,6 +421,32 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
                     </Select>
                   </FormControl>
                 </Card>
+
+                {costCenters.length === 0 ? (
+                  <Alert severity="info">No hay centros de costo configurados para esta empresa.</Alert>
+                ) : (
+                  <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
+                    <Typography
+                      variant="subtitle2"
+                      gutterBottom
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+                    >
+                      <Icon icon="solar:layers-bold-duotone" width={20} />
+                      Centro de costo (opcional)
+                    </Typography>
+
+                    <FormControl fullWidth>
+                      <Select value={costCenterId} onChange={(e) => setCostCenterId(e.target.value)} displayEmpty>
+                        <MenuItem value="">Ninguno</MenuItem>
+                        {costCenters.map((cc) => (
+                          <MenuItem key={cc.id} value={cc.id}>
+                            {cc.code ? `${cc.code} · ${cc.name}` : cc.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Card>
+                )}
 
                 {/* Date and Time */}
                 <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>

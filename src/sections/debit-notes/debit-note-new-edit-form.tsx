@@ -44,6 +44,7 @@ import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFSelect, RHFTextField } from 'src/components/hook-form';
 import DraftRecoveryDialog from 'src/components/draft-recovery-dialog';
+import { CostCenterSelectField } from 'src/components/cost-center';
 // utils
 import { fCurrency } from 'src/utils/format-number';
 
@@ -203,7 +204,8 @@ export default function DebitNoteNewEditForm({ currentDebitNote, preselectedInvo
       .oneOf(['interest', 'price_adjustment', 'additional_charge', 'other']),
     issue_date: Yup.date().required('La fecha es obligatoria').max(new Date(), 'La fecha no puede ser futura'),
     reason: Yup.string().required('La razón es obligatoria').min(10, 'La razón debe tener al menos 10 caracteres'),
-    notes: Yup.string()
+    notes: Yup.string(),
+    cost_center_id: Yup.string().nullable()
   });
 
   const defaultValues = useMemo(
@@ -212,7 +214,8 @@ export default function DebitNoteNewEditForm({ currentDebitNote, preselectedInvo
       type: currentDebitNote?.type || 'interest',
       issue_date: currentDebitNote?.issue_date ? new Date(currentDebitNote.issue_date) : new Date(),
       reason: currentDebitNote?.reason || '',
-      notes: currentDebitNote?.notes || ''
+      notes: currentDebitNote?.notes || '',
+      cost_center_id: ''
     }),
     [currentDebitNote, selectedInvoiceId]
   );
@@ -480,6 +483,7 @@ export default function DebitNoteNewEditForm({ currentDebitNote, preselectedInvo
         issue_date: data.issue_date instanceof Date ? data.issue_date.toISOString().split('T')[0] : data.issue_date,
         reason: data.reason,
         notes: data.notes || undefined,
+        cost_center_id: data.cost_center_id || undefined,
         line_items: lineItems.map((item) => ({
           product_id: item.product_id || undefined,
           name: item.name,
@@ -686,8 +690,9 @@ export default function DebitNoteNewEditForm({ currentDebitNote, preselectedInvo
                 />
               </Grid>
 
-              {/* Espaciador */}
-              <Grid item xs={12} md={4} />
+              <Grid item xs={12} md={4}>
+                <CostCenterSelectField />
+              </Grid>
 
               {/* Razón */}
               <Grid item xs={12}>

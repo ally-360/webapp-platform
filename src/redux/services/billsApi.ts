@@ -8,8 +8,10 @@ import { baseQueryWithAuth } from './baseQuery';
 export interface PurchaseOrderItem {
   id?: string;
   product_id: string;
-  quantity: number;
+  quantity: number | string;
   unit_price: string;
+  name?: string;
+  line_subtotal?: string;
   line_taxes?: any;
   taxes_amount?: string;
   line_total?: string;
@@ -22,18 +24,29 @@ export interface PurchaseOrderItem {
 
 export interface PurchaseOrder {
   id: string;
+  order_number?: string;
   supplier_id: string;
   pdv_id: string;
   issue_date: string;
+  expected_delivery_date?: string;
+  currency?: string;
+  notes?: string;
+  payment_terms?: string;
+  terms_and_conditions?: string;
   status: 'draft' | 'sent' | 'approved' | 'closed' | 'void';
   subtotal: string;
   taxes_total: string;
   total_amount: string;
+  supplier_name?: string;
+  supplier_email?: string;
   items: PurchaseOrderItem[];
   supplier?: {
     id: string;
     name: string;
     email?: string;
+    id_type?: string;
+    id_number?: string;
+    payment_terms_days?: number;
   };
   pdv?: {
     id: string;
@@ -44,15 +57,17 @@ export interface PurchaseOrder {
   updated_at: string;
 }
 
-export interface PurchaseOrderDetail extends PurchaseOrder {
-  notes?: string;
-}
+export type PurchaseOrderDetail = PurchaseOrder;
 
 export interface CreatePurchaseOrderRequest {
   supplier_id: string;
   pdv_id: string;
   issue_date: string;
+  expected_delivery_date?: string;
+  currency?: string;
   notes?: string;
+  payment_terms?: string;
+  terms_and_conditions?: string;
   items: {
     product_id: string;
     quantity: number;
@@ -64,7 +79,11 @@ export interface UpdatePurchaseOrderRequest {
   supplier_id?: string;
   pdv_id?: string;
   issue_date?: string;
+  expected_delivery_date?: string;
+  currency?: string;
   notes?: string;
+  payment_terms?: string;
+  terms_and_conditions?: string;
   items?: {
     product_id: string;
     quantity: number;
@@ -174,6 +193,7 @@ export interface CreateBillRequest {
   due_date: string;
   currency?: string;
   notes?: string;
+  cost_center_id?: string;
   line_items: {
     product_id: string;
     quantity: number;
@@ -190,6 +210,7 @@ export interface UpdateBillRequest {
   due_date?: string;
   currency?: string;
   notes?: string;
+  cost_center_id?: string;
   line_items?: {
     product_id: string;
     quantity: number;
@@ -263,9 +284,14 @@ export interface DebitNote {
   supplier_id: string;
   issue_date: string;
   status: 'open' | 'void';
+  subtotal: string;
+  taxes_total: string;
   total_amount: string;
   notes?: string;
   items: DebitNoteItem[];
+  supplier_name?: string;
+  supplier_email?: string;
+  bill_number?: string;
   supplier?: {
     id: string;
     name: string;
@@ -284,6 +310,7 @@ export interface CreateDebitNoteRequest {
   supplier_id: string;
   issue_date: string;
   notes?: string;
+  cost_center_id?: string;
   items: {
     product_id?: string;
     name: string;

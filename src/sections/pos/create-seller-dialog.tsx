@@ -15,42 +15,42 @@ import {
   Alert
 } from '@mui/material';
 import { Icon } from '@iconify/react';
+import { enqueueSnackbar } from 'notistack';
 
 // types
-import type { SellerCreate } from 'src/types/pos';
+import type { SellerInvite } from 'src/types/pos';
 
 // hooks
-import { useCashRegister } from './hooks';
+import { useInviteSellerMutation } from 'src/redux/services/posApi';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  onSuccess: (seller: { id: string; name: string; email?: string }) => void;
+  onSuccess?: () => void;
 }
 
 export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) {
-  const [formData, setFormData] = useState<SellerCreate>({
-    name: '',
+  const [formData, setFormData] = useState<SellerInvite>({
     email: '',
+    first_name: '',
+    last_name: '',
     phone: '',
-    document: '',
     commission_rate: 0,
     base_salary: 0,
     notes: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { handleCreateSeller } = useCashRegister();
+  const [inviteSeller, { isLoading: isSubmitting }] = useInviteSellerMutation();
 
   // Reset form when dialog opens/closes
   React.useEffect(() => {
     if (open) {
       setFormData({
-        name: '',
         email: '',
+        first_name: '',
+        last_name: '',
         phone: '',
-        document: '',
         commission_rate: 0,
         base_salary: 0,
         notes: ''
@@ -59,7 +59,7 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
     }
   }, [open]);
 
-  const handleInputChange = (field: keyof SellerCreate) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (field: keyof SellerInvite) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.target;
     setFormData((prev) => ({
       ...prev,
@@ -68,8 +68,25 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
   };
 
   const handleSubmit = async () => {
-    if (!formData.name.trim()) {
+    if (!formData.email.trim()) {
+      setError('El email es requerido');
+      return;
+    }
+
+    if (!formData.first_name.trim()) {
       setError('El nombre es requerido');
+      return;
+    }
+
+    if (!formData.last_name.trim()) {
+      setError('El apellido es requerido');
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    if (!emailRegex.test(formData.email)) {
+      setError('El email no tiene un formato válido');
       return;
     }
 
@@ -83,26 +100,31 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
       return;
     }
 
-    setIsSubmitting(true);
     setError(null);
 
     try {
-      const result = await handleCreateSeller(formData);
+      const result = await inviteSeller(formData).unwrap();
 
-      if (result.success && result.data) {
-        onSuccess({
-          id: result.data.id,
-          name: result.data.name,
-          email: result.data.email
+      enqueueSnackbar(result.message || 'Invitación enviada exitosamente', {
+        variant: 'success',
+        autoHideDuration: 5000
+      });
+
+      if (result.note) {
+        enqueueSnackbar(result.note, {
+          variant: 'info',
+          autoHideDuration: 8000
         });
-        handleClose();
-      } else {
-        setError(result.error || 'Error al crear el vendedor');
       }
-    } catch (err) {
-      setError('Error inesperado al crear el vendedor');
-    } finally {
-      setIsSubmitting(false);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+      handleClose();
+    } catch (err: any) {
+      console.error('Error inviting seller:', err);
+      const message = err?.data?.detail || 'Error al enviar la invitación';
+      setError(message);
     }
   };
 
@@ -112,7 +134,7 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
     }
   };
 
-  const canSubmit = formData.name.trim() && !isSubmitting;
+  const canSubmit = formData.email.trim() && formData.first_name.trim() && formData.last_name.trim() && !isSubmitting;
 
   return (
     <Dialog
@@ -128,13 +150,13 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
     >
       <DialogTitle>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Icon icon="mdi:account-plus" width={28} height={28} />
+          <Icon icon="mdi:email-send" width={28} height={28} />
           <Box>
             <Typography variant="h6" component="div">
-              Crear Nuevo Vendedor
+              Invitar Nuevo Vendedor
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Complete la información del vendedor
+              El vendedor recibirá una invitación por email
             </Typography>
           </Box>
         </Stack>
@@ -142,6 +164,16 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
 
       <DialogContent sx={{ p: 3 }}>
         <Grid container spacing={3}>
+          {/* Info Alert */}
+          <Grid item xs={12}>
+            <Alert severity="info" icon={<Icon icon="mdi:information" />}>
+              <Typography variant="body2">
+                El vendedor recibirá un email de invitación para unirse a tu empresa. Una vez aceptada, aparecerá
+                automáticamente en la lista de vendedores.
+              </Typography>
+            </Alert>
+          </Grid>
+
           {/* Información básica */}
           <Grid item xs={12}>
             <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -150,13 +182,34 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
             </Typography>
           </Grid>
 
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              required
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange('email')}
+              placeholder="vendedor@empresa.com"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Icon icon="mdi:email" />
+                  </InputAdornment>
+                )
+              }}
+              helperText="El vendedor recibirá la invitación en este email"
+            />
+          </Grid>
+
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
-              label="Nombre completo *"
-              value={formData.name}
-              onChange={handleInputChange('name')}
-              placeholder="Ej: Juan Pérez"
+              required
+              label="Nombre"
+              value={formData.first_name}
+              onChange={handleInputChange('first_name')}
+              placeholder="Ej: Juan"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -170,22 +223,22 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
           <Grid item xs={12} md={6}>
             <TextField
               fullWidth
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange('email')}
-              placeholder="vendedor@empresa.com"
+              required
+              label="Apellido"
+              value={formData.last_name}
+              onChange={handleInputChange('last_name')}
+              placeholder="Ej: Pérez"
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Icon icon="mdi:email" />
+                    <Icon icon="mdi:account" />
                   </InputAdornment>
                 )
               }}
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               label="Teléfono"
@@ -202,28 +255,11 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Documento"
-              value={formData.document}
-              onChange={handleInputChange('document')}
-              placeholder="Ej: 12345678"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Icon icon="mdi:card-account-details" />
-                  </InputAdornment>
-                )
-              }}
-            />
-          </Grid>
-
           {/* Información laboral */}
           <Grid item xs={12} sx={{ mt: 2 }}>
             <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Icon icon="mdi:currency-usd" />
-              Información Laboral
+              Configuración POS (Opcional)
             </Typography>
           </Grid>
 
@@ -270,6 +306,7 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
                 min: 0,
                 step: 10000
               }}
+              helperText="Salario mensual en COP"
             />
           </Grid>
 
@@ -290,6 +327,16 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
                 )
               }}
             />
+          </Grid>
+
+          {/* Warning Alert */}
+          <Grid item xs={12}>
+            <Alert severity="warning" icon={<Icon icon="mdi:alert" />}>
+              <Typography variant="caption">
+                <strong>Nota técnica:</strong> El envío de email está pendiente de implementación. Por ahora, debes
+                agregar manualmente al usuario o notificarle por otros medios.
+              </Typography>
+            </Alert>
           </Grid>
         </Grid>
 
@@ -316,9 +363,9 @@ export default function CreateSellerDialog({ open, onClose, onSuccess }: Props) 
           onClick={handleSubmit}
           disabled={!canSubmit}
           size="large"
-          startIcon={isSubmitting ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:check" />}
+          startIcon={isSubmitting ? <Icon icon="mdi:loading" className="animate-spin" /> : <Icon icon="mdi:send" />}
         >
-          {isSubmitting ? 'Creando...' : 'Crear Vendedor'}
+          {isSubmitting ? 'Enviando...' : 'Enviar Invitación'}
         </Button>
       </DialogActions>
     </Dialog>

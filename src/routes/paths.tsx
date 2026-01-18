@@ -60,7 +60,12 @@ export const paths = {
       details: (id: string) => `${ROOTS.DASHBOARD}/sales/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/sales/${id}/edit`
     },
-    pos: `/pos`,
+    pos: {
+      root: `/pos`,
+      cashRegister: `/pos/cash-register`,
+      history: `/pos/history`,
+      sellers: `/pos/sellers`
+    },
     bill: {
       root: `${ROOTS.DASHBOARD}/bill`,
       newBill: `${ROOTS.DASHBOARD}/bill/new-bill`,
@@ -161,6 +166,31 @@ export const paths = {
       new: `${ROOTS.DASHBOARD}/debit-notes/new`,
       details: (id: string) => `${ROOTS.DASHBOARD}/debit-notes/${id}`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/debit-notes/${id}/edit`
+    },
+    expenses: {
+      root: `${ROOTS.DASHBOARD}/expenses`,
+      debitNotes: {
+        root: `${ROOTS.DASHBOARD}/expenses/debit-notes`,
+        new: `${ROOTS.DASHBOARD}/expenses/debit-notes/new`,
+        details: (id: string) => `${ROOTS.DASHBOARD}/expenses/debit-notes/${id}`
+      },
+      purchaseOrders: {
+        root: `${ROOTS.DASHBOARD}/expenses/purchase-orders`,
+        new: `${ROOTS.DASHBOARD}/expenses/purchase-orders/new`,
+        details: (id: string) => `${ROOTS.DASHBOARD}/expenses/purchase-orders/${id}`,
+        edit: (id: string) => `${ROOTS.DASHBOARD}/expenses/purchase-orders/${id}/edit`
+      }
+    },
+    settings: {
+      root: `${ROOTS.DASHBOARD}/settings`,
+      costCenters: `${ROOTS.DASHBOARD}/settings/cost-centers`
+    },
+    treasury: {
+      root: `${ROOTS.DASHBOARD}/treasury`,
+      accounts: `${ROOTS.DASHBOARD}/treasury/accounts`,
+      movements: `${ROOTS.DASHBOARD}/treasury/movements`,
+      transfers: `${ROOTS.DASHBOARD}/treasury/transfers`,
+      accountDetails: (id: string) => `${ROOTS.DASHBOARD}/treasury/accounts/${id}`
     }
   }
 };

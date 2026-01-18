@@ -37,11 +37,11 @@ const PosSaleActions = memo(({ canComplete, onCompleteSale, onCancel }: Props) =
         <Button variant="outlined" size="medium" fullWidth startIcon={<Icon icon="mdi:content-save" />}>
           Guardar
         </Button>
-        <Button 
-          variant="outlined" 
-          size="medium" 
-          fullWidth 
-          color="error" 
+        <Button
+          variant="outlined"
+          size="medium"
+          fullWidth
+          color="error"
           onClick={onCancel}
           startIcon={<Icon icon="mdi:cancel" />}
         >

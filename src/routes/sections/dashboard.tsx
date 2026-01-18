@@ -37,11 +37,6 @@ const BrandsListView = lazy(() => import('src/pages/dashboard/brands/list'));
 // ORDER
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
-// INVOICE
-const InvoiceListPage = lazy(() => import('src/pages/dashboard/invoice/list'));
-const InvoiceDetailsPage = lazy(() => import('src/pages/dashboard/invoice/details'));
-const InvoiceCreatePage = lazy(() => import('src/pages/dashboard/invoice/new'));
-const InvoiceEditPage = lazy(() => import('src/pages/dashboard/invoice/edit'));
 
 // Sales
 
@@ -69,7 +64,24 @@ const DebitNoteNewPage = lazy(() => import('src/pages/dashboard/debit-notes/new'
 const DebitNoteEditPage = lazy(() => import('src/pages/dashboard/debit-notes/edit'));
 const DebitNoteDetailsPage = lazy(() => import('src/pages/dashboard/debit-notes/details'));
 
+// EXPENSES
+const ExpenseDebitNotesPage = lazy(() => import('src/pages/dashboard/expenses/debit-notes'));
+const ExpenseDebitNoteNewPage = lazy(() => import('src/pages/dashboard/expenses/debit-notes-new'));
+const PurchaseOrdersPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders'));
+const PurchaseOrderNewPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders-new'));
+const PurchaseOrderDetailsPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders-details'));
+const PurchaseOrderEditPage = lazy(() => import('src/pages/dashboard/expenses/purchase-orders-edit'));
+
 const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
+
+// SETTINGS
+const SettingsPage = lazy(() => import('src/pages/dashboard/settings'));
+
+// TREASURY
+const TreasuryPage = lazy(() => import('src/pages/dashboard/treasury'));
+const TreasuryAccountsPage = lazy(() => import('src/pages/dashboard/treasury/accounts'));
+const TreasuryAccountDetailPage = lazy(() => import('src/pages/dashboard/treasury/account-detail'));
+const TreasuryMovementsPage = lazy(() => import('src/pages/dashboard/treasury/movements'));
 
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
@@ -205,6 +217,27 @@ export const dashboardRoutes = [
         ]
       },
       {
+        path: 'expenses',
+        children: [
+          {
+            path: 'debit-notes',
+            children: [
+              { element: <ExpenseDebitNotesPage />, index: true },
+              { path: 'new', element: <ExpenseDebitNoteNewPage /> }
+            ]
+          },
+          {
+            path: 'purchase-orders',
+            children: [
+              { element: <PurchaseOrdersPage />, index: true },
+              { path: 'new', element: <PurchaseOrderNewPage /> },
+              { path: ':id', element: <PurchaseOrderDetailsPage /> },
+              { path: ':id/edit', element: <PurchaseOrderEditPage /> }
+            ]
+          }
+        ]
+      },
+      {
         path: 'user',
         children: [
           { element: <UserProfilePage />, index: true },
@@ -279,6 +312,18 @@ export const dashboardRoutes = [
           { path: 'journal/:entryId/reversal', element: <JournalReversalPage /> }
         ]
       },
+      // TREASURY
+      {
+        path: 'treasury',
+        children: [
+          { element: <TreasuryPage />, index: true },
+          { path: 'accounts', element: <TreasuryAccountsPage /> },
+          { path: 'accounts/:id', element: <TreasuryAccountDetailPage /> },
+          { path: 'movements', element: <TreasuryMovementsPage /> }
+        ]
+      },
+      // SETTINGS
+      { path: 'settings', element: <SettingsPage /> },
       { path: 'file-manager', element: <FileManagerPage /> },
       { path: 'mail', element: <MailPage /> },
       { path: 'chat', element: <ChatPage /> },

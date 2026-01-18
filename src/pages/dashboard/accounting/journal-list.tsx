@@ -14,7 +14,9 @@ import {
 } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Icon } from '@iconify/react';
-import { format } from 'date-fns';
+/* eslint-disable import/no-duplicates */
+/* eslint-disable prettier/prettier */
+import { format} from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DatePicker } from '@mui/x-date-pickers';
 import { LoadingScreen } from 'src/components/loading-screen';
