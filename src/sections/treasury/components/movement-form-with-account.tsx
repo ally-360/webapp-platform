@@ -14,9 +14,9 @@ import {
   MenuItem,
   Typography,
   Alert,
-  Box,
-  Chip,
-  Divider
+  Autocomplete,
+  TextField,
+  CircularProgress
 } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -26,10 +26,10 @@ import FormProvider, { RHFTextField, RHFSelect } from 'src/components/hook-form'
 import Iconify from 'src/components/iconify';
 
 // API
-import { useCreateMovementMutation } from 'src/redux/services/treasuryApi';
+import { useCreateMovementMutation, useGetAccountsQuery } from 'src/redux/services/treasuryApi';
 
 // Types
-import type { CreateMovementPayload, MovementType, TreasuryAccount, PaymentMethod } from 'src/sections/treasury/types';
+import type { CreateMovementPayload, MovementType, PaymentMethod } from 'src/sections/treasury/types';
 
 // Utils
 import { fCurrency } from 'src/utils/format-number';
@@ -43,10 +43,10 @@ type Props = {
   open: boolean;
   onClose: VoidFunction;
   onSuccess?: VoidFunction;
-  account: TreasuryAccount;
 };
 
 type FormValues = {
+  treasury_account_id: string;
   movement_type: MovementType;
   movement_date: Date | null;
   amount: string;
@@ -84,19 +84,20 @@ const getAccountTypeInfo = (type: string) => {
 
 // ----------------------------------------------------------------------
 
-export default function MovementForm({ open, onClose, onSuccess, account }: Props) {
+export default function MovementFormWithAccount({ open, onClose, onSuccess }: Props) {
   // RTK Query hooks
   const [createMovement, { isLoading: isCreating }] = useCreateMovementMutation();
+  const { data: accountsData, isLoading: isLoadingAccounts } = useGetAccountsQuery({
+    is_active: true
+  });
 
   // Check if user has permission (admin, owner, accountant)
   // TODO: Update when backend implements role field in BackendUser
   const hasPermission = useMemo(() => true, []);
 
-  // Parse current balance
-  const currentBalance = useMemo(() => parseFloat(account?.current_balance || '0'), [account?.current_balance]);
-
   // Validation schema
   const MovementSchema = Yup.object().shape({
+    treasury_account_id: Yup.string().required('La cuenta es requerida'),
     movement_type: Yup.string().oneOf(['inflow', 'outflow'], 'Tipo inválido').required('El tipo es requerido'),
     movement_date: Yup.date().required('La fecha es requerida').nullable(),
     amount: Yup.string()
@@ -117,6 +118,7 @@ export default function MovementForm({ open, onClose, onSuccess, account }: Prop
   const methods = useForm<FormValues>({
     resolver: yupResolver(MovementSchema),
     defaultValues: {
+      treasury_account_id: '',
       movement_type: 'inflow',
       movement_date: new Date(),
       amount: '',
@@ -130,6 +132,7 @@ export default function MovementForm({ open, onClose, onSuccess, account }: Prop
     reset,
     control,
     watch,
+    setValue,
     handleSubmit,
     formState: { isSubmitting }
   } = methods;
@@ -137,18 +140,32 @@ export default function MovementForm({ open, onClose, onSuccess, account }: Prop
   // Watch values for validation
   const movementType = watch('movement_type');
   const amount = watch('amount');
+  const selectedAccountId = watch('treasury_account_id');
+
+  // Get selected account
+  const selectedAccount = useMemo(() => {
+    if (!selectedAccountId || !accountsData?.accounts) return null;
+    return accountsData.accounts.find((acc) => acc.id === selectedAccountId) || null;
+  }, [selectedAccountId, accountsData]);
+
+  // Parse current balance
+  const currentBalance = useMemo(
+    () => parseFloat(selectedAccount?.current_balance || '0'),
+    [selectedAccount?.current_balance]
+  );
 
   // Check if outflow exceeds balance
   const exceedsBalance = useMemo(() => {
-    if (movementType !== 'outflow' || !amount) return false;
+    if (movementType !== 'outflow' || !amount || !selectedAccount) return false;
     const numAmount = parseFloat(amount);
     return !Number.isNaN(numAmount) && numAmount > currentBalance;
-  }, [movementType, amount, currentBalance]);
+  }, [movementType, amount, currentBalance, selectedAccount]);
 
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       reset({
+        treasury_account_id: '',
         movement_type: 'inflow',
         movement_date: new Date(),
         amount: '',
@@ -163,7 +180,7 @@ export default function MovementForm({ open, onClose, onSuccess, account }: Prop
   const onSubmit = handleSubmit(async (data) => {
     try {
       const payload: CreateMovementPayload = {
-        treasury_account_id: account.id,
+        treasury_account_id: data.treasury_account_id,
         movement_type: data.movement_type,
         movement_date: data.movement_date!.toISOString().split('T')[0],
         amount: data.amount,
@@ -194,9 +211,9 @@ export default function MovementForm({ open, onClose, onSuccess, account }: Prop
   };
 
   const isLoading = isCreating;
-  const isFormDisabled = isLoading || !account?.is_active || !hasPermission;
+  const isFormDisabled = !!(isLoading || !hasPermission || (selectedAccount && !selectedAccount.is_active));
 
-  const accountTypeInfo = getAccountTypeInfo(account?.type);
+  const accounts = accountsData?.accounts || [];
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -211,11 +228,11 @@ export default function MovementForm({ open, onClose, onSuccess, account }: Prop
         <DialogContent dividers>
           <Stack spacing={3}>
             {/* Inactive account alert */}
-            {!account?.is_active && (
+            {selectedAccount && !selectedAccount.is_active && (
               <Alert severity="error" icon={<Iconify icon="solar:danger-bold" />}>
                 <Typography variant="body2">
-                  <strong>Cuenta inactiva:</strong> No se pueden registrar movimientos en esta cuenta. Actívala primero
-                  para continuar.
+                  <strong>Cuenta inactiva:</strong> La cuenta seleccionada está inactiva. Selecciona otra cuenta o
+                  actívala primero.
                 </Typography>
               </Alert>
             )}
@@ -237,48 +254,72 @@ export default function MovementForm({ open, onClose, onSuccess, account }: Prop
               </Typography>
             </Alert>
 
-            {/* Account Info - Fixed */}
-            <Box
-              sx={{
-                p: 2,
-                border: (theme) => `1px solid ${theme.palette.divider}`,
-                borderRadius: 1,
-                bgcolor: 'background.neutral'
-              }}
-            >
-              <Typography variant="overline" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                Cuenta de Tesorería
-              </Typography>
-              <Stack direction="row" alignItems="center" spacing={1.5}>
-                <Iconify icon={accountTypeInfo.icon} width={32} sx={{ color: `${accountTypeInfo.color}.main` }} />
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="subtitle1">{account?.name}</Typography>
-                  <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-                    <Chip label={accountTypeInfo.label} size="small" color={accountTypeInfo.color as any} />
-                    {account?.code && (
-                      <Typography variant="caption" color="text.secondary">
-                        Código: {account.code}
-                      </Typography>
-                    )}
-                    {account?.account_number && (
-                      <Typography variant="caption" color="text.secondary">
-                        N°: {account.account_number}
-                      </Typography>
-                    )}
-                  </Stack>
-                </Box>
-                <Box sx={{ textAlign: 'right' }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Saldo actual
+            {/* Account Selector */}
+            <Controller
+              name="treasury_account_id"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <Autocomplete
+                  value={accounts.find((acc) => acc.id === field.value) || null}
+                  options={accounts}
+                  loading={isLoadingAccounts}
+                  disabled={isFormDisabled}
+                  getOptionLabel={(option) => option.name}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  onChange={(_, newValue) => {
+                    setValue('treasury_account_id', newValue?.id || '', { shouldValidate: true });
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Cuenta de Tesorería"
+                      required
+                      error={!!error}
+                      helperText={error?.message}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {isLoadingAccounts ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }}
+                    />
+                  )}
+                  renderOption={(props, option) => {
+                    const typeInfo = getAccountTypeInfo(option.type);
+                    return (
+                      <li {...props} key={option.id}>
+                        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '100%' }}>
+                          <Iconify icon={typeInfo.icon} width={24} sx={{ color: `${typeInfo.color}.main` }} />
+                          <Stack sx={{ flexGrow: 1 }}>
+                            <Typography variant="body2">{option.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {typeInfo.label} • Saldo: {fCurrency(parseFloat(option.current_balance))}
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                      </li>
+                    );
+                  }}
+                />
+              )}
+            />
+
+            {/* Show selected account balance */}
+            {selectedAccount && (
+              <Alert severity="info" icon={<Iconify icon="solar:wallet-bold" />}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography variant="body2">
+                    <strong>Saldo actual:</strong>
                   </Typography>
                   <Typography variant="h6" color="primary.main">
                     {fCurrency(currentBalance)}
                   </Typography>
-                </Box>
-              </Stack>
-            </Box>
-
-            <Divider />
+                </Stack>
+              </Alert>
+            )}
 
             {/* Movement Type */}
             <RHFSelect name="movement_type" label="Tipo de Movimiento" disabled={isFormDisabled} required>

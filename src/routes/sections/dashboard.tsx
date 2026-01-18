@@ -80,6 +80,7 @@ const SettingsPage = lazy(() => import('src/pages/dashboard/settings'));
 // TREASURY
 const TreasuryPage = lazy(() => import('src/pages/dashboard/treasury'));
 const TreasuryAccountsPage = lazy(() => import('src/pages/dashboard/treasury/accounts'));
+const TreasuryAccountDetailPage = lazy(() => import('src/pages/dashboard/treasury/account-detail'));
 const TreasuryMovementsPage = lazy(() => import('src/pages/dashboard/treasury/movements'));
 
 // USER
@@ -317,6 +318,7 @@ export const dashboardRoutes = [
         children: [
           { element: <TreasuryPage />, index: true },
           { path: 'accounts', element: <TreasuryAccountsPage /> },
+          { path: 'accounts/:id', element: <TreasuryAccountDetailPage /> },
           { path: 'movements', element: <TreasuryMovementsPage /> }
         ]
       },

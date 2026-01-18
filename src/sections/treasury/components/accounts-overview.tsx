@@ -165,7 +165,7 @@ export default function AccountsOverview({ accounts, isLoading }: Props) {
                     bgcolor: 'action.hover'
                   }
                 }}
-                onClick={() => navigate(`${paths.dashboard.treasury.accounts}?accountId=${account.id}`)}
+                onClick={() => navigate(paths.dashboard.treasury.accountDetails(account.id))}
               >
                 <Stack direction="row" alignItems="center" spacing={2} sx={{ flex: 1 }}>
                   <Box

@@ -19,7 +19,7 @@ import { useGetMovementsQuery, useGetAccountsQuery } from 'src/redux/services/tr
 
 // Components
 import MovementTable from '../components/movement-table';
-import MovementForm from '../components/movement-form';
+import MovementFormWithAccount from '../components/movement-form-with-account';
 import VoidMovementDialog from '../components/void-movement-dialog';
 
 // Types
@@ -42,7 +42,7 @@ export default function MovementsListView() {
     refetch: refetchMovements
   } = useGetMovementsQuery({
     page: 1,
-    size: 1000,
+    size: 500,
     include_reversed: true
   });
 
@@ -156,11 +156,10 @@ export default function MovementsListView() {
       </Stack>
 
       {/* Movement Form Dialog */}
-      <MovementForm
+      <MovementFormWithAccount
         open={openFormDialog.value}
         onClose={handleCloseForm}
         onSuccess={handleSuccessForm}
-        accounts={accounts}
       />
 
       {/* Void Movement Dialog */}
