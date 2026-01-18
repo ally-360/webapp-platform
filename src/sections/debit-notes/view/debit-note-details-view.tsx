@@ -182,6 +182,19 @@ export default function DebitNoteDetailsView() {
               <Typography variant="body2">{debitNote.notes}</Typography>
             </Stack>
           )}
+
+          {debitNote.cost_center && (
+            <Stack direction="row" spacing={2}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', minWidth: 120 }}>
+                Centro de Costo:
+              </Typography>
+              <Typography variant="body2">
+                {debitNote.cost_center.code
+                  ? `${debitNote.cost_center.code} · ${debitNote.cost_center.name}`
+                  : debitNote.cost_center.name}
+              </Typography>
+            </Stack>
+          )}
         </Stack>
 
         <Divider sx={{ mb: 3 }} />

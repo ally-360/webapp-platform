@@ -32,6 +32,7 @@ import { useProgressiveProducts } from 'src/sections/expenses/hooks/use-progress
 import Iconify from 'src/components/iconify';
 import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFSelect, RHFTextField, RHFAutocomplete } from 'src/components/hook-form';
+import { CostCenterSelectField } from 'src/components/cost-center';
 import { fCurrency } from 'src/utils/format-number';
 //
 import AddressListDialog from 'src/sections/address/address-list-dialog';
@@ -67,6 +68,7 @@ export default function ExpenseDebitNoteNewForm() {
     bill_id: Yup.string().nullable(),
     issue_date: Yup.date().required('La fecha es requerida'),
     notes: Yup.string(),
+    cost_center_id: Yup.string().nullable(),
     items: Yup.array()
       .of(
         Yup.object().shape({
@@ -88,6 +90,7 @@ export default function ExpenseDebitNoteNewForm() {
       bill_id: null as string | null,
       issue_date: new Date(),
       notes: '',
+      cost_center_id: '',
       items: [
         {
           product_id: null as string | null,
@@ -201,6 +204,7 @@ export default function ExpenseDebitNoteNewForm() {
         bill_id: data.bill_id || undefined,
         issue_date: new Date(data.issue_date).toISOString().split('T')[0],
         notes: data.notes || undefined,
+        cost_center_id: data.cost_center_id || undefined,
         items: (data.items || []).map((item: any) => ({
           product_id: item.product_id || undefined,
           name: item.name,
@@ -235,9 +239,7 @@ export default function ExpenseDebitNoteNewForm() {
               <MenuItem value="principal">Principal</MenuItem>
             </RHFSelect>
 
-            <RHFSelect name="cost_center" label="Centro de Costo" size="small" sx={{ minWidth: 200 }}>
-              <MenuItem value="">Ninguno</MenuItem>
-            </RHFSelect>
+            <CostCenterSelectField />
           </Stack>
         </Card>
 

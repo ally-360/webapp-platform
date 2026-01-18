@@ -58,6 +58,7 @@ const NewBillSchema = Yup.object()
     notes: Yup.string(),
     status: Yup.string(),
     currency: Yup.string(),
+    cost_center_id: Yup.string().nullable(),
     // Campos extra del componente Invoice para evitar errores de validación
     method: Yup.string(),
     paymentMethod: Yup.string(),
@@ -96,6 +97,7 @@ export default function BillNewEditForm({ currentBill }) {
       currency: currentBill?.currency || 'COP',
       notes: currentBill?.notes || '',
       status: currentBill?.status || 'draft',
+      cost_center_id: '',
       // Add fields expected by InvoiceNewEditStatusDate component
       createDate: currentBill?.issue_date ? new Date(currentBill.issue_date) : new Date(),
       pdvId: currentBill?.pdv_id || '',
@@ -200,6 +202,7 @@ export default function BillNewEditForm({ currentBill }) {
       due_date: due_date ? new Date(due_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       currency: data.currency || 'COP',
       notes: data.notes || undefined,
+      ...(data.cost_center_id ? { cost_center_id: data.cost_center_id } : {}),
       line_items: validItems.map((item: any) => ({
         product_id: item.product_id,
         quantity: Number(item.quantity),

@@ -48,7 +48,7 @@ export default function AccountGeneral() {
   // RTK Query mutations
   const [updateProfile, { isLoading: _isUpdatingProfile }] = useUpdateUserProfileMutation();
   const [uploadAvatar, { isLoading: _isUploadingAvatar }] = useUploadUserAvatarMutation();
-  const { data: avatarData } = useGetUserAvatarQuery();
+  const { data: avatarData } = useGetUserAvatarQuery(undefined, { skip: !user });
 
   const UpdateUserSchema = Yup.object().shape({
     first_name: Yup.string().required('First name is required'),

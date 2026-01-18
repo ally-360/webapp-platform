@@ -270,6 +270,16 @@ const DetailsDialog = memo(({ open, onClose, saleId, onPrint }: any) => {
               <Info label="Vendedor" value={saleDetail.seller_name || '-'} />
               <Info label="PDV" value={saleDetail.pdv_name || '-'} />
               <Info label="Estado" value={saleDetail.status} />
+              {saleDetail.cost_center && (
+                <Info
+                  label="Centro de Costo"
+                  value={
+                    saleDetail.cost_center.code
+                      ? `${saleDetail.cost_center.code} · ${saleDetail.cost_center.name}`
+                      : saleDetail.cost_center.name
+                  }
+                />
+              )}
             </Stack>
 
             <Divider />

@@ -52,7 +52,9 @@ const ICONS = {
   inventory: icon('ic_inventory'),
   ventas: icon('ic_arrow_up'),
   gastos: icon('ic_arrow_down'),
-  contact: icon('user-3-fill')
+  contact: icon('user-3-fill'),
+  settings: icon('ic_settings'),
+  treasury: icon('ic_banking')
 };
 
 // ----------------------------------------------------------------------
@@ -205,6 +207,26 @@ export function useNavData() {
               { title: t('Libro Diario'), path: paths.dashboard.accounting.journal.root }
             ]
           },
+          {
+            title: t('Tesorería'),
+            path: paths.dashboard.treasury.root,
+            icon: ICONS.treasury,
+            children: [
+              {
+                title: t('Cuentas'),
+                path: paths.dashboard.treasury.accounts,
+                openPopup() {
+                  navigate(paths.dashboard.treasury.accounts);
+                  // Trigger dialog open via URL state or event
+                  setTimeout(() => {
+                    const createBtn = document.querySelector('[data-treasury-create-btn]') as HTMLButtonElement;
+                    if (createBtn) createBtn.click();
+                  }, 100);
+                }
+              },
+              { title: t('Movimientos'), path: paths.dashboard.treasury.movements }
+            ]
+          },
           // {
           //   title: t('orden de compra'),
           //   path: paths.dashboard.order.root,
@@ -237,6 +259,11 @@ export function useNavData() {
             title: t('Reportes'),
             path: paths.dashboard.blank,
             icon: ICONS.product
+          },
+          {
+            title: t('Configuración'),
+            path: paths.dashboard.settings.root,
+            icon: ICONS.settings
           }
         ]
       },

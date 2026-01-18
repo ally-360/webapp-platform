@@ -8,6 +8,7 @@ export type CreateDebitNoteRequest = {
   issue_date: string;
   reason: string;
   notes?: string;
+  cost_center_id?: string;
   line_items: DebitNoteLineItem[];
 };
 

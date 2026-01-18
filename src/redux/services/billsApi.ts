@@ -57,9 +57,7 @@ export interface PurchaseOrder {
   updated_at: string;
 }
 
-export interface PurchaseOrderDetail extends PurchaseOrder {
-  // kept for backward compatibility
-}
+export type PurchaseOrderDetail = PurchaseOrder;
 
 export interface CreatePurchaseOrderRequest {
   supplier_id: string;
@@ -195,6 +193,7 @@ export interface CreateBillRequest {
   due_date: string;
   currency?: string;
   notes?: string;
+  cost_center_id?: string;
   line_items: {
     product_id: string;
     quantity: number;
@@ -211,6 +210,7 @@ export interface UpdateBillRequest {
   due_date?: string;
   currency?: string;
   notes?: string;
+  cost_center_id?: string;
   line_items?: {
     product_id: string;
     quantity: number;
@@ -310,6 +310,7 @@ export interface CreateDebitNoteRequest {
   supplier_id: string;
   issue_date: string;
   notes?: string;
+  cost_center_id?: string;
   items: {
     product_id?: string;
     name: string;

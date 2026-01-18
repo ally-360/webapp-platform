@@ -74,6 +74,14 @@ const PurchaseOrderEditPage = lazy(() => import('src/pages/dashboard/expenses/pu
 
 const SelectBussinessPage = lazy(() => import('src/pages/dashboard/select-business'));
 
+// SETTINGS
+const SettingsPage = lazy(() => import('src/pages/dashboard/settings'));
+
+// TREASURY
+const TreasuryPage = lazy(() => import('src/pages/dashboard/treasury'));
+const TreasuryAccountsPage = lazy(() => import('src/pages/dashboard/treasury/accounts'));
+const TreasuryMovementsPage = lazy(() => import('src/pages/dashboard/treasury/movements'));
+
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
 const UserCardsPage = lazy(() => import('src/pages/dashboard/user/cards'));
@@ -303,6 +311,17 @@ export const dashboardRoutes = [
           { path: 'journal/:entryId/reversal', element: <JournalReversalPage /> }
         ]
       },
+      // TREASURY
+      {
+        path: 'treasury',
+        children: [
+          { element: <TreasuryPage />, index: true },
+          { path: 'accounts', element: <TreasuryAccountsPage /> },
+          { path: 'movements', element: <TreasuryMovementsPage /> }
+        ]
+      },
+      // SETTINGS
+      { path: 'settings', element: <SettingsPage /> },
       { path: 'file-manager', element: <FileManagerPage /> },
       { path: 'mail', element: <MailPage /> },
       { path: 'chat', element: <ChatPage /> },

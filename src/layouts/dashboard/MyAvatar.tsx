@@ -7,7 +7,7 @@ import { useGetUserAvatarQuery } from 'src/redux/services/userProfileApi';
 
 function MyAvatar() {
   const { user } = useAuthContext();
-  const { data: avatarData } = useGetUserAvatarQuery();
+  const { data: avatarData } = useGetUserAvatarQuery(undefined, { skip: !user });
 
   return (
     <Avatar

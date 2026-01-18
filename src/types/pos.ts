@@ -177,6 +177,7 @@ export interface POSPaymentCreate {
 export interface POSInvoiceCreate {
   customer_id: string | null; // UUID del cliente o null para cliente genérico
   seller_id: string;
+  cost_center_id?: string;
   items: POSLineItemCreate[];
   payments: POSPaymentCreate[];
   notes?: string;

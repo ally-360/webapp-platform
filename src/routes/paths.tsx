@@ -180,6 +180,17 @@ export const paths = {
         details: (id: string) => `${ROOTS.DASHBOARD}/expenses/purchase-orders/${id}`,
         edit: (id: string) => `${ROOTS.DASHBOARD}/expenses/purchase-orders/${id}/edit`
       }
+    },
+    settings: {
+      root: `${ROOTS.DASHBOARD}/settings`,
+      costCenters: `${ROOTS.DASHBOARD}/settings/cost-centers`
+    },
+    treasury: {
+      root: `${ROOTS.DASHBOARD}/treasury`,
+      accounts: `${ROOTS.DASHBOARD}/treasury/accounts`,
+      movements: `${ROOTS.DASHBOARD}/treasury/movements`,
+      transfers: `${ROOTS.DASHBOARD}/treasury/transfers`,
+      accountDetails: (id: string) => `${ROOTS.DASHBOARD}/treasury/accounts/${id}`
     }
   }
 };

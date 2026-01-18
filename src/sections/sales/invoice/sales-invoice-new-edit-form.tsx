@@ -64,6 +64,7 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
     pdv_id: Yup.string(),
     global_pdv_id: Yup.string(), // Para el PDV global
     notes: Yup.string(),
+    cost_center_id: Yup.string().nullable(),
     items: Yup.array()
       .of(
         Yup.object().shape({
@@ -96,6 +97,7 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
       pdv_id: currentInvoice?.pdv_id || '',
       global_pdv_id: '', // Para el PDV global
       notes: currentInvoice?.notes || '',
+      cost_center_id: '',
       items: currentInvoice?.line_items?.map((item) => ({
         title: item.name,
         description: item.description || item.name,
@@ -204,6 +206,7 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
       status: getStatusForAPI(data.status),
       currency: 'COP', // Default currency for Colombia
       notes: data.notes || '',
+      ...(data.cost_center_id ? { cost_center_id: data.cost_center_id } : {}),
       items:
         data.items?.map((item) => ({
           product_id: item.product_id || '',

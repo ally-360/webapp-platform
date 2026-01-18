@@ -47,7 +47,7 @@ export default function AccountPopover() {
   const location = useLocation();
   const { user, company } = useAuthContext();
   const { logout } = useAuthContext();
-  const { data: avatarData } = useGetUserAvatarQuery();
+  const { data: avatarData } = useGetUserAvatarQuery(undefined, { skip: !user });
 
   const { enqueueSnackbar } = useSnackbar();
 

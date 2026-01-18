@@ -45,6 +45,7 @@ export interface GetAccountsParams {
   search?: string;
   skip?: number;
   limit?: number;
+  use?: 'treasury' | 'general';
 }
 
 export interface CreateAccountPayload {
@@ -138,6 +139,13 @@ export interface AccountingCatalogs {
     value: JournalEntryStatus;
     label: string;
   }>;
+}
+
+export interface CostCenter {
+  id: string;
+  code?: string;
+  name: string;
+  is_active?: boolean;
 }
 
 // Legacy types for existing UI components (kept for compatibility)

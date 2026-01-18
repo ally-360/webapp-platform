@@ -88,6 +88,7 @@ export interface CreateSalesInvoiceRequest {
   due_date: string;
   notes?: string;
   currency: string;
+  cost_center_id?: string;
   items: {
     product_id: string;
     name: string;

@@ -37,7 +37,8 @@ const AccountStyle = styled('div')(({ theme }) => ({
 
 export default function NavVertical({ openNav, onCloseNav }) {
   const { user, company } = useAuthContext();
-  const { data: avatarData } = useGetUserAvatarQuery();
+  // Skip query if user doesn't exist, handle 404 silently
+  const { data: avatarData } = useGetUserAvatarQuery(undefined, { skip: !user });
 
   const theme = useTheme();
 
