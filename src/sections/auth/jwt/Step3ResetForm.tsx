@@ -3,10 +3,12 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Stack, InputAdornment, IconButton } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { useSnackbar } from 'notistack';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { SentIcon } from 'src/assets/icons';
 import { useBoolean } from 'src/hooks/use-boolean';
+import { useResetPasswordMutation } from 'src/redux/services/authApi';
 import AuthFormHead from './components/AuthFormHead';
 import BackToLoginLink from './components/BackToLoginLink';
 
@@ -24,7 +26,10 @@ const schema = Yup.object({
 });
 
 export default function Step3ResetForm({ email, code, onReset }: Step3Props) {
+  const { enqueueSnackbar } = useSnackbar();
   const showPassword = useBoolean(false);
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+  
   const methods = useForm({
     mode: 'onChange',
     resolver: yupResolver(schema),
@@ -36,8 +41,17 @@ export default function Step3ResetForm({ email, code, onReset }: Step3Props) {
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
-    console.info('Step 3:', data, 'Email:', email, 'Code:', code);
-    onReset();
+    try {
+      await resetPassword({ code, new_password: data.password }).unwrap();
+      enqueueSnackbar('Contraseña restablecida exitosamente', { variant: 'success' });
+      onReset();
+    } catch (error: any) {
+      console.error('Error al restablecer contraseña:', error);
+      enqueueSnackbar(
+        error?.data?.detail || 'Error al restablecer la contraseña. Verifica el código e intenta nuevamente.',
+        { variant: 'error' }
+      );
+    }
   });
 
   return (
@@ -70,7 +84,7 @@ export default function Step3ResetForm({ email, code, onReset }: Step3Props) {
           size="large"
           type="submit"
           variant="contained"
-          loading={isSubmitting}
+          loading={isSubmitting || isLoading}
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
         >
           Restablecer contraseña
