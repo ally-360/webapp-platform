@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
 // @mui
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -24,9 +25,10 @@ type Props = {
   onClose: VoidFunction;
   poId: string;
   poNumber?: string;
+  onSuccess?: (billId: string) => void;
 };
 
-export default function ConvertPOToBillDialog({ open, onClose, poId, poNumber }: Props) {
+export default function ConvertPOToBillDialog({ open, onClose, poId, poNumber, onSuccess }: Props) {
   const { enqueueSnackbar } = useSnackbar();
   const [convertPOToBill, { isLoading }] = useConvertPOToBillMutation();
 
@@ -36,19 +38,35 @@ export default function ConvertPOToBillDialog({ open, onClose, poId, poNumber }:
     bill_number: '',
     issue_date: today,
     due_date: today,
-    status: 'draft' as 'draft' | 'open',
+    status: 'DRAFT' as 'DRAFT' | 'OPEN',
     notes: ''
   });
 
-  const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (!open) return;
+
+    setFormData({
+      bill_number: '',
+      issue_date: today,
+      due_date: today,
+      status: 'DRAFT',
+      notes: ''
+    });
+  }, [open, today]);
+
+  const handleChange = (field: string) => (event: ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: event.target.value }));
   };
 
   const handleConvert = async () => {
     try {
-      await convertPOToBill({ id: poId, data: formData }).unwrap();
+      const bill = await convertPOToBill({ id: poId, data: formData }).unwrap();
       enqueueSnackbar('Orden de compra convertida a factura exitosamente', { variant: 'success' });
       onClose();
+
+      if (bill?.id) {
+        onSuccess?.(bill.id);
+      }
     } catch (error: any) {
       console.error('Error converting PO to bill:', error);
       const message = error?.data?.detail || 'Error al convertir orden de compra';
@@ -104,8 +122,8 @@ export default function ConvertPOToBillDialog({ open, onClose, poId, poNumber }:
             onChange={handleChange('status')}
             helperText="open actualiza inventario automáticamente"
           >
-            <MenuItem value="draft">Borrador</MenuItem>
-            <MenuItem value="open">Abierta (actualiza inventario)</MenuItem>
+            <MenuItem value="DRAFT">Borrador</MenuItem>
+            <MenuItem value="OPEN">Abierta (actualiza inventario)</MenuItem>
           </TextField>
 
           <TextField

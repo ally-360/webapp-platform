@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
@@ -16,6 +16,8 @@ import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 // redux
 import { useGetPurchaseOrdersQuery } from 'src/redux/services/billsApi';
+import { useGetContactsQuery } from 'src/redux/services/contactsApi';
+import { useGetPDVsQuery } from 'src/redux/services/catalogApi';
 // components
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -30,8 +32,8 @@ import {
   TableSelectedAction,
   TablePaginationCustom
 } from 'src/components/table';
-import { useSnackbar } from 'src/components/snackbar';
-import { ConfirmDialog } from 'src/components/custom-dialog';
+import ConvertPOToBillDialog from '../convert-po-to-bill-dialog';
+import VoidPurchaseOrderDialog from '../void-purchase-order-dialog';
 //
 import PurchaseOrderTableRow from '../purchase-order-table-row';
 import PurchaseOrderTableToolbar from '../purchase-order-table-toolbar';
@@ -42,16 +44,17 @@ const TABLE_HEAD = [
   { id: 'order_number', label: 'N° Orden' },
   { id: 'issue_date', label: 'Fecha' },
   { id: 'supplier', label: 'Proveedor' },
+  { id: 'pdv', label: 'PDV' },
   { id: 'total', label: 'Total' },
   { id: 'status', label: 'Estado' },
   { id: '' }
 ];
 
 const defaultFilters = {
-  supplier: '',
-  status: '',
-  startDate: null,
-  endDate: null
+  search: '',
+  supplier_id: '',
+  pdv_id: '',
+  status: ''
 };
 
 // ----------------------------------------------------------------------
@@ -60,43 +63,72 @@ export default function PurchaseOrdersListView() {
   const table = useTable({ defaultOrderBy: 'issue_date', defaultOrder: 'desc' });
   const settings = useSettingsContext();
   const router = useRouter();
-  const { enqueueSnackbar } = useSnackbar();
 
   const [filters, setFilters] = useState(defaultFilters);
-  const confirm = useBoolean(false);
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  // Fetch purchase orders
-  const { data: purchaseOrders = [] } = useGetPurchaseOrdersQuery({
-    limit: table.rowsPerPage,
-    offset: table.page * table.rowsPerPage,
-    status: filters.status || undefined
-  });
+  const convertDialog = useBoolean(false);
+  const voidDialog = useBoolean(false);
+  const [selectedOrder, setSelectedOrder] = useState<{ id: string; order_number?: string } | null>(null);
 
-  const dataFiltered = applyFilter({
-    inputData: purchaseOrders,
-    filters
-  });
-
-  const dataInPage = dataFiltered.slice(
-    table.page * table.rowsPerPage,
-    table.page * table.rowsPerPage + table.rowsPerPage
+  const { data: allContacts = [] } = useGetContactsQuery({});
+  const { data: allPDVs = [] } = useGetPDVsQuery();
+  const suppliers = useMemo(
+    () => allContacts.filter((contact: any) => contact.type && contact.type.includes('provider')),
+    [allContacts]
   );
 
+  const pdvNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    (allPDVs || []).forEach((p: any) => map.set(p.id, p.name));
+    return map;
+  }, [allPDVs]);
+
+  // Fetch purchase orders
+  const { data: purchaseOrdersResponse } = useGetPurchaseOrdersQuery({
+    limit: table.rowsPerPage,
+    offset: table.page * table.rowsPerPage,
+    status: filters.status || undefined,
+    supplier_id: filters.supplier_id || undefined,
+    pdv_id: filters.pdv_id || undefined
+  });
+
+  const purchaseOrders = purchaseOrdersResponse?.items || [];
+  const totalCount = purchaseOrdersResponse?.total || 0;
+
+  const searchText = filters.search.trim().toLowerCase();
+
+  const dataInPage = useMemo(() => {
+    if (!searchText) return purchaseOrders;
+
+    return purchaseOrders.filter((row: any) => {
+      const orderText = String(row.order_number || row.id || '').toLowerCase();
+      const supplierText = String(row.supplier_name || row.supplier?.name || '').toLowerCase();
+      const pdvText = String(pdvNameById.get(row.pdv_id) || row.pdv?.name || row.pdv_id || '').toLowerCase();
+
+      return (
+        orderText.includes(searchText) ||
+        supplierText.includes(searchText) ||
+        pdvText.includes(searchText)
+      );
+    });
+  }, [purchaseOrders, pdvNameById, searchText]);
+
   const denseHeight = table.dense ? 52 : 72;
-  const canReset = !!filters.supplier || !!filters.status || !!filters.startDate || !!filters.endDate;
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+  const canReset = !!filters.search || !!filters.supplier_id || !!filters.pdv_id || !!filters.status;
+  const notFound = (!dataInPage.length && canReset) || !dataInPage.length;
 
   const handleFilters = useCallback((name: string, value: any) => {
+    table.onResetPage();
     setFilters((prevState) => ({
       ...prevState,
       [name]: value
     }));
-  }, []);
+  }, [table]);
 
   const handleResetFilters = useCallback(() => {
+    table.onResetPage();
     setFilters(defaultFilters);
-  }, []);
+  }, [table]);
 
   const handleViewRow = useCallback(
     (id: string) => {
@@ -113,26 +145,20 @@ export default function PurchaseOrdersListView() {
   );
 
   const handleVoidRow = useCallback(
-    (id: string) => {
-      setSelectedOrderId(id);
-      confirm.onTrue();
+    (id: string, order_number?: string) => {
+      setSelectedOrder({ id, order_number });
+      voidDialog.onTrue();
     },
-    [confirm]
+    [voidDialog]
   );
 
-  const handleConfirmVoid = useCallback(async () => {
-    if (selectedOrderId) {
-      try {
-        // TODO: Implement void mutation when backend endpoint is ready
-        enqueueSnackbar('Orden anulada exitosamente', { variant: 'success' });
-        confirm.onFalse();
-        setSelectedOrderId(null);
-      } catch (error) {
-        console.error(error);
-        enqueueSnackbar('Error al anular la orden', { variant: 'error' });
-      }
-    }
-  }, [selectedOrderId, enqueueSnackbar, confirm]);
+  const handleConvertRow = useCallback(
+    (id: string, order_number?: string) => {
+      setSelectedOrder({ id, order_number });
+      convertDialog.onTrue();
+    },
+    [convertDialog]
+  );
 
   return (
     <>
@@ -160,17 +186,23 @@ export default function PurchaseOrdersListView() {
         />
 
         <Card>
-          <PurchaseOrderTableToolbar filters={filters} onFilters={handleFilters} onResetFilters={handleResetFilters} />
+          <PurchaseOrderTableToolbar
+            filters={filters}
+            onFilters={handleFilters}
+            onResetFilters={handleResetFilters}
+            suppliers={suppliers}
+            pdvs={allPDVs}
+          />
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
             <TableSelectedAction
               dense={table.dense}
               numSelected={table.selected.length}
-              rowCount={dataFiltered.length}
+              rowCount={dataInPage.length}
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  dataFiltered.map((row) => row.id)
+                  dataInPage.map((row) => row.id)
                 )
               }
               action={
@@ -188,13 +220,13 @@ export default function PurchaseOrdersListView() {
                   order={table.order}
                   orderBy={table.orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
+                  rowCount={dataInPage.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      dataFiltered.map((row) => row.id)
+                      dataInPage.map((row) => row.id)
                     )
                   }
                 />
@@ -204,17 +236,19 @@ export default function PurchaseOrdersListView() {
                     <PurchaseOrderTableRow
                       key={row.id}
                       row={row}
+                      pdvName={pdvNameById.get(row.pdv_id)}
                       selected={table.selected.includes(row.id)}
                       onSelectRow={() => table.onSelectRow(row.id)}
                       onViewRow={() => handleViewRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
-                      onVoidRow={() => handleVoidRow(row.id)}
+                      onConvertRow={() => handleConvertRow(row.id, row.order_number)}
+                      onVoidRow={() => handleVoidRow(row.id, row.order_number)}
                     />
                   ))}
 
                   <TableEmptyRows
                     height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, totalCount)}
                   />
 
                   <TableNoData notFound={notFound} />
@@ -224,7 +258,7 @@ export default function PurchaseOrdersListView() {
           </TableContainer>
 
           <TablePaginationCustom
-            count={dataFiltered.length}
+            count={totalCount}
             page={table.page}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
@@ -235,41 +269,25 @@ export default function PurchaseOrdersListView() {
         </Card>
       </Container>
 
-      <ConfirmDialog
-        open={confirm.value}
-        onClose={confirm.onFalse}
-        title="Anular Orden"
-        content="¿Está seguro de anular esta orden de compra? Esta acción no se puede deshacer."
-        action={
-          <Button variant="contained" color="error" onClick={handleConfirmVoid}>
-            Anular
-          </Button>
-        }
+      <ConvertPOToBillDialog
+        open={convertDialog.value}
+        onClose={convertDialog.onFalse}
+        poId={selectedOrder?.id || ''}
+        poNumber={selectedOrder?.order_number}
+        onSuccess={(billId) => {
+          convertDialog.onFalse();
+          if (billId) {
+            router.push(paths.dashboard.bill.details(billId));
+          }
+        }}
+      />
+
+      <VoidPurchaseOrderDialog
+        open={voidDialog.value}
+        onClose={voidDialog.onFalse}
+        poId={selectedOrder?.id || ''}
+        poNumber={selectedOrder?.order_number}
       />
     </>
   );
-}
-
-// ----------------------------------------------------------------------
-
-function applyFilter({ inputData, filters }: { inputData: any[]; filters: any }) {
-  const { supplier, status, startDate, endDate } = filters;
-
-  if (supplier) {
-    inputData = inputData.filter((order) => order.supplier?.name.toLowerCase().includes(supplier.toLowerCase()));
-  }
-
-  if (status) {
-    inputData = inputData.filter((order) => order.status === status);
-  }
-
-  if (startDate) {
-    inputData = inputData.filter((order) => new Date(order.issue_date) >= startDate);
-  }
-
-  if (endDate) {
-    inputData = inputData.filter((order) => new Date(order.issue_date) <= endDate);
-  }
-
-  return inputData;
 }

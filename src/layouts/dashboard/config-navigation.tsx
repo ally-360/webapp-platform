@@ -155,6 +155,13 @@ export function useNavData() {
                 }
               },
               {
+                title: t('Cotizaciones'),
+                path: paths.dashboard.sales.quotes.root,
+                openPopup() {
+                  navigate(paths.dashboard.sales.quotes.new);
+                }
+              },
+              {
                 title: t('Pagos recibidos'),
                 path: paths.dashboard.paymentsReceived.root,
                 openPopup() {

@@ -58,7 +58,13 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/sales`,
       newSale: `${ROOTS.DASHBOARD}/sales/new-sale`,
       details: (id: string) => `${ROOTS.DASHBOARD}/sales/${id}`,
-      edit: (id: string) => `${ROOTS.DASHBOARD}/sales/${id}/edit`
+      edit: (id: string) => `${ROOTS.DASHBOARD}/sales/${id}/edit`,
+      quotes: {
+        root: `${ROOTS.DASHBOARD}/sales/quotes`,
+        new: `${ROOTS.DASHBOARD}/sales/quotes/new`,
+        details: (id: string) => `${ROOTS.DASHBOARD}/sales/quotes/${id}`,
+        edit: (id: string) => `${ROOTS.DASHBOARD}/sales/quotes/${id}/edit`
+      }
     },
     pos: {
       root: `/pos`,
