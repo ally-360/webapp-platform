@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect, useState } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -13,6 +13,9 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 // routes
 import { paths } from 'src/routes/paths';
@@ -30,7 +33,6 @@ import { useSnackbar } from 'src/components/snackbar';
 import FormProvider, { RHFTextField, RHFAutocomplete } from 'src/components/hook-form';
 import { fCurrency } from 'src/utils/format-number';
 //
-import AddressListDialog from 'src/sections/address/address-list-dialog';
 import { useProgressiveProducts } from 'src/sections/expenses/hooks/use-progressive-products';
 
 // ----------------------------------------------------------------------
@@ -39,9 +41,6 @@ export default function PurchaseOrderNewForm() {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
   const loadingSave = useBoolean(false);
-
-  const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
-  const supplierDialog = useBoolean(false);
 
   // RTK Query
   const { data: allContacts = [] } = useGetContactsQuery({});
@@ -58,10 +57,11 @@ export default function PurchaseOrderNewForm() {
 
   // Validation schema
   const PurchaseOrderSchema = Yup.object().shape({
-    supplier_id: Yup.string().required('El proveedor es requerido'),
+    supplier: Yup.mixed().required('El proveedor es requerido'),
     pdv_id: Yup.mixed().required('El punto de venta es requerido'),
     issue_date: Yup.date().required('La fecha de emisión es requerida'),
     expected_delivery_date: Yup.date().nullable(),
+    currency: Yup.string().required('La moneda es requerida'),
     notes: Yup.string(),
     payment_terms: Yup.string(),
     terms_and_conditions: Yup.string(),
@@ -78,10 +78,11 @@ export default function PurchaseOrderNewForm() {
 
   const defaultValues = useMemo(
     () => ({
-      supplier_id: '',
+      supplier: null as any,
       pdv_id: null as any,
       issue_date: new Date(),
       expected_delivery_date: null as Date | null,
+      currency: 'COP',
       notes: '',
       payment_terms: '',
       terms_and_conditions: '',
@@ -110,54 +111,32 @@ export default function PurchaseOrderNewForm() {
 
   const values = watch();
 
-  // Update selectedSupplier when supplier_id changes
-  useEffect(() => {
-    if (values.supplier_id) {
-      const supplier = suppliers.find((s: any) => s.id === values.supplier_id);
-      setSelectedSupplier(supplier || null);
-    } else {
-      setSelectedSupplier(null);
-    }
-  }, [values.supplier_id, suppliers]);
-
-  // Calculate totals
-  const totals = useMemo(() => {
-    const items = values.items || [];
-    const subtotal = items.reduce((sum, item) => {
-      const quantity = Number(item.quantity) || 0;
-      const price = Number(item.unit_price) || 0;
-      return sum + quantity * price;
-    }, 0);
-
-    return {
-      subtotal,
-      taxes: 0,
-      total: subtotal
-    };
-  }, [values.items]);
-
-  const handleSelectSupplier = useCallback(
-    (supplier: any) => {
-      setValue('supplier_id', supplier.id);
-      setSelectedSupplier(supplier);
-      supplierDialog.onFalse();
-    },
-    [setValue, supplierDialog]
-  );
-
-  const handleSelectProduct = useCallback(
+  const handleProductChange = useCallback(
     (index: number, product: any) => {
-      setValue(`items.${index}.product` as const, product ?? null);
+      const productPrice = Number(product?.priceBase ?? product?.priceSale ?? 0);
 
-      if (product) {
-        const price = Number(product.cost || product.priceSale || 0);
-        setValue(`items.${index}.unit_price` as const, price);
-      } else {
-        setValue(`items.${index}.unit_price` as const, 0);
-      }
+      setValue(`items.${index}.unit_price` as any, product ? productPrice : 0, {
+        shouldValidate: true,
+        shouldDirty: true,
+        shouldTouch: false
+      });
     },
     [setValue]
   );
+
+  // Calculate totals (avoid memoization here: RHF can mutate arrays in-place)
+  const itemsForTotals = values.items || [];
+  const subtotal = itemsForTotals.reduce((sum: number, item: any) => {
+    const quantity = Number(item.quantity) || 0;
+    const price = Number(item.unit_price) || 0;
+    return sum + quantity * price;
+  }, 0);
+
+  const totals = {
+    subtotal,
+    taxes: 0,
+    total: subtotal
+  };
 
   const handleAddItem = useCallback(() => {
     append({
@@ -178,12 +157,13 @@ export default function PurchaseOrderNewForm() {
     loadingSave.onTrue();
     try {
       const payload = {
-        supplier_id: data.supplier_id,
+        supplier_id: data.supplier?.id,
         pdv_id: typeof data.pdv_id === 'string' ? data.pdv_id : data.pdv_id?.id,
         issue_date: data.issue_date.toISOString().split('T')[0],
         expected_delivery_date: data.expected_delivery_date
           ? data.expected_delivery_date.toISOString().split('T')[0]
           : undefined,
+        currency: data.currency || 'COP',
         notes: data.notes || undefined,
         payment_terms: data.payment_terms || undefined,
         terms_and_conditions: data.terms_and_conditions || undefined,
@@ -206,7 +186,7 @@ export default function PurchaseOrderNewForm() {
   });
 
   const canSave =
-    !!values.supplier_id &&
+    !!values.supplier &&
     !!values.pdv_id &&
     (values.items?.length || 0) > 0 &&
     (values.items || []).every((item: any) => !!item?.product);
@@ -231,25 +211,42 @@ export default function PurchaseOrderNewForm() {
             <Divider />
 
             <Stack spacing={3}>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <Typography variant="h6">{selectedSupplier?.name || 'Seleccionar Proveedor'}</Typography>
-                <IconButton size="small" onClick={supplierDialog.onTrue}>
-                  <Iconify icon={selectedSupplier ? 'solar:pen-bold' : 'mingcute:add-line'} width={18} />
-                </IconButton>
-              </Stack>
+              <Typography variant="h6">Información General</Typography>
 
-              {selectedSupplier && (
-                <Stack spacing={0.5}>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>NIT:</strong> {selectedSupplier.identification || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Email:</strong> {selectedSupplier.email || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Teléfono:</strong> {selectedSupplier.phone || 'N/A'}
-                  </Typography>
-                </Stack>
+              <RHFAutocomplete
+                name="supplier"
+                label="Proveedor *"
+                placeholder="Buscar proveedor..."
+                options={suppliers}
+                getOptionLabel={(option: any) => option?.name || ''}
+                isOptionEqualToValue={(option: any, value: any) => option?.id === value?.id}
+                renderOption={(props, option: any) => (
+                  <li {...props} key={option.id}>
+                    <Stack>
+                      <Typography variant="body2" fontWeight={600}>
+                        {option.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option.id_type}: {option.id_number || 'N/A'} • {option.email || 'Sin email'}
+                      </Typography>
+                    </Stack>
+                  </li>
+                )}
+              />
+
+              {values.supplier && (
+                <Alert severity="info" sx={{ bgcolor: 'background.neutral' }}>
+                  <Stack spacing={0.5}>
+                    <Typography variant="subtitle2">{values.supplier.name}</Typography>
+                    <Typography variant="caption">
+                      <strong>{values.supplier.id_type}:</strong> {values.supplier.id_number || 'N/A'}
+                      {' • '}
+                      {values.supplier.email || 'N/A'}
+                      {' • '}
+                      <strong>Móvil:</strong> {values.supplier.mobile || 'N/A'}
+                    </Typography>
+                  </Stack>
+                </Alert>
               )}
 
               <RHFAutocomplete
@@ -271,37 +268,34 @@ export default function PurchaseOrderNewForm() {
                 )}
               />
 
-              <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-                <DatePicker
-                  label="Fecha de Emisión *"
-                  value={values.issue_date}
-                  onChange={(newValue) => setValue('issue_date', newValue || new Date())}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: !values.issue_date
-                    }
-                  }}
-                />
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <DatePicker
+                    label="Fecha de Emisión *"
+                    value={values.issue_date}
+                    onChange={(newValue) => setValue('issue_date', newValue || new Date())}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        error: !values.issue_date
+                      }
+                    }}
+                  />
+                </Grid>
 
-                <DatePicker
-                  label="Fecha de Entrega Esperada"
-                  value={values.expected_delivery_date}
-                  onChange={(newValue) => setValue('expected_delivery_date', newValue)}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true
-                    }
-                  }}
-                />
-              </Stack>
-
-              <Alert severity="info" sx={{ mb: 2 }}>
-                <Typography variant="body2">
-                  <strong>Nota:</strong> La orden de compra es un documento de control que no genera movimientos en
-                  inventario ni en cuentas contables. Indica las cantidades solicitadas y pendientes por recibir.
-                </Typography>
-              </Alert>
+                <Grid item xs={12} md={6}>
+                  <DatePicker
+                    label="Fecha de Entrega Esperada"
+                    value={values.expected_delivery_date}
+                    onChange={(newValue) => setValue('expected_delivery_date', newValue)}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
             </Stack>
           </Stack>
         </Card>
@@ -309,26 +303,46 @@ export default function PurchaseOrderNewForm() {
         {/* Card 2: Items - Productos */}
         <Card sx={{ p: 3 }}>
           <Stack spacing={3}>
-            <Typography variant="h6">Productos a Ordenar</Typography>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Typography variant="h6">Productos a Ordenar</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {values.items?.length || 0} producto(s)
+              </Typography>
+            </Stack>
+
+            <Alert severity="info" icon={<Iconify icon="solar:info-circle-bold" />}>
+              <Typography variant="body2">
+                La orden de compra no genera movimientos en inventario. Indica cantidades solicitadas pendientes por
+                recibir.
+              </Typography>
+            </Alert>
 
             <Stack spacing={2}>
               {/* Header */}
               <Grid container spacing={2} sx={{ px: 1 }}>
                 <Grid item xs={12} md={4}>
-                  <Typography variant="subtitle2">Producto *</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Producto *
+                  </Typography>
                 </Grid>
                 <Grid item xs={6} md={2}>
-                  <Typography variant="subtitle2">Cantidad *</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Cantidad *
+                  </Typography>
                 </Grid>
                 <Grid item xs={6} md={2}>
-                  <Typography variant="subtitle2">Precio Unitario *</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Precio Unit. *
+                  </Typography>
                 </Grid>
-                <Grid item xs={6} md={2}>
-                  <Typography variant="subtitle2">Subtotal</Typography>
+                <Grid item xs={6} md={2.5}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Subtotal
+                  </Typography>
                 </Grid>
-                <Grid item xs={6} md={2}>
-                  <Typography variant="subtitle2" align="right">
-                    Acciones
+                <Grid item xs={6} md={1.5}>
+                  <Typography variant="subtitle2" align="right" color="text.secondary">
+                    Acción
                   </Typography>
                 </Grid>
               </Grid>
@@ -341,26 +355,36 @@ export default function PurchaseOrderNewForm() {
                 const price = Number(values.items?.[index]?.unit_price) || 0;
                 const lineTotal = quantity * price;
 
+                const selectedProductIds = new Set(
+                  (values.items || []).map((row: any) => row?.product?.id).filter((id: any) => Boolean(id))
+                );
+
+                const currentProductId = values.items?.[index]?.product?.id;
+                if (currentProductId) selectedProductIds.delete(currentProductId);
+
+                const availableProducts = (allProducts || []).filter((p: any) => !selectedProductIds.has(p?.id));
+
                 return (
                   <Grid container spacing={2} key={item.id} alignItems="center">
                     <Grid item xs={12} md={4}>
                       <RHFAutocomplete
-                        name={`items[${index}].product`}
+                        name={`items.${index}.product`}
                         placeholder="Buscar producto..."
-                        options={allProducts}
+                        options={availableProducts}
                         loading={isFetchingProducts}
                         filterOptions={(x: any) => x}
                         onInputChange={(event: any, value: string) => setProductSearch(value)}
                         ListboxProps={productsListboxProps}
                         getOptionLabel={(option: any) => option?.name || ''}
                         isOptionEqualToValue={(option: any, value: any) => option.id === value?.id}
-                        onChange={(event, newValue) => handleSelectProduct(index, newValue)}
+                        onChange={(event: any, newValue: any) => handleProductChange(index, newValue)}
                         renderOption={(props, option: any) => (
                           <li {...props} key={option.id}>
                             <Stack>
                               <Typography variant="body2">{option.name}</Typography>
                               <Typography variant="caption" color="text.secondary">
-                                SKU: {option.sku || 'N/A'} | Stock: {option.stock || 0}
+                                SKU: {option.sku || 'N/A'} | Stock: {option.quantityStock || option.globalStock || 0} |
+                                Precio: {fCurrency(option.priceSale || 0)}
                               </Typography>
                             </Stack>
                           </li>
@@ -371,7 +395,7 @@ export default function PurchaseOrderNewForm() {
 
                     <Grid item xs={6} md={2}>
                       <RHFTextField
-                        name={`items[${index}].quantity`}
+                        name={`items.${index}.quantity`}
                         type="number"
                         placeholder="1"
                         InputProps={{
@@ -382,7 +406,7 @@ export default function PurchaseOrderNewForm() {
 
                     <Grid item xs={6} md={2}>
                       <RHFTextField
-                        name={`items[${index}].unit_price`}
+                        name={`items.${index}.unit_price`}
                         type="number"
                         placeholder="0.00"
                         InputProps={{
@@ -392,13 +416,19 @@ export default function PurchaseOrderNewForm() {
                       />
                     </Grid>
 
-                    <Grid item xs={6} md={2}>
-                      <Typography variant="body2" fontWeight={600}>
-                        {fCurrency(lineTotal)}
-                      </Typography>
+                    <Grid item xs={6} md={2.5}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          color={lineTotal > 0 ? 'primary.main' : 'text.secondary'}
+                        >
+                          {fCurrency(lineTotal)}
+                        </Typography>
+                      </Stack>
                     </Grid>
 
-                    <Grid item xs={6} md={2} sx={{ textAlign: 'right' }}>
+                    <Grid item xs={6} md={1.5} sx={{ textAlign: 'right' }}>
                       {fields.length > 1 && (
                         <IconButton size="small" color="error" onClick={() => handleRemoveItem(index)}>
                           <Iconify icon="solar:trash-bin-trash-bold" />
@@ -422,56 +452,77 @@ export default function PurchaseOrderNewForm() {
           </Stack>
         </Card>
 
-        {/* Card 3: Términos y Condiciones */}
-        <Card sx={{ p: 3 }}>
-          <Stack spacing={3}>
-            <Typography variant="h6">Términos y Condiciones</Typography>
+        {/* Accordion: Términos y Condiciones (Opcional) */}
+        <Accordion sx={{ boxShadow: 1 }}>
+          <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Iconify icon="solar:document-text-bold" width={20} />
+              <Typography variant="subtitle2">Términos y Condiciones (Opcional)</Typography>
+            </Stack>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack spacing={2.5}>
+              <RHFTextField
+                name="payment_terms"
+                label="Términos de Pago"
+                placeholder="Ej: Pago a 30 días"
+                multiline
+                rows={2}
+                size="small"
+              />
 
-            <RHFTextField
-              name="payment_terms"
-              label="Términos de Pago"
-              placeholder="Ej: Pago a 30 días"
-              multiline
-              rows={2}
-            />
+              <RHFTextField
+                name="terms_and_conditions"
+                label="Términos y Condiciones"
+                placeholder="Especifique las condiciones de la orden..."
+                multiline
+                rows={2}
+                size="small"
+              />
 
-            <RHFTextField
-              name="terms_and_conditions"
-              label="Términos y Condiciones"
-              placeholder="Especifique las condiciones de la orden..."
-              multiline
-              rows={3}
-            />
-
-            <RHFTextField
-              name="notes"
-              label="Notas Adicionales"
-              placeholder="Observaciones o notas internas..."
-              multiline
-              rows={3}
-            />
-          </Stack>
-        </Card>
+              <RHFTextField
+                name="notes"
+                label="Notas Adicionales"
+                placeholder="Observaciones o notas internas..."
+                multiline
+                rows={2}
+                size="small"
+              />
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
 
         {/* Card 4: Totales */}
-        <Card sx={{ p: 3 }}>
+        <Card sx={{ p: 3, bgcolor: 'background.neutral' }}>
           <Stack spacing={2}>
-            <Stack direction="row" justifyContent="space-between">
-              <Typography variant="subtitle2">Subtotal:</Typography>
-              <Typography variant="body2">{fCurrency(totals.subtotal)}</Typography>
-            </Stack>
+            <Typography variant="h6">Resumen de la Orden</Typography>
 
-            <Stack direction="row" justifyContent="space-between">
-              <Typography variant="subtitle2">Impuestos:</Typography>
-              <Typography variant="body2">{fCurrency(totals.taxes)}</Typography>
-            </Stack>
+            <Stack spacing={1.5}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                  Subtotal:
+                </Typography>
+                <Typography variant="subtitle2">{fCurrency(totals.subtotal)}</Typography>
+              </Stack>
 
-            <Divider />
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                  Impuestos:
+                </Typography>
+                <Typography variant="subtitle2">{fCurrency(totals.taxes)}</Typography>
+              </Stack>
 
-            <Stack direction="row" justifyContent="space-between">
-              <Typography variant="h6">Total:</Typography>
-              <Typography variant="h6" color="primary.main">
-                {fCurrency(totals.total)}
+              <Divider />
+
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6">Total a Ordenar:</Typography>
+                <Typography variant="h5" color="primary.main" fontWeight={700}>
+                  {fCurrency(totals.total)}
+                </Typography>
+              </Stack>
+
+              <Typography variant="caption" color="text.secondary" sx={{ pt: 1 }}>
+                Moneda: COP (Pesos Colombianos)
               </Typography>
             </Stack>
           </Stack>
@@ -493,15 +544,6 @@ export default function PurchaseOrderNewForm() {
           </LoadingButton>
         </Stack>
       </Stack>
-
-      <AddressListDialog
-        open={supplierDialog.value}
-        onClose={supplierDialog.onFalse}
-        selected={(id: string) => `${id}` === `${values.supplier_id}`}
-        onSelect={handleSelectSupplier}
-        list={suppliers}
-        title="Seleccionar Proveedor"
-      />
     </FormProvider>
   );
 }

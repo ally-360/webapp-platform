@@ -1,16 +1,17 @@
 import { useCallback } from 'react';
 import type { ChangeEvent } from 'react';
 // @mui
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
+import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
+import Autocomplete from '@mui/material/Autocomplete';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
 // components
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
@@ -20,23 +21,47 @@ import CustomPopover, { usePopover } from 'src/components/custom-popover';
 type Props = {
   filters: {
     search: string;
-    supplier_id: string;
-    pdv_id: string;
+    customer_id: string;
     status: string;
+    startDate: Date | null;
+    endDate: Date | null;
   };
   onFilters: (name: string, value: any) => void;
   onResetFilters: VoidFunction;
-  suppliers: any[];
-  pdvs: any[];
+  customers: any[];
+  dateError: boolean;
 };
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'Todos' },
+  { value: 'draft', label: 'Borrador' },
+  { value: 'sent', label: 'Enviada' },
+  { value: 'accepted', label: 'Aceptada' },
+  { value: 'rejected', label: 'Rechazada' },
+  { value: 'expired', label: 'Vencida' },
+  { value: 'converted', label: 'Convertida' }
+];
 
 // ----------------------------------------------------------------------
 
-export default function PurchaseOrderTableToolbar({ filters, onFilters, onResetFilters, suppliers, pdvs }: Props) {
+export default function QuotesTableToolbar({ filters, onFilters, onResetFilters, customers, dateError }: Props) {
   const popover = usePopover();
 
-  const selectedSupplier = suppliers.find((s: any) => s.id === filters.supplier_id) || null;
-  const selectedPDV = pdvs.find((p: any) => p.id === filters.pdv_id) || null;
+  const selectedCustomer = customers.find((c: any) => c.id === filters.customer_id) || null;
+
+  const handleFilterSearch = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onFilters('search', event.target.value);
+    },
+    [onFilters]
+  );
+
+  const handleFilterCustomer = useCallback(
+    (_event: any, newValue: any) => {
+      onFilters('customer_id', newValue?.id || '');
+    },
+    [onFilters]
+  );
 
   const handleFilterStatus = useCallback(
     (event: SelectChangeEvent) => {
@@ -45,23 +70,16 @@ export default function PurchaseOrderTableToolbar({ filters, onFilters, onResetF
     [onFilters]
   );
 
-  const handleFilterSupplier = useCallback(
-    (_event: any, newValue: any) => {
-      onFilters('supplier_id', newValue?.id || '');
+  const handleFilterStartDate = useCallback(
+    (newValue: Date | null) => {
+      onFilters('startDate', newValue);
     },
     [onFilters]
   );
 
-  const handleFilterPDV = useCallback(
-    (_event: any, newValue: any) => {
-      onFilters('pdv_id', newValue?.id || '');
-    },
-    [onFilters]
-  );
-
-  const handleFilterSearch = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      onFilters('search', event.target.value);
+  const handleFilterEndDate = useCallback(
+    (newValue: Date | null) => {
+      onFilters('endDate', newValue);
     },
     [onFilters]
   );
@@ -80,27 +98,12 @@ export default function PurchaseOrderTableToolbar({ filters, onFilters, onResetF
           pr: { xs: 2.5, md: 1 }
         }}
       >
-        <Autocomplete
-          fullWidth
-          size="small"
-          value={selectedSupplier}
-          options={suppliers}
-          onChange={handleFilterSupplier}
-          getOptionLabel={(option: any) => option?.name || ''}
-          isOptionEqualToValue={(option: any, value: any) => option?.id === value?.id}
-          renderInput={(params) => <TextField {...params} label="Proveedor" placeholder="Seleccionar proveedor" />}
-          sx={{
-            maxWidth: { md: 320 }
-          }}
-        />
-
         <TextField
           fullWidth
           size="small"
           value={filters.search}
           onChange={handleFilterSearch}
-          label="Buscar"
-          placeholder="N° orden, proveedor o PDV"
+          placeholder="Buscar cotización..."
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -116,14 +119,14 @@ export default function PurchaseOrderTableToolbar({ filters, onFilters, onResetF
         <Autocomplete
           fullWidth
           size="small"
-          value={selectedPDV}
-          options={pdvs}
-          onChange={handleFilterPDV}
+          value={selectedCustomer}
+          options={customers}
+          onChange={handleFilterCustomer}
           getOptionLabel={(option: any) => option?.name || ''}
           isOptionEqualToValue={(option: any, value: any) => option?.id === value?.id}
-          renderInput={(params) => <TextField {...params} label="PDV" placeholder="Seleccionar PDV" />}
+          renderInput={(params) => <TextField {...params} label="Cliente" placeholder="Seleccionar cliente" />}
           sx={{
-            maxWidth: { md: 260 }
+            maxWidth: { md: 280 }
           }}
         />
 
@@ -145,14 +148,39 @@ export default function PurchaseOrderTableToolbar({ filters, onFilters, onResetF
               }
             }}
           >
-            <MenuItem value="">Todos</MenuItem>
-            <MenuItem value="draft">Borrador</MenuItem>
-            <MenuItem value="sent">Enviada</MenuItem>
-            <MenuItem value="approved">Aprobada</MenuItem>
-            <MenuItem value="closed">Cerrada</MenuItem>
-            <MenuItem value="void">Anulada</MenuItem>
+            {STATUS_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
+
+        <DatePicker
+          label="Fecha desde"
+          value={filters.startDate}
+          onChange={handleFilterStartDate}
+          slotProps={{ textField: { fullWidth: true, size: 'small' } }}
+          sx={{
+            maxWidth: { md: 180 }
+          }}
+        />
+
+        <DatePicker
+          label="Fecha hasta"
+          value={filters.endDate}
+          onChange={handleFilterEndDate}
+          slotProps={{
+            textField: {
+              fullWidth: true,
+              size: 'small',
+              error: dateError
+            }
+          }}
+          sx={{
+            maxWidth: { md: 180 }
+          }}
+        />
 
         <IconButton onClick={popover.onOpen}>
           <Iconify icon="eva:more-vertical-fill" />

@@ -325,6 +325,11 @@ export default function PurchaseOrderDetailsView() {
         onClose={() => setConvertDialogOpen(false)}
         poId={id}
         poNumber={data?.order_number}
+        onSuccess={(billId) => {
+          if (billId) {
+            router.push(paths.dashboard.bill.details(billId));
+          }
+        }}
       />
 
       <VoidPurchaseOrderDialog

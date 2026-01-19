@@ -96,15 +96,39 @@ export interface ConvertPOToBillRequest {
   bill_number: string;
   issue_date: string;
   due_date?: string;
-  status?: 'draft' | 'open';
+  status?: 'DRAFT' | 'OPEN' | 'draft' | 'open';
   notes?: string;
 }
+
+const normalizeBillStatusToLower = (status: unknown): BillDetail['status'] | undefined => {
+  if (typeof status !== 'string') return undefined;
+  const lower = status.toLowerCase();
+  if (lower === 'draft' || lower === 'open' || lower === 'partial' || lower === 'paid' || lower === 'void') {
+    return lower;
+  }
+  return undefined;
+};
+
+const normalizeBillStatusToUpper = (status: ConvertPOToBillRequest['status']): 'DRAFT' | 'OPEN' | undefined => {
+  if (!status) return undefined;
+  const upper = String(status).toUpperCase();
+  if (upper === 'DRAFT' || upper === 'OPEN') return upper;
+  return undefined;
+};
 
 export interface PurchaseOrdersResponse {
   items: PurchaseOrder[];
   total: number;
   limit: number;
   offset: number;
+}
+
+export interface PurchaseOrdersFilters {
+  limit?: number;
+  offset?: number;
+  status?: 'draft' | 'sent' | 'approved' | 'closed' | 'void' | string;
+  supplier_id?: string;
+  pdv_id?: string;
 }
 
 // ============================================================================
@@ -375,19 +399,23 @@ export const billsApi = createApi({
     // ========================================================================
 
     // Get all purchase orders
-    getPurchaseOrders: builder.query<PurchaseOrder[], { limit?: number; offset?: number; status?: string }>({
+    getPurchaseOrders: builder.query<PurchaseOrdersResponse, PurchaseOrdersFilters>({
       query: (params = {}) => {
         const queryParams = new URLSearchParams();
         if (params.limit) queryParams.append('limit', params.limit.toString());
         if (params.offset) queryParams.append('offset', params.offset.toString());
         if (params.status) queryParams.append('status', params.status);
+        if (params.supplier_id) queryParams.append('supplier_id', params.supplier_id);
+        if (params.pdv_id) queryParams.append('pdv_id', params.pdv_id);
         const queryString = queryParams.toString();
         return `/bills/purchase-orders/${queryString ? `?${queryString}` : ''}`;
       },
-      transformResponse: (response: PurchaseOrdersResponse) => response.items || [],
       providesTags: (result) =>
-        result
-          ? [...result.map(({ id }) => ({ type: 'PurchaseOrder' as const, id })), { type: 'PurchaseOrder', id: 'LIST' }]
+        result?.items
+          ? [
+              ...result.items.map(({ id }) => ({ type: 'PurchaseOrder' as const, id })),
+              { type: 'PurchaseOrder', id: 'LIST' }
+            ]
           : [{ type: 'PurchaseOrder', id: 'LIST' }]
     }),
 
@@ -425,8 +453,18 @@ export const billsApi = createApi({
       query: ({ id, data }) => ({
         url: `/bills/purchase-orders/${id}/convert-to-bill`,
         method: 'POST',
-        body: data
+        body: {
+          ...data,
+          status: normalizeBillStatusToUpper(data.status)
+        }
       }),
+      transformResponse: (response: any) => {
+        const normalizedStatus = normalizeBillStatusToLower(response?.status);
+        return {
+          ...response,
+          status: normalizedStatus || response?.status
+        } as BillDetail;
+      },
       invalidatesTags: (result, error, { id }) => [
         { type: 'PurchaseOrder', id },
         { type: 'PurchaseOrder', id: 'LIST' },
