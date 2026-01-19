@@ -265,6 +265,28 @@ export const authApi = createApi({
     }),
 
     /**
+     * Request Password Reset - POST /auth/request-password-reset
+     */
+    requestPasswordReset: builder.mutation<{ message: string }, { email: string }>({
+      query: (data) => ({
+        url: '/auth/request-password-reset',
+        method: 'POST',
+        body: data
+      })
+    }),
+
+    /**
+     * Reset Password - POST /auth/reset-password
+     */
+    resetPassword: builder.mutation<{ message: string }, { code: string; new_password: string }>({
+      query: (data) => ({
+        url: '/auth/reset-password',
+        method: 'POST',
+        body: data
+      })
+    }),
+
+    /**
      * Get current user - GET /auth/me
      */
     getCurrentUser: builder.query<UserOut, void>({
@@ -501,6 +523,36 @@ export const useVerifyEmailViaGetQuery = authApi.endpoints.verifyEmailViaGet.use
  * ```
  */
 export const useLogoutMutation = authApi.endpoints.logout.useMutation;
+
+/**
+ * **Request Password Reset**
+ *
+ * `POST /auth/request-password-reset`
+ *
+ * Sends a password reset code to the specified email address
+ *
+ * @example
+ * ```ts
+ * const [requestPasswordReset, { isLoading }] = useRequestPasswordResetMutation();
+ * await requestPasswordReset({ email: 'user@example.com' });
+ * ```
+ */
+export const useRequestPasswordResetMutation = authApi.endpoints.requestPasswordReset.useMutation;
+
+/**
+ * **Reset Password**
+ *
+ * `POST /auth/reset-password`
+ *
+ * Resets the password using a verification code
+ *
+ * @example
+ * ```ts
+ * const [resetPassword, { isLoading }] = useResetPasswordMutation();
+ * await resetPassword({ code: '123456', new_password: 'NewSecurePassword123!' });
+ * ```
+ */
+export const useResetPasswordMutation = authApi.endpoints.resetPassword.useMutation;
 
 /**
  * **Get Current User**

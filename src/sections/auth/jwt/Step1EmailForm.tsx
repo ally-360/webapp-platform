@@ -3,9 +3,11 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Stack } from '@mui/material';
 import LoadingButton from '@mui/lab/LoadingButton';
+import { useSnackbar } from 'notistack';
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { PasswordIcon } from 'src/assets/icons';
+import { useRequestPasswordResetMutation } from 'src/redux/services/authApi';
 import AuthFormHead from './components/AuthFormHead';
 import BackToLoginLink from './components/BackToLoginLink';
 
@@ -14,6 +16,9 @@ const schema = Yup.object().shape({
 });
 
 export default function Step1EmailForm({ onSuccess }: { onSuccess: (email: string) => void }) {
+  const { enqueueSnackbar } = useSnackbar();
+  const [requestPasswordReset, { isLoading }] = useRequestPasswordResetMutation();
+  
   const methods = useForm({ resolver: yupResolver(schema), defaultValues: { email: '' } });
 
   const {
@@ -22,9 +27,18 @@ export default function Step1EmailForm({ onSuccess }: { onSuccess: (email: strin
   } = methods;
 
   const onSubmit = handleSubmit(async ({ email }) => {
-    console.info('Step 1: email enviado', email);
-    onSuccess(email);
-    methods.reset();
+    try {
+      await requestPasswordReset({ email }).unwrap();
+      enqueueSnackbar('Código enviado a tu correo electrónico', { variant: 'success' });
+      onSuccess(email);
+      methods.reset();
+    } catch (error: any) {
+      console.error('Error al solicitar restablecimiento:', error);
+      enqueueSnackbar(
+        error?.data?.detail || 'Error al enviar el código. Por favor, intenta nuevamente.',
+        { variant: 'error' }
+      );
+    }
   });
 
   return (
@@ -42,7 +56,7 @@ export default function Step1EmailForm({ onSuccess }: { onSuccess: (email: strin
           size="large"
           type="submit"
           variant="contained"
-          loading={isSubmitting}
+          loading={isSubmitting || isLoading}
           endIcon={<Iconify icon="eva:arrow-ios-forward-fill" />}
           sx={{ justifyContent: 'space-between', pl: 2, pr: 1.5 }}
         >
