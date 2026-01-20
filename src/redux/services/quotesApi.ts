@@ -4,7 +4,8 @@ import type {
   QuotesResponse,
   QuotesFilters,
   CreateQuoteRequest,
-  UpdateQuoteRequest
+  UpdateQuoteRequest,
+  ConvertQuoteToInvoiceRequest
 } from 'src/types/quotes';
 import { baseQueryWithAuth } from './baseQuery';
 
@@ -141,13 +142,14 @@ export const quotesApi = createApi({
     }),
 
     // Convert quote to invoice
-    convertToInvoice: builder.mutation<any, string>({
-      query: (id) => ({
+    convertToInvoice: builder.mutation<any, { id: string; body: ConvertQuoteToInvoiceRequest }>({
+      query: ({ id, body }) => ({
         url: `/quotes/${id}/convert-to-invoice`,
-        method: 'POST'
+        method: 'POST',
+        body
       }),
-      invalidatesTags: (result, error, id) => [
-        { type: 'Quote', id },
+      invalidatesTags: (result, error, arg) => [
+        { type: 'Quote', id: arg.id },
         { type: 'QuoteList', id: 'LIST' }
       ]
     })

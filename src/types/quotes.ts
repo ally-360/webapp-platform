@@ -27,6 +27,10 @@ export interface Quote {
   quote_number: string;
   status: QuoteStatus;
   customer_id: string;
+  customer_name?: string;
+  customer_first_name?: string;
+  customer_last_name?: string;
+  customer_email?: string;
   pdv_id: string;
   seller_id: string;
   issue_date: string;
@@ -108,4 +112,11 @@ export interface UpdateQuoteRequest {
     quantity: number;
     unit_price: number;
   }[];
+}
+
+export interface ConvertQuoteToInvoiceRequest {
+  invoice_type: 'SALE' | string;
+  issue_date: string;
+  due_date: string;
+  notes?: string;
 }
