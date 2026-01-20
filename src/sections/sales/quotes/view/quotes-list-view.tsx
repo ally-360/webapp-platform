@@ -1,38 +1,46 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
+import { format } from 'date-fns';
 // @mui
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
+import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 // routes
-import { paths } from 'src/routes/paths';
-import { useRouter } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
+import { useRouter } from 'src/routes/hook';
+import { paths } from 'src/routes/paths';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // redux
-import { useGetQuotesQuery, useConvertToInvoiceMutation, useCloneQuoteMutation } from 'src/redux/services/quotesApi';
 import { useGetContactsQuery } from 'src/redux/services/contactsApi';
+import {
+  useAcceptQuoteMutation,
+  useCloneQuoteMutation,
+  useConvertToInvoiceMutation,
+  useExpireQuoteMutation,
+  useGetQuotesQuery,
+  useRejectQuoteMutation,
+  useSendQuoteMutation
+} from 'src/redux/services/quotesApi';
 // components
+import { ConfirmDialog } from 'src/components/custom-dialog';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import Iconify from 'src/components/iconify';
+import { LoadingScreen } from 'src/components/loading-screen';
 import Scrollbar from 'src/components/scrollbar';
 import { useSettingsContext } from 'src/components/settings';
-import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { LoadingScreen } from 'src/components/loading-screen';
-import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSnackbar } from 'src/components/snackbar';
 import {
-  useTable,
   emptyRows,
-  TableNoData,
   TableEmptyRows,
   TableHeadCustom,
-  TablePaginationCustom
+  TableNoData,
+  TablePaginationCustom,
+  useTable
 } from 'src/components/table';
 //
-import { format } from 'date-fns';
 import QuotesTableRow from '../quotes-table-row';
 import QuotesTableToolbar from '../quotes-table-toolbar';
 
@@ -57,7 +65,7 @@ const defaultFilters = {
   endDate: null as Date | null
 };
 
-// ----------------------------------------------------------------------
+type PendingAction = 'send' | 'accept' | 'reject' | 'expire';
 
 export default function QuotesListView() {
   const table = useTable({ defaultOrderBy: 'issue_date', defaultOrder: 'desc' });
@@ -67,24 +75,21 @@ export default function QuotesListView() {
 
   const [filters, setFilters] = useState(defaultFilters);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+
   const convertDialog = useBoolean(false);
   const cloneDialog = useBoolean(false);
+  const actionDialog = useBoolean(false);
 
-  // Fetch contacts for customer filter
-  const { data: allContacts = [] } = useGetContactsQuery({});
-  const customers = useMemo(
-    () => allContacts.filter((contact: any) => contact.type && contact.type.includes('customer')),
-    [allContacts]
-  );
+  // Fetch contacts only for the customer filter dropdown
+  const { data: customers = [] } = useGetContactsQuery({ type: 'client', limit: 100, offset: 0 });
 
-  // Create customer name map for display
   const customerNameById = useMemo(() => {
     const map = new Map<string, string>();
-    (customers || []).forEach((c: any) => map.set(c.id, c.name));
+    customers.forEach((c: any) => map.set(c.id, c.name));
     return map;
   }, [customers]);
 
-  // Build query params
   const queryParams = useMemo(() => {
     const params: any = {
       page: table.page + 1,
@@ -99,14 +104,15 @@ export default function QuotesListView() {
     return params;
   }, [filters, table.page, table.rowsPerPage]);
 
-  // Fetch quotes
   const { data: quotesResponse, isLoading, isFetching } = useGetQuotesQuery(queryParams);
 
-  // Mutations
+  const [sendQuote, { isLoading: isSending }] = useSendQuoteMutation();
+  const [acceptQuote, { isLoading: isAccepting }] = useAcceptQuoteMutation();
+  const [rejectQuote, { isLoading: isRejecting }] = useRejectQuoteMutation();
+  const [expireQuote, { isLoading: isExpiring }] = useExpireQuoteMutation();
   const [convertToInvoice, { isLoading: isConverting }] = useConvertToInvoiceMutation();
   const [cloneQuote, { isLoading: isCloning }] = useCloneQuoteMutation();
 
-  // Apply client-side search filter if needed
   const searchText = filters.search.trim().toLowerCase();
   const dataInPage = useMemo(() => {
     const quotes = quotesResponse?.items || [];
@@ -114,9 +120,19 @@ export default function QuotesListView() {
 
     return quotes.filter((row: any) => {
       const quoteText = String(row.quote_number || row.id || '').toLowerCase();
-      const customerText = String(customerNameById.get(row.customer_id) || '').toLowerCase();
+      const customerNameText = String(
+        row.customer_name ||
+          [row.customer_first_name, row.customer_last_name].filter(Boolean).join(' ') ||
+          customerNameById.get(row.customer_id) ||
+          ''
+      ).toLowerCase();
+      const customerEmailText = String(row.customer_email || '').toLowerCase();
 
-      return quoteText.includes(searchText) || customerText.includes(searchText);
+      return (
+        quoteText.includes(searchText) ||
+        customerNameText.includes(searchText) ||
+        customerEmailText.includes(searchText)
+      );
     });
   }, [quotesResponse?.items, customerNameById, searchText]);
 
@@ -128,7 +144,6 @@ export default function QuotesListView() {
   const notFound = (!dataInPage.length && canReset) || !dataInPage.length;
   const denseHeight = table.dense ? 52 : 72;
 
-  // Handlers
   const handleFilters = useCallback(
     (name: string, value: any) => {
       table.onResetPage();
@@ -175,15 +190,106 @@ export default function QuotesListView() {
     [cloneDialog]
   );
 
+  const handleActionRow = useCallback(
+    (id: string, action: PendingAction) => {
+      setSelectedQuoteId(id);
+      setPendingAction(action);
+      actionDialog.onTrue();
+    },
+    [actionDialog]
+  );
+
+  const actionConfig = useMemo(() => {
+    switch (pendingAction) {
+      case 'send':
+        return {
+          title: 'Enviar Cotización',
+          content: '¿Está seguro de enviar esta cotización al cliente?',
+          buttonText: isSending ? 'Enviando...' : 'Enviar',
+          buttonColor: 'primary' as const,
+          loading: isSending
+        };
+      case 'accept':
+        return {
+          title: 'Aceptar Cotización',
+          content: '¿Confirma que esta cotización fue aceptada por el cliente?',
+          buttonText: isAccepting ? 'Aceptando...' : 'Aceptar',
+          buttonColor: 'success' as const,
+          loading: isAccepting
+        };
+      case 'reject':
+        return {
+          title: 'Rechazar Cotización',
+          content: '¿Confirma que esta cotización fue rechazada por el cliente?',
+          buttonText: isRejecting ? 'Rechazando...' : 'Rechazar',
+          buttonColor: 'error' as const,
+          loading: isRejecting
+        };
+      case 'expire':
+        return {
+          title: 'Expirar Cotización',
+          content: '¿Desea marcar esta cotización como vencida?',
+          buttonText: isExpiring ? 'Expirando...' : 'Expirar',
+          buttonColor: 'warning' as const,
+          loading: isExpiring
+        };
+      default:
+        return null;
+    }
+  }, [pendingAction, isSending, isAccepting, isRejecting, isExpiring]);
+
+  const handleConfirmAction = useCallback(async () => {
+    if (!selectedQuoteId || !pendingAction) return;
+
+    try {
+      switch (pendingAction) {
+        case 'send':
+          await sendQuote(selectedQuoteId).unwrap();
+          enqueueSnackbar('Cotización enviada', { variant: 'success' });
+          break;
+        case 'accept':
+          await acceptQuote(selectedQuoteId).unwrap();
+          enqueueSnackbar('Cotización aceptada', { variant: 'success' });
+          break;
+        case 'reject':
+          await rejectQuote(selectedQuoteId).unwrap();
+          enqueueSnackbar('Cotización rechazada', { variant: 'success' });
+          break;
+        case 'expire':
+          await expireQuote(selectedQuoteId).unwrap();
+          enqueueSnackbar('Cotización marcada como vencida', { variant: 'success' });
+          break;
+        default:
+          break;
+      }
+
+      actionDialog.onFalse();
+      setPendingAction(null);
+    } catch (error: any) {
+      console.error('Error performing quote action:', error);
+      const message = error?.data?.detail || 'Error al ejecutar la acción';
+      enqueueSnackbar(message, { variant: 'error' });
+    }
+  }, [acceptQuote, actionDialog, enqueueSnackbar, expireQuote, pendingAction, rejectQuote, selectedQuoteId, sendQuote]);
+
   const handleConfirmConvert = useCallback(async () => {
     if (!selectedQuoteId) return;
 
     try {
-      const result = await convertToInvoice(selectedQuoteId).unwrap();
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const result = await convertToInvoice({
+        id: selectedQuoteId,
+        body: {
+          invoice_type: 'SALE',
+          issue_date: today,
+          due_date: today,
+          notes: ''
+        }
+      }).unwrap();
+
       enqueueSnackbar('Cotización convertida a factura exitosamente', { variant: 'success' });
       convertDialog.onFalse();
 
-      // Navigate to invoice if ID is returned
       if (result?.id) {
         router.push(paths.dashboard.sales.details(result.id));
       }
@@ -202,7 +308,6 @@ export default function QuotesListView() {
       enqueueSnackbar('Cotización clonada exitosamente', { variant: 'success' });
       cloneDialog.onFalse();
 
-      // Navigate to new quote
       if (result?.id) {
         router.push(paths.dashboard.sales.quotes.edit(result.id));
       }
@@ -271,22 +376,40 @@ export default function QuotesListView() {
                 />
 
                 <TableBody>
-                  {(isFetching ? [] : dataInPage).map((row) => (
-                    <QuotesTableRow
-                      key={row.id}
-                      row={row}
-                      customerName={customerNameById.get(row.customer_id)}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
-                      onViewRow={() => handleViewRow(row.id)}
-                      onEditRow={row.status === 'draft' ? () => handleEditRow(row.id) : undefined}
-                      onConvertToInvoice={row.status === 'accepted' ? () => handleConvertRow(row.id) : undefined}
-                      onClone={() => handleCloneRow(row.id)}
-                      onViewInvoice={
-                        row.converted_to_invoice_id ? () => handleViewInvoice(row.converted_to_invoice_id!) : undefined
-                      }
-                    />
-                  ))}
+                  {(isFetching ? [] : dataInPage).map((row) => {
+                    const customerName =
+                      row.customer_name ||
+                      [row.customer_first_name, row.customer_last_name].filter(Boolean).join(' ') ||
+                      customerNameById.get(row.customer_id) ||
+                      'Sin cliente';
+
+                    const canConvert =
+                      (row.status === 'sent' || row.status === 'accepted') && !row.converted_to_invoice_id;
+
+                    return (
+                      <QuotesTableRow
+                        key={row.id}
+                        row={row}
+                        customerName={customerName}
+                        customerEmail={row.customer_email}
+                        selected={table.selected.includes(row.id)}
+                        onSelectRow={() => table.onSelectRow(row.id)}
+                        onViewRow={() => handleViewRow(row.id)}
+                        onEditRow={row.status === 'draft' ? () => handleEditRow(row.id) : undefined}
+                        onSend={row.status === 'draft' ? () => handleActionRow(row.id, 'send') : undefined}
+                        onAccept={row.status === 'sent' ? () => handleActionRow(row.id, 'accept') : undefined}
+                        onReject={row.status === 'sent' ? () => handleActionRow(row.id, 'reject') : undefined}
+                        onExpire={row.status === 'sent' ? () => handleActionRow(row.id, 'expire') : undefined}
+                        onConvertToInvoice={canConvert ? () => handleConvertRow(row.id) : undefined}
+                        onClone={() => handleCloneRow(row.id)}
+                        onViewInvoice={
+                          row.converted_to_invoice_id
+                            ? () => handleViewInvoice(row.converted_to_invoice_id!)
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
 
                   <TableEmptyRows
                     height={denseHeight}
@@ -311,7 +434,6 @@ export default function QuotesListView() {
         </Card>
       </Container>
 
-      {/* Convert to Invoice Confirm Dialog */}
       <ConfirmDialog
         open={convertDialog.value}
         onClose={convertDialog.onFalse}
@@ -324,7 +446,26 @@ export default function QuotesListView() {
         }
       />
 
-      {/* Clone Quote Confirm Dialog */}
+      <ConfirmDialog
+        open={actionDialog.value}
+        onClose={() => {
+          actionDialog.onFalse();
+          setPendingAction(null);
+        }}
+        title={actionConfig?.title || 'Confirmar'}
+        content={actionConfig?.content || '¿Desea continuar?'}
+        action={
+          <Button
+            variant="contained"
+            color={actionConfig?.buttonColor || 'primary'}
+            onClick={handleConfirmAction}
+            disabled={!!actionConfig?.loading}
+          >
+            {actionConfig?.buttonText || 'Confirmar'}
+          </Button>
+        }
+      />
+
       <ConfirmDialog
         open={cloneDialog.value}
         onClose={cloneDialog.onFalse}

@@ -24,6 +24,7 @@ import { fCurrency } from 'src/utils/format-number';
 type Props = {
   row: Quote;
   customerName?: string;
+  customerEmail?: string;
   selected: boolean;
   onSelectRow: VoidFunction;
   onViewRow: VoidFunction;
@@ -60,6 +61,7 @@ const STATUS_COLORS: Record<string, 'default' | 'info' | 'success' | 'error' | '
 export default function QuotesTableRow({
   row,
   customerName,
+  customerEmail,
   selected,
   onSelectRow,
   onViewRow,
@@ -87,7 +89,7 @@ export default function QuotesTableRow({
   const canAccept = status === 'sent';
   const canReject = status === 'sent';
   const canExpire = status === 'sent';
-  const canConvert = status === 'accepted';
+  const canConvert = status === 'sent' || status === 'accepted';
   const canClone = true; // Cualquier estado permite clonar
 
   return (
@@ -110,7 +112,9 @@ export default function QuotesTableRow({
         <TableCell>
           <ListItemText
             primary={customerName || 'Sin cliente'}
+            secondary={customerEmail || undefined}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
+            secondaryTypographyProps={{ typography: 'caption', noWrap: true, color: 'text.secondary' }}
           />
         </TableCell>
 

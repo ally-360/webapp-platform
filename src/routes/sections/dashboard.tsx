@@ -48,6 +48,8 @@ const SalesInvoiceDetailsPage = lazy(() => import('src/pages/dashboard/sales/inv
 // QUOTES
 const QuotesListPage = lazy(() => import('src/pages/dashboard/sales/quotes/list'));
 const QuotesNewPage = lazy(() => import('src/pages/dashboard/sales/quotes/new'));
+const QuotesEditPage = lazy(() => import('src/pages/dashboard/sales/quotes/edit'));
+const QuotesDetailsPage = lazy(() => import('src/pages/dashboard/sales/quotes/details'));
 
 // BILL
 
@@ -191,7 +193,9 @@ export const dashboardRoutes = [
             path: 'quotes',
             children: [
               { element: <QuotesListPage />, index: true },
-              { path: 'new', element: <QuotesNewPage /> }
+              { path: 'new', element: <QuotesNewPage /> },
+              { path: ':id', element: <QuotesDetailsPage /> },
+              { path: ':id/edit', element: <QuotesEditPage /> }
             ]
           }
         ]
