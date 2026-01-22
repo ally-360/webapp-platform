@@ -1,6 +1,6 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable prettier/prettier */
-import { format} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 // @mui
 import Box from '@mui/material/Box';
@@ -48,9 +48,10 @@ export default function PaymentReceivedTableRow({
   onDeleteRow,
   onVoidRow,
   onSendEmail,
-  onPrint
+  onPrint,
 }: Props) {
-  const { id, payment_date, customer_name, amount, method, invoice_id, invoice_number, is_voided } = row;
+  const { id, payment_date, customer_name, amount, method, invoice_id, invoice_number, is_voided } =
+    row;
 
   const confirm = useBoolean(false);
   const confirmVoid = useBoolean(false);
@@ -65,7 +66,7 @@ export default function PaymentReceivedTableRow({
       CASH: 'Efectivo',
       TRANSFER: 'Transferencia',
       CARD: 'Tarjeta',
-      OTHER: 'Otro'
+      OTHER: 'Otro',
     };
     return labels[m as keyof typeof labels] || m;
   };
@@ -91,7 +92,7 @@ export default function PaymentReceivedTableRow({
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               component: 'span',
-              color: 'text.disabled'
+              color: 'text.disabled',
             }}
           />
         </Box>
@@ -140,7 +141,12 @@ export default function PaymentReceivedTableRow({
     <>
       {renderPrimary}
 
-      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
+      <CustomPopover
+        open={popover.open}
+        onClose={popover.onClose}
+        arrow="right-top"
+        sx={{ width: 160 }}
+      >
         <MenuItem
           onClick={() => {
             onViewRow();

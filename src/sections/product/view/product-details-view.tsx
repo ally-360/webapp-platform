@@ -28,13 +28,17 @@ import ProductDetailsToolbar from '../product-details-toolbar';
 import ProductDetailsCarousel from '../product-details-carousel';
 import ProductDetailsInventory from '../product-details-view/product-details-inventory';
 import ProductDetailsDescription from '../product-details-description';
+import ProductMovementsTab from '../product-movements-tab';
+import ProductInventoryTab from '../product-inventory-tab';
+import ProductInvoicesTab from '../product-invoices-tab';
+import ProductAccountingTab from '../product-accounting-tab';
 
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
 // Tipos de las pestañas disponibles
-type TabValue = 'description' | 'invoices' | 'accounting' | 'history';
+type TabValue = 'description' | 'invoices' | 'accounting' | 'history' | 'movements';
 
 interface TabItem {
   value: TabValue;
@@ -46,6 +50,10 @@ const TAB_ITEMS: TabItem[] = [
   {
     value: 'description',
     label: 'Inventario'
+  },
+  {
+    value: 'movements',
+    label: 'Movimientos'
   },
   {
     value: 'invoices',
@@ -175,7 +183,25 @@ export default function ProductDetailsView({ id }: { id: string }) {
             ))}
           </Tabs>
 
-          {currentTab === 'description' && null}
+          {currentTab === 'description' && (
+            <ProductInventoryTab 
+              productId={product.id} 
+              productName={product.name}
+              onTabChange={(tab) => setCurrentTab(tab as TabValue)}
+            />
+          )}
+
+          {currentTab === 'movements' && (
+            <ProductMovementsTab productId={product.id} productName={product.name} />
+          )}
+
+          {currentTab === 'invoices' && (
+            <ProductInvoicesTab productId={product.id} productName={product.name} />
+          )}
+
+          {currentTab === 'accounting' && (
+            <ProductAccountingTab productId={product.id} productName={product.name} />
+          )}
         </Card>
       </>
     );

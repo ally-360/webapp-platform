@@ -94,7 +94,9 @@ export default function EmailVerificationView() {
             error: null
           });
 
-          enqueueSnackbar('Email verificado exitosamente. Por favor, inicia sesión.', { variant: 'success' });
+          enqueueSnackbar('Email verificado exitosamente. Por favor, inicia sesión.', {
+            variant: 'success'
+          });
         }
       } catch (error: any) {
         const errorMessage = error?.data?.detail || error?.message || 'Error verificando email';

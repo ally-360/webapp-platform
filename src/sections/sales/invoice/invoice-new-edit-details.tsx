@@ -220,7 +220,9 @@ export default function InvoiceNewEditDetails() {
       //  Buscar si ya el producto esta en el array
       const product = values.items.find((item) => item.title.id === option.id);
       if (product) {
-        enqueueSnackbar('Ya agregaste este producto, si deseas puedes aumentar la cantidad', { variant: 'warning' });
+        enqueueSnackbar('Ya agregaste este producto, si deseas puedes aumentar la cantidad', {
+          variant: 'warning'
+        });
         return;
       }
 

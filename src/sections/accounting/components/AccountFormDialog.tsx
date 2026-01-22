@@ -93,7 +93,7 @@ export function AccountFormDialog({ open, onClose, account, mode }: AccountFormD
   const isEditMode = mode === 'edit';
   const isSystemAccount = account?.is_system || false;
 
-  const { data: accountsData } = useGetAccountsQuery({ limit: 1000 });
+  const { data: accountsData } = useGetAccountsQuery({ limit: 100 });
   const [createAccount, { isLoading: isCreating }] = useCreateAccountMutation();
   const [updateAccount, { isLoading: isUpdating }] = useUpdateAccountMutation();
 

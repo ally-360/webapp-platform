@@ -34,6 +34,9 @@ const CategoriesListView = lazy(() => import('src/pages/dashboard/categories/lis
 
 const BrandsListView = lazy(() => import('src/pages/dashboard/brands/list'));
 
+// INVENTORY MOVEMENTS
+const InventoryMovementsPage = lazy(() => import('src/pages/dashboard/inventory/movements'));
+
 // ORDER
 const OrderListPage = lazy(() => import('src/pages/dashboard/order/list'));
 const OrderDetailsPage = lazy(() => import('src/pages/dashboard/order/details'));
@@ -88,6 +91,9 @@ const TreasuryPage = lazy(() => import('src/pages/dashboard/treasury'));
 const TreasuryAccountsPage = lazy(() => import('src/pages/dashboard/treasury/accounts'));
 const TreasuryAccountDetailPage = lazy(() => import('src/pages/dashboard/treasury/account-detail'));
 const TreasuryMovementsPage = lazy(() => import('src/pages/dashboard/treasury/movements'));
+const BankReconciliationsPage = lazy(() => import('src/pages/dashboard/treasury/bank-reconciliations'));
+const BankReconciliationNewPage = lazy(() => import('src/pages/dashboard/treasury/bank-reconciliation-new'));
+const BankReconciliationDetailPage = lazy(() => import('src/pages/dashboard/treasury/bank-reconciliation-detail'));
 
 // USER
 const UserProfilePage = lazy(() => import('src/pages/dashboard/user/profile'));
@@ -179,7 +185,8 @@ export const dashboardRoutes = [
             element: <CategoriesListView />
           },
           { path: 'pdvs', element: <PDVSListPage /> },
-          { path: 'brands', element: <BrandsListView /> }
+          { path: 'brands', element: <BrandsListView /> },
+          { path: 'movements', element: <InventoryMovementsPage /> }
         ]
       },
       {
@@ -334,7 +341,10 @@ export const dashboardRoutes = [
           { element: <TreasuryPage />, index: true },
           { path: 'accounts', element: <TreasuryAccountsPage /> },
           { path: 'accounts/:id', element: <TreasuryAccountDetailPage /> },
-          { path: 'movements', element: <TreasuryMovementsPage /> }
+          { path: 'movements', element: <TreasuryMovementsPage /> },
+          { path: 'reconciliations', element: <BankReconciliationsPage /> },
+          { path: 'reconciliations/new', element: <BankReconciliationNewPage /> },
+          { path: 'reconciliations/:id', element: <BankReconciliationDetailPage /> }
         ]
       },
       // SETTINGS

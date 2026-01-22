@@ -7,7 +7,11 @@ export interface CustomError {
 export const errorCodes: Record<string, CustomError> = {
   ERR001: { action: 'popup', message: 'User not found.' },
   ERR002: { action: 'toast', message: 'Invalid input. Please try again.' },
-  ERR003: { action: 'redirect', message: 'Session expired. Redirecting to login...', url: '/login' },
+  ERR003: {
+    action: 'redirect',
+    message: 'Session expired. Redirecting to login...',
+    url: '/login'
+  },
   ERR004: { action: 'silent', message: 'Resource not available.' }
 };
 

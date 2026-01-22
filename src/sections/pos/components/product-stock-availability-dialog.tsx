@@ -177,7 +177,9 @@ export default function ProductStockAvailabilityDialog({ open, onClose, productI
                             <Iconify
                               icon="solar:shop-2-bold-duotone"
                               width={20}
-                              sx={{ color: hasStock ? theme.palette.success.main : theme.palette.error.main }}
+                              sx={{
+                                color: hasStock ? theme.palette.success.main : theme.palette.error.main
+                              }}
                             />
                           </Box>
                           <Box sx={{ flex: 1 }}>

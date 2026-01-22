@@ -475,7 +475,13 @@ export default function PosSalesHistoryView() {
     (name: keyof Filters, value: any) => {
       table.onResetPage();
       if (name === 'query' && value === '') {
-        setFilters((prev) => ({ ...prev, query: '', pos_type: 'all', startDate: null, endDate: null }));
+        setFilters((prev) => ({
+          ...prev,
+          query: '',
+          pos_type: 'all',
+          startDate: null,
+          endDate: null
+        }));
       } else {
         setFilters((prev) => ({ ...prev, [name]: value }));
       }
@@ -629,7 +635,10 @@ export default function PosSalesHistoryView() {
         <Tabs
           value={filters.pos_type}
           onChange={handleFilterPosType}
-          sx={{ px: 2.5, boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}` }}
+          sx={{
+            px: 2.5,
+            boxShadow: (theme) => `inset 0 -2px 0 0 ${alpha(theme.palette.grey[500], 0.08)}`
+          }}
         >
           {POS_TYPE_TABS.map((tab) => (
             <Tab

@@ -30,6 +30,9 @@ import { accountingApi } from './services/accountingApi';
 import { treasuryApi } from './services/treasuryApi';
 import { quotesApi } from './services/quotesApi';
 import { sellersApi } from './services/sellersApi';
+import { bankReconciliationsApi } from './services/bankReconciliationsApi';
+import { inventoryMovementsApi } from './services/inventoryMovementsApi';
+import { stockApi } from './services/stockApi';
 
 export const store = configureStore({
   reducer: {
@@ -55,6 +58,9 @@ export const store = configureStore({
     [treasuryApi.reducerPath]: treasuryApi.reducer,
     [quotesApi.reducerPath]: quotesApi.reducer,
     [sellersApi.reducerPath]: sellersApi.reducer,
+    [bankReconciliationsApi.reducerPath]: bankReconciliationsApi.reducer,
+    [inventoryMovementsApi.reducerPath]: inventoryMovementsApi.reducer,
+    [stockApi.reducerPath]: stockApi.reducer,
 
     products: productsReducer,
     pdvs: pdvsReducer,
@@ -88,7 +94,10 @@ export const store = configureStore({
       accountingApi.middleware,
       treasuryApi.middleware,
       quotesApi.middleware,
-      sellersApi.middleware
+      sellersApi.middleware,
+      bankReconciliationsApi.middleware,
+      inventoryMovementsApi.middleware,
+      stockApi.middleware
     )
 });
 

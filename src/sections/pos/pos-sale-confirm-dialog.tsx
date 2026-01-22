@@ -178,7 +178,9 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
     try {
       // Validación: cliente obligatorio (backend requiere UUID)
       if (!saleWindow.customer?.id) {
-        enqueueSnackbar('Debes seleccionar un cliente antes de confirmar la venta.', { variant: 'warning' });
+        enqueueSnackbar('Debes seleccionar un cliente antes de confirmar la venta.', {
+          variant: 'warning'
+        });
         return;
       }
       const finalDiscountAmount =

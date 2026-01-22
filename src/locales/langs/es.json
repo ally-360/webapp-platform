@@ -106,6 +106,43 @@
       "DRAFT": "Borrador"
     }
   },
+  "treasury": {
+    "title": "Tesorería",
+    "bankReconciliations": {
+      "title": "Conciliaciones Bancarias",
+      "infoTitle": "Conciliaciones Bancarias",
+      "infoDescription": "Gestiona y revisa las conciliaciones bancarias para asegurar que los registros contables coincidan con los extractos bancarios. Identifica diferencias y realiza ajustes necesarios.",
+      "newReconciliation": "Nueva Conciliación",
+      "searchPlaceholder": "Buscar por nombre o referencia...",
+      "bankAccount": "Cuenta Bancaria",
+      "period": "Período",
+      "currentDifference": "Diferencia Actual",
+      "lastUpdate": "Última Actualización",
+      "noReconciliations": "No hay conciliaciones bancarias",
+      "createFirstMessage": "Crea tu primera conciliación bancaria para comenzar a verificar tus registros con los extractos bancarios.",
+      "createFirst": "Crear Primera Conciliación",
+      "loadError": "Ocurrió un error al cargar las conciliaciones. Por favor, intenta nuevamente.",
+      "noResults": "No se encontraron conciliaciones",
+      "downloadReport": "Descargar reporte",
+      "complete": "Finalizar conciliación",
+      "reverse": "Reversar conciliación"
+    }
+  },
+  "common": {
+    "filters": "Filtros",
+    "all": "Todas",
+    "status": "Estado",
+    "clearFilters": "Limpiar Filtros",
+    "applyFilters": "Aplicar Filtros",
+    "showingResults": "Mostrando {{total}} resultado(s)",
+    "error": "Error",
+    "loading": "Cargando...",
+    "actions": "Acciones",
+    "viewDetail": "Ver detalle",
+    "rowsPerPage": "Filas por página",
+    "displayedRows": "{{from}}-{{to}} de {{count}}"
+  },
+  "dashboard": "Dashboard",
   "errorsCode": {
     "1": "Correo o contraseña incorrectos",
     "2": "Tu sesión ha expirado, por favor inicia sesión de nuevo",

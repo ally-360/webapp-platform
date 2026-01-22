@@ -22,7 +22,7 @@ export function useProgressiveProducts(options: UseProgressiveProductsOptions = 
     () => ({
       page,
       limit,
-      search: debouncedSearch ? debouncedSearch : undefined
+      search: debouncedSearch || undefined
     }),
     [page, limit, debouncedSearch]
   );

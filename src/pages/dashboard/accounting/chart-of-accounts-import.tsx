@@ -15,7 +15,13 @@ const mockRows: ImportRow[] = [
   { code: '1', name: 'Activo', level: 'CLASS', nature: 'DEBIT', flags: [] },
   { code: '11', name: 'Disponible', level: 'GROUP', nature: 'DEBIT', flags: [] },
   { code: '1105', name: 'Caja', level: 'ACCOUNT', nature: 'DEBIT', flags: ['reconcilable'] },
-  { code: '110505', name: 'Caja general', level: 'SUBACCOUNT', nature: 'DEBIT', flags: ['movements'] }
+  {
+    code: '110505',
+    name: 'Caja general',
+    level: 'SUBACCOUNT',
+    nature: 'DEBIT',
+    flags: ['movements']
+  }
 ];
 
 export default function ChartOfAccountsImportPage() {
@@ -27,7 +33,13 @@ export default function ChartOfAccountsImportPage() {
       { field: 'name', headerName: 'Nombre', flex: 1, minWidth: 200 },
       { field: 'level', headerName: 'Nivel', width: 140 },
       { field: 'nature', headerName: 'Naturaleza', width: 140 },
-      { field: 'flags', headerName: 'Flags', flex: 1, minWidth: 200, valueGetter: ({ row }) => row.flags.join(', ') }
+      {
+        field: 'flags',
+        headerName: 'Flags',
+        flex: 1,
+        minWidth: 200,
+        valueGetter: ({ row }) => row.flags.join(', ')
+      }
     ],
     []
   );

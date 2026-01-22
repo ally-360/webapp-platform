@@ -271,10 +271,30 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ open, onClose, onScanSu
                     border: '3px solid #00f5ff',
                     animation: `${cornerAnimation} 2s infinite`,
                     boxShadow: '0 0 20px rgba(0, 245, 255, 0.8)',
-                    ...(corner === 'top-left' && { top: 60, left: 60, borderRight: 'none', borderBottom: 'none' }),
-                    ...(corner === 'top-right' && { top: 60, right: 60, borderLeft: 'none', borderBottom: 'none' }),
-                    ...(corner === 'bottom-left' && { bottom: 60, left: 60, borderRight: 'none', borderTop: 'none' }),
-                    ...(corner === 'bottom-right' && { bottom: 60, right: 60, borderLeft: 'none', borderTop: 'none' })
+                    ...(corner === 'top-left' && {
+                      top: 60,
+                      left: 60,
+                      borderRight: 'none',
+                      borderBottom: 'none'
+                    }),
+                    ...(corner === 'top-right' && {
+                      top: 60,
+                      right: 60,
+                      borderLeft: 'none',
+                      borderBottom: 'none'
+                    }),
+                    ...(corner === 'bottom-left' && {
+                      bottom: 60,
+                      left: 60,
+                      borderRight: 'none',
+                      borderTop: 'none'
+                    }),
+                    ...(corner === 'bottom-right' && {
+                      bottom: 60,
+                      right: 60,
+                      borderLeft: 'none',
+                      borderTop: 'none'
+                    })
                   }}
                 />
               ))}

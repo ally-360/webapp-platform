@@ -373,9 +373,24 @@ export default function InvoiceListView() {
     () => [
       { value: 'all', label: 'Todas', color: 'default' as const, count: getInvoiceLength('total') },
       { value: 'OPEN', label: 'Abiertas', color: 'info' as const, count: getInvoiceLength('OPEN') },
-      { value: 'PAID', label: 'Pagadas', color: 'success' as const, count: getInvoiceLength('PAID') },
-      { value: 'VOID', label: 'Canceladas', color: 'error' as const, count: getInvoiceLength('VOID') },
-      { value: 'DRAFT', label: 'Borrador', color: 'warning' as const, count: getInvoiceLength('DRAFT') }
+      {
+        value: 'PAID',
+        label: 'Pagadas',
+        color: 'success' as const,
+        count: getInvoiceLength('PAID')
+      },
+      {
+        value: 'VOID',
+        label: 'Canceladas',
+        color: 'error' as const,
+        count: getInvoiceLength('VOID')
+      },
+      {
+        value: 'DRAFT',
+        label: 'Borrador',
+        color: 'warning' as const,
+        count: getInvoiceLength('DRAFT')
+      }
     ],
     [getInvoiceLength]
   );
@@ -476,7 +491,9 @@ export default function InvoiceListView() {
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Facturas');
       XLSX.writeFile(workbook, `facturas-${fDate(new Date(), 'yyyy-MM-dd')}.xlsx`);
 
-      enqueueSnackbar(`${selectedInvoices.length} factura(s) exportada(s) a Excel`, { variant: 'success' });
+      enqueueSnackbar(`${selectedInvoices.length} factura(s) exportada(s) a Excel`, {
+        variant: 'success'
+      });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
       enqueueSnackbar('Error al exportar a Excel', { variant: 'error' });
@@ -647,7 +664,9 @@ export default function InvoiceListView() {
 
       await Promise.all(pdfPromises);
 
-      enqueueSnackbar(`${selectedInvoices.length} factura(s) abiertas para impresión`, { variant: 'info' });
+      enqueueSnackbar(`${selectedInvoices.length} factura(s) abiertas para impresión`, {
+        variant: 'info'
+      });
     } catch (error) {
       console.error('Error printing invoices:', error);
       enqueueSnackbar('Error al preparar la impresión', { variant: 'error' });

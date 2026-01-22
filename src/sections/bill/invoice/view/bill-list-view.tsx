@@ -253,9 +253,19 @@ export default function BillListView() {
         { value: 'all', label: 'Todas', color: 'default' as const, count: totalCount },
         { value: 'open', label: 'Abiertas', color: 'info' as const, count: countsMap.open || 0 },
         { value: 'paid', label: 'Pagadas', color: 'success' as const, count: countsMap.paid || 0 },
-        { value: 'partial', label: 'Parciales', color: 'warning' as const, count: countsMap.partial || 0 },
+        {
+          value: 'partial',
+          label: 'Parciales',
+          color: 'warning' as const,
+          count: countsMap.partial || 0
+        },
         { value: 'void', label: 'Anuladas', color: 'error' as const, count: countsMap.void || 0 },
-        { value: 'draft', label: 'Borrador', color: 'warning' as const, count: countsMap.draft || 0 }
+        {
+          value: 'draft',
+          label: 'Borrador',
+          color: 'warning' as const,
+          count: countsMap.draft || 0
+        }
       ];
     }
 
@@ -390,7 +400,9 @@ export default function BillListView() {
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Facturas');
       XLSX.writeFile(workbook, `facturas-compra-${fDate(new Date(), 'yyyy-MM-dd')}.xlsx`);
 
-      enqueueSnackbar(`${selectedBills.length} factura(s) exportada(s) a Excel`, { variant: 'success' });
+      enqueueSnackbar(`${selectedBills.length} factura(s) exportada(s) a Excel`, {
+        variant: 'success'
+      });
     } catch (error) {
       console.error('Error exporting to Excel:', error);
       enqueueSnackbar('Error al exportar a Excel', { variant: 'error' });
@@ -556,7 +568,9 @@ export default function BillListView() {
       );
 
       await Promise.all(printPromises);
-      enqueueSnackbar(`${selectedBills.length} factura(s) enviada(s) a impresión`, { variant: 'success' });
+      enqueueSnackbar(`${selectedBills.length} factura(s) enviada(s) a impresión`, {
+        variant: 'success'
+      });
     } catch (error) {
       console.error('Error printing invoices:', error);
       enqueueSnackbar('Error al imprimir facturas', { variant: 'error' });

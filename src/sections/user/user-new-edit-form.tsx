@@ -177,7 +177,12 @@ export default function UserNewEditForm({ currentUser }) {
     phoneNumber: string | null;
     phoneNumber2: string | null;
     type: number;
-    identity: { typeDocument: number; number: string | number | null; dv: number | null; typePerson: number };
+    identity: {
+      typeDocument: number;
+      number: string | number | null;
+      dv: number | null;
+      typePerson: number;
+    };
     departamento: any | null;
     town: any | null;
     sendEmail: boolean;

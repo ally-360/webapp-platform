@@ -29,7 +29,7 @@ export default function Step3ResetForm({ email, code, onReset }: Step3Props) {
   const { enqueueSnackbar } = useSnackbar();
   const showPassword = useBoolean(false);
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
-  
+
   const methods = useForm({
     mode: 'onChange',
     resolver: yupResolver(schema),

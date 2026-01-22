@@ -71,12 +71,49 @@
   "Inactivo": "Inactive",
   "demo": {
     "title": "English"
-  }
-  ,"invoice": {
+  },
+  "invoice": {
     "status": {
       "OPEN": "Open",
       "PAID": "Paid",
       "VOID": "Void"
     }
-  }
+  },
+  "treasury": {
+    "title": "Treasury",
+    "bankReconciliations": {
+      "title": "Bank Reconciliations",
+      "infoTitle": "Bank Reconciliations",
+      "infoDescription": "Manage and review bank reconciliations to ensure accounting records match bank statements. Identify differences and make necessary adjustments.",
+      "newReconciliation": "New Reconciliation",
+      "searchPlaceholder": "Search by name or reference...",
+      "bankAccount": "Bank Account",
+      "period": "Period",
+      "currentDifference": "Current Difference",
+      "lastUpdate": "Last Update",
+      "noReconciliations": "No bank reconciliations",
+      "createFirstMessage": "Create your first bank reconciliation to start verifying your records with bank statements.",
+      "createFirst": "Create First Reconciliation",
+      "loadError": "An error occurred while loading reconciliations. Please try again.",
+      "noResults": "No reconciliations found",
+      "downloadReport": "Download report",
+      "complete": "Complete reconciliation",
+      "reverse": "Reverse reconciliation"
+    }
+  },
+  "common": {
+    "filters": "Filters",
+    "all": "All",
+    "status": "Status",
+    "clearFilters": "Clear Filters",
+    "applyFilters": "Apply Filters",
+    "showingResults": "Showing {{total}} result(s)",
+    "error": "Error",
+    "loading": "Loading...",
+    "actions": "Actions",
+    "viewDetail": "View detail",
+    "rowsPerPage": "Rows per page",
+    "displayedRows": "{{from}}-{{to}} of {{count}}"
+  },
+  "dashboard": "Dashboard"
 }

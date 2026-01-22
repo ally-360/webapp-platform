@@ -122,10 +122,7 @@ export const accountingApi = createApi({
       },
       providesTags: (result) =>
         result
-          ? [
-              ...result.map(({ id }) => ({ type: 'CostCenter' as const, id })),
-              { type: 'CostCenter', id: 'LIST' }
-            ]
+          ? [...result.map(({ id }) => ({ type: 'CostCenter' as const, id })), { type: 'CostCenter', id: 'LIST' }]
           : [{ type: 'CostCenter', id: 'LIST' }]
     }),
 

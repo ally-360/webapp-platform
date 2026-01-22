@@ -125,7 +125,9 @@ function UserNewEditFormPopup({ currentUser }) {
       const { departamento: _departamento, town, identity, ...rest } = data;
 
       if (!_departamento || !town?.id) {
-        enqueueSnackbar('Selecciona un departamento y municipio antes de guardar.', { variant: 'warning' });
+        enqueueSnackbar('Selecciona un departamento y municipio antes de guardar.', {
+          variant: 'warning'
+        });
         return;
       }
 

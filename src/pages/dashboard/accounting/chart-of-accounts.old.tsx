@@ -41,7 +41,15 @@ function deriveParentIdByCode(code: string, level: ChartAccountNode['level'], al
 // Mock data with a standard PUC-like seed (Servicios)
 const seedAccounts: ChartAccountNode[] = [
   { id: '1', code: '1', name: 'Activo', level: 'CLASS', nature: 'DEBIT', status: 'ACTIVE' },
-  { id: '11', code: '11', name: 'Disponible', level: 'GROUP', nature: 'DEBIT', status: 'ACTIVE', parentId: '1' },
+  {
+    id: '11',
+    code: '11',
+    name: 'Disponible',
+    level: 'GROUP',
+    nature: 'DEBIT',
+    status: 'ACTIVE',
+    parentId: '1'
+  },
   {
     id: '1105',
     code: '1105',
@@ -132,7 +140,15 @@ const seedAccounts: ChartAccountNode[] = [
 // Alternative seeds (simple mocks)
 const seedCommerce: ChartAccountNode[] = [
   { id: '1c', code: '1', name: 'Activo', level: 'CLASS', nature: 'DEBIT', status: 'ACTIVE' },
-  { id: '11c', code: '11', name: 'Disponible', level: 'GROUP', nature: 'DEBIT', status: 'ACTIVE', parentId: '1c' },
+  {
+    id: '11c',
+    code: '11',
+    name: 'Disponible',
+    level: 'GROUP',
+    nature: 'DEBIT',
+    status: 'ACTIVE',
+    parentId: '1c'
+  },
   {
     id: '1435c',
     code: '1435',
@@ -167,7 +183,15 @@ const seedCommerce: ChartAccountNode[] = [
 
 const seedManufacturing: ChartAccountNode[] = [
   { id: '1m', code: '1', name: 'Activo', level: 'CLASS', nature: 'DEBIT', status: 'ACTIVE' },
-  { id: '14m', code: '14', name: 'Inventarios', level: 'GROUP', nature: 'DEBIT', status: 'ACTIVE', parentId: '1m' },
+  {
+    id: '14m',
+    code: '14',
+    name: 'Inventarios',
+    level: 'GROUP',
+    nature: 'DEBIT',
+    status: 'ACTIVE',
+    parentId: '1m'
+  },
   {
     id: '1405m',
     code: '1405',

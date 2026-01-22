@@ -213,7 +213,10 @@ export const AccountWizardDialog: React.FC<AccountWizardDialogProps> = ({
                 multiple
                 value={form.taxTags || []}
                 onChange={(e) =>
-                  setForm((prev) => ({ ...prev, taxTags: e.target.value as ChartAccountNode['taxTags'] }))
+                  setForm((prev) => ({
+                    ...prev,
+                    taxTags: e.target.value as ChartAccountNode['taxTags']
+                  }))
                 }
                 renderValue={(selected) => (
                   <Stack direction="row" spacing={1} flexWrap="wrap">
@@ -237,7 +240,12 @@ export const AccountWizardDialog: React.FC<AccountWizardDialogProps> = ({
                 label="Uso / Mapeo"
                 multiple
                 value={form.usage || []}
-                onChange={(e) => setForm((prev) => ({ ...prev, usage: e.target.value as ChartAccountNode['usage'] }))}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    usage: e.target.value as ChartAccountNode['usage']
+                  }))
+                }
                 renderValue={(selected) => (
                   <Stack direction="row" spacing={1} flexWrap="wrap">
                     {(selected as string[]).map((u) => (

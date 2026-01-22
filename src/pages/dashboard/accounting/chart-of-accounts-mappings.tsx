@@ -61,7 +61,9 @@ export default function ChartOfAccountsMappingsPage() {
   const [form, setForm] = useState<Record<string, any>>({});
 
   const handleSave = () => {
-    enqueueSnackbar('Parámetros guardados (mock). Listo para integrar con GraphQL.', { variant: 'success' });
+    enqueueSnackbar('Parámetros guardados (mock). Listo para integrar con GraphQL.', {
+      variant: 'success'
+    });
   };
 
   return (

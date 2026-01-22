@@ -18,7 +18,7 @@ const schema = Yup.object().shape({
 export default function Step1EmailForm({ onSuccess }: { onSuccess: (email: string) => void }) {
   const { enqueueSnackbar } = useSnackbar();
   const [requestPasswordReset, { isLoading }] = useRequestPasswordResetMutation();
-  
+
   const methods = useForm({ resolver: yupResolver(schema), defaultValues: { email: '' } });
 
   const {
@@ -34,10 +34,9 @@ export default function Step1EmailForm({ onSuccess }: { onSuccess: (email: strin
       methods.reset();
     } catch (error: any) {
       console.error('Error al solicitar restablecimiento:', error);
-      enqueueSnackbar(
-        error?.data?.detail || 'Error al enviar el código. Por favor, intenta nuevamente.',
-        { variant: 'error' }
-      );
+      enqueueSnackbar(error?.data?.detail || 'Error al enviar el código. Por favor, intenta nuevamente.', {
+        variant: 'error'
+      });
     }
   });
 

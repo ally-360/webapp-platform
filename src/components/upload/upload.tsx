@@ -169,11 +169,11 @@ export default function Upload({
 }
 
 Upload.propTypes = {
-  disabled: PropTypes.object,
+  disabled: PropTypes.bool,
   error: PropTypes.bool,
   file: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   files: PropTypes.array,
-  helperText: PropTypes.object,
+  helperText: PropTypes.node,
   multiple: PropTypes.bool,
   onDelete: PropTypes.func,
   onRemove: PropTypes.func,

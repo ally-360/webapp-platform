@@ -26,7 +26,7 @@ import {
   TableEmptyRows,
   TableHeadCustom,
   TableSelectedAction,
-  TablePaginationCustom
+  TablePaginationCustom,
 } from 'src/components/table';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -47,16 +47,16 @@ import PDVSTableFiltersResult from '../pdvs-table-filters-result';
 const TABLE_HEAD = [
   { id: 'name', label: 'Nombre', minWidth: 220, align: 'left', width: 150 },
   { id: 'description', label: 'Dirección', width: 200, maxWidth: 250 },
-  { id: 'location', label: 'Municipio', width: 160, maxWidth: 160,  },
+  { id: 'location', label: 'Municipio', width: 160, maxWidth: 160 },
   { id: 'main', label: 'Principal', width: 20, align: 'left' },
-  { id: '', width: 88 }
+  { id: '', width: 88 },
 ];
 
 const defaultFilters = {
   name: '',
   address: '',
   main: false,
-  municipio: []
+  municipio: [],
 };
 
 // ----------------------------------------------------------------------
@@ -78,26 +78,28 @@ export default function PdvsListView() {
   const [deletePDVMutation] = useDeletePDVMutation();
 
   // Transform PDVs data to include location as string for filtering
-  const transformedPDVs = useMemo(() => 
-    pdvs.map((pdv) => ({
-      ...pdv,
-      location: pdv.address, // Use address as location since backend doesn't have location object
-      main: false // Backend doesn't have main field, defaulting to false
-    })), [pdvs]
+  const transformedPDVs = useMemo(
+    () =>
+      pdvs.map((pdv) => ({
+        ...pdv,
+        location: pdv.address, // Use address as location since backend doesn't have location object
+        main: false, // Backend doesn't have main field, defaulting to false
+      })),
+    [pdvs]
   );
 
   // Generate municipality options from addresses
   const municipioOptions = useMemo(() => {
     if (pdvs.length === 0) return [];
-    const addresses = pdvs.map(pdv => pdv.address).filter(Boolean);
+    const addresses = pdvs.map((pdv) => pdv.address).filter(Boolean);
     const uniqueAddresses = [...new Set(addresses)];
-    return uniqueAddresses.map(addr => ({ value: addr, label: addr }));
+    return uniqueAddresses.map((addr) => ({ value: addr, label: addr }));
   }, [pdvs]);
 
   const dataFiltered = applyFilter({
     inputData: transformedPDVs,
     comparator: getComparator(table.order, table.orderBy),
-    filters
+    filters,
   });
 
   const dataInPage = dataFiltered.slice(
@@ -114,7 +116,7 @@ export default function PdvsListView() {
       table.onResetPage();
       setFilters((prevState) => ({
         ...prevState,
-        [name]: value
+        [name]: value,
       }));
     },
     [table]
@@ -122,12 +124,12 @@ export default function PdvsListView() {
 
   const handleDeleteRows = useCallback(async () => {
     try {
-      await Promise.all(table.selected.map(id => deletePDVMutation(id).unwrap()));
+      await Promise.all(table.selected.map((id) => deletePDVMutation(id).unwrap()));
       enqueueSnackbar('PDVs eliminados correctamente', { variant: 'success' });
       table.onUpdatePageDeleteRows({
         totalRows: transformedPDVs.length,
         totalRowsInPage: dataInPage.length,
-        totalRowsFiltered: dataFiltered.length
+        totalRowsFiltered: dataFiltered.length,
       });
     } catch (err) {
       enqueueSnackbar('Error al eliminar PDVs', { variant: 'error' });
@@ -166,7 +168,6 @@ export default function PdvsListView() {
 
   // Popup create punto de venta - remove unused variable
 
-
   return (
     <>
       <Container ref={componentRef} maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -177,9 +178,9 @@ export default function PdvsListView() {
             { name: 'Dashboard', href: paths.dashboard.root },
             {
               name: 'Inventario',
-              href: paths.dashboard.inventory.list
+              href: paths.dashboard.inventory.list,
             },
-            { name: 'Puntos de venta' }
+            { name: 'Puntos de venta' },
           ]}
           action={
             <Button
@@ -261,7 +262,10 @@ export default function PdvsListView() {
                   ) : (
                     <>
                       {dataFiltered
-                        .slice(table.page * table.rowsPerPage, table.page * table.rowsPerPage + table.rowsPerPage)
+                        .slice(
+                          table.page * table.rowsPerPage,
+                          table.page * table.rowsPerPage + table.rowsPerPage
+                        )
                         .map((row) => (
                           <PDVSTableRow
                             key={row.id}
@@ -305,7 +309,8 @@ export default function PdvsListView() {
         title="Eliminar Puntos de venta"
         content={
           <>
-            ¿Esta seguro que desea eliminar <strong> {table.selected.length} </strong> Puntos de venta?
+            ¿Esta seguro que desea eliminar <strong> {table.selected.length} </strong> Puntos de
+            venta?
           </>
         }
         action={
@@ -334,7 +339,6 @@ function applyFilter({ inputData, comparator, filters }) {
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
-
     console.log(inputData);
     const order = comparator(a[0], b[0]);
 

@@ -30,8 +30,7 @@ export default function AddressListDialog({
   const { data: contactsQuery = [] } = useGetContactsQuery({});
 
   const contacts = Array.isArray(_list) && _list.length ? _list : contactsQuery;
-  const isSelected =
-    typeof selected === 'function' ? selected : (id) => (selected ? `${selected}` === `${id}` : false);
+  const isSelected = typeof selected === 'function' ? selected : (id) => (selected ? `${selected}` === `${id}` : false);
 
   const dataFiltered = applyFilter({
     inputData: contacts,

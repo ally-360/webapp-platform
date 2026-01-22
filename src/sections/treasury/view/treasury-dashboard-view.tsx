@@ -1,4 +1,4 @@
-import { Stack, Typography, Button, Alert, AlertTitle, Grid } from '@mui/material';
+import { Stack, Typography, Button, Grid } from '@mui/material';
 
 // Components
 import Iconify from 'src/components/iconify';
@@ -68,18 +68,9 @@ export default function TreasuryDashboardView() {
           </Button>
         }
         sx={{
-          mb: { xs: 3, md: 5 }
+          mb: { xs: 1, md: 1 }
         }}
       />
-
-      {/* Info Alert */}
-      <Alert severity="info" icon={<Iconify icon="solar:chart-2-bold" />}>
-        <AlertTitle>Vista Ejecutiva</AlertTitle>
-        <Typography variant="body2">
-          Visualiza el estado de tus cuentas de caja y bancos en tiempo real. Monitorea el flujo de efectivo, saldos
-          actuales y últimos movimientos para tomar decisiones financieras informadas.
-        </Typography>
-      </Alert>
 
       {/* Summary Cards */}
       <TreasurySummaryCards accounts={accounts} isLoading={isLoadingAccounts} />

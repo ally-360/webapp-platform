@@ -111,7 +111,11 @@ export default function JournalEntryEditorPage() {
                     onChange={(e) => {
                       const sel = accounts.find((a) => a.id === e.target.value);
                       if (!sel) return;
-                      updateLine(l.id, { accountId: sel.id, accountCode: sel.code, accountName: sel.name });
+                      updateLine(l.id, {
+                        accountId: sel.id,
+                        accountCode: sel.code,
+                        accountName: sel.name
+                      });
                     }}
                     sx={{ minWidth: 260 }}
                   >

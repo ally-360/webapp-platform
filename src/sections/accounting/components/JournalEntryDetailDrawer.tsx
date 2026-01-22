@@ -16,7 +16,7 @@ import {
 import { Icon } from '@iconify/react';
 /* eslint-disable import/no-duplicates */
 /* eslint-disable prettier/prettier */
-import { format} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { useGetJournalEntryByIdQuery } from 'src/redux/services/accountingApi';
@@ -36,7 +36,7 @@ const entryTypeLabels: Record<JournalEntryType, string> = {
   debit_note: 'Nota Débito',
   credit_note: 'Nota Crédito',
   adjustment: 'Ajuste',
-  manual: 'Manual'
+  manual: 'Manual',
 };
 
 const entryTypeColors: Record<JournalEntryType, any> = {
@@ -46,24 +46,28 @@ const entryTypeColors: Record<JournalEntryType, any> = {
   debit_note: 'error',
   credit_note: 'primary',
   adjustment: 'secondary',
-  manual: 'default'
+  manual: 'default',
 };
 
 const statusLabels: Record<JournalEntryStatus, string> = {
   draft: 'Borrador',
   posted: 'Contabilizado',
-  voided: 'Anulado'
+  voided: 'Anulado',
 };
 
 const statusColors: Record<JournalEntryStatus, any> = {
   draft: 'warning',
   posted: 'success',
-  voided: 'error'
+  voided: 'error',
 };
 
-export function JournalEntryDetailDrawer({ entryId, open, onClose }: JournalEntryDetailDrawerProps) {
+export function JournalEntryDetailDrawer({
+  entryId,
+  open,
+  onClose,
+}: JournalEntryDetailDrawerProps) {
   const { data: entry, isLoading } = useGetJournalEntryByIdQuery(entryId!, {
-    skip: !entryId
+    skip: !entryId,
   });
 
   return (
@@ -72,7 +76,7 @@ export function JournalEntryDetailDrawer({ entryId, open, onClose }: JournalEntr
       open={open}
       onClose={onClose}
       PaperProps={{
-        sx: { width: { xs: '100%', md: 720 } }
+        sx: { width: { xs: '100%', md: 720 } },
       }}
     >
       {/* Header */}
@@ -98,7 +102,11 @@ export function JournalEntryDetailDrawer({ entryId, open, onClose }: JournalEntr
             <Box>
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
                 <Typography variant="h4">{entry.entry_number}</Typography>
-                <Chip label={statusLabels[entry.status]} color={statusColors[entry.status]} size="small" />
+                <Chip
+                  label={statusLabels[entry.status]}
+                  color={statusColors[entry.status]}
+                  size="small"
+                />
               </Stack>
 
               <Stack spacing={1.5}>
