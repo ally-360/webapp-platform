@@ -223,7 +223,11 @@ export const dashboardApi = createApi({
       transformResponse: (response: any): SalesComparison => {
         console.log('📈 Dashboard API - getSalesComparison raw response:', response);
 
-        const today = response?.today || { amount: '0', invoices: 0, date: new Date().toISOString().split('T')[0] };
+        const today = response?.today || {
+          amount: '0',
+          invoices: 0,
+          date: new Date().toISOString().split('T')[0]
+        };
         const yesterday = response?.yesterday || {
           amount: '0',
           invoices: 0,

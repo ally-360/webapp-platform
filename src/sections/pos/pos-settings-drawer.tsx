@@ -124,7 +124,9 @@ export default function PosSettingsDrawer({ open, onClose }: Props) {
 
     // Si hay diferencia, exigir nota
     if (difference !== 0 && !notes.trim()) {
-      enqueueSnackbar('Debes ingresar una nota cuando hay diferencia de efectivo', { variant: 'warning' });
+      enqueueSnackbar('Debes ingresar una nota cuando hay diferencia de efectivo', {
+        variant: 'warning'
+      });
       return;
     }
 

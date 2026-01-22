@@ -51,7 +51,9 @@ export function useBillStatusManager(bill: any) {
       return true;
     } catch (error: any) {
       console.error('Error confirming receipt:', error);
-      enqueueSnackbar(error?.data?.message || 'Error al confirmar la recepción de mercancía', { variant: 'error' });
+      enqueueSnackbar(error?.data?.message || 'Error al confirmar la recepción de mercancía', {
+        variant: 'error'
+      });
       return false;
     }
   }, [bill?.id, currentStatus, updateBill, enqueueSnackbar]);

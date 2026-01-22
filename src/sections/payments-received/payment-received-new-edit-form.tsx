@@ -182,7 +182,9 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
         console.log('Total allocated:', totalAllocated);
 
         if (totalAllocated === 0) {
-          enqueueSnackbar('Debe asignar al menos un monto a las facturas seleccionadas', { variant: 'error' });
+          enqueueSnackbar('Debe asignar al menos un monto a las facturas seleccionadas', {
+            variant: 'error'
+          });
           loadingSave.onFalse();
           return;
         }
@@ -209,7 +211,9 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
 
           console.log('Creating payment for single invoice:', payload);
           await createPayment(payload).unwrap();
-          enqueueSnackbar('Pago registrado y aplicado a factura exitosamente', { variant: 'success' });
+          enqueueSnackbar('Pago registrado y aplicado a factura exitosamente', {
+            variant: 'success'
+          });
         }
         // CASO 2: Múltiples facturas - crear pago anticipado y usar allocate
         else {
@@ -243,7 +247,9 @@ export default function PaymentReceivedNewEditForm({ currentPayment }: Props) {
       // Pago anticipado sin facturas
       else {
         if (!data.contact_id) {
-          enqueueSnackbar('Debe seleccionar un cliente para pagos anticipados', { variant: 'error' });
+          enqueueSnackbar('Debe seleccionar un cliente para pagos anticipados', {
+            variant: 'error'
+          });
           loadingSave.onFalse();
           return;
         }

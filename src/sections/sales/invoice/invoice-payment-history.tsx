@@ -27,7 +27,11 @@ import { useGetInvoicePaymentsQuery } from 'src/redux/services/salesInvoicesApi'
 
 const PAYMENT_METHOD_CONFIG: Record<
   string,
-  { label: string; color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'; icon: string }
+  {
+    label: string;
+    color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+    icon: string;
+  }
 > = {
   cash: { label: 'Efectivo', color: 'success', icon: 'mdi:cash' },
   transfer: { label: 'Transferencia', color: 'info', icon: 'mdi:bank-transfer' },

@@ -23,7 +23,13 @@ import { fCurrency } from 'src/utils/format-number';
 const pdfStyles = StyleSheet.create({
   page: { padding: 24, fontSize: 10 },
   title: { fontSize: 16, marginBottom: 8, fontWeight: 'bold' },
-  header: { flexDirection: 'row', borderBottomWidth: 1, paddingBottom: 6, marginBottom: 6, fontWeight: 'bold' },
+  header: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    paddingBottom: 6,
+    marginBottom: 6,
+    fontWeight: 'bold'
+  },
   row: { flexDirection: 'row', borderBottomWidth: 0.5, paddingVertical: 4 },
   cell: { flex: 1, paddingRight: 6 },
   small: { flex: 0.7 },

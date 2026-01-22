@@ -16,14 +16,18 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Icon } from '@iconify/react';
 /* eslint-disable import/no-duplicates */
 /* eslint-disable prettier/prettier */
-import { format} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DatePicker } from '@mui/x-date-pickers';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { useGetJournalEntriesQuery } from 'src/redux/services/accountingApi';
 import { JournalEntryDetailDrawer } from 'src/sections/accounting/components/JournalEntryDetailDrawer';
 import { fCurrency } from 'src/utils/format-number';
-import type { JournalEntry, JournalEntryType, JournalEntryStatus } from 'src/sections/accounting/types';
+import type {
+  JournalEntry,
+  JournalEntryType,
+  JournalEntryStatus,
+} from 'src/sections/accounting/types';
 
 const entryTypeLabels: Record<JournalEntryType, string> = {
   invoice: 'Factura',
@@ -32,7 +36,7 @@ const entryTypeLabels: Record<JournalEntryType, string> = {
   debit_note: 'Nota Débito',
   credit_note: 'Nota Crédito',
   adjustment: 'Ajuste',
-  manual: 'Manual'
+  manual: 'Manual',
 };
 
 const entryTypeColors: Record<JournalEntryType, any> = {
@@ -42,19 +46,19 @@ const entryTypeColors: Record<JournalEntryType, any> = {
   debit_note: 'error',
   credit_note: 'primary',
   adjustment: 'secondary',
-  manual: 'default'
+  manual: 'default',
 };
 
 const statusLabels: Record<JournalEntryStatus, string> = {
   draft: 'Borrador',
   posted: 'Contabilizado',
-  voided: 'Anulado'
+  voided: 'Anulado',
 };
 
 const statusColors: Record<JournalEntryStatus, any> = {
   draft: 'warning',
   posted: 'success',
-  voided: 'error'
+  voided: 'error',
 };
 
 function JournalListPage() {
@@ -76,7 +80,7 @@ function JournalListPage() {
     ...(startDate && { start_date: format(startDate, 'yyyy-MM-dd') }),
     ...(endDate && { end_date: format(endDate, 'yyyy-MM-dd') }),
     ...(selectedType && { entry_type: selectedType }),
-    ...(selectedStatus && { status: selectedStatus })
+    ...(selectedStatus && { status: selectedStatus }),
   });
 
   const entries = data?.journal_entries || [];
@@ -105,8 +109,10 @@ function JournalListPage() {
         width: 130,
         sortable: false,
         renderCell: ({ row }: { row: JournalEntry }) => (
-          <Typography variant="body2">{format(new Date(row.entry_date), 'dd/MM/yyyy', { locale: es })}</Typography>
-        )
+          <Typography variant="body2">
+            {format(new Date(row.entry_date), 'dd/MM/yyyy', { locale: es })}
+          </Typography>
+        ),
       },
       {
         field: 'entry_number',
@@ -117,7 +123,7 @@ function JournalListPage() {
           <Typography variant="body2" fontWeight={600}>
             {row.entry_number}
           </Typography>
-        )
+        ),
       },
       {
         field: 'entry_type',
@@ -131,7 +137,7 @@ function JournalListPage() {
             size="small"
             variant="outlined"
           />
-        )
+        ),
       },
       {
         field: 'reference_number',
@@ -142,7 +148,7 @@ function JournalListPage() {
           <Typography variant="body2" color="text.secondary">
             {row.reference_number || '-'}
           </Typography>
-        )
+        ),
       },
       {
         field: 'description',
@@ -154,7 +160,7 @@ function JournalListPage() {
           <Typography variant="body2" noWrap>
             {row.description}
           </Typography>
-        )
+        ),
       },
       {
         field: 'total_debit',
@@ -167,7 +173,7 @@ function JournalListPage() {
           <Typography variant="body2" fontWeight={600} color="info.main">
             {fCurrency(row.total_debit)}
           </Typography>
-        )
+        ),
       },
       {
         field: 'total_credit',
@@ -180,7 +186,7 @@ function JournalListPage() {
           <Typography variant="body2" fontWeight={600} color="success.main">
             {fCurrency(row.total_credit)}
           </Typography>
-        )
+        ),
       },
       {
         field: 'status',
@@ -189,7 +195,7 @@ function JournalListPage() {
         sortable: false,
         renderCell: ({ row }: { row: JournalEntry }) => (
           <Chip label={statusLabels[row.status]} color={statusColors[row.status]} size="small" />
-        )
+        ),
       },
       {
         field: 'actions',
@@ -204,8 +210,8 @@ function JournalListPage() {
               <Icon icon="solar:eye-bold" width={20} />
             </IconButton>
           </Tooltip>
-        )
-      }
+        ),
+      },
     ],
     []
   );
@@ -242,8 +248,8 @@ function JournalListPage() {
                 Fase 1 - Solo lectura
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Los asientos se generan automáticamente por las operaciones del sistema (ventas, pagos, tesorería,
-                etc.). La creación manual estará disponible en una fase futura.
+                Los asientos se generan automáticamente por las operaciones del sistema (ventas,
+                pagos, tesorería, etc.). La creación manual estará disponible en una fase futura.
               </Typography>
             </Box>
           </Stack>
@@ -262,7 +268,7 @@ function JournalListPage() {
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 InputProps={{
-                  startAdornment: <Icon icon="mdi:magnify" style={{ marginRight: 8 }} />
+                  startAdornment: <Icon icon="mdi:magnify" style={{ marginRight: 8 }} />,
                 }}
               />
               <DatePicker
@@ -270,7 +276,7 @@ function JournalListPage() {
                 value={startDate}
                 onChange={(date) => setStartDate(date)}
                 slotProps={{
-                  textField: { fullWidth: true, size: 'medium' }
+                  textField: { fullWidth: true, size: 'medium' },
                 }}
               />
               <DatePicker
@@ -278,7 +284,7 @@ function JournalListPage() {
                 value={endDate}
                 onChange={(date) => setEndDate(date)}
                 slotProps={{
-                  textField: { fullWidth: true, size: 'medium' }
+                  textField: { fullWidth: true, size: 'medium' },
                 }}
               />
             </Stack>
@@ -345,7 +351,9 @@ function JournalListPage() {
                   No se encontraron asientos
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {hasFilters ? 'Intenta ajustar los filtros' : 'Aún no hay asientos contables registrados'}
+                  {hasFilters
+                    ? 'Intenta ajustar los filtros'
+                    : 'Aún no hay asientos contables registrados'}
                 </Typography>
               </Stack>
             ) : (
@@ -366,12 +374,12 @@ function JournalListPage() {
                 sx={{
                   border: 'none',
                   '& .MuiDataGrid-cell:focus': {
-                    outline: 'none'
+                    outline: 'none',
                   },
                   '& .MuiDataGrid-row:hover': {
                     backgroundColor: 'action.hover',
-                    cursor: 'pointer'
-                  }
+                    cursor: 'pointer',
+                  },
                 }}
               />
             )}

@@ -25,7 +25,12 @@ export type FilterDrawerPayload = {
   sortDir: 'asc' | 'desc';
   nature: AccountNature | '';
   status: AccountStatus | '';
-  flags: { requiresThirdParty: boolean; requiresCostCenter: boolean; reconcilable: boolean; allowMovements: boolean };
+  flags: {
+    requiresThirdParty: boolean;
+    requiresCostCenter: boolean;
+    reconcilable: boolean;
+    allowMovements: boolean;
+  };
 };
 
 export type FilterDrawerProps = {
@@ -71,7 +76,12 @@ export const FilterDrawer = React.memo((props: FilterDrawerProps) => {
     sortDir: 'asc' | 'desc';
     nature: AccountNature | '';
     status: AccountStatus | '';
-    flags: { requiresThirdParty: boolean; requiresCostCenter: boolean; reconcilable: boolean; allowMovements: boolean };
+    flags: {
+      requiresThirdParty: boolean;
+      requiresCostCenter: boolean;
+      reconcilable: boolean;
+      allowMovements: boolean;
+    };
   };
 
   const STORAGE_KEY = 'coaFilterPresets';
@@ -107,7 +117,15 @@ export const FilterDrawer = React.memo((props: FilterDrawerProps) => {
 
   const handleSavePreset = () => {
     if (!presetName.trim()) return;
-    const newPreset: Preset = { name: presetName.trim(), text, sortKey: sk, sortDir: sd, nature, status, flags };
+    const newPreset: Preset = {
+      name: presetName.trim(),
+      text,
+      sortKey: sk,
+      sortDir: sd,
+      nature,
+      status,
+      flags
+    };
     const exists = presets.some((p) => p.name.toLowerCase() === newPreset.name.toLowerCase());
     const next = exists
       ? presets.map((p) => (p.name.toLowerCase() === newPreset.name.toLowerCase() ? newPreset : p))

@@ -1,6 +1,6 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable prettier/prettier */
-import { format} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 // @mui
 import Card from '@mui/material/Card';
@@ -20,7 +20,10 @@ import { paths } from 'src/routes/paths';
 import { useParams } from 'src/routes/hook';
 import { RouterLink } from 'src/routes/components';
 // redux
-import { useGetDebitNoteByIdQuery, useVoidDebitNoteMutation } from 'src/redux/services/debitNotesApi';
+import {
+  useGetDebitNoteByIdQuery,
+  useVoidDebitNoteMutation,
+} from 'src/redux/services/debitNotesApi';
 // components
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -42,7 +45,7 @@ export default function DebitNoteDetailsView() {
   const { id } = params;
 
   const { data: debitNote, isLoading } = useGetDebitNoteByIdQuery(id!, {
-    skip: !id
+    skip: !id,
   });
 
   const [voidDebitNote] = useVoidDebitNoteMutation();
@@ -71,7 +74,7 @@ export default function DebitNoteDetailsView() {
       interest: 'Intereses',
       price_adjustment: 'Ajuste de Precio',
       additional_charge: 'Cargo Adicional',
-      other: 'Otro'
+      other: 'Otro',
     };
     return typeMap[noteType] || noteType;
   };
@@ -83,7 +86,7 @@ export default function DebitNoteDetailsView() {
         links={[
           { name: 'Dashboard', href: paths.dashboard.root },
           { name: 'Notas Débito', href: paths.dashboard.debitNotes.root },
-          { name: debitNote.number }
+          { name: debitNote.number },
         ]}
         icon="solar:document-text-bold"
         action={
@@ -111,7 +114,7 @@ export default function DebitNoteDetailsView() {
           </Stack>
         }
         sx={{
-          mb: { xs: 3, md: 5 }
+          mb: { xs: 3, md: 5 },
         }}
       />
 
@@ -218,14 +221,19 @@ export default function DebitNoteDetailsView() {
             </TableHead>
             <TableBody>
               {debitNote.line_items?.map((item, index) => {
-                const lineTaxTotal = (item.line_taxes || []).reduce((sum, tax) => sum + (tax.tax_amount || 0), 0);
+                const lineTaxTotal = (item.line_taxes || []).reduce(
+                  (sum, tax) => sum + (tax.tax_amount || 0),
+                  0
+                );
                 const lineTotal = (item.subtotal || 0) + lineTaxTotal;
 
                 return (
                   <TableRow key={index}>
                     <TableCell>{item.name || item.description || '-'}</TableCell>
                     <TableCell align="right">{item.quantity || '-'}</TableCell>
-                    <TableCell align="right">{item.unit_price ? fCurrency(item.unit_price) : '-'}</TableCell>
+                    <TableCell align="right">
+                      {item.unit_price ? fCurrency(item.unit_price) : '-'}
+                    </TableCell>
                     <TableCell align="right">{fCurrency(item.subtotal || 0)}</TableCell>
                     <TableCell align="right">
                       {item.line_taxes && item.line_taxes.length > 0 ? (
@@ -263,7 +271,9 @@ export default function DebitNoteDetailsView() {
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Impuestos:
             </Typography>
-            <Typography variant="subtitle2">{fCurrency(parseFloat(debitNote.tax_amount))}</Typography>
+            <Typography variant="subtitle2">
+              {fCurrency(parseFloat(debitNote.tax_amount))}
+            </Typography>
           </Stack>
 
           <Stack direction="row" spacing={3} sx={{ minWidth: 300 }}>

@@ -44,16 +44,19 @@ const STATUS_LABELS: Record<string, string> = {
   accepted: 'Aceptada',
   rejected: 'Rechazada',
   expired: 'Vencida',
-  converted: 'Convertida'
+  converted: 'Convertida',
 };
 
-const STATUS_COLORS: Record<string, 'default' | 'info' | 'success' | 'error' | 'warning' | 'primary' | 'secondary'> = {
+const STATUS_COLORS: Record<
+  string,
+  'default' | 'info' | 'success' | 'error' | 'warning' | 'primary' | 'secondary'
+> = {
   draft: 'default',
   sent: 'info',
   accepted: 'success',
   rejected: 'error',
   expired: 'warning',
-  converted: 'primary'
+  converted: 'primary',
 };
 
 // ----------------------------------------------------------------------
@@ -72,16 +75,25 @@ export default function QuotesTableRow({
   onExpire,
   onClone,
   onConvertToInvoice,
-  onViewInvoice
+  onViewInvoice,
 }: Props) {
-  const { quote_number, issue_date, expiration_date, status, total_amount, converted_to_invoice_id, id } = row;
+  const {
+    quote_number,
+    issue_date,
+    expiration_date,
+    status,
+    total_amount,
+    converted_to_invoice_id,
+    id,
+  } = row;
 
   const popover = usePopover();
 
   const statusLabel = STATUS_LABELS[status] || status;
   const statusColor = STATUS_COLORS[status] || 'default';
 
-  const isExpired = isPast(new Date(expiration_date)) && status !== 'converted' && status !== 'expired';
+  const isExpired =
+    isPast(new Date(expiration_date)) && status !== 'converted' && status !== 'expired';
   const isConverted = status === 'converted' || !!converted_to_invoice_id;
 
   const canEdit = status === 'draft';
@@ -114,7 +126,11 @@ export default function QuotesTableRow({
             primary={customerName || 'Sin cliente'}
             secondary={customerEmail || undefined}
             primaryTypographyProps={{ typography: 'body2', noWrap: true }}
-            secondaryTypographyProps={{ typography: 'caption', noWrap: true, color: 'text.secondary' }}
+            secondaryTypographyProps={{
+              typography: 'caption',
+              noWrap: true,
+              color: 'text.secondary',
+            }}
           />
         </TableCell>
 
@@ -133,7 +149,7 @@ export default function QuotesTableRow({
             secondaryTypographyProps={{
               typography: 'caption',
               color: 'error.main',
-              fontWeight: 600
+              fontWeight: 600,
             }}
           />
         </TableCell>
@@ -167,7 +183,12 @@ export default function QuotesTableRow({
         </TableCell>
       </TableRow>
 
-      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 180 }}>
+      <CustomPopover
+        open={popover.open}
+        onClose={popover.onClose}
+        arrow="right-top"
+        sx={{ width: 180 }}
+      >
         <MenuItem
           onClick={() => {
             onViewRow();

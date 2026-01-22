@@ -22,7 +22,7 @@ const schema = Yup.object({
 export default function Step2CodeForm({ email, onSuccess }: Step2Props) {
   const { enqueueSnackbar } = useSnackbar();
   const [requestPasswordReset, { isLoading: isResending }] = useRequestPasswordResetMutation();
-  
+
   const methods = useForm({ resolver: yupResolver(schema), defaultValues: { code: '' } });
   const {
     handleSubmit,
@@ -40,10 +40,9 @@ export default function Step2CodeForm({ email, onSuccess }: Step2Props) {
       enqueueSnackbar('Código reenviado exitosamente', { variant: 'success' });
     } catch (error: any) {
       console.error('Error al reenviar código:', error);
-      enqueueSnackbar(
-        error?.data?.detail || 'Error al reenviar el código. Por favor, intenta nuevamente.',
-        { variant: 'error' }
-      );
+      enqueueSnackbar(error?.data?.detail || 'Error al reenviar el código. Por favor, intenta nuevamente.', {
+        variant: 'error'
+      });
     }
   };
 
@@ -61,9 +60,9 @@ export default function Step2CodeForm({ email, onSuccess }: Step2Props) {
         </LoadingButton>
         <Typography variant="body2">
           ¿No has recibido el código?{' '}
-          <Link 
-            variant="subtitle2" 
-            sx={{ cursor: 'pointer' }} 
+          <Link
+            variant="subtitle2"
+            sx={{ cursor: 'pointer' }}
             onClick={handleResend}
             component="button"
             disabled={isResending}

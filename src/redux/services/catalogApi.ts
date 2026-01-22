@@ -70,7 +70,11 @@ export const catalogApi = createApi({
       query: () => '/categories',
       transformResponse: (response: any) => {
         const list = Array.isArray(response?.categories) ? response.categories : [];
-        return list.map((c: any) => ({ id: String(c.id), name: c.name, description: c.description }));
+        return list.map((c: any) => ({
+          id: String(c.id),
+          name: c.name,
+          description: c.description
+        }));
       },
       providesTags: ['Category']
     }),
@@ -82,7 +86,11 @@ export const catalogApi = createApi({
       query: () => '/brands',
       transformResponse: (response: any) => {
         const list = Array.isArray(response?.brands) ? response.brands : [];
-        return list.map((b: any) => ({ id: String(b.id), name: b.name, description: b.description }));
+        return list.map((b: any) => ({
+          id: String(b.id),
+          name: b.name,
+          description: b.description
+        }));
       },
       providesTags: ['Brand']
     })

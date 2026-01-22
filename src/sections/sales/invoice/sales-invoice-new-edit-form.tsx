@@ -234,7 +234,10 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
         console.log('📤 Sending draft invoice data:', invoiceData);
 
         if (currentInvoice) {
-          const result = await updateSalesInvoice({ id: currentInvoice.id, ...invoiceData }).unwrap();
+          const result = await updateSalesInvoice({
+            id: currentInvoice.id,
+            ...invoiceData
+          }).unwrap();
           console.log('✅ Updated invoice result:', result);
           enqueueSnackbar('Factura actualizada como borrador', { variant: 'success' });
         } else {
@@ -281,7 +284,10 @@ export default function SalesInvoiceNewEditForm({ currentInvoice }) {
         console.log('📤 Sending open invoice data:', invoiceData);
 
         if (currentInvoice) {
-          const result = await updateSalesInvoice({ id: currentInvoice.id, ...invoiceData }).unwrap();
+          const result = await updateSalesInvoice({
+            id: currentInvoice.id,
+            ...invoiceData
+          }).unwrap();
           console.log('✅ Updated invoice result:', result);
           enqueueSnackbar('Factura actualizada y enviada', { variant: 'success' });
         } else {

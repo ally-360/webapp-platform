@@ -52,7 +52,8 @@ export const paths = {
       newProduct: `${ROOTS.DASHBOARD}/inventory/new-product`,
       categories: `${ROOTS.DASHBOARD}/inventory/categories`,
       pdvs: `${ROOTS.DASHBOARD}/inventory/pdvs`,
-      brands: `${ROOTS.DASHBOARD}/inventory/brands`
+      brands: `${ROOTS.DASHBOARD}/inventory/brands`,
+      movements: `${ROOTS.DASHBOARD}/inventory/movements`
     },
     sales: {
       root: `${ROOTS.DASHBOARD}/sales`,
@@ -196,7 +197,10 @@ export const paths = {
       accounts: `${ROOTS.DASHBOARD}/treasury/accounts`,
       movements: `${ROOTS.DASHBOARD}/treasury/movements`,
       transfers: `${ROOTS.DASHBOARD}/treasury/transfers`,
-      accountDetails: (id: string) => `${ROOTS.DASHBOARD}/treasury/accounts/${id}`
+      accountDetails: (id: string) => `${ROOTS.DASHBOARD}/treasury/accounts/${id}`,
+      reconciliations: `${ROOTS.DASHBOARD}/treasury/reconciliations`,
+      reconciliationNew: `${ROOTS.DASHBOARD}/treasury/reconciliations/new`,
+      reconciliationDetails: (id: string) => `${ROOTS.DASHBOARD}/treasury/reconciliations/${id}`
     }
   }
 };

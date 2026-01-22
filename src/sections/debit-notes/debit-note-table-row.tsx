@@ -1,6 +1,6 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable prettier/prettier */
-import { format} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 // @mui
 import Box from '@mui/material/Box';
@@ -43,7 +43,7 @@ export default function DebitNoteTableRow({
   onViewRow,
   onEditRow,
   onDeleteRow,
-  onVoidRow
+  onVoidRow,
 }: Props) {
   const { number, customer_name, invoice_number, type, issue_date, total_amount, status } = row;
 
@@ -55,7 +55,7 @@ export default function DebitNoteTableRow({
       interest: 'Intereses',
       price_adjustment: 'Ajuste de Precio',
       additional_charge: 'Cargo Adicional',
-      other: 'Otro'
+      other: 'Otro',
     };
     return typeMap[noteType] || noteType;
   };
@@ -76,7 +76,7 @@ export default function DebitNoteTableRow({
               secondaryTypographyProps={{
                 mt: 0.5,
                 component: 'span',
-                typography: 'caption'
+                typography: 'caption',
               }}
             />
           </Box>
@@ -134,7 +134,12 @@ export default function DebitNoteTableRow({
         </TableCell>
       </TableRow>
 
-      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
+      <CustomPopover
+        open={popover.open}
+        onClose={popover.onClose}
+        arrow="right-top"
+        sx={{ width: 160 }}
+      >
         <MenuItem
           onClick={() => {
             onViewRow();

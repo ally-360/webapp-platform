@@ -156,11 +156,7 @@ export default function MovementsListView() {
       </Stack>
 
       {/* Movement Form Dialog */}
-      <MovementFormWithAccount
-        open={openFormDialog.value}
-        onClose={handleCloseForm}
-        onSuccess={handleSuccessForm}
-      />
+      <MovementFormWithAccount open={openFormDialog.value} onClose={handleCloseForm} onSuccess={handleSuccessForm} />
 
       {/* Void Movement Dialog */}
       <VoidMovementDialog

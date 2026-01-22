@@ -229,7 +229,10 @@ const posSlice = createSlice({
       }
 
       // Recalcular totales
-      posSlice.caseReducers.recalculateTotals(state, { payload: action.payload.windowId, type: 'recalculateTotals' });
+      posSlice.caseReducers.recalculateTotals(state, {
+        payload: action.payload.windowId,
+        type: 'recalculateTotals'
+      });
     },
 
     removeProductFromSaleWindow(state, action: PayloadAction<{ windowId: number; productId: number }>) {
@@ -237,7 +240,10 @@ const posSlice = createSlice({
       if (!window) return;
 
       window.products = window.products.filter((p) => p.id !== action.payload.productId);
-      posSlice.caseReducers.recalculateTotals(state, { payload: action.payload.windowId, type: 'recalculateTotals' });
+      posSlice.caseReducers.recalculateTotals(state, {
+        payload: action.payload.windowId,
+        type: 'recalculateTotals'
+      });
     },
 
     updateProductQuantity(state, action: PayloadAction<{ windowId: number; productId: number; quantity: number }>) {
@@ -247,7 +253,10 @@ const posSlice = createSlice({
       const product = window.products.find((p) => p.id === action.payload.productId);
       if (product && action.payload.quantity > 0) {
         product.quantity = action.payload.quantity;
-        posSlice.caseReducers.recalculateTotals(state, { payload: action.payload.windowId, type: 'recalculateTotals' });
+        posSlice.caseReducers.recalculateTotals(state, {
+          payload: action.payload.windowId,
+          type: 'recalculateTotals'
+        });
       }
     },
 
@@ -294,14 +303,21 @@ const posSlice = createSlice({
     // ===== DISCOUNTS =====
     applyDiscountToSaleWindow(
       state,
-      action: PayloadAction<{ windowId: number; discount_percentage?: number; discount_amount?: number }>
+      action: PayloadAction<{
+        windowId: number;
+        discount_percentage?: number;
+        discount_amount?: number;
+      }>
     ) {
       const window = state.salesWindows.find((w) => w.id === action.payload.windowId);
       if (!window) return;
 
       window.discount_percentage = action.payload.discount_percentage;
       window.discount_amount = action.payload.discount_amount;
-      posSlice.caseReducers.recalculateTotals(state, { payload: action.payload.windowId, type: 'recalculateTotals' });
+      posSlice.caseReducers.recalculateTotals(state, {
+        payload: action.payload.windowId,
+        type: 'recalculateTotals'
+      });
     },
 
     // ===== CALCULATIONS =====
@@ -334,7 +350,11 @@ const posSlice = createSlice({
     // ===== COMPLETE SALE =====
     completeSale(
       state,
-      action: PayloadAction<{ windowId: number; pos_type: 'simple' | 'electronic'; invoice_number?: string }>
+      action: PayloadAction<{
+        windowId: number;
+        pos_type: 'simple' | 'electronic';
+        invoice_number?: string;
+      }>
     ) {
       const windowIndex = state.salesWindows.findIndex((w) => w.id === action.payload.windowId);
       if (windowIndex === -1 || !state.currentRegister) return;

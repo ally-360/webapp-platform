@@ -331,10 +331,16 @@ export default function ShiftHistoryView() {
         startDate={filters.date_from ? new Date(filters.date_from) : null}
         endDate={filters.date_to ? new Date(filters.date_to) : null}
         onChangeStartDate={(d) =>
-          setFilters((p) => ({ ...p, date_from: d ? new Date(d).toISOString().slice(0, 10) : undefined }))
+          setFilters((p) => ({
+            ...p,
+            date_from: d ? new Date(d).toISOString().slice(0, 10) : undefined
+          }))
         }
         onChangeEndDate={(d) =>
-          setFilters((p) => ({ ...p, date_to: d ? new Date(d).toISOString().slice(0, 10) : undefined }))
+          setFilters((p) => ({
+            ...p,
+            date_to: d ? new Date(d).toISOString().slice(0, 10) : undefined
+          }))
         }
         error={dateError}
       />

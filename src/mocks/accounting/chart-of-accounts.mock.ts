@@ -2,7 +2,15 @@ import { ChartAccountNode } from 'src/sections/accounting/types';
 
 export const mockChartAccounts: ChartAccountNode[] = [
   { id: '1', code: '1', name: 'Activo', level: 'CLASS', nature: 'DEBIT', status: 'ACTIVE' },
-  { id: '11', code: '11', name: 'Disponible', level: 'GROUP', nature: 'DEBIT', status: 'ACTIVE', parentId: '1' },
+  {
+    id: '11',
+    code: '11',
+    name: 'Disponible',
+    level: 'GROUP',
+    nature: 'DEBIT',
+    status: 'ACTIVE',
+    parentId: '1'
+  },
   {
     id: '1105',
     code: '1105',

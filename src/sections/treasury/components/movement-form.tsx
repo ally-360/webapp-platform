@@ -56,8 +56,18 @@ type FormValues = {
 };
 
 const MOVEMENT_TYPE_OPTIONS = [
-  { value: 'inflow', label: 'Entrada de Dinero', icon: 'eva:arrow-downward-fill', color: 'success.main' },
-  { value: 'outflow', label: 'Salida de Dinero', icon: 'eva:arrow-upward-fill', color: 'error.main' }
+  {
+    value: 'inflow',
+    label: 'Entrada de Dinero',
+    icon: 'eva:arrow-downward-fill',
+    color: 'success.main'
+  },
+  {
+    value: 'outflow',
+    label: 'Salida de Dinero',
+    icon: 'eva:arrow-upward-fill',
+    color: 'error.main'
+  }
 ];
 
 const PAYMENT_METHOD_OPTIONS = [

@@ -1,6 +1,6 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable prettier/prettier */
-import { format} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 // @mui
 import MenuItem from '@mui/material/MenuItem';
@@ -35,7 +35,7 @@ const STATUS_LABELS = {
   sent: 'Enviada',
   approved: 'Aprobada',
   closed: 'Cerrada',
-  void: 'Anulada'
+  void: 'Anulada',
 };
 
 const STATUS_COLORS = {
@@ -43,7 +43,7 @@ const STATUS_COLORS = {
   sent: 'info',
   approved: 'success',
   closed: 'warning',
-  void: 'error'
+  void: 'error',
 } as const;
 
 // ----------------------------------------------------------------------
@@ -56,9 +56,19 @@ export default function PurchaseOrderTableRow({
   onViewRow,
   onEditRow,
   onConvertRow,
-  onVoidRow
+  onVoidRow,
 }: Props) {
-  const { issue_date, expected_delivery_date, supplier_name, supplier, total_amount, status, id, order_number, pdv_id } = row;
+  const {
+    issue_date,
+    expected_delivery_date,
+    supplier_name,
+    supplier,
+    total_amount,
+    status,
+    id,
+    order_number,
+    pdv_id,
+  } = row;
 
   const popover = usePopover();
 
@@ -93,20 +103,32 @@ export default function PurchaseOrderTableRow({
             primary={format(new Date(issue_date), 'dd MMM yyyy', { locale: es })}
             secondary={
               expected_delivery_date
-                ? `Entrega: ${format(new Date(expected_delivery_date), 'dd MMM yyyy', { locale: es })}`
+                ? `Entrega: ${format(new Date(expected_delivery_date), 'dd MMM yyyy', {
+                    locale: es,
+                  })}`
                 : undefined
             }
             primaryTypographyProps={{ typography: 'body2' }}
-            secondaryTypographyProps={{ typography: 'caption', color: 'text.secondary', noWrap: true }}
+            secondaryTypographyProps={{
+              typography: 'caption',
+              color: 'text.secondary',
+              noWrap: true,
+            }}
           />
         </TableCell>
 
         <TableCell>
-          <ListItemText primary={supplierDisplay} primaryTypographyProps={{ typography: 'body2', noWrap: true }} />
+          <ListItemText
+            primary={supplierDisplay}
+            primaryTypographyProps={{ typography: 'body2', noWrap: true }}
+          />
         </TableCell>
 
         <TableCell>
-          <ListItemText primary={pdvDisplay} primaryTypographyProps={{ typography: 'body2', noWrap: true }} />
+          <ListItemText
+            primary={pdvDisplay}
+            primaryTypographyProps={{ typography: 'body2', noWrap: true }}
+          />
         </TableCell>
 
         <TableCell>
@@ -129,7 +151,12 @@ export default function PurchaseOrderTableRow({
         </TableCell>
       </TableRow>
 
-      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
+      <CustomPopover
+        open={popover.open}
+        onClose={popover.onClose}
+        arrow="right-top"
+        sx={{ width: 160 }}
+      >
         <MenuItem
           onClick={() => {
             onViewRow();

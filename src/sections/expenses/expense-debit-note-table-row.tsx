@@ -1,6 +1,6 @@
 /* eslint-disable import/no-duplicates */
 /* eslint-disable prettier/prettier */
-import { format} from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 // @mui
 import MenuItem from '@mui/material/MenuItem';
@@ -29,7 +29,13 @@ type Props = {
 
 // ----------------------------------------------------------------------
 
-export default function ExpenseDebitNoteTableRow({ row, selected, onSelectRow, onViewRow, onVoidRow }: Props) {
+export default function ExpenseDebitNoteTableRow({
+  row,
+  selected,
+  onSelectRow,
+  onViewRow,
+  onVoidRow,
+}: Props) {
   const { issue_date, supplier_name, supplier, bill, total_amount, status, notes } = row;
 
   const popover = usePopover();
@@ -51,17 +57,23 @@ export default function ExpenseDebitNoteTableRow({ row, selected, onSelectRow, o
             primaryTypographyProps={{ typography: 'body2' }}
             secondaryTypographyProps={{
               component: 'span',
-              color: 'text.disabled'
+              color: 'text.disabled',
             }}
           />
         </TableCell>
 
         <TableCell>
-          <ListItemText primary={supplierDisplay} primaryTypographyProps={{ typography: 'body2', noWrap: true }} />
+          <ListItemText
+            primary={supplierDisplay}
+            primaryTypographyProps={{ typography: 'body2', noWrap: true }}
+          />
         </TableCell>
 
         <TableCell>
-          <ListItemText primary={billDisplay} primaryTypographyProps={{ typography: 'body2', noWrap: true }} />
+          <ListItemText
+            primary={billDisplay}
+            primaryTypographyProps={{ typography: 'body2', noWrap: true }}
+          />
         </TableCell>
 
         <TableCell>
@@ -72,7 +84,10 @@ export default function ExpenseDebitNoteTableRow({ row, selected, onSelectRow, o
         </TableCell>
 
         <TableCell>
-          <Label variant="soft" color={(status === 'open' && 'success') || (status === 'void' && 'error') || 'default'}>
+          <Label
+            variant="soft"
+            color={(status === 'open' && 'success') || (status === 'void' && 'error') || 'default'}
+          >
             {status === 'open' ? 'Abierta' : 'Anulada'}
           </Label>
         </TableCell>
@@ -84,7 +99,12 @@ export default function ExpenseDebitNoteTableRow({ row, selected, onSelectRow, o
         </TableCell>
       </TableRow>
 
-      <CustomPopover open={popover.open} onClose={popover.onClose} arrow="right-top" sx={{ width: 160 }}>
+      <CustomPopover
+        open={popover.open}
+        onClose={popover.onClose}
+        arrow="right-top"
+        sx={{ width: 160 }}
+      >
         <MenuItem
           onClick={() => {
             onViewRow();

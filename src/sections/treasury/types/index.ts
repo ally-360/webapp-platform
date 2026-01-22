@@ -98,6 +98,21 @@ export interface CreateAccountPayload {
   description?: string;
 }
 
+// Auto-match response
+export interface AutoMatchResponse {
+  matched_count: number;
+  message?: string;
+}
+
+export interface CreateReconciliationPayload {
+  treasury_account_id: string;
+  period_start_date: string;
+  period_end_date: string;
+  bank_balance_start: number;
+  bank_balance_end: number;
+  notes?: string;
+}
+
 export type UpdateAccountPayload = Partial<CreateAccountPayload>;
 
 export interface CreateMovementPayload {
@@ -271,4 +286,274 @@ export interface JournalEntry {
   total_debit: string;
   total_credit: string;
   created_at: string;
+}
+
+// Bank Reconciliation Types
+export type ReconciliationStatus = 'draft' | 'in_progress' | 'completed' | 'reversed';
+
+export interface BankReconciliation {
+  id: string;
+  tenant_id: string;
+  bank_account_id: string;
+  period_start_date: string;
+  period_end_date: string;
+  bank_balance_start: string;
+  bank_balance_end: string;
+  book_balance_start: string;
+  book_balance_end: string;
+  adjustment_journal_entry_id?: string;
+  total_statement_lines: number;
+  reconciled_lines: number;
+  unreconciled_lines: number;
+  reconciliation_percentage: number;
+  balance_difference: number;
+  is_balanced: boolean;
+  status: ReconciliationStatus;
+  reconciled_by?: string;
+  reconciled_at?: string;
+  reversed_by?: string;
+  reversed_at?: string;
+  reversal_reason?: string;
+  notes?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  treasury_account_id: string;
+  // Populated fields
+  bank_account?: TreasuryAccount;
+  created_by_user?: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface GetReconciliationsResponse {
+  reconciliations: BankReconciliation[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface ReconciliationFilters {
+  bank_account_id?: string;
+  status_filter?: ReconciliationStatus;
+  from_date?: string;
+  to_date?: string;
+  limit?: number;
+  offset?: number;
+}
+
+// Bank Reconciliation - Statement Lines
+export type StatementLineStatus = 'unreconciled' | 'reconciled' | 'pending';
+
+export interface UnmatchedLine {
+  id: string;
+  statement_date: string;
+  description: string;
+  reference?: string;
+  amount: string;
+  balance: string;
+  created_at: string;
+}
+
+export interface GetUnmatchedLinesResponse {
+  lines: UnmatchedLine[];
+  total: number;
+}
+
+export interface UnmatchedMovement {
+  id: string;
+  movement_date: string;
+  description: string;
+  reference?: string;
+  amount: string;
+  payment_method?: string;
+  source_module: string;
+}
+
+export interface GetUnmatchedMovementsResponse {
+  movements: UnmatchedMovement[];
+  total: number;
+}
+
+export interface BankStatementLine {
+  id: string;
+  reconciliation_id: string;
+  statement_date: string;
+  description: string;
+  reference?: string;
+  debit: string;
+  credit: string;
+  balance: string;
+  status: StatementLineStatus;
+  matched_transaction_id?: string;
+  matched_at?: string;
+  matched_by?: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Bank Reconciliation - Accounting Transactions
+export interface AccountingTransaction {
+  id: string;
+  transaction_date: string;
+  description: string;
+  reference?: string;
+  document_type?: string;
+  document_id?: string;
+  debit: string;
+  credit: string;
+  balance: string;
+  is_reconciled: boolean;
+  reconciliation_id?: string;
+  reconciled_at?: string;
+  created_at: string;
+}
+
+// Bank Reconciliation - Match
+export type MatchType = 'auto' | 'manual' | 'adjustment';
+export type InternalMatchType = 'treasury_movement' | 'invoice_payment' | 'purchase_payment' | 'adjustment';
+
+export interface ReconciliationMatch {
+  id: string;
+  reconciliation_id: string;
+  statement_line_id: string;
+  match_type: MatchType;
+  internal_type: InternalMatchType;
+  internal_reference?: string;
+  statement_date: string;
+  statement_description: string;
+  statement_amount: string;
+  internal_amount: string;
+  difference: string;
+  match_score?: number;
+  matched_by?: string;
+  matched_by_user?: {
+    id: string;
+    name: string;
+  };
+  matched_at: string;
+  notes?: string;
+}
+
+export interface GetMatchesResponse {
+  matches: ReconciliationMatch[];
+  total: number;
+}
+
+export interface MatchesFilters {
+  match_type?: MatchType;
+  min_score?: number;
+  max_score?: number;
+  limit?: number;
+  offset?: number;
+}
+
+// Bank Reconciliation - Activity/Timeline
+export type ReconciliationActivityType =
+  | 'created'
+  | 'statement_imported'
+  | 'auto_matched'
+  | 'manual_matched'
+  | 'match_removed'
+  | 'adjustment_created'
+  | 'completed'
+  | 'reversed'
+  | 'status_changed';
+
+export interface ReconciliationActivity {
+  id: string;
+  reconciliation_id: string;
+  activity_type: ReconciliationActivityType;
+  description: string;
+  details?: Record<string, any>;
+  user_id: string;
+  user_name: string;
+  created_at: string;
+}
+
+// Bank Reconciliation - Detailed Response
+export interface BankReconciliationDetail extends BankReconciliation {
+  statement_lines: BankStatementLine[];
+  accounting_transactions: AccountingTransaction[];
+  matches: ReconciliationMatch[];
+  activities: ReconciliationActivity[];
+  adjustment_entry?: JournalEntry;
+}
+
+// Bank Reconciliation - Actions Payloads
+export interface MatchTransactionPayload {
+  statement_line_id: string;
+  transaction_ids: string[];
+  match_type?: 'manual';
+  notes?: string;
+}
+
+export interface RemoveMatchPayload {
+  match_id: string;
+  reason?: string;
+}
+
+export interface CompleteReconciliationPayload {
+  create_adjustment?: boolean;
+  adjustment_notes?: string;
+}
+
+export interface ReverseReconciliationPayload {
+  reason: string;
+}
+
+// Bank Reconciliation - Report Types
+export interface ReconciliationMovementSummary {
+  type: string; // 'auto' | 'manual' | 'adjustment' | 'IN' | 'OUT'
+  count: number;
+  total_amount?: string;
+}
+
+export interface ReconciliationReportSummary {
+  total_statement_lines: number;
+  reconciled_lines: number;
+  unreconciled_lines: number;
+  reconciliation_percentage: number;
+  balance_difference: string;
+  is_balanced: boolean;
+  reconciled_amount?: string;
+  unreconciled_amount?: string;
+}
+
+export interface ReconciliationReport {
+  reconciliation_id: string;
+  status: ReconciliationStatus;
+  bank_account: {
+    id: string;
+    name: string;
+    account_number?: string;
+  };
+  period_start: string;
+  period_end: string;
+  summary: ReconciliationReportSummary;
+  movement_types?: ReconciliationMovementSummary[];
+  unmatched_lines?: BankStatementLine[];
+  unmatched_movements?: TreasuryMovement[];
+  adjustment_entry_id?: string;
+  generated_at: string;
+}
+
+// Bank Reconciliation - Timeline Types
+export interface TimelineEvent {
+  id?: string;
+  type: string;
+  occurred_at: string; // ISO datetime
+  user_id?: string;
+  user_email?: string;
+  user_name?: string;
+  message?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface GetTimelineResponse {
+  reconciliation_id: string;
+  events: TimelineEvent[];
+  total_events: number;
 }

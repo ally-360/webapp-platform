@@ -133,7 +133,9 @@ export default function LatestMovementsList({ movements, accounts, isLoading }: 
                     {movement.description || 'Sin descripción'}
                   </Typography>
                   <Typography variant="caption" color="text.disabled">
-                    {format(new Date(movement.movement_date), "dd MMM yyyy 'a las' HH:mm", { locale: es })}
+                    {format(new Date(movement.movement_date), "dd MMM yyyy 'a las' HH:mm", {
+                      locale: es
+                    })}
                   </Typography>
                 </Stack>
               </Stack>

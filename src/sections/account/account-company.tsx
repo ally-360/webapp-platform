@@ -140,7 +140,9 @@ export default function AccountCompany() {
       };
 
       await updateCompany(updateData).unwrap();
-      enqueueSnackbar('Información de la empresa actualizada correctamente', { variant: 'success' });
+      enqueueSnackbar('Información de la empresa actualizada correctamente', {
+        variant: 'success'
+      });
 
       refetchCompany();
     } catch (error: any) {

@@ -105,11 +105,7 @@ export default function PurchaseOrdersListView() {
       const supplierText = String(row.supplier_name || row.supplier?.name || '').toLowerCase();
       const pdvText = String(pdvNameById.get(row.pdv_id) || row.pdv?.name || row.pdv_id || '').toLowerCase();
 
-      return (
-        orderText.includes(searchText) ||
-        supplierText.includes(searchText) ||
-        pdvText.includes(searchText)
-      );
+      return orderText.includes(searchText) || supplierText.includes(searchText) || pdvText.includes(searchText);
     });
   }, [purchaseOrders, pdvNameById, searchText]);
 
@@ -117,13 +113,16 @@ export default function PurchaseOrdersListView() {
   const canReset = !!filters.search || !!filters.supplier_id || !!filters.pdv_id || !!filters.status;
   const notFound = (!dataInPage.length && canReset) || !dataInPage.length;
 
-  const handleFilters = useCallback((name: string, value: any) => {
-    table.onResetPage();
-    setFilters((prevState) => ({
-      ...prevState,
-      [name]: value
-    }));
-  }, [table]);
+  const handleFilters = useCallback(
+    (name: string, value: any) => {
+      table.onResetPage();
+      setFilters((prevState) => ({
+        ...prevState,
+        [name]: value
+      }));
+    },
+    [table]
+  );
 
   const handleResetFilters = useCallback(() => {
     table.onResetPage();
