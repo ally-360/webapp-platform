@@ -23,9 +23,15 @@ import { Icon } from '@iconify/react';
 
 // utils
 import { formatCurrency } from 'src/redux/pos/posUtils';
+import { fDateTime } from 'src/utils/format-time';
+
+// redux
+import { useAppDispatch } from 'src/hooks/store';
+import { openRegister } from 'src/redux/pos/posSlice';
 
 // hooks
 import { useCashRegister } from './hooks';
+import { useGetCurrentCashRegisterQuery } from 'src/redux/services/posApi';
 import CreateSellerDialog from './create-seller-dialog';
 
 interface Props {
@@ -51,6 +57,7 @@ interface Props {
 const SUGGESTED_AMOUNTS = [50000, 100000, 200000, 500000];
 
 export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaultValues }: Props) {
+  const dispatch = useAppDispatch();
   const [selectedPDV, setSelectedPDV] = useState<{
     id: string;
     name: string;
@@ -67,6 +74,14 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
   const [createSellerDialogOpen, setCreateSellerDialogOpen] = useState(false);
 
   const { availablePDVs, isLoadingPDVs, availableSellers, isLoadingSellers, refetchSellers } = useCashRegister();
+
+  // Validar si existe una caja abierta para el PDV seleccionado
+  const {
+    data: currentRegister,
+    isLoading: isCheckingRegister
+  } = useGetCurrentCashRegisterQuery(selectedPDV?.id || '', {
+    skip: !selectedPDV?.id || !open
+  });
 
   useEffect(() => {
     if (open) {
@@ -110,7 +125,26 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
     handleClose();
   };
 
-  const canConfirm = selectedPDV && openingAmount >= 0;
+  const canConfirm = selectedPDV && openingAmount >= 0 && !currentRegister;
+
+  const handleGoToShift = () => {
+    if (!currentRegister || !selectedPDV) return;
+
+    dispatch(
+      openRegister({
+        register_id: currentRegister.id,
+        user_id: currentRegister.opened_by || 'current_user',
+        user_name: selectedSeller?.full_name || selectedSeller?.name || 'Usuario',
+        pdv_id: currentRegister.pdv_id,
+        pdv_name: selectedPDV.name,
+        opening_amount: parseFloat(currentRegister.opening_balance) || 0,
+        notes: currentRegister.opening_notes || undefined,
+        shift_id: currentRegister.id
+      })
+    );
+
+    handleClose();
+  };
 
   const handleOpenCreateSeller = () => {
     setCreateSellerDialogOpen(true);
@@ -220,6 +254,21 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
       </DialogTitle>
 
       <DialogContent sx={{ p: 3, mt: 2 }}>
+        {/* Alerta si existe una caja abierta */}
+        {currentRegister && !isCheckingRegister && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Este PDV ya tiene una caja registradora abierta
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Caja abierta el {fDateTime(currentRegister.opened_at)}
+              {currentRegister.opened_by && ` por ${currentRegister.opened_by}`}
+              <br />
+              Balance inicial: {formatCurrency(currentRegister.opening_balance)}
+            </Typography>
+          </Alert>
+        )}
+
         <Grid container spacing={3}>
           {/* Left Column - Basic Info */}
           <Grid item xs={12} mb={4} md={12}>
@@ -233,6 +282,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                   value={openingAmount}
                   onChange={(e) => setOpeningAmount(parseFloat(e.target.value) || 0)}
                   sx={{ bgcolor: 'background.paper', mb: 2 }}
+                  disabled={!!currentRegister}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -256,6 +306,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                         label={formatCurrency(amount)}
                         variant={openingAmount === amount ? 'filled' : 'outlined'}
                         onClick={() => setOpeningAmount(amount)}
+                        disabled={!!currentRegister}
                         color={openingAmount === amount ? 'primary' : 'default'}
                         size="small"
                         icon={<Icon icon="mdi:currency-usd" />}
@@ -357,6 +408,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                   }
                 }}
                 loading={isLoadingSellers}
+                disabled={!!currentRegister}
                 isOptionEqualToValue={(option, value) => option?.id === value?.id}
                 renderInput={(params) => (
                   <TextField
@@ -446,6 +498,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Notas sobre la apertura de caja, denominaciones de billetes, etc..."
                 variant="outlined"
+                disabled={!!currentRegister}
                 sx={{ bgcolor: 'background.paper' }}
               />
             </Stack>
@@ -453,7 +506,7 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
         </Grid>
 
         {/* Warning if no opening amount */}
-        {openingAmount === 0 && (
+        {!currentRegister && openingAmount === 0 && (
           <Alert severity="warning" sx={{ mt: 2 }}>
             <Typography variant="body2">
               <strong>Advertencia:</strong> Está configurando una apertura sin dinero inicial. Esto puede ser válido
@@ -467,15 +520,27 @@ export default function PosRegisterOpenDialog({ open, onClose, onConfirm, defaul
         <Button onClick={handleClose} variant="outlined" size="large" startIcon={<Icon icon="mdi:close" />}>
           Cancelar
         </Button>
-        <Button
-          variant="contained"
-          onClick={handleConfirm}
-          disabled={!canConfirm}
-          size="large"
-          startIcon={<Icon icon="mdi:check" />}
-        >
-          Abrir Caja
-        </Button>
+        {currentRegister ? (
+          <Button
+            variant="contained"
+            onClick={handleGoToShift}
+            size="large"
+            color="info"
+            startIcon={<Icon icon="mdi:cash-register" />}
+          >
+            Ir al Turno
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            onClick={handleConfirm}
+            disabled={!canConfirm || isCheckingRegister}
+            size="large"
+            startIcon={<Icon icon="mdi:check" />}
+          >
+            Abrir Caja
+          </Button>
+        )}
       </DialogActions>
 
       {/* Modal para crear vendedor */}

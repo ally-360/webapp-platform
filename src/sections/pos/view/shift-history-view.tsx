@@ -23,14 +23,20 @@ import {
 } from '@mui/material';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
 import { paths } from 'src/routes/paths';
+import { useRouter } from 'src/routes/hook/use-router';
 import { fCurrency } from 'src/utils/format-number';
 import { fDate, fDateTime } from 'src/utils/format-time';
 import CustomDateRangePicker from 'src/components/custom-date-range-picker';
 import Scrollbar from 'src/components/scrollbar';
-import { useGetShiftHistoryQuery, useGetShiftDetailQuery } from 'src/redux/services/posApi';
+import { useGetShiftHistoryQuery, useGetShiftDetailQuery, useLazyGetCurrentCashRegisterQuery } from 'src/redux/services/posApi';
 import type { ShiftHistoryParams } from 'src/types/pos';
+import { useAppDispatch } from 'src/hooks/store';
+import { openRegister } from 'src/redux/pos/posSlice';
 
 export default function ShiftHistoryView() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
   const [filters, setFilters] = useState<ShiftHistoryParams>({
     page: 1,
     page_size: 20,
@@ -39,11 +45,15 @@ export default function ShiftHistoryView() {
   });
   const [openPicker, setOpenPicker] = useState(false);
 
+  const [joiningPdvId, setJoiningPdvId] = useState<string | null>(null);
+
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedRegisterId, setSelectedRegisterId] = useState<string | null>(null);
 
   // Fetch shift history with filters
   const { data: historyData, isLoading } = useGetShiftHistoryQuery(filters);
+
+  const [getCurrentCashRegister] = useLazyGetCurrentCashRegisterQuery();
 
   // Fetch shift detail when modal is open
   const { data: shiftDetail, isLoading: loadingDetail } = useGetShiftDetailQuery(selectedRegisterId || '', {
@@ -66,6 +76,31 @@ export default function ShiftHistoryView() {
   const handleOpenDetail = (register_id: string) => {
     setSelectedRegisterId(register_id);
     setDetailOpen(true);
+  };
+
+  const handleGoToOpenShift = async (pdv_id: string, pdv_name: string) => {
+    try {
+      setJoiningPdvId(pdv_id);
+
+      const register = await getCurrentCashRegister(pdv_id).unwrap();
+
+      dispatch(
+        openRegister({
+          register_id: register.id,
+          user_id: register.opened_by || 'current_user',
+          user_name: 'Usuario',
+          pdv_id: register.pdv_id,
+          pdv_name,
+          opening_amount: parseFloat(register.opening_balance) || 0,
+          notes: register.opening_notes || undefined,
+          shift_id: register.id
+        })
+      );
+
+      router.push('/pos');
+    } finally {
+      setJoiningPdvId(null);
+    }
   };
 
   const handleCloseDetail = () => {
@@ -167,9 +202,23 @@ export default function ShiftHistoryView() {
                           <Chip label={statusLabel} color={statusColor} size="small" />
                         </TableCell>
                         <TableCell align="right" sx={{ width: 120 }}>
-                          <Button size="small" onClick={() => handleOpenDetail(row.register_id)}>
-                            Ver detalle
-                          </Button>
+                          <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
+                            <Button size="small" onClick={() => handleOpenDetail(row.register_id)}>
+                              Ver detalle
+                            </Button>
+                            {row.status === 'open' && (
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="warning"
+                                disabled={joiningPdvId === row.pdv_id}
+                                startIcon={joiningPdvId === row.pdv_id ? <CircularProgress size={14} /> : undefined}
+                                onClick={() => handleGoToOpenShift(row.pdv_id, row.pdv_name)}
+                              >
+                                Ir al turno
+                              </Button>
+                            )}
+                          </Stack>
                         </TableCell>
                       </TableRow>
                     );

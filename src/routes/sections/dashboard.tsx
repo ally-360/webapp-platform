@@ -134,6 +134,7 @@ const ChartOfAccountsPage = lazy(() => import('src/pages/dashboard/accounting/ch
 const ChartOfAccountsMappingsPage = lazy(() => import('src/pages/dashboard/accounting/chart-of-accounts-mappings'));
 const ChartOfAccountsImportPage = lazy(() => import('src/pages/dashboard/accounting/chart-of-accounts-import'));
 const JournalListPage = lazy(() => import('src/pages/dashboard/accounting/journal-list'));
+const JournalEntryNewPage = lazy(() => import('src/pages/dashboard/accounting/journal/new'));
 const JournalEntryEditorPage = lazy(() => import('src/pages/dashboard/accounting/journal-entry-editor'));
 const JournalEntryDetailPage = lazy(() => import('src/pages/dashboard/accounting/journal-entry-detail'));
 const JournalReversalPage = lazy(() => import('src/pages/dashboard/accounting/journal-reversal'));
@@ -328,7 +329,7 @@ export const dashboardRoutes = [
           { path: 'chart-of-accounts/mappings', element: <ChartOfAccountsMappingsPage /> },
           { path: 'chart-of-accounts/import', element: <ChartOfAccountsImportPage /> },
           { path: 'journal', element: <JournalListPage /> },
-          { path: 'journal/new', element: <JournalEntryEditorPage /> },
+          { path: 'journal/new', element: <JournalEntryNewPage /> },
           { path: 'journal/:entryId', element: <JournalEntryDetailPage /> },
           { path: 'journal/:entryId/edit', element: <JournalEntryEditorPage /> },
           { path: 'journal/:entryId/reversal', element: <JournalReversalPage /> }

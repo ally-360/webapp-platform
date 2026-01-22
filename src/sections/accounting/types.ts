@@ -77,6 +77,10 @@ export type JournalEntryType =
   | 'treasury'
   | 'debit_note'
   | 'credit_note'
+  | 'ADJUSTMENT'
+  | 'OPENING'
+  | 'CLOSING'
+  | 'OTHER'
   | 'adjustment'
   | 'manual';
 
@@ -139,6 +143,49 @@ export interface AccountingCatalogs {
     value: JournalEntryStatus;
     label: string;
   }>;
+}
+
+// Create Journal Entry types
+export interface CreateJournalEntryLine {
+  account_id: string;
+  debit_amount: number;
+  credit_amount: number;
+  contact_id?: string;
+  description?: string;
+  cost_center_id?: string;
+  category_id?: string;
+}
+
+export interface CreateJournalEntryRequest {
+  entry_date: string;
+  entry_type: 'ADJUSTMENT' | 'OPENING' | 'CLOSING' | 'OTHER';
+  description: string;
+  reference_type?: string;
+  reference_id?: string;
+  reference_number?: string;
+  source_module?: string;
+  lines: CreateJournalEntryLine[];
+}
+
+export interface CreateJournalEntryResponse {
+  id: string;
+  tenant_id: string;
+  number: string;
+  entry_date: string;
+  entry_type: string;
+  status: string;
+  reference_type?: string;
+  reference_id?: string;
+  reference_number?: string;
+  source_module?: string;
+  description: string;
+  total_debit: number;
+  total_credit: number;
+  is_balanced: boolean;
+  created_at: string;
+  created_by: string;
+  lines: any[];
+  reversal_info?: any;
 }
 
 export interface CostCenter {

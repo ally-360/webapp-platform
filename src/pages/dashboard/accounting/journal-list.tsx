@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   Chip,
+  Container,
   IconButton,
   Stack,
   TextField,
@@ -18,11 +19,17 @@ import { Icon } from '@iconify/react';
 /* eslint-disable prettier/prettier */
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LoadingScreen } from 'src/components/loading-screen';
 import { useGetJournalEntriesQuery } from 'src/redux/services/accountingApi';
 import { JournalEntryDetailDrawer } from 'src/sections/accounting/components/JournalEntryDetailDrawer';
 import { fCurrency } from 'src/utils/format-number';
+import { useRouter } from 'src/routes/hook';
+import { paths } from 'src/routes/paths';
+import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
+import { useSettingsContext } from 'src/components/settings';
 import type {
   JournalEntry,
   JournalEntryType,
@@ -37,6 +44,10 @@ const entryTypeLabels: Record<JournalEntryType, string> = {
   credit_note: 'Nota Crédito',
   adjustment: 'Ajuste',
   manual: 'Manual',
+  ADJUSTMENT: 'Ajuste Contable',
+  OPENING: 'Apertura',
+  CLOSING: 'Cierre',
+  OTHER: 'Otro'
 };
 
 const entryTypeColors: Record<JournalEntryType, any> = {
@@ -47,6 +58,10 @@ const entryTypeColors: Record<JournalEntryType, any> = {
   credit_note: 'primary',
   adjustment: 'secondary',
   manual: 'default',
+  ADJUSTMENT: 'secondary',
+  OPENING: 'primary',
+  CLOSING: 'warning',
+  OTHER: 'default'
 };
 
 const statusLabels: Record<JournalEntryStatus, string> = {
@@ -62,6 +77,8 @@ const statusColors: Record<JournalEntryStatus, any> = {
 };
 
 function JournalListPage() {
+  const router = useRouter();
+  const settings = useSettingsContext();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
@@ -225,36 +242,41 @@ function JournalListPage() {
   }
 
   return (
-    <Box>
-      {/* Header */}
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        <Typography variant="h4">Libro Diario</Typography>
-        <Tooltip title="Disponible en fase futura">
-          <span>
-            <Button variant="contained" startIcon={<Icon icon="mdi:plus" />} disabled>
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+      <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+        {/* Breadcrumbs */}
+        <CustomBreadcrumbs
+          heading="Libro Diario"
+          icon="solar:document-text-bold-duotone"
+          links={[
+            {
+              name: 'Dashboard',
+              href: paths.dashboard.root
+            },
+            {
+              name: 'Contabilidad',
+              href: paths.dashboard.accounting.root
+            },
+            {
+              name: 'Libro Diario'
+            }
+          ]}
+          action={
+            <Button
+              variant="contained"
+              startIcon={<Icon icon="mdi:plus" />}
+              onClick={() => router.push(paths.dashboard.accounting.journal.new)}
+            >
               Nuevo Asiento
             </Button>
-          </span>
-        </Tooltip>
-      </Stack>
+          }
+          sx={{ mb: 2 }}
+        />
 
-      {/* Info banner - READ ONLY */}
-      <Card sx={{ mb: 3, bgcolor: 'info.lighter' }}>
-        <CardContent>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Icon icon="mdi:information" width={24} color="#0288d1" />
-            <Box>
-              <Typography variant="subtitle2" color="info.darker">
-                Fase 1 - Solo lectura
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Los asientos se generan automáticamente por las operaciones del sistema (ventas,
-                pagos, tesorería, etc.). La creación manual estará disponible en una fase futura.
-              </Typography>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
+        {/* Descripción */}
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          Registro cronológico de todas las transacciones contables. Incluye asientos automáticos y manuales del sistema.
+        </Typography>
 
       {/* Filters */}
       <Card sx={{ mb: 3 }}>
@@ -396,7 +418,8 @@ function JournalListPage() {
           setSelectedEntryId(null);
         }}
       />
-    </Box>
+      </Container>
+    </LocalizationProvider>
   );
 }
 
