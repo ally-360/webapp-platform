@@ -9,7 +9,9 @@ import type {
   GetJournalEntriesResponse,
   GetJournalEntriesParams,
   AccountingCatalogs,
-  CostCenter
+  CostCenter,
+  CreateJournalEntryRequest,
+  CreateJournalEntryResponse
 } from 'src/sections/accounting/types';
 import { baseQueryWithReauth } from './baseQuery';
 
@@ -98,6 +100,14 @@ export const accountingApi = createApi({
       query: (id) => `/accounting/journal-entries/${id}`,
       providesTags: (result, error, id) => [{ type: 'JournalEntry', id }]
     }),
+    createJournalEntry: builder.mutation<CreateJournalEntryResponse, CreateJournalEntryRequest>({
+      query: (payload) => ({
+        url: '/accounting/journal-entries',
+        method: 'POST',
+        body: payload
+      }),
+      invalidatesTags: [{ type: 'JournalEntry', id: 'LIST' }]
+    }),
     getCatalogs: builder.query<AccountingCatalogs, void>({
       query: () => '/accounting/catalogs'
     }),
@@ -171,6 +181,7 @@ export const {
   useDeleteAccountMutation,
   useGetJournalEntriesQuery,
   useGetJournalEntryByIdQuery,
+  useCreateJournalEntryMutation,
   useGetCatalogsQuery,
   useGetCostCentersQuery,
   useGetCostCenterByIdQuery,

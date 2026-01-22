@@ -7,7 +7,6 @@ import {
   DialogActions,
   Button,
   TextField,
-  Alert,
   FormControl,
   Select,
   MenuItem,
@@ -64,7 +63,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
 
   // RTK Query mutations and queries
   const [createPOSSale, { isLoading: isCreatingSale }] = useCreatePOSSaleMutation();
-  const { data: sellersData, isLoading: _isLoadingSellers } = useGetSellersQuery({
+  const { data: sellersData } = useGetSellersQuery({
     active_only: true,
     size: 100
   });
@@ -110,13 +109,13 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
         if (currentCashierSeller) {
           // Si encontramos al cajero actual en la lista de vendedores, usarlo
           setSeller(currentCashierSeller.id);
-          setSellerName(currentCashierSeller.name);
-          console.log('✅ Usando cajero actual como vendedor:', currentCashierSeller.name);
+          setSellerName(currentCashierSeller.full_name || '');
+          console.log('✅ Usando cajero actual como vendedor:', currentCashierSeller.full_name);
         } else {
           // Si no se encuentra, usar el primer vendedor disponible
           setSeller(sellers[0].id);
-          setSellerName(sellers[0].name);
-          console.log('⚠️ Cajero no está en lista de vendedores, usando primer vendedor:', sellers[0].name);
+          setSellerName(sellers[0].full_name || '');
+          console.log('⚠️ Cajero no está en lista de vendedores, usando primer vendedor:', sellers[0].full_name);
         }
       }
     }
@@ -160,7 +159,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
     setSeller(sellerId);
     const selectedSeller = sellers.find((s) => s.id === sellerId);
     if (selectedSeller) {
-      setSellerName(selectedSeller.name);
+      setSellerName(selectedSeller.full_name || '');
     }
   };
 
@@ -260,7 +259,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
       dispatch(
         completeSale({
           windowId: saleWindow.id,
-          pos_type: 'simple', // Tipo de venta (puede ser 'electronic' si tiene documento)
+          pos_type: 'simple' as const, // Tipo de venta (puede ser 'electronic' si tiene documento)
           invoice_number: backendResponse.number,
           seller_id: seller,
           seller_name: sellerName,
@@ -290,7 +289,7 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
             total: recalculatedTotals.total,
             created_at: saleDate.toISOString(),
             invoice_number: backendResponse.number,
-            pos_type: 'simple',
+            pos_type: 'simple' as const,
             notes: notes || undefined,
             seller_id: seller,
             seller_name: sellerName,
@@ -374,228 +373,541 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
           </Stack>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 3 }}>
-          <Grid container spacing={3}>
+        <DialogContent sx={{ p: 0, bgcolor: 'background.neutral' }}>
+          <Grid container spacing={0}>
             {/* Left Column - Form Data */}
-            <Grid item xs={12} md={7}>
-              <Stack spacing={3}>
-                {/* Seller Selection */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
+            <Grid
+              item
+              xs={12}
+              md={7}
+              sx={{
+                p: { xs: 2, md: 3 },
+                borderRight: { md: '1px solid' },
+                borderColor: { md: 'divider' },
+                maxHeight: { md: '70vh' },
+                overflowY: 'auto'
+              }}
+            >
+              <Stack spacing={{ xs: 1.5, md: 2 }}>
+                {/* Información Principal Section */}
+                <Box>
                   <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="solar:user-check-bold-duotone" width={20} />
-                    Vendedor Responsable
-                  </Typography>
-
-                  <FormControl fullWidth>
-                    <Select value={seller} onChange={(e) => handleSellerChange(e.target.value)} displayEmpty>
-                      <MenuItem value="" disabled>
-                        {sellers.length === 0 ? 'Cargando vendedores...' : 'Seleccionar vendedor'}
-                      </MenuItem>
-                      {sellers.map((sellerOption) => (
-                        <MenuItem key={sellerOption.id} value={sellerOption.id}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
-                            <Icon icon="solar:user-circle-bold" width={20} height={20} />
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="body2" fontWeight="medium">
-                                {sellerOption.name}
-                              </Typography>
-                              {sellerOption.document && (
-                                <Typography variant="caption" color="text.secondary">
-                                  {sellerOption.document}
-                                </Typography>
-                              )}
-                            </Box>
-                            {currentRegister?.user_id === sellerOption.id && (
-                              <Chip
-                                label="Cajero"
-                                size="small"
-                                color="primary"
-                                sx={{ fontSize: '0.65rem', height: 20 }}
-                              />
-                            )}
-                          </Box>
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Card>
-
-                {costCenters.length === 0 ? (
-                  <Alert severity="info">No hay centros de costo configurados para esta empresa.</Alert>
-                ) : (
-                  <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
-                    <Typography
-                      variant="subtitle2"
-                      gutterBottom
-                      sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                    >
-                      <Icon icon="solar:layers-bold-duotone" width={20} />
-                      Centro de costo (opcional)
-                    </Typography>
-
-                    <FormControl fullWidth>
-                      <Select value={costCenterId} onChange={(e) => setCostCenterId(e.target.value)} displayEmpty>
-                        <MenuItem value="">Ninguno</MenuItem>
-                        {costCenters.map((cc) => (
-                          <MenuItem key={cc.id} value={cc.id}>
-                            {cc.code ? `${cc.code} · ${cc.name}` : cc.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Card>
-                )}
-
-                {/* Date and Time */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="solar:calendar-date-bold-duotone" width={20} />
-                    Fecha y Hora de Venta
-                  </Typography>
-                  <DateTimePicker
-                    label="Fecha y Hora"
-                    value={saleDate}
-                    onChange={(newValue) => setSaleDate(newValue || new Date())}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true
-                      }
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      mb: 1,
+                      fontSize: '0.7rem'
                     }}
-                  />
-                </Card>
-
-                {/* Tax Configuration */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
                   >
-                    <Icon icon="solar:calculator-bold-duotone" width={20} />
-                    Configuración de Impuestos
+                    <Icon icon="solar:document-text-bold" width={14} />
+                    Información Principal
                   </Typography>
-                  <TextField
-                    fullWidth
-                    label="Tasa de Impuesto (%)"
-                    type="number"
-                    value={taxRate}
-                    onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => setTaxRate(19)}
-                            disabled={taxRate === 19}
+
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      p: { xs: 1.5, md: 2 },
+                      bgcolor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <Stack spacing={2}>
+                      {/* Seller Selection */}
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 1,
+                              bgcolor: 'primary.lighter',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
                           >
-                            IVA 19%
-                          </Button>
-                        </InputAdornment>
-                      )
-                    }}
-                    inputProps={{
-                      min: 0,
-                      max: 100,
-                      step: 0.1
-                    }}
-                  />
-                </Card>
+                            <Icon icon="solar:user-check-bold-duotone" width={16} color="primary.main" />
+                          </Box>
+                          <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
+                            Vendedor Responsable
+                          </Typography>
+                        </Stack>
 
-                {/* Discount Section */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
-                  >
-                    <Icon icon="solar:tag-price-bold-duotone" width={20} />
-                    Descuento
-                  </Typography>
-                  <Stack spacing={2}>
-                    <Stack direction="row" spacing={1}>
-                      <Chip
-                        label="Porcentaje"
-                        variant={discountType === 'percentage' ? 'filled' : 'outlined'}
-                        onClick={() => setDiscountType('percentage')}
-                        color={discountType === 'percentage' ? 'primary' : 'default'}
-                      />
-                      <Chip
-                        label="Valor Fijo"
-                        variant={discountType === 'amount' ? 'filled' : 'outlined'}
-                        onClick={() => setDiscountType('amount')}
-                        color={discountType === 'amount' ? 'primary' : 'default'}
-                      />
+                        <FormControl fullWidth size="small">
+                          <Select
+                            value={seller}
+                            onChange={(e) => handleSellerChange(e.target.value)}
+                            displayEmpty
+                            sx={{ bgcolor: 'background.paper' }}
+                          >
+                            <MenuItem value="" disabled>
+                              {sellers.length === 0 ? 'Cargando vendedores...' : 'Seleccionar vendedor'}
+                            </MenuItem>
+                            {sellers.map((sellerOption) => (
+                              <MenuItem key={sellerOption.id} value={sellerOption.id}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                                  <Icon icon="solar:user-circle-bold" width={18} height={18} />
+                                  <Box sx={{ flex: 1 }}>
+                                    <Typography variant="body2" fontWeight="medium" fontSize="0.85rem">
+                                      {sellerOption.full_name}
+                                    </Typography>
+                                    {sellerOption.document && (
+                                      <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
+                                        {sellerOption.document}
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                  {currentRegister?.user_id === sellerOption.id && (
+                                    <Chip
+                                      label="Cajero"
+                                      size="small"
+                                      color="primary"
+                                      sx={{ fontSize: '0.6rem', height: 18 }}
+                                    />
+                                  )}
+                                </Box>
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Box>
+
+                      <Divider />
+
+                      {/* Date and Time */}
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 1,
+                              bgcolor: 'info.lighter',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Icon icon="solar:calendar-date-bold-duotone" width={16} />
+                          </Box>
+                          <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
+                            Fecha y Hora
+                          </Typography>
+                        </Stack>
+                        <DateTimePicker
+                          label="Fecha y Hora"
+                          value={saleDate}
+                          onChange={(newValue) => setSaleDate(newValue || new Date())}
+                          slotProps={{
+                            textField: {
+                              fullWidth: true,
+                              size: 'small',
+                              sx: { bgcolor: 'background.paper' }
+                            }
+                          }}
+                        />
+                      </Box>
                     </Stack>
-                    <TextField
-                      fullWidth
-                      label={discountType === 'percentage' ? 'Descuento (%)' : 'Descuento ($)'}
-                      type="number"
-                      value={discountValue}
-                      onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
-                      inputProps={{
-                        min: 0,
-                        step: discountType === 'percentage' ? 0.1 : 100
-                      }}
-                    />
-                  </Stack>
-                </Card>
+                  </Card>
+                </Box>
 
-                {/* Notes */}
-                <Card sx={{ p: 2.5, bgcolor: 'background.paper' }}>
+                {/* Configuración Financiera Section */}
+                <Box>
                   <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      mb: 1,
+                      fontSize: '0.7rem'
+                    }}
                   >
-                    <Icon icon="solar:notes-bold-duotone" width={20} />
-                    Observaciones
+                    <Icon icon="solar:wallet-money-bold" width={14} />
+                    Configuración Financiera
                   </Typography>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={3}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Notas adicionales sobre la venta..."
-                  />
-                </Card>
+
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      p: { xs: 1.5, md: 2 },
+                      bgcolor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <Stack spacing={2}>
+                      {/* Tax Configuration */}
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 1,
+                              bgcolor: 'success.lighter',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Icon icon="solar:calculator-bold-duotone" width={16} />
+                          </Box>
+                          <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
+                            Impuestos
+                          </Typography>
+                        </Stack>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          label="Tasa de Impuesto (%)"
+                          type="number"
+                          value={taxRate}
+                          onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
+                          sx={{ bgcolor: 'background.paper' }}
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  onClick={() => setTaxRate(19)}
+                                  disabled={taxRate === 19}
+                                  sx={{ fontSize: '0.7rem', py: 0.5 }}
+                                >
+                                  IVA 19%
+                                </Button>
+                              </InputAdornment>
+                            )
+                          }}
+                          inputProps={{
+                            min: 0,
+                            max: 100,
+                            step: 0.1
+                          }}
+                        />
+                      </Box>
+
+                      <Divider />
+
+                      {/* Discount Section */}
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 1,
+                              bgcolor: 'warning.lighter',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Icon icon="solar:tag-price-bold-duotone" width={16} />
+                          </Box>
+                          <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
+                            Descuento
+                          </Typography>
+                        </Stack>
+                        <Stack spacing={1.5}>
+                          <Stack direction="row" spacing={1}>
+                            <Chip
+                              label="Porcentaje"
+                              icon={<Icon icon="solar:percent-bold" width={14} />}
+                              variant={discountType === 'percentage' ? 'filled' : 'outlined'}
+                              onClick={() => setDiscountType('percentage')}
+                              color={discountType === 'percentage' ? 'primary' : 'default'}
+                              size="small"
+                              sx={{ flex: 1, fontSize: '0.75rem' }}
+                            />
+                            <Chip
+                              label="Valor Fijo"
+                              icon={<Icon icon="solar:dollar-bold" width={14} />}
+                              variant={discountType === 'amount' ? 'filled' : 'outlined'}
+                              onClick={() => setDiscountType('amount')}
+                              color={discountType === 'amount' ? 'primary' : 'default'}
+                              size="small"
+                              sx={{ flex: 1, fontSize: '0.75rem' }}
+                            />
+                          </Stack>
+                          <TextField
+                            fullWidth
+                            size="small"
+                            label={discountType === 'percentage' ? 'Descuento (%)' : 'Descuento ($)'}
+                            type="number"
+                            value={discountValue}
+                            onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                            sx={{ bgcolor: 'background.paper' }}
+                            inputProps={{
+                              min: 0,
+                              step: discountType === 'percentage' ? 0.1 : 100
+                            }}
+                          />
+                        </Stack>
+                      </Box>
+                    </Stack>
+                  </Card>
+                </Box>
+
+                {/* Información Adicional Section */}
+                <Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      fontWeight: 700,
+                      letterSpacing: 1,
+                      textTransform: 'uppercase',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      mb: 1,
+                      fontSize: '0.7rem'
+                    }}
+                  >
+                    <Icon icon="solar:document-add-bold" width={14} />
+                    Información Adicional
+                  </Typography>
+
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      p: { xs: 1.5, md: 2 },
+                      bgcolor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <Stack spacing={2}>
+                      {/* Cost Center */}
+                      {costCenters.length > 0 && (
+                        <>
+                          <Box>
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                              <Box
+                                sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: 1,
+                                  bgcolor: 'secondary.lighter',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}
+                              >
+                                <Icon icon="solar:layers-bold-duotone" width={16} />
+                              </Box>
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
+                                  Centro de Costo
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
+                                  Opcional
+                                </Typography>
+                              </Box>
+                            </Stack>
+
+                            <FormControl fullWidth size="small">
+                              <Select
+                                value={costCenterId}
+                                onChange={(e) => setCostCenterId(e.target.value)}
+                                displayEmpty
+                                sx={{ bgcolor: 'background.paper' }}
+                              >
+                                <MenuItem value="">Ninguno</MenuItem>
+                                {costCenters.map((cc) => (
+                                  <MenuItem key={cc.id} value={cc.id}>
+                                    {cc.code ? `${cc.code} · ${cc.name}` : cc.name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Box>
+
+                          <Divider />
+                        </>
+                      )}
+
+                      {/* Notes */}
+                      <Box>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+                          <Box
+                            sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: 1,
+                              bgcolor: 'grey.200',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <Icon icon="solar:notes-bold-duotone" width={16} />
+                          </Box>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
+                              Observaciones
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
+                              Notas adicionales sobre la venta
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        <TextField
+                          fullWidth
+                          multiline
+                          size="small"
+                          rows={2}
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="Escribe aquí cualquier observación relevante..."
+                          sx={{ bgcolor: 'background.paper' }}
+                        />
+                      </Box>
+                    </Stack>
+                  </Card>
+                </Box>
               </Stack>
             </Grid>
 
             {/* Right Column - Summary */}
-            <Grid item xs={12} md={5}>
-              <Card
-                sx={{
-                  p: 3,
-                  height: 'fit-content',
-                  bgcolor: 'background.paper',
-                  position: 'sticky',
-                  top: 24
-                }}
-              >
-                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Icon icon="solar:bill-list-bold-duotone" width={24} />
-                  Resumen de Venta
-                </Typography>
+            <Grid
+              item
+              xs={12}
+              md={5}
+              sx={{
+                p: { xs: 2, md: 3 },
+                bgcolor: 'background.paper',
+                maxHeight: { md: '70vh' },
+                overflowY: 'auto'
+              }}
+            >
+              <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ position: 'sticky', top: 0 }}>
+                {/* Header */}
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
+                    <Box
+                      sx={{
+                        width: { xs: 32, md: 36 },
+                        height: { xs: 32, md: 36 },
+                        borderRadius: 1.5,
+                        bgcolor: 'primary.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Icon icon="solar:bill-list-bold-duotone" width={20} color="#fff" />
+                    </Box>
+                    <Box>
+                      <Typography variant="h1" fontWeight={700} fontSize={{ xs: '1rem', md: '1.45rem' }}>
+                        Resumen de Venta
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
+                        Revisa los detalles antes de confirmar
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
 
-                <Divider sx={{ my: 2 }} />
+                <Divider />
+
+                {/* Customer Info - destacado arriba */}
+                {saleWindow.customer && (
+                  <Card
+                    sx={{
+                      px: { xs: 1.5, md: 2 },
+                      borderRadius: 1.5,
+                      bgcolor: 'primary.lighter',
+                      border: '2px solid',
+                      borderColor: 'primary.main'
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                      <Box
+                        sx={{
+                          width: { xs: 36, md: 42 },
+                          height: { xs: 36, md: 42 },
+                          borderRadius: '50%',
+                          bgcolor: 'primary.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Icon icon="solar:user-bold-duotone" width={20} color="#fff" />
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          fontWeight={600}
+                          sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.65rem' }}
+                        >
+                          Cliente
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700} color="primary.darker" fontSize="0.9rem">
+                          {saleWindow.customer.name}
+                        </Typography>
+                        {saleWindow.customer.document && (
+                          <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
+                            {saleWindow.customer.document_type}: {saleWindow.customer.document}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Stack>
+                  </Card>
+                )}
 
                 {/* Products Summary */}
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    PRODUCTOS ({saleWindow.products.length})
-                  </Typography>
-                  <Paper variant="outlined" sx={{ maxHeight: 200, overflow: 'auto', p: 1 }}>
-                    <Stack spacing={1}>
+                <Box>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      fontWeight={700}
+                      sx={{ textTransform: 'uppercase', letterSpacing: 0.8, fontSize: '0.7rem' }}
+                    >
+                      Productos
+                    </Typography>
+                    <Chip
+                      label={`${saleWindow.products.length} ${saleWindow.products.length === 1 ? 'item' : 'items'}`}
+                      size="small"
+                      color="primary"
+                      sx={{ fontWeight: 600, height: 22, fontSize: '0.7rem' }}
+                    />
+                  </Stack>
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      maxHeight: 200,
+                      overflowY: 'auto',
+                      borderRadius: 1.5,
+                      '&::-webkit-scrollbar': {
+                        width: '6px'
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'primary.main',
+                        borderRadius: '3px'
+                      }
+                    }}
+                  >
+                    <Stack spacing={0}>
                       {saleWindow.products.map((product, index) => (
                         <Box
                           key={index}
@@ -603,21 +915,38 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            py: 1,
+                            py: 1.5,
                             px: 1.5,
-                            borderRadius: 1,
-                            bgcolor: index % 2 === 0 ? 'action.hover' : 'transparent'
+                            borderBottom: index < saleWindow.products.length - 1 ? '1px solid' : 'none',
+                            borderColor: 'divider',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                              bgcolor: 'action.hover'
+                            }
                           }}
                         >
-                          <Box sx={{ flex: 1, mr: 2 }}>
-                            <Typography variant="body2" fontWeight="medium" noWrap>
+                          <Box sx={{ flex: 1, mr: 1.5 }}>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5, fontSize: '0.85rem' }}>
                               {product.name}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {product.quantity} × {formatCurrency(product.price)}
-                            </Typography>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Chip
+                                label={`${product.quantity}x`}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '0.65rem',
+                                  bgcolor: 'primary.lighter',
+                                  color: 'primary.darker',
+                                  fontWeight: 700
+                                }}
+                              />
+                              <Typography variant="caption" color="text.secondary" fontSize="0.7rem">
+                                {formatCurrency(product.price)}
+                              </Typography>
+                            </Stack>
                           </Box>
-                          <Typography variant="body2" fontWeight="bold">
+                          <Typography variant="body2" fontWeight={700} color="primary.main" fontSize="0.9rem">
                             {formatCurrency(product.price * product.quantity)}
                           </Typography>
                         </Box>
@@ -626,13 +955,15 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
                   </Paper>
                 </Box>
 
-                <Divider sx={{ my: 2 }} />
+                <Divider />
 
-                {/* Totals */}
+                {/* Totals Breakdown */}
                 <Stack spacing={1.5}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2">Subtotal:</Typography>
-                    <Typography variant="body2" fontWeight="medium">
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                      Subtotal
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
                       {formatCurrency(recalculatedTotals.subtotal)}
                     </Typography>
                   </Box>
@@ -642,137 +973,155 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
                       sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
+                        alignItems: 'center',
                         py: 1,
                         px: 1.5,
                         borderRadius: 1,
-                        bgcolor: 'error.lighter'
+                        bgcolor: 'error.lighter',
+                        border: '1px dashed',
+                        borderColor: 'error.main'
                       }}
                     >
-                      <Typography variant="body2" color="error.main">
-                        Descuento:
-                      </Typography>
-                      <Typography variant="body2" color="error.main" fontWeight="bold">
+                      <Stack direction="row" spacing={0.75} alignItems="center">
+                        <Icon icon="solar:tag-price-bold" width={16} color="error.main" />
+                        <Typography variant="body2" fontWeight={600} color="error.main" fontSize="0.8rem">
+                          Descuento
+                        </Typography>
+                      </Stack>
+                      <Typography variant="body2" color="error.main" fontWeight={700} fontSize="0.85rem">
                         -{formatCurrency(recalculatedTotals.discount_amount)}
                       </Typography>
                     </Box>
                   )}
 
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2">Impuestos ({taxRate}%):</Typography>
-                    <Typography variant="body2" fontWeight="medium">
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                      Impuestos ({taxRate}%)
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600} fontSize="0.85rem">
                       {formatCurrency(recalculatedTotals.tax_amount)}
                     </Typography>
                   </Box>
 
-                  <Divider />
+                  <Divider sx={{ my: 0.5 }} />
 
+                  {/* Total Principal */}
                   <Box
                     sx={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      py: 1.5,
-                      px: 2,
-                      borderRadius: 2,
+                      alignItems: 'center',
+                      py: { xs: 1, md: 1 },
+                      px: { xs: 2, md: 2.5 },
+                      borderRadius: 1.5,
                       bgcolor: 'primary.main',
-                      color: 'primary.contrastText'
+                      boxShadow: (theme) => `0 4px 12px ${theme.palette.primary.main}40`
                     }}
                   >
-                    <Typography variant="h6">Total:</Typography>
-                    <Typography variant="h6" fontWeight="bold">
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      color="primary.contrastText"
+                      fontSize={{ xs: '1rem', md: '1.15rem' }}
+                    >
+                      Total
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      fontWeight={800}
+                      color="primary.contrastText"
+                      fontSize={{ xs: '1.2rem', md: '1.4rem' }}
+                    >
                       {formatCurrency(recalculatedTotals.total)}
                     </Typography>
                   </Box>
 
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      py: 1,
-                      px: 1.5,
-                      borderRadius: 1,
-                      bgcolor: 'success.lighter'
-                    }}
-                  >
-                    <Typography variant="body2" color="success.dark">
-                      Pagado:
-                    </Typography>
-                    <Typography variant="body2" color="success.dark" fontWeight="bold">
-                      {formatCurrency(totalPaid)}
-                    </Typography>
-                  </Box>
-
-                  {totalPaid < recalculatedTotals.total && (
+                  {/* Payment Status */}
+                  <Stack spacing={1.5}>
                     <Box
                       sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
+                        alignItems: 'center',
                         py: 1,
                         px: 1.5,
                         borderRadius: 1,
-                        bgcolor: 'warning.lighter'
+                        bgcolor: 'success.lighter',
+                        border: '1px solid',
+                        borderColor: 'success.main'
                       }}
                     >
-                      <Typography variant="body2" color="warning.dark">
-                        Pendiente:
-                      </Typography>
-                      <Typography variant="body2" color="warning.dark" fontWeight="bold">
-                        {formatCurrency(recalculatedTotals.total - totalPaid)}
-                      </Typography>
-                    </Box>
-                  )}
-                </Stack>
-
-                {/* Customer Info */}
-                {saleWindow.customer && (
-                  <>
-                    <Divider sx={{ my: 2 }} />
-                    <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover' }}>
-                      <Typography
-                        variant="subtitle2"
-                        gutterBottom
-                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                      >
-                        <Icon icon="solar:user-bold-duotone" width={18} />
-                        Cliente
-                      </Typography>
-                      <Typography variant="body2" fontWeight="medium">
-                        {saleWindow.customer.name}
-                      </Typography>
-                      {saleWindow.customer.document && (
-                        <Typography variant="caption" color="text.secondary">
-                          {saleWindow.customer.document_type}: {saleWindow.customer.document}
+                      <Stack direction="row" spacing={0.75} alignItems="center">
+                        <Icon icon="solar:check-circle-bold" width={16} />
+                        <Typography variant="body2" fontWeight={600} color="success.darker" fontSize="0.8rem">
+                          Pagado
                         </Typography>
-                      )}
+                      </Stack>
+                      <Typography variant="body2" color="success.darker" fontWeight={700} fontSize="0.85rem">
+                        {formatCurrency(totalPaid)}
+                      </Typography>
                     </Box>
-                  </>
-                )}
-              </Card>
+
+                    {totalPaid < recalculatedTotals.total && (
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          py: 1,
+                          px: 1.5,
+                          borderRadius: 1,
+                          bgcolor: 'warning.lighter',
+                          border: '1px solid',
+                          borderColor: 'warning.main'
+                        }}
+                      >
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <Icon icon="solar:clock-circle-bold" width={16} />
+                          <Typography variant="body2" fontWeight={600} color="warning.darker" fontSize="0.8rem">
+                            Pendiente
+                          </Typography>
+                        </Stack>
+                        <Typography variant="body2" color="warning.darker" fontWeight={700} fontSize="0.85rem">
+                          {formatCurrency(recalculatedTotals.total - totalPaid)}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Stack>
+                </Stack>
+              </Stack>
             </Grid>
           </Grid>
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, gap: 2, justifyContent: 'space-between', alignItems: 'center' }}>
+        <DialogActions
+          sx={{ p: { xs: 2, md: 2.5 }, gap: { xs: 1.5, md: 2 }, justifyContent: 'space-between', alignItems: 'center' }}
+        >
           <FormControlLabel
             control={
               <Switch
                 checked={shouldPrintTicket}
                 onChange={(e) => setShouldPrintTicket(e.target.checked)}
                 color="primary"
+                size="small"
               />
             }
             label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Icon icon="solar:printer-bold-duotone" width={18} />
-                <Typography variant="body2">Imprimir ticket</Typography>
+                <Icon icon="solar:printer-bold-duotone" width={16} />
+                <Typography variant="body2" fontSize="0.85rem">
+                  Imprimir ticket
+                </Typography>
               </Box>
             }
           />
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: { xs: 1.5, md: 2 } }}>
             <Button
               onClick={handleClose}
               variant="outlined"
-              size="large"
-              startIcon={<Icon icon="solar:close-circle-bold" />}
+              size="medium"
+              startIcon={<Icon icon="solar:close-circle-bold" width={18} />}
+              sx={{ fontSize: '0.85rem' }}
             >
               Cancelar
             </Button>
@@ -780,10 +1129,15 @@ export default function PosSaleConfirmDialog({ open, onClose, onConfirm: _onConf
               variant="contained"
               onClick={handleConfirm}
               disabled={!canConfirm || isCreatingSale}
-              size="large"
+              size="medium"
               startIcon={
-                isCreatingSale ? <Icon icon="svg-spinners:180-ring-with-bg" /> : <Icon icon="solar:check-circle-bold" />
+                isCreatingSale ? (
+                  <Icon icon="svg-spinners:180-ring-with-bg" width={18} />
+                ) : (
+                  <Icon icon="solar:check-circle-bold" width={18} />
+                )
               }
+              sx={{ fontSize: '0.85rem' }}
               sx={{ minWidth: 160 }}
             >
               {isCreatingSale ? 'Procesando...' : 'Confirmar Venta'}

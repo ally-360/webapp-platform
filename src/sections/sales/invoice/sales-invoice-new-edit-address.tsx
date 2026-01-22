@@ -1,4 +1,5 @@
 import { useFormContext } from 'react-hook-form';
+import { useMemo } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
@@ -8,8 +9,6 @@ import Typography from '@mui/material/Typography';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
-// _mock
-import { _addressBooks } from 'src/_mock';
 // components
 import Iconify from 'src/components/iconify';
 //
@@ -18,6 +17,7 @@ import { AddressListDialog } from 'src/sections/address';
 import { Link } from 'react-router-dom';
 import { paths } from 'src/routes/paths';
 import React from 'react';
+import { useGetContactsQuery } from 'src/redux/services/contactsApi';
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +34,14 @@ export default function SalesInvoiceNewEditAddress() {
   const to = useBoolean(false);
 
   const { company } = useAuthContext();
+
+  // Fetch contacts from API and filter for clients only
+  const { data: contactsData = { items: [] } } = useGetContactsQuery({});
+  
+  const clients = useMemo(() => {
+    const items = Array.isArray(contactsData) ? contactsData : (contactsData.items || []);
+    return items.filter(contact => contact.type?.includes('client'));
+  }, [contactsData]);
 
   return (
     <>
@@ -79,8 +87,10 @@ export default function SalesInvoiceNewEditAddress() {
           {invoiceTo ? (
             <Stack spacing={1}>
               <Typography variant="subtitle2">{invoiceTo.name}</Typography>
-              <Typography variant="body2">{invoiceTo.fullAddress}</Typography>
-              <Typography variant="body2">{invoiceTo.phoneNumber}</Typography>
+              <Typography variant="body2">
+                {invoiceTo.billing_address?.address || invoiceTo.shipping_address?.address || 'Sin dirección'}
+              </Typography>
+              <Typography variant="body2">{invoiceTo.mobile || invoiceTo.phone_primary || ''}</Typography>
             </Stack>
           ) : (
             <Typography typography="caption" sx={{ color: 'error.main' }}>
@@ -96,7 +106,7 @@ export default function SalesInvoiceNewEditAddress() {
         onClose={from.onFalse}
         selected={(selectedId) => invoiceFrom?.id === selectedId}
         onSelect={(address) => setValue('invoiceFrom', address)}
-        list={_addressBooks}
+        list={clients}
         action={
           <Button size="small" startIcon={<Iconify icon="mingcute:add-line" />} sx={{ alignSelf: 'flex-end' }}>
             Nuevo
@@ -110,7 +120,7 @@ export default function SalesInvoiceNewEditAddress() {
         onClose={to.onFalse}
         selected={(selectedId) => invoiceTo?.id === selectedId}
         onSelect={(address) => setValue('invoiceTo', address)}
-        list={_addressBooks}
+        list={clients}
         action={
           <Button
             color="primary"
